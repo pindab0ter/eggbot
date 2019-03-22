@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/nl.pindab0ter.EggBot.iml" filepath="$PROJECT_DIR$/.idea/modules/nl.pindab0ter.EggBot.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/nl.pindab0ter.EggBot.main.iml" filepath="$PROJECT_DIR$/.idea/modules/nl.pindab0ter.EggBot.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/nl.pindab0ter.EggBot.test.iml" filepath="$PROJECT_DIR$/.idea/modules/nl.pindab0ter.EggBot.test.iml" />
+    </modules>
+  </component>
+</project>
