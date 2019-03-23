@@ -14,11 +14,14 @@ application {
 
 repositories {
     mavenCentral()
+    jcenter()
 }
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.discord4j:discord4j-core:3.0.0")
+    implementation("com.discord4j:discord4j-core:3.0.1")
+    implementation("org.jetbrains.exposed:exposed:0.13.4")
+    implementation("org.xerial:sqlite-jdbc:3.21.0.1")
 }
 
 tasks.withType<KotlinCompile> {
