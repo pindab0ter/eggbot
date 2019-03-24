@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot
 
 import discord4j.core.DiscordClientBuilder
-import discord4j.core.`object`.entity.Message
 import discord4j.core.event.domain.lifecycle.ReadyEvent
 import discord4j.core.event.domain.message.MessageCreateEvent
 import org.jetbrains.exposed.sql.Database
@@ -10,7 +9,24 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import reactor.core.publisher.Flux
+import reactor.core.publisher.Mono
 import java.sql.Connection
+
+const val prefix = "!"
+val commands: HashMap<String, (MessageCreateEvent) -> Mono<Void>> = hashMapOf(
+    "ping" to { event ->
+        event.message.channel
+            .flatMap { channel -> channel.createMessage("Pong!") }
+            .then()
+    },
+    "adduser" to { event ->
+        event.message.channel
+
+            .flatMap { channel -> channel.createMessage("Added user") }
+            .then()
+    }
+)
 
 fun main(args: Array<String>) {
     if (args.size != 1) {
@@ -35,10 +51,15 @@ fun main(args: Array<String>) {
         .subscribe { ready -> println("Logged in as ${ready.self.username}") }
 
     client.eventDispatcher.on(MessageCreateEvent::class.java)
-        .map(MessageCreateEvent::getMessage)
-        .filter { msg -> msg.content.map("!ping"::equals).orElse(false) }
-        .flatMap(Message::getChannel)
-        .flatMap { channel -> channel.createMessage("Pong!") }
+        .flatMap { event ->
+            Mono.justOrEmpty(event.message.content)
+                .flatMap { content ->
+                    Flux.fromIterable(commands.entries)
+                        .filter { entry -> content.startsWith("$prefix${entry.key}") }
+                        .flatMap { entry -> entry.value(event) }
+                        .next()
+                }
+        }
         .subscribe()
 
     client.login().block()
