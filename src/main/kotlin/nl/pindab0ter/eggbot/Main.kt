@@ -1,31 +1,22 @@
 package nl.pindab0ter.eggbot
 
-import discord4j.core.DiscordClientBuilder
-import discord4j.core.event.domain.lifecycle.ReadyEvent
-import discord4j.core.event.domain.message.MessageCreateEvent
+import net.dv8tion.jda.core.JDABuilder
+import net.dv8tion.jda.core.events.Event
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.core.hooks.EventListener
+import net.dv8tion.jda.core.hooks.ListenerAdapter
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
-import reactor.core.publisher.Flux
-import reactor.core.publisher.Mono
 import java.sql.Connection
+import java.util.*
 
 const val prefix = "!"
-val commands: HashMap<String, (MessageCreateEvent) -> Mono<Void>> = hashMapOf(
-    "ping" to { event ->
-        event.message.channel
-            .flatMap { channel -> channel.createMessage("Pong!") }
-            .then()
-    },
-    "adduser" to { event ->
-        event.message.channel
-
-            .flatMap { channel -> channel.createMessage("Added user") }
-            .then()
-    }
+val commands: HashMap<String, (MessageReceivedEvent) -> Unit?> = hashMapOf(
+    "ping" to ::pingPong
 )
 
 fun main(args: Array<String>) {
@@ -45,24 +36,20 @@ fun main(args: Array<String>) {
         }
     }
 
-    val client = DiscordClientBuilder(args[0]).build()
+    JDABuilder(args[0])
+        .addEventListener(MessageListener())
+        .build()
+        .awaitReady()
+}
 
-    client.eventDispatcher.on(ReadyEvent::class.java)
-        .subscribe { ready -> println("Logged in as ${ready.self.username}") }
+class MessageListener : ListenerAdapter() {
+    override fun onMessageReceived(event: MessageReceivedEvent?) {
+        // TODO: Parse message and break up into prefix, command and arguments
+        val message = event?.message?.contentDisplay
+        if (message == null || !message.startsWith(prefix)) return
 
-    client.eventDispatcher.on(MessageCreateEvent::class.java)
-        .flatMap { event ->
-            Mono.justOrEmpty(event.message.content)
-                .flatMap { content ->
-                    Flux.fromIterable(commands.entries)
-                        .filter { entry -> content.startsWith("$prefix${entry.key}") }
-                        .flatMap { entry -> entry.value(event) }
-                        .next()
-                }
-        }
-        .subscribe()
-
-    client.login().block()
+        commands[message.drop(1)]?.invoke(event)
+    }
 }
 
 fun prepareDatabase() {

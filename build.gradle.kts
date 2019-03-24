@@ -19,9 +19,12 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.discord4j:discord4j-core:3.0.1")
-    implementation("org.jetbrains.exposed:exposed:0.13.4")
-    implementation("org.xerial:sqlite-jdbc:3.21.0.1")
+    implementation("net.dv8tion", "JDA", "3.8.3_462") {
+        exclude("opus-java")
+    }
+    implementation("org.jetbrains.exposed", "exposed", "0.13.4")
+    implementation("org.xerial", "sqlite-jdbc", "3.21.0.1")
+    runtime("org.slf4j", "slf4j-simple", "1.7.26")
 }
 
 tasks.withType<KotlinCompile> {
