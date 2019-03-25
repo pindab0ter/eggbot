@@ -4,8 +4,13 @@ import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.IntIdTable
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
+import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.sql.transactions.TransactionManager
+import org.jetbrains.exposed.sql.transactions.transaction
+import java.sql.Connection
 
 object ColumnNames {
     const val farmerInGameName = "in_game_name"
@@ -80,4 +85,18 @@ enum class Roles(oom: Int) {
     PetaFarmer(17),
     PetaFarmer2(18),
     PetaFarmer3(19)
+}
+
+fun prepareDatabase() {
+    Database.connect("jdbc:sqlite:./EggBot.sqlite", driver = "org.sqlite.JDBC")
+    TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+    TransactionManager.manager.defaultRepetitionAttempts = 0
+
+    transaction {
+        SchemaUtils.create(Farmers)
+        SchemaUtils.create(Coops)
+        SchemaUtils.create(FarmerCoops)
+        SchemaUtils.create(Contracts)
+        SchemaUtils.create(Goals)
+    }
 }
