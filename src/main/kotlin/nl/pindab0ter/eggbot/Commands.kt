@@ -25,12 +25,6 @@ object Help : Command {
         .queue()
 }
 
-object PingPong : Command {
-    override val keyWord: String = "ping"
-    override val help: String = "$prefix$keyWord - \"Pong!\""
-    override fun function(event: MessageReceivedEvent) = event.channel.sendMessage("Pong!").queue()
-}
-
 object Register : Command {
     override val keyWord = "register"
     override val help = "$prefix$keyWord <in-game name> - Register on this server with your in-game name"
@@ -57,7 +51,9 @@ object Register : Command {
                 exception.message?.contains(ColumnNames.farmerDiscordTag) == true
             ) {
                 event.channel.sendMessage("You are already registered!").queue()
-            } else event.channel.sendMessage("Failed to register.").queue()
+            } else {
+                event.channel.sendMessage("Failed to register.").queue()
+            }
         }
     }
 }

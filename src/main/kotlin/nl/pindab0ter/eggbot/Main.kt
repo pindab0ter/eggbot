@@ -7,7 +7,6 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter
 const val prefix = "!"
 val commands: List<Command> = listOf(
     Help,
-    PingPong,
     Register
 )
 
