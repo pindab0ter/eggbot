@@ -3,12 +3,25 @@ package nl.pindab0ter.eggbot
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 
+object ColumnNames {
+    const val farmerInGameName = "in_game_name"
+    const val farmerDiscordTag = "discord_tag"
+}
 
 object Farmers : IntIdTable() {
-    val inGameName = text("in_game_name").uniqueIndex()
-    val discordName = text("discord_name").uniqueIndex()
-    val role = enumeration("role", Roles::class)
+    val discordTag = text(ColumnNames.farmerInGameName).uniqueIndex()
+    val inGameName = text(ColumnNames.farmerDiscordTag).uniqueIndex()
+    val role = text("role")
 }
+
+class Farmer(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<Farmer>(Farmers)
+
+    var discordTag by Farmers.discordTag
+    var inGameName by Farmers.inGameName
+    var role by Farmers.role
+}
+
 
 object Coops : IntIdTable() {
     val name = text("name")
