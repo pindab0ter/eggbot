@@ -4,7 +4,6 @@ import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 
-const val prefix = "!"
 val commands: List<Command> = listOf(
     Help,
     Register

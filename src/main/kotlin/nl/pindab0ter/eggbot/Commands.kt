@@ -6,6 +6,8 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.sqlite.SQLiteErrorCode
 
+const val prefix = "!"
+
 interface Command {
     val keyWord: String
     val help: String
