@@ -8,13 +8,12 @@ import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
-import java.util.*
 
 const val prefix = "!"
-val commands: HashMap<String, (MessageReceivedEvent, List<String>) -> Unit?> = hashMapOf(
-    "ping" to ::pingPong,
-    "addFarmer" to ::addFarmer,
-    "register" to ::registerFarmer
+val commands: List<Command> = listOf(
+    Help,
+    PingPong,
+    Register
 )
 
 fun main(args: Array<String>) {
@@ -32,14 +31,10 @@ fun main(args: Array<String>) {
 
 class MessageListener : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent?) {
-        event?.message?.contentDisplay
-            ?.takeIf { it.startsWith(prefix) }
-            ?.removePrefix(prefix)
-            ?.split(' ')
-            ?.let { it.first() to it.drop(1) }
-            ?.let { (command, arguments) ->
-                commands[command]?.invoke(event, arguments)
-            }
+        if (event?.message?.isCommand == true) {
+            commands.find { it.keyWord == event.message.command }
+                ?.function(event)
+        }
     }
 }
 

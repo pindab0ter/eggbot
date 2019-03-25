@@ -5,54 +5,54 @@ import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.sqlite.SQLiteErrorCode
 
-fun pingPong(event: MessageReceivedEvent, arguments: List<String> = emptyList()) =
-    event.channel.sendMessage("Pong!").queue()
-
-fun registerFarmer(event: MessageReceivedEvent, arguments: List<String>) {
-    if (arguments.size != 1) {
-        event.channel.sendMessage("Usage: ${prefix}register <ingame name>").queue()
-        return
-    }
-
-    try {
-        transaction {
-            Farmer.new {
-                discordTag = event.author.asTag
-                inGameName = arguments[0]
-            }
-        }.apply {
-            event.channel.sendMessage("Successfully registered, welcome!").queue()
-        }
-    } catch (exception: ExposedSQLException) {
-        if (exception.errorCode == SQLiteErrorCode.SQLITE_CONSTRAINT.code &&
-            exception.message?.contains(ColumnNames.farmerDiscordTag) == true) {
-            event.channel.sendMessage("You are already registered!").queue()
-        } else event.channel.sendMessage("Failed to register.").queue()
-    }
+interface Command {
+    val keyWord: String
+    val help: String
+    fun function(event: MessageReceivedEvent)
 }
 
-fun addFarmer(event: MessageReceivedEvent, arguments: List<String>) {
-    if (arguments.size != 3) {
-        event.channel.sendMessage("Usage: ${prefix}addFarmer inGameName discordTag orderOfMagnitude").queue()
-        return
-    }
+object Help : Command {
+    override val keyWord = "help"
+    override val help = "$prefix$keyWord - Shows this menu"
+    // TODO: Change to EmbedMessage
+    override fun function(event: MessageReceivedEvent) = event.channel
+        .sendMessage("Available commands:\n${commands.joinToString("\n") { it.help }}")
+        .queue()
+}
 
-    try {
-        transaction {
-            Farmer.new {
-                inGameName = arguments[0]
-                discordTag = arguments[1]
-                role = arguments[2]
-            }
-        }.apply {
-            event.channel.sendMessage(
-                "Added new farmer:\n" +
-                        "\tIn-game name:\t$inGameName\n" +
-                        "\tDiscord tag:\t\t$discordTag\n" +
-                        "\tRole:\t\t\t\t\t$role"
-            ).queue()
+object PingPong : Command {
+    override val keyWord: String = "ping"
+    override val help: String = "$prefix$keyWord - \"Pong!\""
+    override fun function(event: MessageReceivedEvent) = event.channel.sendMessage("Pong!").queue()
+}
+
+object Register : Command {
+    override val keyWord = "register"
+    override val help = "$prefix$keyWord <in-game name> - Register on this server with your in-game name"
+
+    override fun function(event: MessageReceivedEvent) {
+        val arguments = event.message.arguments
+
+        if (arguments?.size != 1) {
+            event.channel.sendMessage(help).queue()
+            return
         }
-    } catch (exception: ExposedSQLException) {
-        event.channel.sendMessage("Failed to add farmer.").queue()
+
+        try {
+            transaction {
+                Farmer.new {
+                    discordTag = event.author.asTag
+                    inGameName = arguments[0]
+                }
+            }.apply {
+                event.channel.sendMessage("Successfully registered, welcome!").queue()
+            }
+        } catch (exception: ExposedSQLException) {
+            if (exception.errorCode == SQLiteErrorCode.SQLITE_CONSTRAINT.code &&
+                exception.message?.contains(ColumnNames.farmerDiscordTag) == true
+            ) {
+                event.channel.sendMessage("You are already registered!").queue()
+            } else event.channel.sendMessage("Failed to register.").queue()
+        }
     }
 }
