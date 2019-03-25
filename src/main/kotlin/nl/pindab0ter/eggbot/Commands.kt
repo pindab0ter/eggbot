@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot
 
+import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -14,9 +15,13 @@ interface Command {
 object Help : Command {
     override val keyWord = "help"
     override val help = "$prefix$keyWord - Shows this menu"
-    // TODO: Change to EmbedMessage
     override fun function(event: MessageReceivedEvent) = event.channel
-        .sendMessage("Available commands:\n${commands.joinToString("\n") { it.help }}")
+        .sendMessage(
+            EmbedBuilder()
+                .setTitle("Available commands")
+                .setDescription(commands.joinToString("\n") { it.help })
+                .build()
+        )
         .queue()
 }
 
