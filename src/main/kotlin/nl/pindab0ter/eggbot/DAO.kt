@@ -1,7 +1,8 @@
 package nl.pindab0ter.eggbot
 
-import org.jetbrains.exposed.dao.IntIdTable
+import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
+import org.jetbrains.exposed.sql.Table
 
 object ColumnNames {
     const val farmerInGameName = "in_game_name"
@@ -12,6 +13,7 @@ object Farmers : IntIdTable() {
     val discordTag = text(ColumnNames.farmerInGameName).uniqueIndex()
     val inGameName = text(ColumnNames.farmerDiscordTag).uniqueIndex()
     val role = text("role")
+    //    val role = enumeration("role", Roles::class)
 }
 
 class Farmer(id: EntityID<Int>) : IntEntity(id) {
@@ -22,6 +24,10 @@ class Farmer(id: EntityID<Int>) : IntEntity(id) {
     var role by Farmers.role
 }
 
+object FarmerCoops : Table() {
+    val farmer = reference("farmer", Farmers).primaryKey(0)
+    val coop = reference("coop", Coops).primaryKey(1)
+}
 
 object Coops : IntIdTable() {
     val name = text("name")
@@ -34,16 +40,22 @@ object Contracts : IntIdTable() {
     val description = text("description")
     val eggType = text("egg_type")
     val size = integer("size")
-    val tiers = reference("tiers", Tiers, CASCADE)
     val maxCoopSize = integer("max_coop_size")
     val daysToComplete = integer("days_to_complete")
     val validTill = datetime("valid_till")
 }
 
-object Tiers : IntIdTable() {
-    val tier = integer("tier") // 1, 2 or 3, **must be unique per contract**
+object Goals : IntIdTable() {
+    val contract = reference("contract", Contracts)
+    val tier = enumeration("tier", Tiers::class) // Must be unique per contract
     val goal = integer("goal")
     val reward = text("reward")
+}
+
+enum class Tiers(tier: Int) {
+    First(1),
+    Second(2),
+    Third(3)
 }
 
 enum class Roles(oom: Int) {

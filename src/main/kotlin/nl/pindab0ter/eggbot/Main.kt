@@ -51,6 +51,6 @@ fun prepareDatabase() {
         SchemaUtils.create(Coops)
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Contracts)
-        SchemaUtils.create(Tiers)
+        SchemaUtils.create(Goals)
     }
 }
