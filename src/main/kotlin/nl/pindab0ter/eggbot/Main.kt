@@ -26,9 +26,8 @@ fun main(args: Array<String>) {
 
 class MessageListener : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent?) {
-        if (event?.message?.isCommand == true) {
-            commands.find { it.keyWord == event.message.command }
-                ?.function(event)
-        }
+        if (event?.message?.isCommand == true) commands
+            .find { it.keyWord.toLowerCase() == event.message.command }
+            ?.function(event)
     }
 }
