@@ -12,7 +12,7 @@ object ColumnNames {
 object Farmers : IntIdTable() {
     val discordTag = text(ColumnNames.farmerInGameName).uniqueIndex()
     val inGameName = text(ColumnNames.farmerDiscordTag).uniqueIndex()
-    val role = text("role")
+    val role = text("role").nullable()
     //    val role = enumeration("role", Roles::class)
 }
 

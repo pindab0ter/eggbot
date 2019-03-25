@@ -13,7 +13,8 @@ import java.util.*
 const val prefix = "!"
 val commands: HashMap<String, (MessageReceivedEvent, List<String>) -> Unit?> = hashMapOf(
     "ping" to ::pingPong,
-    "addFarmer" to ::addFarmer
+    "addFarmer" to ::addFarmer,
+    "register" to ::registerFarmer
 )
 
 fun main(args: Array<String>) {
