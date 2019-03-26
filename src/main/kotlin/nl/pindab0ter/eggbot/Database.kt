@@ -13,13 +13,13 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import java.sql.Connection
 
 object ColumnNames {
-    const val farmerInGameName = "in_game_name"
-    const val farmerDiscordTag = "discord_tag"
+    const val FARMER_IN_GAME_NAME = "in_game_name"
+    const val FARMER_DISCORD_TAG = "discord_tag"
 }
 
 object Farmers : IntIdTable() {
-    val discordTag = text(ColumnNames.farmerInGameName).uniqueIndex()
-    val inGameName = text(ColumnNames.farmerDiscordTag).uniqueIndex()
+    val discordTag = text(ColumnNames.FARMER_IN_GAME_NAME).uniqueIndex()
+    val inGameName = text(ColumnNames.FARMER_DISCORD_TAG).uniqueIndex()
     val role = text("role").nullable()
     //    val role = enumeration("role", Roles::class)
 }

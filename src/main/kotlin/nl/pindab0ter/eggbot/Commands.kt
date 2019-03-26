@@ -50,7 +50,7 @@ object Register : Command {
             }
         } catch (exception: ExposedSQLException) {
             if (exception.errorCode == SQLiteErrorCode.SQLITE_CONSTRAINT.code &&
-                exception.message?.contains(ColumnNames.farmerDiscordTag) == true
+                exception.message?.contains(ColumnNames.FARMER_DISCORD_TAG) == true
             ) {
                 event.channel.sendMessage("You are already registered!").queue()
             } else {
