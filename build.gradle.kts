@@ -4,8 +4,10 @@ group = "nl.pindab0ter"
 version = "0.0.1"
 
 plugins {
+    idea
     application
     kotlin("jvm") version "1.3.21"
+    id("com.google.protobuf").version("0.8.8")
 }
 
 application {
@@ -24,6 +26,10 @@ dependencies {
     }
     implementation("org.jetbrains.exposed", "exposed", "0.13.4")
     implementation("org.xerial", "sqlite-jdbc", "3.21.0.1")
+    api("com.github.kittinunf.fuel", "fuel", "2.0.1")
+    implementation("com.google.protobuf", "protobuf-java", "3.7.0")
+    implementation("com.google.protobuf", "protobuf-gradle-plugin", "0.8.8")
+
     runtime("org.slf4j", "slf4j-simple", "1.7.26")
 }
 

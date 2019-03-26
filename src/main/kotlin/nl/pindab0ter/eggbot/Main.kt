@@ -9,17 +9,19 @@ val commands: List<Command> = listOf(
     Register
 )
 
-fun main(args: Array<String>) {
-    if (args.size != 1) {
-        println("usage: EggBot bot_token")
+fun main() {
+    System.getenv()["bot_token"]?.let { botToken ->
+        JDABuilder(botToken)
+            .addEventListener(MessageListener())
+            .build()
+            .awaitReady()
+    } ?: run {
+        throw MissingEnvironmentVariableException("Please enter the bot token in the \"bot_token\" environment variable")
     }
 
     prepareDatabase()
 
-    JDABuilder(args[0])
-        .addEventListener(MessageListener())
-        .build()
-        .awaitReady()
+    getContracts()
 }
 
 class MessageListener : ListenerAdapter() {
