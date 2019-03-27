@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package nl.pindab0ter.eggbot.network;
+package nl.pindab0ter.eggbot.auxbrain;
 
 option java_outer_classname = "EggInc";
 

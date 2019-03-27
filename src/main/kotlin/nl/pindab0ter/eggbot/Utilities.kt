@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import net.dv8tion.jda.core.entities.Message
+import nl.pindab0ter.eggbot.auxbrain.EggInc
 import nl.pindab0ter.eggbot.commands.PREFIX
 
 class MissingEnvironmentVariableException(message: String? = null) : Exception(message)
@@ -19,3 +20,8 @@ val Message.arguments: List<String>?
         ?.removePrefix(PREFIX)
         ?.split(' ')
         ?.drop(1)
+
+val EggInc.Egg.formattedName: String get() = name
+    .toLowerCase()
+    .split('_')
+    .joinToString(" ", transform = String::capitalize)

@@ -1,6 +1,10 @@
 package nl.pindab0ter.eggbot.database
 
+import nl.pindab0ter.eggbot.auxbrain.EggInc
+import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
+import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.Table
 
@@ -23,15 +27,15 @@ object FarmerCoops : Table() {
 
 object Coops : IntIdTable() {
     val name = text("name")
-    val contract = reference("contract", Contracts.identifier, CASCADE)
+    val contract = reference("contract", Contracts.id, CASCADE)
     val maxSize = integer("max_size")
 }
 
-object Contracts : Table() {
-    val identifier = text("identifier").primaryKey()
-    val title = text("title")
+object Contracts : IdTable<String>() {
+    override val id: Column<EntityID<String>> = text("identifier").primaryKey().entityId()
+    val title = text("name")
     val description = text("description")
-    val egg = enumeration("egg", Egg::class)
+    val egg = enumeration("egg", EggInc.Egg::class)
     val coopAllowed = bool("coop_allowed")
     val coopSize = integer("coop_size")
     val validUntil = datetime("valid_until")
@@ -39,16 +43,10 @@ object Contracts : Table() {
 }
 
 object Goals : IntIdTable() {
-    val contract = reference("contract", Contracts.identifier, CASCADE)
-    val tier = enumeration("tier", Tiers::class) // Must be unique per contract
+    val contract = reference("contract", Contracts.id, CASCADE)
+    val tier = integer("tier") // 1-3 (or 4?) Must be unique per contract
     val goal = integer("goal")
     val reward = text("reward")
-}
-
-enum class Tiers(tier: Int) {
-    First(1),
-    Second(2),
-    Third(3)
 }
 
 enum class Roles(oom: Int) {
@@ -72,28 +70,3 @@ enum class Roles(oom: Int) {
     PetaFarmer3(19)
 }
 
-enum class Egg(id: Int) {
-    DEFAULT(0),
-    EDIBLE(1),
-    SUPERFOOD(2),
-    MEDICAL(3),
-    ROCKET_FUEL(4),
-    SUPER_MATERIAL(5),
-    FUSION(6),
-    QUANTUM(7),
-    IMMORTALITY(8),
-    TACHYON(9),
-    GRAVITON(10),
-    DILITHIUM(11),
-    PRODIGY(12),
-    TERRAFORM(13),
-    ANTIMATTER(14),
-    DARK_MATTER(15),
-    AI(16),
-    NEBULA(17),
-    CHOCOLATE(100),
-    EASTER(101),
-    WATER_BALLOON(102),
-    FIREWORK(103),
-    PUMPKIN(104)
-}
