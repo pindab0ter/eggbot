@@ -1,16 +1,8 @@
-package nl.pindab0ter.eggbot
+package nl.pindab0ter.eggbot.database
 
-import org.jetbrains.exposed.dao.EntityID
-import org.jetbrains.exposed.dao.IntEntity
-import org.jetbrains.exposed.dao.IntEntityClass
 import org.jetbrains.exposed.dao.IntIdTable
-import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
-import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.Table
-import org.jetbrains.exposed.sql.transactions.TransactionManager
-import org.jetbrains.exposed.sql.transactions.transaction
-import java.sql.Connection
 
 object ColumnNames {
     const val FARMER_IN_GAME_NAME = "in_game_name"
@@ -24,14 +16,6 @@ object Farmers : IntIdTable() {
     //    val role = enumeration("role", Roles::class)
 }
 
-class Farmer(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<Farmer>(Farmers)
-
-    var discordTag by Farmers.discordTag
-    var inGameName by Farmers.inGameName
-    var role by Farmers.role
-}
-
 object FarmerCoops : Table() {
     val farmer = reference("farmer", Farmers).primaryKey(0)
     val coop = reference("coop", Coops).primaryKey(1)
@@ -39,22 +23,23 @@ object FarmerCoops : Table() {
 
 object Coops : IntIdTable() {
     val name = text("name")
-    val contract = reference("contract", Contracts, CASCADE)
+    val contract = reference("contract", Contracts.identifier, CASCADE)
     val maxSize = integer("max_size")
 }
 
-object Contracts : IntIdTable() {
+object Contracts : Table() {
+    val identifier = text("identifier").primaryKey()
     val title = text("title")
     val description = text("description")
-    val eggType = text("egg_type")
-    val size = integer("size")
-    val maxCoopSize = integer("max_coop_size")
-    val daysToComplete = integer("days_to_complete")
-    val validTill = datetime("valid_till")
+    val egg = enumeration("egg", Egg::class)
+    val coopAllowed = bool("coop_allowed")
+    val coopSize = integer("coop_size")
+    val validUntil = datetime("valid_until")
+    val duration = double("duration")
 }
 
 object Goals : IntIdTable() {
-    val contract = reference("contract", Contracts)
+    val contract = reference("contract", Contracts.identifier, CASCADE)
     val tier = enumeration("tier", Tiers::class) // Must be unique per contract
     val goal = integer("goal")
     val reward = text("reward")
@@ -87,16 +72,28 @@ enum class Roles(oom: Int) {
     PetaFarmer3(19)
 }
 
-fun prepareDatabase() {
-    Database.connect("jdbc:sqlite:./EggBot.sqlite", driver = "org.sqlite.JDBC")
-    TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
-    TransactionManager.manager.defaultRepetitionAttempts = 0
-
-    transaction {
-        SchemaUtils.create(Farmers)
-        SchemaUtils.create(Coops)
-        SchemaUtils.create(FarmerCoops)
-        SchemaUtils.create(Contracts)
-        SchemaUtils.create(Goals)
-    }
+enum class Egg(id: Int) {
+    DEFAULT(0),
+    EDIBLE(1),
+    SUPERFOOD(2),
+    MEDICAL(3),
+    ROCKET_FUEL(4),
+    SUPER_MATERIAL(5),
+    FUSION(6),
+    QUANTUM(7),
+    IMMORTALITY(8),
+    TACHYON(9),
+    GRAVITON(10),
+    DILITHIUM(11),
+    PRODIGY(12),
+    TERRAFORM(13),
+    ANTIMATTER(14),
+    DARK_MATTER(15),
+    AI(16),
+    NEBULA(17),
+    CHOCOLATE(100),
+    EASTER(101),
+    WATER_BALLOON(102),
+    FIREWORK(103),
+    PUMPKIN(104)
 }
