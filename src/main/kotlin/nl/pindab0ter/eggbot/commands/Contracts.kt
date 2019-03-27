@@ -9,12 +9,13 @@ import nl.pindab0ter.eggbot.daysAndHours
 import nl.pindab0ter.eggbot.formattedName
 import nl.pindab0ter.eggbot.network.GET_CONTRACTS_URL
 import nl.pindab0ter.eggbot.network.base64Decoded
+import nl.pindab0ter.eggbot.toDateTime
 import nl.pindab0ter.eggbot.toPeriod
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Contracts : Command {
     override val keyWord = "contracts"
-    override val help = "$PREFIX$keyWord - Shows currently active contracts"
+    override val help = "$PREFIX$keyWord - Shows currently active contracts:"
 
     override fun execute(event: MessageReceivedEvent) {
         Fuel.get(GET_CONTRACTS_URL).response { _, response, _ ->
@@ -35,24 +36,32 @@ object Contracts : Command {
                 }
 
             val contracts = transaction {
-                Contract.all().sortedBy { it.validUntil }
+                // TODO: Filter in query, not after
+                Contract.all()
+                    .filter { contract -> contract.validUntil.toDateTime().isAfterNow }
+                    .sortedBy { it.validUntil }
             }
 
             val embed = EmbedBuilder()
                 .setTitle("**Currently active contracts**")
                 .apply {
-                    contracts.forEach { contract ->
-                        addField(
-                            "**${contract.name}** - *${contract.egg.formattedName}*",
-                            """
+                    contracts
+                        .ifEmpty {
+                            setDescription("There are currently no active contracts")
+                            contracts
+                        }
+                        .forEach { contract ->
+                            addField(
+                                "**${contract.name}** - *${contract.egg.formattedName}*",
+                                """
                                 ${contract.description}
                                 **Co-op allowed**: **${if (contract.coopAllowed) "✓ (${contract.coopSize})" else "✗"}**
                                 **Duration**: ${daysAndHours.print(contract.duration.toPeriod())}
 
                             """.trimIndent(),
-                            false
-                        )
-                    }
+                                false
+                            )
+                        }
                 }
                 .build()
 

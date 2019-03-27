@@ -36,7 +36,7 @@ val EggInc.Egg.formattedName: String
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.days())
 
-var daysAndHours: PeriodFormatter = PeriodFormatterBuilder()
+val daysAndHours: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
     .appendDays()
     .appendSuffix(" day", " days")
