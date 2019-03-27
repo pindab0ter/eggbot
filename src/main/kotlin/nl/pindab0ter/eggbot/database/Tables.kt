@@ -38,7 +38,7 @@ object Contracts : IdTable<String>() {
     val egg = enumeration("egg", EggInc.Egg::class)
     val coopAllowed = bool("coop_allowed")
     val coopSize = integer("coop_size")
-    val validUntil = datetime("valid_until")
+    val validUntil = double("valid_until")
     val duration = double("duration")
 }
 
