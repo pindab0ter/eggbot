@@ -11,13 +11,13 @@ const val prefix = "!"
 interface Command {
     val keyWord: String
     val help: String
-    fun function(event: MessageReceivedEvent)
+    fun execute(event: MessageReceivedEvent)
 }
 
 object Help : Command {
     override val keyWord = "help"
     override val help = "$prefix$keyWord - Shows this menu"
-    override fun function(event: MessageReceivedEvent) = event.channel
+    override fun execute(event: MessageReceivedEvent) = event.channel
         .sendMessage(
             EmbedBuilder()
                 .setTitle("Available commands")
@@ -31,7 +31,7 @@ object Register : Command {
     override val keyWord = "register"
     override val help = "$prefix$keyWord <in-game name> - Register on this server with your in-game name"
 
-    override fun function(event: MessageReceivedEvent) {
+    override fun execute(event: MessageReceivedEvent) {
         val arguments = event.message.arguments
 
         if (arguments?.size != 1) {

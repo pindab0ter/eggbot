@@ -28,6 +28,6 @@ class MessageListener : ListenerAdapter() {
     override fun onMessageReceived(event: MessageReceivedEvent?) {
         if (event?.message?.isCommand == true) commands
             .find { it.keyWord.toLowerCase() == event.message.command }
-            ?.function(event)
+            ?.execute(event)
     }
 }
