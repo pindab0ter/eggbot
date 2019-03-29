@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
-import nl.pindab0ter.eggbot.auxbrain.EggInc
+import com.auxbrain.ei.EggInc
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
@@ -39,7 +39,7 @@ object Contracts : IdTable<String>() {
     val coopAllowed = bool("coop_allowed")
     val coopSize = integer("coop_size")
     val validUntil = double("valid_until")
-    val duration = double("duration")
+    val duration = double("lengthSeconds")
 }
 
 object Goals : IntIdTable() {

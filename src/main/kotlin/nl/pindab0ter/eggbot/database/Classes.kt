@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
-import nl.pindab0ter.eggbot.auxbrain.EggInc
+import com.auxbrain.ei.EggInc
 import org.jetbrains.exposed.dao.*
 
 class Farmer(id: EntityID<Int>) : IntEntity(id) {
@@ -19,7 +19,7 @@ class Contract(id: EntityID<String>) : Entity<String>(id) {
     var description by Contracts.description
     var egg: EggInc.Egg by Contracts.egg
     var coopAllowed by Contracts.coopAllowed
-    var coopSize by Contracts.coopSize
-    var validUntil by Contracts.validUntil
-    var duration by Contracts.duration
+    var maxCoopSize by Contracts.coopSize
+    var expirationTime by Contracts.validUntil
+    var lengthSeconds by Contracts.duration
 }

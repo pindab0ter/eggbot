@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot
 
-import nl.pindab0ter.eggbot.auxbrain.EggInc
+import com.auxbrain.ei.EggInc
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
