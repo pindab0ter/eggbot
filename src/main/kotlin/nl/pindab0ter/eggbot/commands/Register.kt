@@ -1,22 +1,24 @@
 package nl.pindab0ter.eggbot.commands
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import nl.pindab0ter.eggbot.arguments
+import com.jagrosh.jdautilities.command.Command
+import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.database.ColumnNames
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.sqlite.SQLiteErrorCode
 
-object Register : Command {
-    override val keyWord = "register"
-    override val help = "$PREFIX$keyWord <in-game name> - Register on this server with your in-game name"
+object Register : Command() {
+    init {
+        name = "register"
+        arguments = "<in-game name>"
+        help = "Register on this server with your in-game name"
+        guildOnly = false
+    }
 
-    override fun execute(event: MessageReceivedEvent) {
-        val arguments = event.message.arguments
-
-        if (arguments?.size != 1) {
-            event.channel.sendMessage(help).queue()
+    override fun execute(event: CommandEvent) {
+        if (event.args.isBlank()) {
+            event.replyWarning("Missing in-game name argument. See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
             return
         }
 
@@ -24,18 +26,19 @@ object Register : Command {
             transaction {
                 Farmer.new {
                     discordTag = event.author.asTag
-                    inGameName = arguments[0]
+                    inGameName = event.arguments[0]
                 }
             }.apply {
-                event.channel.sendMessage("Successfully registered, welcome!").queue()
+                event.replySuccess("Successfully registered, welcome!")
             }
         } catch (exception: ExposedSQLException) {
+            // TODO: Check __who__ has registered that name and let the sender know if it was them or not
             if (exception.errorCode == SQLiteErrorCode.SQLITE_CONSTRAINT.code &&
                 exception.message?.contains(ColumnNames.FARMER_DISCORD_TAG) == true
             ) {
-                event.channel.sendMessage("You are already registered!").queue()
+                event.replyWarning("You are already registered!")
             } else {
-                event.channel.sendMessage("Failed to register.").queue()
+                event.replyError("Failed to register.")
             }
         }
     }

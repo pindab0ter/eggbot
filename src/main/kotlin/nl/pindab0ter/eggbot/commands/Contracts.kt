@@ -1,8 +1,9 @@
 package nl.pindab0ter.eggbot.commands
 
 import com.github.kittinunf.fuel.Fuel
+import com.jagrosh.jdautilities.command.Command
+import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import nl.pindab0ter.eggbot.auxbrain.EggInc
 import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.daysAndHours
@@ -13,11 +14,16 @@ import nl.pindab0ter.eggbot.toDateTime
 import nl.pindab0ter.eggbot.toPeriod
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object Contracts : Command {
-    override val keyWord = "contracts"
-    override val help = "$PREFIX$keyWord - Shows currently active contracts:"
+object Contracts : Command() {
+    init {
+        name = "contracts"
+        help = "Shows currently active contracts"
+        guildOnly = false
+    }
 
-    override fun execute(event: MessageReceivedEvent) {
+
+    // TODO: Refactor and handle failure
+    override fun execute(event: CommandEvent) {
         Fuel.get(GET_CONTRACTS_URL).response { _, response, _ ->
             EggInc.GetContractsResponse.parseFrom(response.body().base64Decoded())
                 .contractsList
@@ -65,7 +71,7 @@ object Contracts : Command {
                 }
                 .build()
 
-            event.channel.sendMessage(embed).queue()
+            event.reply(embed)
 
         }
     }
