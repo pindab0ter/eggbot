@@ -2,11 +2,10 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import nl.pindab0ter.eggbot.database.ColumnNames
 import nl.pindab0ter.eggbot.database.Farmer
-import org.jetbrains.exposed.exceptions.ExposedSQLException
+import nl.pindab0ter.eggbot.database.Farmers
+import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.sqlite.SQLiteErrorCode
 
 object Register : Command() {
     init {
@@ -22,23 +21,20 @@ object Register : Command() {
             return
         }
 
-        try {
-            transaction {
-                Farmer.new {
-                    discordTag = event.author.asTag
-                    inGameName = event.arguments[0]
-                }
+        val newDiscordTag = event.author.asTag
+        val newInGameName = event.arguments[0]
+
+        transaction {
+            Farmer.find { (Farmers.id eq newDiscordTag) or (Farmers.inGameName eq newInGameName) }.firstOrNull()
+                ?.let { farmer ->
+                    if (farmer.discordTag.value != newDiscordTag)
+                        event.replyWarning("Someone else has already registered as `${farmer.inGameName}`.")
+                    else
+                        event.replyWarning("You are already registered as `${farmer.inGameName}`.")
+                } ?: Farmer.new(newDiscordTag) {
+                inGameName = newInGameName
             }.apply {
-                event.replySuccess("Successfully registered, welcome!")
-            }
-        } catch (exception: ExposedSQLException) {
-            // TODO: Check __who__ has registered that name and let the sender know if it was them or not
-            if (exception.errorCode == SQLiteErrorCode.SQLITE_CONSTRAINT.code &&
-                exception.message?.contains(ColumnNames.FARMER_DISCORD_TAG) == true
-            ) {
-                event.replyWarning("You are already registered!")
-            } else {
-                event.replyError("Failed to register.")
+                event.replySuccess("You have registered as `$newInGameName`, welcome!")
             }
         }
     }

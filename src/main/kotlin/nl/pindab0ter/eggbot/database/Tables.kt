@@ -9,19 +9,19 @@ import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.Table
 
 object ColumnNames {
-    const val FARMER_IN_GAME_NAME = "in_game_name"
     const val FARMER_DISCORD_TAG = "discord_tag"
+    const val FARMER_IN_GAME_NAME = "in_game_name"
 }
 
-object Farmers : IntIdTable() {
-    val discordTag = text(ColumnNames.FARMER_IN_GAME_NAME).uniqueIndex()
-    val inGameName = text(ColumnNames.FARMER_DISCORD_TAG).uniqueIndex()
+object Farmers : IdTable<String>() {
+    override val id = text(ColumnNames.FARMER_DISCORD_TAG).primaryKey().entityId()
+    val inGameName = text(ColumnNames.FARMER_IN_GAME_NAME).uniqueIndex()
     val role = text("role").nullable()
     //    val role = enumeration("role", Roles::class)
 }
 
 object FarmerCoops : Table() {
-    val farmer = reference("farmer", Farmers).primaryKey(0)
+    val farmer = reference("farmer", Farmers.id, CASCADE).primaryKey(0)
     val coop = reference("coop", Coops).primaryKey(1)
 }
 

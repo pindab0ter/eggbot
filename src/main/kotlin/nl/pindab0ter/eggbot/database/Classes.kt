@@ -1,14 +1,16 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
-import org.jetbrains.exposed.dao.*
+import org.jetbrains.exposed.dao.Entity
+import org.jetbrains.exposed.dao.EntityClass
+import org.jetbrains.exposed.dao.EntityID
 
-class Farmer(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<Farmer>(Farmers)
+class Farmer(id: EntityID<String>) : Entity<String>(id) {
+    companion object : EntityClass<String, Farmer>(Farmers)
 
-    var discordTag by Farmers.discordTag
+    var discordTag by Farmers.id
     var inGameName by Farmers.inGameName
-    var role by Farmers.role
+//    var role by Farmers.role
 }
 
 class Contract(id: EntityID<String>) : Entity<String>(id) {
