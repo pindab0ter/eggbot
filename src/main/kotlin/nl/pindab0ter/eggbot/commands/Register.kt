@@ -2,9 +2,8 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.database.Farmers
-import org.jetbrains.exposed.sql.or
+import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.database.InGameName
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Register : Command() {
@@ -21,20 +20,56 @@ object Register : Command() {
             return
         }
 
-        val newDiscordTag = event.author.asTag
-        val newInGameName = event.arguments[0]
+        val tag = event.author.asTag
+        val name = event.arguments[0]
 
         transaction {
-            Farmer.find { (Farmers.id eq newDiscordTag) or (Farmers.inGameName eq newInGameName) }.firstOrNull()
-                ?.let { farmer ->
-                    if (farmer.discordTag.value != newDiscordTag)
-                        event.replyWarning("Someone else has already registered as `${farmer.inGameName}`.")
-                    else
-                        event.replyWarning("You are already registered as `${farmer.inGameName}`.")
-                } ?: Farmer.new(newDiscordTag) {
-                inGameName = newInGameName
-            }.apply {
-                event.replySuccess("You have registered as `$newInGameName`, welcome!")
+            val inGameNames = InGameName.all().toList().map { it.inGameName }
+            val users = DiscordUser.all().toList()
+
+            // Check if the Discord user is already known
+            val user = users.find { it.discordTag.value == tag }?.let { user ->
+                when {
+
+                    // Check if this Discord user hasn't already registered that in-game name
+                    user.inGameNames.any { it == name } -> {
+                        event.replyWarning(
+                            "You are already registered with the in-game names: `${user.inGameNames.joinToString("`, `")}`."
+                        )
+                        return@transaction
+                    }
+
+                    // Check if someone else hasn't already registered that in-game name
+                    inGameNames.subtract(user.inGameNames).any { it == name } -> {
+                        event.replyWarning(
+                            "Someone else has already registered the in-game name `$name`."
+                        )
+                        return@transaction
+                    }
+
+                    // Otherwise use the known Discord user
+                    else -> user
+                }
+            } ?: {
+                // Otherwise, register the new Discord user
+                DiscordUser.new(tag) {}
+            }()
+
+            // Add the new in-game name
+            InGameName.new {
+                discordTag = user
+                inGameName = name
+            }
+
+            // Finally confirm the registration
+            if (inGameNames.isEmpty()) {
+                event.replySuccess(
+                    "You have been registered with the in-game name `$name`, welcome!"
+                )
+            } else {
+                event.replySuccess(
+                    "You are now registered with the in-game name `$name`, as well as `${inGameNames.joinToString("`, `")}`!"
+                )
             }
         }
     }
