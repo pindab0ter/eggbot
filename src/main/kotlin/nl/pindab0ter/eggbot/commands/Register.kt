@@ -1,41 +1,75 @@
 package nl.pindab0ter.eggbot.commands
 
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import nl.pindab0ter.eggbot.arguments
-import nl.pindab0ter.eggbot.database.ColumnNames
-import nl.pindab0ter.eggbot.database.Farmer
-import org.jetbrains.exposed.exceptions.ExposedSQLException
+import com.jagrosh.jdautilities.command.Command
+import com.jagrosh.jdautilities.command.CommandEvent
+import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.database.InGameName
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.sqlite.SQLiteErrorCode
 
-object Register : Command {
-    override val keyWord = "register"
-    override val help = "$PREFIX$keyWord <in-game name> - Register on this server with your in-game name"
+object Register : Command() {
+    init {
+        name = "register"
+        arguments = "<in-game name>"
+        help = "Register on this server with your in-game name"
+        guildOnly = false
+    }
 
-    override fun execute(event: MessageReceivedEvent) {
-        val arguments = event.message.arguments
-
-        if (arguments?.size != 1) {
-            event.channel.sendMessage(help).queue()
+    override fun execute(event: CommandEvent) {
+        if (event.args.isBlank()) {
+            event.replyWarning("Missing in-game name argument. See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
             return
         }
 
-        try {
-            transaction {
-                Farmer.new {
-                    discordTag = event.author.asTag
-                    inGameName = arguments[0]
+        val tag = event.author.asTag
+        val name = event.arguments[0]
+
+        transaction {
+            val inGameNames = InGameName.all().toList().map { it.inGameName }
+            val users = DiscordUser.all().toList()
+
+            // Check if the Discord user is already known
+            val user = users.find { it.discordTag.value == tag }?.let { user ->
+                when {
+
+                    // Check if this Discord user hasn't already registered that in-game name
+                    user.inGameNames.any { it == name } -> {
+                        event.replyWarning(
+                            "You are already registered with the in-game names:\n`${user.inGameNames.joinToString("`, `")}`."
+                        )
+                        return@transaction
+                    }
+
+                    // Check if someone else hasn't already registered that in-game name
+                    inGameNames.subtract(user.inGameNames).any { it == name } -> {
+                        event.replyWarning(
+                            "Someone else has already registered the in-game name `$name`."
+                        )
+                        return@transaction
+                    }
+
+                    // Otherwise use the known Discord user
+                    else -> user
                 }
-            }.apply {
-                event.channel.sendMessage("Successfully registered, welcome!").queue()
+            } ?: {
+                // Otherwise, register the new Discord user
+                DiscordUser.new(tag) {}
+            }()
+
+            // Add the new in-game name
+            InGameName.new {
+                discordTag = user
+                inGameName = name
             }
-        } catch (exception: ExposedSQLException) {
-            if (exception.errorCode == SQLiteErrorCode.SQLITE_CONSTRAINT.code &&
-                exception.message?.contains(ColumnNames.FARMER_DISCORD_TAG) == true
-            ) {
-                event.channel.sendMessage("You are already registered!").queue()
+
+            // Finally confirm the registration
+            if (user.inGameNames.isEmpty()) {
+                event.replySuccess(
+                    "You have been registered with the in-game name `$name`, welcome!"
+                )
             } else {
-                event.channel.sendMessage("Failed to register.").queue()
+                event.replySuccess(
+                    "You are now registered with the in-game name `$name`, as well as `${inGameNames.joinToString("`, `")}`!"
+                )
             }
         }
     }

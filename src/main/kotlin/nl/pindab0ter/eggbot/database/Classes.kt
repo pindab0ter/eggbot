@@ -1,14 +1,20 @@
 package nl.pindab0ter.eggbot.database
 
-import nl.pindab0ter.eggbot.auxbrain.EggInc
+import com.auxbrain.ei.EggInc
 import org.jetbrains.exposed.dao.*
 
-class Farmer(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<Farmer>(Farmers)
+class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
+    companion object : EntityClass<String, DiscordUser>(DiscordUsers)
 
-    var discordTag by Farmers.discordTag
-    var inGameName by Farmers.inGameName
-    var role by Farmers.role
+    var discordTag by DiscordUsers.id
+    private val _inGameNames by InGameName referrersOn InGameNames.discordTag
+    val inGameNames: List<String> get() = _inGameNames.map { it.inGameName }
+}
+
+class InGameName(id: EntityID<Int>) : IntEntity(id) {
+    companion object : IntEntityClass<InGameName>(InGameNames)
+    var discordTag by DiscordUser referencedOn InGameNames.discordTag
+    var inGameName by InGameNames.inGameName
 }
 
 class Contract(id: EntityID<String>) : Entity<String>(id) {
@@ -19,7 +25,7 @@ class Contract(id: EntityID<String>) : Entity<String>(id) {
     var description by Contracts.description
     var egg: EggInc.Egg by Contracts.egg
     var coopAllowed by Contracts.coopAllowed
-    var coopSize by Contracts.coopSize
-    var validUntil by Contracts.validUntil
-    var duration by Contracts.duration
+    var maxCoopSize by Contracts.coopSize
+    var expirationTime by Contracts.validUntil
+    var lengthSeconds by Contracts.duration
 }

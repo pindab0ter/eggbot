@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
-import nl.pindab0ter.eggbot.auxbrain.EggInc
+import com.auxbrain.ei.EggInc
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
@@ -8,20 +8,19 @@ import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.Table
 
-object ColumnNames {
-    const val FARMER_IN_GAME_NAME = "in_game_name"
-    const val FARMER_DISCORD_TAG = "discord_tag"
-}
-
-object Farmers : IntIdTable() {
-    val discordTag = text(ColumnNames.FARMER_IN_GAME_NAME).uniqueIndex()
-    val inGameName = text(ColumnNames.FARMER_DISCORD_TAG).uniqueIndex()
+object DiscordUsers : IdTable<String>() {
+    override val id = text("discord_tag").uniqueIndex().entityId()
     val role = text("role").nullable()
     //    val role = enumeration("role", Roles::class)
 }
 
+object InGameNames : IntIdTable() {
+    val discordTag = reference("discord_tag", DiscordUsers)
+    val inGameName = text("in_game_name").uniqueIndex()
+}
+
 object FarmerCoops : Table() {
-    val farmer = reference("farmer", Farmers).primaryKey(0)
+    val farmer = reference("farmer", DiscordUsers.id, CASCADE).primaryKey(0)
     val coop = reference("coop", Coops).primaryKey(1)
 }
 
@@ -39,7 +38,7 @@ object Contracts : IdTable<String>() {
     val coopAllowed = bool("coop_allowed")
     val coopSize = integer("coop_size")
     val validUntil = double("valid_until")
-    val duration = double("duration")
+    val duration = double("lengthSeconds")
 }
 
 object Goals : IntIdTable() {
