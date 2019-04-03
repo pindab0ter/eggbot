@@ -40,7 +40,7 @@ object ContractIDs : Command() {
                     appendln()
                 }
             }.toString())
-            else event.replyWarning(ContractIDs.NO_ACTIVE_CONTRACTS)
+            else event.replyWarning(NO_ACTIVE_CONTRACTS)
 
         }
     }

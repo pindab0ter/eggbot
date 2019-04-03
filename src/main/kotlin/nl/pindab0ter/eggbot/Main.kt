@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.ContractIDs
+import nl.pindab0ter.eggbot.commands.HighScore
 import nl.pindab0ter.eggbot.commands.Register
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
@@ -31,6 +32,7 @@ private fun connectClient() {
         .useHelpBuilder(true)
         .addCommands(
             ContractIDs,
+            HighScore,
             Register
         )
         .build()
