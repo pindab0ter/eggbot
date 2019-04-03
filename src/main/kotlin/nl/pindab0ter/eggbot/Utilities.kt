@@ -26,3 +26,5 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .appendMinutes()
     .appendSuffix("m")
     .toFormatter()
+
+fun <R> R?.ifNull(defaultValue: () -> R): R = this ?: defaultValue()
