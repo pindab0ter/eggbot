@@ -9,8 +9,8 @@ object LeaderBoard : Command() {
     private const val FORMAT = "%,d %%"
 
     init {
-        name = "leaderboard"
-        aliases = arrayOf("lb")
+        name = "lb"
+        aliases = arrayOf("leaderboard", "leader-board")
         help = "Shows the Earnings Bonus leader board"
         guildOnly = false
     }

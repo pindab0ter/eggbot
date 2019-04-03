@@ -14,7 +14,8 @@ object ContractIDs : Command() {
     private const val NO_ACTIVE_CONTRACTS = "There are currently no active contracts"
 
     init {
-        name = "contractids"
+        name = "ids"
+        aliases = arrayOf("id", "contracts", "contractids", "contract-ids")
         help = "Shows the IDs of the currently active contracts"
         guildOnly = false
     }
