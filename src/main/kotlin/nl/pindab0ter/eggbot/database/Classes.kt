@@ -1,20 +1,24 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
-import org.jetbrains.exposed.dao.*
+import org.jetbrains.exposed.dao.Entity
+import org.jetbrains.exposed.dao.EntityClass
+import org.jetbrains.exposed.dao.EntityID
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, DiscordUser>(DiscordUsers)
 
-    var discordTag by DiscordUsers.id
-    private val _inGameNames by InGameName referrersOn InGameNames.discordTag
-    val inGameNames: List<String> get() = _inGameNames.map { it.inGameName }
+    val discordId: String get() = id.value
+    var discordTag by DiscordUsers.discordTag
+    val farmers by Farmer referrersOn Farmers.discordId
 }
 
-class InGameName(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<InGameName>(InGameNames)
-    var discordTag by DiscordUser referencedOn InGameNames.discordTag
-    var inGameName by InGameNames.inGameName
+class Farmer(id: EntityID<String>) : Entity<String>(id) {
+    companion object : EntityClass<String, Farmer>(Farmers)
+
+    val inGameId: String get() = id.value
+    var discordId by DiscordUser referencedOn Farmers.discordId
+    var inGameName by Farmers.inGameName
 }
 
 class Contract(id: EntityID<String>) : Entity<String>(id) {

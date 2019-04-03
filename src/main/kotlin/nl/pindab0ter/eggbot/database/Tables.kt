@@ -9,13 +9,13 @@ import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.Table
 
 object DiscordUsers : IdTable<String>() {
-    override val id = text("discord_tag").uniqueIndex().entityId()
-    val role = text("role").nullable()
-    //    val role = enumeration("role", Roles::class)
+    override val id = text("discord_id").uniqueIndex().entityId()
+    val discordTag = text("discord_tag").uniqueIndex()
 }
 
-object InGameNames : IntIdTable() {
-    val discordTag = reference("discord_tag", DiscordUsers)
+object Farmers : IdTable<String>() {
+    override val id = text("in_game_id").uniqueIndex().entityId()
+    val discordId = reference("discord_id", DiscordUsers)
     val inGameName = text("in_game_name").uniqueIndex()
 }
 

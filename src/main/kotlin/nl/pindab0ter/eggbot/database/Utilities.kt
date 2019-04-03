@@ -15,7 +15,7 @@ fun initializeDatabase() = transaction {
     SchemaUtils.create(Contracts)
     SchemaUtils.create(Goals)
     SchemaUtils.create(DiscordUsers)
-    SchemaUtils.create(InGameNames)
+    SchemaUtils.create(Farmers)
     SchemaUtils.create(Coops)
     SchemaUtils.create(FarmerCoops)
 }
