@@ -4,12 +4,16 @@ import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.ContractIDs
 import nl.pindab0ter.eggbot.commands.Register
+import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.database.connectToDatabase
 import nl.pindab0ter.eggbot.database.initializeDatabase
+import org.jetbrains.exposed.sql.transactions.transaction
 
 fun main() {
     connectToDatabase()
     initializeDatabase()
+    clearDatabase()
     connectClient()
 }
 
@@ -35,4 +39,11 @@ private fun connectClient() {
         .addEventListener(client)
         .build()
         .awaitReady()
+}
+
+fun clearDatabase() {
+    transaction {
+        DiscordUser.all().forEach(DiscordUser::delete)
+        Farmer.all().forEach(Farmer::delete)
+    }
 }
