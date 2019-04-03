@@ -34,7 +34,7 @@ object Register : Command() {
         }
 
         transaction {
-            val currentFarmers = Farmer.all().toList().map { it.inGameId }
+            val currentFarmers = Farmer.all().toList()
             val currentDiscordUsers = DiscordUser.all().toList()
             val farmerInfo = AuxBrain.firstContact(registrant.inGameId).backup
 
@@ -66,7 +66,7 @@ object Register : Command() {
                 }
 
                 // Check if someone else hasn't already registered that in-game name
-                else if (currentFarmers.subtract(user.farmers).any { it == registrant.inGameId }) {
+                else if (currentFarmers.map { it.inGameId }.subtract(user.farmers).any { it == registrant.inGameId }) {
                     event.replyWarning(
                         "Someone else has already registered the in-game name `${registrant.inGameName}`."
                     )
@@ -100,7 +100,7 @@ object Register : Command() {
             } else {
                 event.replySuccess(
                     "You are now registered with the in-game name `${farmerInfo.name}`, " +
-                            "as well as `${currentFarmers.joinToString(" `, ` ")}`!"
+                            "as well as `${currentFarmers.joinToString(" `, ` ") { it.inGameName }}`!"
                 )
             }
         }
