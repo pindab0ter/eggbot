@@ -86,6 +86,10 @@ object Register : Command() {
             Farmer.new(registrant.inGameId) {
                 discordId = user
                 inGameName = farmerInfo.name
+                soulEggs = farmerInfo.data.soulEggs
+                prophecyEggs = farmerInfo.data.prophecyEggs
+                soulBonus = farmerInfo.data.epicResearchList.find { it.id == "soul_eggs" }!!.level
+                prophecyBonus = farmerInfo.data.epicResearchList.find { it.id == "prophecy_bonus" }!!.level
             }
 
             // Finally confirm the registration
