@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.network
 
 import com.auxbrain.ei.EggInc
 import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.requests.CancellableRequest
+import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.encodeBase64ToString
 
@@ -15,7 +15,7 @@ object AuxBrain {
     private const val FIRST_CONTACT_URL = "http://www.auxbrain.com/ei/first_contact"
     private const val DAILY_GIFT_URL = "http://www.auxbrain.com/ei/daily_gift_info"
 
-    fun getContracts(handler: (EggInc.GetContractsResponse) -> Unit): CancellableRequest = GET_CONTRACTS_URL.httpPost()
+    fun getContracts(handler: (EggInc.GetContractsResponse) -> Unit) = GET_CONTRACTS_URL.httpGet()
         .response { _, response, _ ->
             handler(EggInc.GetContractsResponse.parseFrom(response.body().decodeBase64()))
         }
