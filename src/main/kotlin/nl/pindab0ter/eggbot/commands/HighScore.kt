@@ -8,7 +8,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object HighScore : Command() {
     private const val HIGH_SCORE = "Earnings Bonus high score:"
     private const val NO_HIGH_SCORE = "There are no registered farmers"
-    private const val FORMAT = "%,d%%"
+    private const val FORMAT = "%,d %%"
 
     init {
         name = "highscore"
@@ -28,9 +28,9 @@ object HighScore : Command() {
 
             append("```")
             farmers.forEachIndexed { index, farmer ->
-                append("${index + 1}")
-                append(" ".repeat(farmersCountLength - index.toString().length))
-                append(": ")
+                append("${index + 1}:")
+                append(" ".repeat(farmersCountLength - (index + 1).toString().length))
+                append(" ")
                 append(farmer.inGameName)
                 append(" ".repeat(longestFarmerName - farmer.inGameName.length))
                 append(" ")
