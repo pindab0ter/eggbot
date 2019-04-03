@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.JDABuilder
-import nl.pindab0ter.eggbot.commands.Contracts
+import nl.pindab0ter.eggbot.commands.ContractIDs
 import nl.pindab0ter.eggbot.commands.Register
 import nl.pindab0ter.eggbot.database.connectToDatabase
 import nl.pindab0ter.eggbot.database.initializeDatabase
@@ -26,7 +26,7 @@ private fun connectClient() {
         // TODO: Customize help message
         .useHelpBuilder(true)
         .addCommands(
-            Contracts,
+            ContractIDs,
             Register
         )
         .build()
