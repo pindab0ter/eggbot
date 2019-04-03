@@ -5,14 +5,13 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object HighScore : Command() {
-    private const val HIGH_SCORE = "Earnings Bonus high score:"
-    private const val NO_HIGH_SCORE = "There are no registered farmers"
+object LeaderBoard : Command() {
     private const val FORMAT = "%,d %%"
 
     init {
-        name = "highscore"
-        help = "Shows the Earnings Bonus high score list"
+        name = "leaderboard"
+        aliases = arrayOf("lb")
+        help = "Shows the Earnings Bonus leader board"
         guildOnly = false
     }
 
@@ -21,7 +20,7 @@ object HighScore : Command() {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
         }
 
-        if (farmers.isNotEmpty()) event.reply(StringBuilder(HighScore.HIGH_SCORE).appendln().apply {
+        if (farmers.isNotEmpty()) event.reply(StringBuilder("Earnings Bonus leader board:").appendln().apply {
             val farmersCountLength = farmers.count().toString().length
             val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName.length
             val longestEarningsBonus = format(farmers.maxBy { format(it.earningsBonus).length }!!.earningsBonus).length
@@ -41,7 +40,7 @@ object HighScore : Command() {
             append("```")
         }.toString())
         else {
-            event.replyWarning(NO_HIGH_SCORE)
+            event.replyWarning("There are no registered farmers")
         }
     }
 

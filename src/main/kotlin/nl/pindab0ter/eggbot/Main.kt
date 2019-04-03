@@ -3,7 +3,7 @@ package nl.pindab0ter.eggbot
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.ContractIDs
-import nl.pindab0ter.eggbot.commands.HighScore
+import nl.pindab0ter.eggbot.commands.LeaderBoard
 import nl.pindab0ter.eggbot.commands.Register
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
@@ -28,11 +28,11 @@ private fun connectClient() {
     val client = CommandClientBuilder()
         .setOwnerId(ownerId)
         .setPrefix("!")
-        // TODO: Customize help message
+        // TODO: Customize help message; remove "For additional help[...]"; add aliases
         .useHelpBuilder(true)
         .addCommands(
             ContractIDs,
-            HighScore,
+            LeaderBoard,
             Register
         )
         .build()
