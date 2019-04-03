@@ -14,7 +14,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun main() {
     connectToDatabase()
     initializeDatabase()
-    clearDatabase()
+//    clearDatabase()
     connectClient()
 }
 
