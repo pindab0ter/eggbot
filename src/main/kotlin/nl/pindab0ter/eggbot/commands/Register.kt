@@ -34,7 +34,7 @@ object Register : Command() {
                     // Check if this Discord user hasn't already registered that in-game name
                     user.inGameNames.any { it == name } -> {
                         event.replyWarning(
-                            "You are already registered with the in-game names: `${user.inGameNames.joinToString("`, `")}`."
+                            "You are already registered with the in-game names:\n`${user.inGameNames.joinToString("`, `")}`."
                         )
                         return@transaction
                     }
@@ -62,7 +62,7 @@ object Register : Command() {
             }
 
             // Finally confirm the registration
-            if (inGameNames.isEmpty()) {
+            if (user.inGameNames.isEmpty()) {
                 event.replySuccess(
                     "You have been registered with the in-game name `$name`, welcome!"
                 )
