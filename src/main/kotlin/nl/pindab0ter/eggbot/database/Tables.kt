@@ -31,7 +31,7 @@ object FarmerCoops : Table() {
 object Coops : IntIdTable() {
     val name = text("name")
     val contract = reference("contract", Contracts.id, CASCADE)
-    val maxSize = integer("max_size")
+    val hasStarted = bool("has-started")
 }
 
 object Contracts : IdTable<String>() {

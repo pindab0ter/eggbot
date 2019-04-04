@@ -12,6 +12,7 @@ object LeaderBoard : Command() {
         name = "lb"
         aliases = arrayOf("leaderboard", "leader-board")
         help = "Shows the Earnings Bonus leader board"
+        // TODO: Make guild only
         guildOnly = false
     }
 

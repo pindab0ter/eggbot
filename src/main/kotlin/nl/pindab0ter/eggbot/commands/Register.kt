@@ -13,6 +13,7 @@ object Register : Command() {
         name = "register"
         arguments = "<in-game name> <in-game id>"
         help = "Register on this server with your in-game name and in-game ID."
+        // TODO: Make guild only
         guildOnly = false
     }
 
