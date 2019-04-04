@@ -30,46 +30,7 @@ object FarmerCoops : Table() {
 
 object Coops : IntIdTable() {
     val name = text("name")
-    val contract = reference("contract", Contracts.id, CASCADE)
     val hasStarted = bool("has-started")
 }
-
-object Contracts : IdTable<String>() {
-    override val id: Column<EntityID<String>> = text("identifier").primaryKey().entityId()
-    val title = text("name")
-    val description = text("description")
-    val egg = enumeration("egg", EggInc.Egg::class)
-    val coopAllowed = bool("coop_allowed")
-    val coopSize = integer("coop_size")
-    val validUntil = double("valid_until")
-    val duration = double("lengthSeconds")
-}
-
-object Goals : IntIdTable() {
-    val contract = reference("contract", Contracts.id, CASCADE)
-    val tier = integer("tier") // 1-3 (or 4?) Must be unique per contract
-    val goal = integer("goal")
-    val reward = text("reward")
-}
-
-enum class Roles(oom: Int) {
-    Farmer(2),
-    Farmer2(3),
-    Farmer3(4),
-    KiloFarmer(5),
-    KiloFarmer2(6),
-    KiloFarmer3(7),
-    MegaFarmer(8),
-    MegaFarmer2(9),
-    MegaFarmer3(10),
-    GigaFarmer(11),
-    GigaFarmer2(12),
-    GigaFarmer3(13),
-    TeraFarmer(14),
-    TeraFarmer2(15),
-    TeraFarmer3(16),
-    PetaFarmer(17),
-    PetaFarmer2(18),
-    PetaFarmer3(19)
 }
 

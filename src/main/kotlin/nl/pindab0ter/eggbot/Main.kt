@@ -35,8 +35,6 @@ object EggBot {
     }
 
     fun initializeDatabase() = transaction {
-        SchemaUtils.create(Contracts)
-        SchemaUtils.create(Goals)
         SchemaUtils.create(DiscordUsers)
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
