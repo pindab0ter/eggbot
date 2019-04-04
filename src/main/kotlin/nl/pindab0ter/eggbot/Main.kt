@@ -18,7 +18,6 @@ import java.util.*
 fun main() = with(EggBot) {
     connectToDatabase()
     initializeDatabase()
-//        clearDatabase()
     connectClient()
 }
 
