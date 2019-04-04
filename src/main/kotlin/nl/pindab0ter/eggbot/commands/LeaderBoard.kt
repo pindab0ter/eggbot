@@ -6,8 +6,6 @@ import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
-    private const val FORMAT = "%,d %%"
-
     init {
         name = "lb"
         aliases = arrayOf("leaderboard", "leader-board")
@@ -35,7 +33,7 @@ object LeaderBoard : Command() {
                 append(" ".repeat(longestFarmerName - farmer.inGameName.length))
                 append(" ")
                 append(" ".repeat(longestEarningsBonus - format(farmer.earningsBonus).length))
-                append(FORMAT.format(farmer.earningsBonus))
+                append(format(farmer.earningsBonus))
                 appendln()
             }
             append("```")

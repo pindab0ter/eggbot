@@ -27,6 +27,8 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .appendSuffix("m")
     .toFormatter()
 
+fun format(earningsBonus: Long): String = "%,d %%".format(earningsBonus)
+
 inline fun <T> T?.elseLet(block: () -> T): T {
     return this ?: block()
 }
