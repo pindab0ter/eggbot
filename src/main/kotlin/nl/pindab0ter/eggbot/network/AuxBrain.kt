@@ -20,6 +20,10 @@ object AuxBrain {
             handler(EggInc.GetContractsResponse.parseFrom(response.body().decodeBase64()))
         }
 
+    fun getContracts(): EggInc.GetContractsResponse = EggInc.GetContractsResponse.parseFrom(
+        GET_CONTRACTS_URL.httpGet().response().second.body().decodeBase64()
+    )
+
     private fun firstContactPostRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(

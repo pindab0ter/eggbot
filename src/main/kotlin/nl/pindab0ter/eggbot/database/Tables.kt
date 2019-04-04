@@ -1,10 +1,7 @@
 package nl.pindab0ter.eggbot.database
 
-import com.auxbrain.ei.EggInc
-import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
-import org.jetbrains.exposed.sql.Column
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.Table
 
@@ -23,14 +20,21 @@ object Farmers : IdTable<String>() {
     val prophecyBonus = integer("prophecy_bonus")
 }
 
-object FarmerCoops : Table() {
-    val farmer = reference("farmer", DiscordUsers.id, CASCADE).primaryKey(0)
-    val coop = reference("coop", Coops).primaryKey(1)
-}
-
 object Coops : IntIdTable() {
     val name = text("name")
-    val hasStarted = bool("has-started")
-}
+    val contractId = text("contract_id")
+    val hasStarted = bool("has-started").default(false).nullable()
+
+    init {
+        this.index(true, name, contractId)
+    }
 }
 
+object CoopFarmers : Table() {
+    val farmer = reference("farmer", Farmers.id, CASCADE)
+    val coop = reference("coop", Coops.id)
+
+    init {
+        this.index(true, CoopFarmers.farmer, CoopFarmers.coop)
+    }
+}

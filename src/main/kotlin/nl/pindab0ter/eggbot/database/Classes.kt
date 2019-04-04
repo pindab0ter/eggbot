@@ -1,9 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
-import com.auxbrain.ei.EggInc
-import org.jetbrains.exposed.dao.Entity
-import org.jetbrains.exposed.dao.EntityClass
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal
 import kotlin.math.pow
 
@@ -25,6 +22,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var prophecyEggs by Farmers.prophecyEggs
     var soulBonus by Farmers.soulBonus
     var prophecyBonus by Farmers.prophecyBonus
+    var coops by Coop via CoopFarmers
 
     val earningsBonus: Long
         get() {
@@ -33,4 +31,13 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             val bonusPerSoulEgg = prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
             return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toLong()
         }
+}
+
+class Coop(id: EntityID<Int>): IntEntity(id) {
+    companion object : IntEntityClass<Coop>(Coops)
+
+    var name by Coops.name
+    var contractId by Coops.contractId
+    var hasStarted by Coops.hasStarted
+    var farmers by Farmer via CoopFarmers
 }

@@ -5,6 +5,7 @@ import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.ContractIDs
 import nl.pindab0ter.eggbot.commands.LeaderBoard
 import nl.pindab0ter.eggbot.commands.Register
+import nl.pindab0ter.eggbot.commands.RollCall
 import nl.pindab0ter.eggbot.database.*
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -38,7 +39,7 @@ object EggBot {
         SchemaUtils.create(DiscordUsers)
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
-        SchemaUtils.create(FarmerCoops)
+        SchemaUtils.create(CoopFarmers)
     }
 
     fun connectToDatabase() {
@@ -58,7 +59,8 @@ object EggBot {
             .addCommands(
                 ContractIDs,
                 LeaderBoard,
-                Register
+                Register,
+                RollCall
             )
             // TODO: Specify allowed server and roles
             .build()
