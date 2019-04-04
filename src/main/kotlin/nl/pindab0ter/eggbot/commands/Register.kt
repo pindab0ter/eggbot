@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.ifNull
 import nl.pindab0ter.eggbot.network.AuxBrain
@@ -36,7 +37,6 @@ object Register : Command() {
 
         transaction {
             val currentFarmers = Farmer.all().toList()
-            val currentDiscordUsers = DiscordUser.all().toList()
             val farmerInfo = AuxBrain.firstContact(registrant.inGameId).backup
 
             // Check if the in-game ID is valid
@@ -56,7 +56,7 @@ object Register : Command() {
             }
 
             // Check if the Discord user is already known
-            val user: DiscordUser = currentDiscordUsers.find { it.discordId == registrant.discordId }?.let { user ->
+            val user: DiscordUser = DiscordUser.find { DiscordUsers.id eq registrant.discordId }.firstOrNull()?.let { user ->
 
                 // Check if this Discord user hasn't already registered that in-game name
                 if (user.farmers.any { it.inGameId == registrant.inGameId }) {
