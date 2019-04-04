@@ -5,7 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.ifNull
+import nl.pindab0ter.eggbot.elseLet
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -76,7 +76,7 @@ object Register : Command() {
 
                 // Otherwise use the known Discord user
                 else user
-            }.ifNull {
+            }.elseLet {
                 // Otherwise, register the new Discord user
                 DiscordUser.new(registrant.discordId) {
                     discordTag = registrant.discordTag
