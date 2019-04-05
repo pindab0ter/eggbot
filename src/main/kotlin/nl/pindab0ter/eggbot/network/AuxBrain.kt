@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.encodeBase64ToString
+import nl.pindab0ter.eggbot.decodeBase64
 
 
 object AuxBrain {

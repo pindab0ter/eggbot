@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.format
