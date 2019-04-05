@@ -6,9 +6,13 @@ import nl.pindab0ter.eggbot.commands.ContractIDs
 import nl.pindab0ter.eggbot.commands.LeaderBoard
 import nl.pindab0ter.eggbot.commands.Register
 import nl.pindab0ter.eggbot.commands.RollCall
-import nl.pindab0ter.eggbot.database.*
+import nl.pindab0ter.eggbot.database.CoopFarmers
+import nl.pindab0ter.eggbot.database.Coops
+import nl.pindab0ter.eggbot.database.DiscordUsers
+import nl.pindab0ter.eggbot.database.Farmers
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
+import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.io.FileInputStream
@@ -17,6 +21,7 @@ import java.util.*
 
 fun main() = with(EggBot) {
     connectToDatabase()
+    clearDatabase()
     initializeDatabase()
     connectClient()
 }
@@ -72,8 +77,8 @@ object EggBot {
 
     fun clearDatabase() {
         transaction {
-            DiscordUser.all().forEach(DiscordUser::delete)
-            Farmer.all().forEach(Farmer::delete)
+            CoopFarmers.deleteAll()
+            Coops.deleteAll()
         }
     }
 }
