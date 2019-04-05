@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.format
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
@@ -45,6 +46,4 @@ object LeaderBoard : Command() {
             event.replyWarning("There are no registered farmers")
         }
     }
-
-    private fun format(earningsBonus: Long) = "%,d%%".format(earningsBonus)
 }

@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.database
 
 import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal
+import java.math.BigInteger
 import kotlin.math.pow
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
@@ -24,12 +25,12 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var prophecyBonus by Farmers.prophecyBonus
     var coops by Coop via CoopFarmers
 
-    val earningsBonus: Long
+    val earningsBonus: BigInteger
         get() {
             val soulEggBonus = 10 + soulBonus
             val prophecyEggBonus = (1.05 + 0.01 * prophecyBonus)
             val bonusPerSoulEgg = prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
-            return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toLong()
+            return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
         }
 }
 

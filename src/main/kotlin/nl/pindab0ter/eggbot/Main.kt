@@ -77,6 +77,7 @@ object EggBot {
 
     fun clearDatabase() {
         transaction {
+//            Farmers.deleteAll()
             CoopFarmers.deleteAll()
             Coops.deleteAll()
         }

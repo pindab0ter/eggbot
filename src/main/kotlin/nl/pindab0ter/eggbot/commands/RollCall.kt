@@ -7,6 +7,7 @@ import nl.pindab0ter.eggbot.commands.coops.PlaceholderDistribution
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.format
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.sum
 import nl.pindab0ter.eggbot.sumBy
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -55,18 +56,19 @@ object RollCall : Command() {
 
             val coops = PlaceholderDistribution.createCoops(contractInfo)
 
+            // TODO: Fix spacing
             //@formatter:off
             event.reply(StringBuilder("Co-ops generated for `${contractInfo.identifier}`:").appendln().apply {
                 append("```")
                 coops.forEach { coop ->
                     append("${coop.name}: ")
-                    append(format(coop
-                        .farmers.map { it.earningsBonus }.sum()
+                    append(format(coop.farmers
+                        .map { it.earningsBonus }.sum()
                     ))
                     appendln()
                 }
+                append("Available EB: ")
                 append(format(coops
-                    // TODO: Deal with large numbers
                     .flatMap { coop -> coop.farmers }
                     .sumBy { it.earningsBonus }
                 ))

@@ -8,6 +8,8 @@ import org.joda.time.Period
 import org.joda.time.PeriodType
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
+import java.math.BigInteger
+import java.math.BigInteger.ZERO
 import java.util.*
 import kotlin.math.roundToLong
 
@@ -32,7 +34,7 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .appendSuffix("m")
     .toFormatter()
 
-fun format(earningsBonus: Long): String = "%,d %%".format(earningsBonus)
+fun format(earningsBonus: BigInteger): String = "%,d %%".format(earningsBonus)
 
 
 // Networking
@@ -52,10 +54,19 @@ inline fun <T> T?.elseLet(block: () -> T): T {
     return this ?: block()
 }
 
-inline fun <T> Iterable<T>.sumBy(selector: (T) -> Long): Long {
-    var sum: Long = 0
+inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigInteger): BigInteger {
+    var sum: BigInteger = ZERO
     for (element in this) {
         sum += selector(element)
+    }
+    return sum
+}
+
+@kotlin.jvm.JvmName("sumOfInt")
+fun Iterable<BigInteger>.sum(): BigInteger {
+    var sum: BigInteger = ZERO
+    for (element in this) {
+        sum += element
     }
     return sum
 }
