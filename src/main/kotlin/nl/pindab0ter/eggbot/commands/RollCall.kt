@@ -4,8 +4,12 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.commands.coops.PlaceholderDistribution
+import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.format
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.sumBy
+import org.jetbrains.exposed.sql.select
+import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.contracts.ExperimentalContracts
 
 object RollCall : Command() {
@@ -41,23 +45,34 @@ object RollCall : Command() {
             return
         }
 
-        // TODO: Check if coops already exist for this contract
+        transaction {
+            val coopsExist = Coops.select { Coops.contractId eq contractInfo.identifier }.any()
 
-        val coops = PlaceholderDistribution.createCoops(contractInfo)
+            if (coopsExist) {
+                event.replyWarning("Co-ops are already generated for contract `${contractInfo.identifier}`")
+                return@transaction
+            }
 
-        // TODO: Replace with StringBuilder
-        val coopsString = coops.joinToString("\n") { coop ->
-            "${coop.name}         ${format(coop.farmers.map { it.earningsBonus }.sum())}"
+            val coops = PlaceholderDistribution.createCoops(contractInfo)
+
+            //@formatter:off
+            event.reply(StringBuilder("Co-ops generated for `${contractInfo.identifier}`:").appendln().apply {
+                append("```")
+                coops.forEach { coop ->
+                    append("${coop.name}: ")
+                    append(format(coop
+                        .farmers.map { it.earningsBonus }.sum()
+                    ))
+                    appendln()
+                }
+                append(format(coops
+                    // TODO: Deal with large numbers
+                    .flatMap { coop -> coop.farmers }
+                    .sumBy { it.earningsBonus }
+                ))
+                append("```")
+            }.toString())
+            //@formatter:on
         }
-
-        val totalEbString = format(coops.map { coop ->
-            coop.farmers.map { farmer ->
-                farmer.earningsBonus
-            }.sum()
-        }.sum())
-
-        event.reply(
-            "Coops: ```$coopsString\nTotal available EB: $totalEbString```"
-        )
     }
 }

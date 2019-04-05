@@ -5,12 +5,12 @@ import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.math.roundToInt
 
 object PlaceholderDistribution : DistributionAlgorithm {
     override fun createCoops(contract: EggInc.Contract): List<Coop> = transaction {
         val farmers = Farmer.all()
-//        val coops = List(((farmers.count() * 1.2) / contract.maxCoopSize).roundToInt()) { index ->
-        val coops = List(3) { index ->
+        val coops = List(((farmers.count() * 1.2) / contract.maxCoopSize).roundToInt()) { index ->
             Coop.new {
                 this.contractId = contract.identifier
                 this.name = "${'a'.plus(index)}cluckerz${contract.maxCoopSize}"

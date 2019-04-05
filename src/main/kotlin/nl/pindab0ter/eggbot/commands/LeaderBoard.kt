@@ -19,6 +19,9 @@ object LeaderBoard : Command() {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
         }
 
+        // TODO: Take 2048 character limit into account
+        // Make a list of strings, each for a leader board entry, then count how long they are and fit accordingly
+
         if (farmers.isNotEmpty()) event.reply(StringBuilder("Earnings Bonus leader board:").appendln().apply {
             val farmersCountLength = farmers.count().toString().length
             val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName.length
