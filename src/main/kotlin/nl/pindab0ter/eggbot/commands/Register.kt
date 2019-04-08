@@ -63,7 +63,7 @@ object Register : Command() {
             }
 
             // Check if this Discord user hasn't already registered that in-game name
-            if (discordUser.farmers.any { it.inGameId == registrant.inGameId }) {
+            if (discordUser.farmers.any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName }) {
                 event.replyWarning(
                     "You are already registered with the in-game names: `${discordUser.farmers.joinToString("`, `") { it.inGameName }}`."
                 )
@@ -71,7 +71,7 @@ object Register : Command() {
             }
 
             // Check if someone else hasn't already registered that in-game name
-            if (farmers.any { it.inGameId == registrant.inGameId }) {
+            if (farmers.any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName }) {
                 event.replyWarning(
                     "Someone else has already registered the in-game name `${registrant.inGameName}`."
                 )
@@ -81,7 +81,7 @@ object Register : Command() {
             // Add the new in-game name
             Farmer.new(registrant.inGameId) {
                 discordId = discordUser
-                inGameName = farmerInfo.name
+                inGameName = farmerInfo.name.replace('`', '\'')
                 soulEggs = farmerInfo.data.soulEggs
                 prophecyEggs = farmerInfo.data.prophecyEggs
                 soulBonus = farmerInfo.data.epicResearchList.find { it.id == "soul_eggs" }!!.level
@@ -95,8 +95,9 @@ object Register : Command() {
                 )
             } else {
                 event.replySuccess(
-                    "You are now registered with the in-game name `${farmerInfo.name}`, " +
-                            "as well as `${farmers.joinToString(" `, ` ") { it.inGameName }}`!"
+                    "You are now registered with the in-game name `${farmerInfo.name}`, as well as `${discordUser.farmers
+                        .filterNot { it.inGameId == registrant.inGameId }
+                        .joinToString(" `, ` ") { it.inGameName }}`!"
                 )
             }
         }
