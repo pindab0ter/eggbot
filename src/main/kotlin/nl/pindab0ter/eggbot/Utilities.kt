@@ -49,11 +49,6 @@ val CommandEvent.arguments: List<String>
 
 
 // Generic functions
-
-inline fun <T> T?.elseLet(block: () -> T): T {
-    return this ?: block()
-}
-
 inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigInteger): BigInteger {
     var sum: BigInteger = ZERO
     for (element in this) {
@@ -62,7 +57,6 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigInteger): BigInteger {
     return sum
 }
 
-@kotlin.jvm.JvmName("sumOfInt")
 fun Iterable<BigInteger>.sum(): BigInteger {
     var sum: BigInteger = ZERO
     for (element in this) {

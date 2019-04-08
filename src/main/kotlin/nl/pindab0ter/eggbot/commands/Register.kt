@@ -6,7 +6,6 @@ import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.elseLet
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -37,7 +36,7 @@ object Register : Command() {
         }
 
         transaction {
-            val currentFarmers = Farmer.all().toList()
+            val farmers = Farmer.all().toList()
             val farmerInfo = AuxBrain.firstContact(registrant.inGameId).backup
 
             // Check if the in-game ID is valid
@@ -56,37 +55,32 @@ object Register : Command() {
                 return@transaction
             }
 
-            // Check if the Discord user is already known
-            val user: DiscordUser = DiscordUser.find { DiscordUsers.id eq registrant.discordId }.firstOrNull()?.let { user ->
+            // Check if the Discord user is already known, otherwise create a new user
+            val discordUser: DiscordUser = DiscordUser.find {
+                DiscordUsers.id eq registrant.discordId
+            }.firstOrNull() ?: DiscordUser.new(registrant.discordId) {
+                discordTag = registrant.discordTag
+            }
 
-                // Check if this Discord user hasn't already registered that in-game name
-                if (user.farmers.any { it.inGameId == registrant.inGameId }) {
-                    event.replyWarning(
-                        "You are already registered with the in-game names: `${user.farmers.joinToString("`, `") { it.inGameName }}`."
-                    )
-                    return@transaction
-                }
+            // Check if this Discord user hasn't already registered that in-game name
+            if (discordUser.farmers.any { it.inGameId == registrant.inGameId }) {
+                event.replyWarning(
+                    "You are already registered with the in-game names: `${discordUser.farmers.joinToString("`, `") { it.inGameName }}`."
+                )
+                return@transaction
+            }
 
-                // Check if someone else hasn't already registered that in-game name
-                else if (currentFarmers.map { it.inGameId }.subtract(user.farmers).any { it == registrant.inGameId }) {
-                    event.replyWarning(
-                        "Someone else has already registered the in-game name `${registrant.inGameName}`."
-                    )
-                    return@transaction
-                }
-
-                // Otherwise use the known Discord user
-                else user
-            }.elseLet {
-                // Otherwise, register the new Discord user
-                DiscordUser.new(registrant.discordId) {
-                    discordTag = registrant.discordTag
-                }
+            // Check if someone else hasn't already registered that in-game name
+            if (farmers.any { it.inGameId == registrant.inGameId }) {
+                event.replyWarning(
+                    "Someone else has already registered the in-game name `${registrant.inGameName}`."
+                )
+                return@transaction
             }
 
             // Add the new in-game name
             Farmer.new(registrant.inGameId) {
-                discordId = user
+                discordId = discordUser
                 inGameName = farmerInfo.name
                 soulEggs = farmerInfo.data.soulEggs
                 prophecyEggs = farmerInfo.data.prophecyEggs
@@ -95,14 +89,14 @@ object Register : Command() {
             }
 
             // Finally confirm the registration
-            if (user.farmers.filterNot { it.inGameId == registrant.inGameId }.count() == 0) {
+            if (discordUser.farmers.filterNot { it.inGameId == registrant.inGameId }.none()) {
                 event.replySuccess(
                     "You have been registered with the in-game name `${farmerInfo.name}`, welcome!"
                 )
             } else {
                 event.replySuccess(
                     "You are now registered with the in-game name `${farmerInfo.name}`, " +
-                            "as well as `${currentFarmers.joinToString(" `, ` ") { it.inGameName }}`!"
+                            "as well as `${farmers.joinToString(" `, ` ") { it.inGameName }}`!"
                 )
             }
         }
