@@ -45,7 +45,7 @@ fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 // Ease of access
 
 val CommandEvent.arguments: List<String>
-    get() = if (args.isBlank()) emptyList() else args.split(' ')
+    get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s+"""))
 
 
 // Generic functions
