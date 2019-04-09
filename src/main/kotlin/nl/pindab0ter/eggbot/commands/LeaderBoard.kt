@@ -23,6 +23,11 @@ object LeaderBoard : Command() {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
         }
 
+        if (farmers.isEmpty()) {
+            event.replyWarning("There are no registered farmers")
+            return
+        }
+
         // Make a list of strings, each for a leader board entry, then count how long they are and fit accordingly
         splitMessage(StringBuilder().appendln().apply {
             val farmersCountLength = farmers.count().toString().length
@@ -44,12 +49,6 @@ object LeaderBoard : Command() {
             }
         }.toString()).forEachIndexed { i, message ->
             event.reply("${if (i == 0) "Earnings Bonus leader board:" else "Leader board continued…"}\n$message")
-        }
-
-
-        if (farmers.isNotEmpty()) event.reply("")
-        else {
-            event.replyWarning("There are no registered farmers")
         }
     }
 }
