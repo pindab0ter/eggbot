@@ -49,6 +49,7 @@ val CommandEvent.arguments: List<String>
 
 
 // Generic functions
+
 inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigInteger): BigInteger {
     var sum: BigInteger = ZERO
     for (element in this) {
