@@ -23,6 +23,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var prophecyEggs by Farmers.prophecyEggs
     var soulBonus by Farmers.soulBonus
     var prophecyBonus by Farmers.prophecyBonus
+    var lastUpdated by Farmers.lastUpdated
     var coops by Coop via CoopFarmers
 
     val earningsBonus: BigInteger

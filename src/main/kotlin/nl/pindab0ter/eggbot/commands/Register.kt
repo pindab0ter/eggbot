@@ -10,6 +10,7 @@ import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 
 object Register : Command() {
     init {
@@ -87,6 +88,7 @@ object Register : Command() {
                 prophecyEggs = backup.data.prophecyEggs
                 soulBonus = backup.data.soulBonus
                 prophecyBonus = backup.data.prophecyBonus
+                lastUpdated = DateTime.now()
             }
 
             // Finally confirm the registration

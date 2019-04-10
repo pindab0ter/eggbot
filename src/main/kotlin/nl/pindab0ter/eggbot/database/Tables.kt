@@ -18,6 +18,7 @@ object Farmers : IdTable<String>() {
     val prophecyEggs = long("prophecy_eggs")
     val soulBonus = integer("soul_bonus")
     val prophecyBonus = integer("prophecy_bonus")
+    val lastUpdated = datetime("last_updated")
 }
 
 object Coops : IntIdTable() {
