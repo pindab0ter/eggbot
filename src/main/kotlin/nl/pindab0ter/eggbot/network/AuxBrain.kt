@@ -7,7 +7,12 @@ import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.encodeBase64ToString
+import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.decodeBase64
+import nl.pindab0ter.eggbot.prophecyBonus
+import nl.pindab0ter.eggbot.soulBonus
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 
 
 object AuxBrain {
@@ -44,6 +49,17 @@ object AuxBrain {
         .takeIf { it.hasBackup() }
         ?.backup
         .takeIf { it?.userid == inGameId }
+        ?.also { backup ->
+            transaction {
+                Farmer.findById(inGameId)?.apply {
+                    soulEggs = backup.data.soulEggs
+                    prophecyEggs = backup.data.prophecyEggs
+                    soulBonus = backup.data.soulBonus
+                    prophecyBonus = backup.data.prophecyBonus
+                    lastUpdated = DateTime.now()
+                }
+            }
+        }
 
     fun getFarmerBackup(inGameId: String, handler: (EggInc.Backup?) -> Unit): CancellableRequest =
         firstContactPostRequest(inGameId).response { _, response, _ ->
