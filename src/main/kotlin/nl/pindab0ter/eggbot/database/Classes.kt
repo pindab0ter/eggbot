@@ -1,6 +1,11 @@
 package nl.pindab0ter.eggbot.database
 
+import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.prophecyBonus
+import nl.pindab0ter.eggbot.soulBonus
 import org.jetbrains.exposed.dao.*
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.math.pow
@@ -33,9 +38,20 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             val bonusPerSoulEgg = prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
             return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
         }
+
+    fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
+        if (backup == null) return@let
+        transaction {
+            soulEggs = backup.data.soulEggs
+            prophecyEggs = backup.data.prophecyEggs
+            soulBonus = backup.data.soulBonus
+            prophecyBonus = backup.data.prophecyBonus
+            lastUpdated = DateTime.now()
+        }
+    }
 }
 
-class Coop(id: EntityID<Int>): IntEntity(id) {
+class Coop(id: EntityID<Int>) : IntEntity(id) {
     companion object : IntEntityClass<Coop>(Coops)
 
     var name by Coops.name
