@@ -1,18 +1,17 @@
 package nl.pindab0ter.eggbot.network
 
 import com.auxbrain.ei.EggInc
+import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
-import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.github.kittinunf.fuel.core.ResultHandler
 import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
+import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
-import nl.pindab0ter.eggbot.database.Farmer
+import com.github.kittinunf.result.Result
 import nl.pindab0ter.eggbot.decodeBase64
-import nl.pindab0ter.eggbot.prophecyBonus
-import nl.pindab0ter.eggbot.soulBonus
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
 
 
 object AuxBrain {
@@ -44,28 +43,29 @@ object AuxBrain {
                 .encodeBase64ToString()}"
         )
 
-    private fun Response.parseFirstContactResponse(inGameId: String): EggInc.Backup? = EggInc.FirstContactResponse
-        .parseFrom(body().decodeBase64())
-        .takeIf { it.hasBackup() }
-        ?.backup
-        .takeIf { it?.userid == inGameId }
-        ?.also { backup ->
-            transaction {
-                Farmer.findById(inGameId)?.apply {
-                    soulEggs = backup.data.soulEggs
-                    prophecyEggs = backup.data.prophecyEggs
-                    soulBonus = backup.data.soulBonus
-                    prophecyBonus = backup.data.prophecyBonus
-                    lastUpdated = DateTime.now()
-                }
-            }
-        }
+    /**
+     * Retrieve the [EggInc.Backup] asynchronously, using the [handler]
+     *
+     * @param handler [ResultHandler<EggInc.Backup>] the handler to report the [EggInc.Backup]
+     * @return [CancellableRequest] the request in flight
+     */
+    fun getFarmerBackup(inGameId: String, handler: ResultHandler<EggInc.Backup>): CancellableRequest =
+        firstContactPostRequest(inGameId).responseObject(BackupDeserializer, handler)
 
-    fun getFarmerBackup(inGameId: String, handler: (EggInc.Backup?) -> Unit): CancellableRequest =
-        firstContactPostRequest(inGameId).response { _, response, _ ->
-            handler(response.parseFirstContactResponse(inGameId))
-        }
+    /**
+     * Retrieve the [EggInc.Backup] synchronously
+     *
+     * @note this is a synchronous execution and can not be cancelled
+     *
+     * @return [EggInc.Backup] the backup
+     */
+    fun getFarmerBackup(inGameId: String): Result<EggInc.Backup, FuelError> =
+        firstContactPostRequest(inGameId).responseObject(BackupDeserializer).third
 
-    fun getFarmerBackup(inGameId: String): EggInc.Backup? =
-        firstContactPostRequest(inGameId).response().second.parseFirstContactResponse(inGameId)
+    object BackupDeserializer : ResponseDeserializable<EggInc.Backup> {
+        override fun deserialize(content: String): EggInc.Backup? {
+            return EggInc.FirstContactResponse.parseFrom(content.decodeBase64()).backup
+        }
+    }
 }
+

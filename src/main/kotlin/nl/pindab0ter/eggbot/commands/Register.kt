@@ -39,7 +39,7 @@ object Register : Command() {
 
         transaction {
             val farmers = Farmer.all().toList()
-            val backup = AuxBrain.getFarmerBackup(registrant.inGameId)
+            val (backup, _) = AuxBrain.getFarmerBackup(registrant.inGameId)
 
             // Check if the in-game ID is valid
             if (backup == null) {
