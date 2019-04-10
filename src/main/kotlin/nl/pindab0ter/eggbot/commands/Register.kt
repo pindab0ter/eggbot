@@ -7,6 +7,8 @@ import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.prophecyBonus
+import nl.pindab0ter.eggbot.soulBonus
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Register : Command() {
@@ -36,10 +38,10 @@ object Register : Command() {
 
         transaction {
             val farmers = Farmer.all().toList()
-            val farmerInfo = AuxBrain.firstContact(registrant.inGameId).backup
+            val backup = AuxBrain.getFarmerBackup(registrant.inGameId)
 
             // Check if the in-game ID is valid
-            if (farmerInfo.userid.isBlank()) {
+            if (backup == null) {
                 event.replyError(
                     "No information was found for the given Egg, Inc. ID. Did you make a typo?"
                 )
@@ -47,9 +49,9 @@ object Register : Command() {
             }
 
             // Check if the in-game name matches with the in-game name belonging to the in-game ID's account
-            if (registrant.inGameId != farmerInfo.userid || registrant.inGameName.toLowerCase() != farmerInfo.name.toLowerCase()) {
+            if (registrant.inGameId != backup.userid || registrant.inGameName.toLowerCase() != backup.name.toLowerCase()) {
                 event.replyError(
-                    "The given username (`${registrant.inGameName}`) does not match the username for that Egg, Inc. ID (`${farmerInfo.name}`)"
+                    "The given username (`${registrant.inGameName}`) does not match the username for that Egg, Inc. ID (`${backup.name}`)"
                 )
                 return@transaction
             }
@@ -80,21 +82,21 @@ object Register : Command() {
             // Add the new in-game name
             Farmer.new(registrant.inGameId) {
                 discordId = discordUser
-                inGameName = farmerInfo.name.replace('`', '\'')
-                soulEggs = farmerInfo.data.soulEggs
-                prophecyEggs = farmerInfo.data.prophecyEggs
-                soulBonus = farmerInfo.data.epicResearchList.find { it.id == "soul_eggs" }!!.level
-                prophecyBonus = farmerInfo.data.epicResearchList.find { it.id == "prophecy_bonus" }!!.level
+                inGameName = backup.name.replace('`', '\'')
+                soulEggs = backup.data.soulEggs
+                prophecyEggs = backup.data.prophecyEggs
+                soulBonus = backup.data.soulBonus
+                prophecyBonus = backup.data.prophecyBonus
             }
 
             // Finally confirm the registration
             if (discordUser.farmers.filterNot { it.inGameId == registrant.inGameId }.none()) {
                 event.replySuccess(
-                    "You have been registered with the in-game name `${farmerInfo.name}`, welcome!"
+                    "You have been registered with the in-game name `${backup.name}`, welcome!"
                 )
             } else {
                 event.replySuccess(
-                    "You are now registered with the in-game name `${farmerInfo.name}`, as well as `${discordUser.farmers
+                    "You are now registered with the in-game name `${backup.name}`, as well as `${discordUser.farmers
                         .filterNot { it.inGameId == registrant.inGameId }
                         .joinToString(" `, ` ") { it.inGameName }}`!"
                 )

@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.network
 
 import com.auxbrain.ei.EggInc
 import com.github.kittinunf.fuel.core.Request
+import com.github.kittinunf.fuel.core.Response
+import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.encodeBase64ToString
@@ -28,19 +30,26 @@ object AuxBrain {
     private fun firstContactPostRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(
-            "data=" + EggInc.FirstContactRequest.newBuilder()
+            "data=${EggInc.FirstContactRequest
+                .newBuilder()
                 .setIdentifier(userId)
-                .setPlatform(1)
                 .build()
-                .toByteString().toStringUtf8().encodeBase64ToString()
+                .toByteString()
+                .toStringUtf8()
+                .encodeBase64ToString()}"
         )
 
-    fun firstContact(userId: String, handler: (EggInc.FirstContactResponse) -> Unit) = firstContactPostRequest(userId)
-        .response { _, response, _ ->
-            handler(EggInc.FirstContactResponse.parseFrom(response.body().decodeBase64()))
+    private fun Response.parseFirstContactResponse(inGameId: String): EggInc.Backup? = EggInc.FirstContactResponse
+        .parseFrom(body().decodeBase64())
+        .takeIf { it.hasBackup() }
+        ?.backup
+        .takeIf { it?.userid == inGameId }
+
+    fun getFarmerBackup(inGameId: String, handler: (EggInc.Backup?) -> Unit): CancellableRequest =
+        firstContactPostRequest(inGameId).response { _, response, _ ->
+            handler(response.parseFirstContactResponse(inGameId))
         }
 
-    fun firstContact(userId: String): EggInc.FirstContactResponse = EggInc.FirstContactResponse.parseFrom(
-        firstContactPostRequest(userId).response().second.body().decodeBase64()
-    )
+    fun getFarmerBackup(inGameId: String): EggInc.Backup? =
+        firstContactPostRequest(inGameId).response().second.parseFirstContactResponse(inGameId)
 }
