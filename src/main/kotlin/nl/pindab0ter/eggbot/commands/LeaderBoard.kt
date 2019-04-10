@@ -17,7 +17,7 @@ object LeaderBoard : Command() {
 
     override fun execute(event: CommandEvent) {
 
-        // TODO: Update farmer information for up-to-date EB calculation
+        // TODO: Add "force-update" argument?
 
         val farmers = transaction {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }

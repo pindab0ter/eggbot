@@ -10,19 +10,22 @@ import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmers
+import nl.pindab0ter.eggbot.tasks.UpdateFarmersTask
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.Duration
 import java.io.FileInputStream
 import java.sql.Connection
 import java.util.*
 
 fun main() = with(EggBot) {
     connectToDatabase()
-    clearDatabase()
     initializeDatabase()
+    clearDatabase()
+    startTimerTasks()
     connectClient()
 }
 
@@ -51,6 +54,10 @@ object EggBot {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
+    fun startTimerTasks() = Timer(true).apply {
+        schedule(UpdateFarmersTask, 0, Duration.standardMinutes(10).millis)
+    }
+
     fun connectClient() {
         requireNotNull(botToken) { "Please enter the bot token in the \"bot_token\" environment variable" }
         requireNotNull(ownerId) { "Please enter the owner id in the \"owner_id\" environment variable" }
@@ -77,7 +84,6 @@ object EggBot {
 
     fun clearDatabase() {
         transaction {
-//            Farmers.deleteAll()
             CoopFarmers.deleteAll()
             Coops.deleteAll()
         }
