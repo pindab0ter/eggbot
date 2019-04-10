@@ -21,6 +21,7 @@ import java.io.FileInputStream
 import java.sql.Connection
 import java.util.*
 
+// TODO: Move main function to EggBot object?
 fun main() = with(EggBot) {
     connectToDatabase()
     initializeDatabase()
@@ -36,6 +37,7 @@ object EggBot {
 
     init {
         Properties().apply {
+            // TODO: Catch FileNotFoundException and print human readable feedback
             load(FileInputStream("config.properties"))
             botToken = getProperty("bot_token")
             ownerId = getProperty("owner_id")
@@ -55,7 +57,7 @@ object EggBot {
     }
 
     fun startTimerTasks() = Timer(true).apply {
-        schedule(UpdateFarmersTask, 0, Duration.standardMinutes(10).millis)
+        schedule(UpdateFarmersTask, Duration.standardSeconds(10).millis, Duration.standardMinutes(10).millis)
     }
 
     fun connectClient() {
