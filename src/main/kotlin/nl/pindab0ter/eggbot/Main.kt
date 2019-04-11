@@ -57,7 +57,7 @@ object EggBot {
     }
 
     fun startTimerTasks() = Timer(true).apply {
-        schedule(UpdateFarmersTask, Duration.standardSeconds(10).millis, Duration.standardMinutes(10).millis)
+        schedule(UpdateFarmersTask, Duration.standardSeconds(2).millis, Duration.standardDays(1).millis)
     }
 
     fun connectClient() {
