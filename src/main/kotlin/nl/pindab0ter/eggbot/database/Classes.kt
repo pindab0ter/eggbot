@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.database
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
+import nl.pindab0ter.eggbot.sumBy
 import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -58,4 +59,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     var contractId by Coops.contractId
     var hasStarted by Coops.hasStarted
     var farmers by Farmer via CoopFarmers
+
+    val earningsBonus: BigInteger
+        get() = farmers.sumBy { it.earningsBonus }
 }

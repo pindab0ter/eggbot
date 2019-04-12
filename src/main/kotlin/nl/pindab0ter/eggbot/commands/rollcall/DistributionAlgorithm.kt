@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.commands.coops
+package nl.pindab0ter.eggbot.commands.rollcall
 
 import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.database.Coop

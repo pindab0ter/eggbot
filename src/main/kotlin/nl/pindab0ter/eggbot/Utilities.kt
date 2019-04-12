@@ -34,7 +34,25 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .appendSuffix("m")
     .toFormatter()
 
-fun format(earningsBonus: BigInteger): String = "%,d %%".format(earningsBonus)
+fun BigInteger.formatAsEB(): String = "%,d %%".format(this)
+
+fun paddingSpaces(current: Any, longest: Any): String {
+    val currentLength = current.toString().length
+    val longestLength = longest.toString().length
+
+    if (longestLength < currentLength) throw IllegalArgumentException("Longest's length ($longestLength) must be longer than current's length ($currentLength)")
+
+    return " ".repeat(longestLength - currentLength)
+}
+
+fun <T : Any> paddingSpaces(current: T, containsLongest: Iterable<T>): String =
+    paddingSpaces(current, containsLongest.maxBy { it.toString().length }!!)
+
+fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, longest: T): java.lang.StringBuilder =
+    append(paddingSpaces(current, longest))
+
+fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, containsLongest: Iterable<T>): java.lang.StringBuilder =
+    append(paddingSpaces(current, containsLongest))
 
 
 // Networking

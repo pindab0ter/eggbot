@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.commands.coops
+package nl.pindab0ter.eggbot.commands.rollcall
 
 import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.database.Coop
@@ -7,7 +7,7 @@ import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.roundToInt
 
-object PlaceholderDistribution : DistributionAlgorithm {
+object SequentialDistribution : DistributionAlgorithm {
     override fun createCoops(contract: EggInc.Contract): List<Coop> = transaction {
         val farmers = Farmer.all()
         val coops = List(((farmers.count() * 1.2) / contract.maxCoopSize).roundToInt()) { index ->
@@ -19,9 +19,9 @@ object PlaceholderDistribution : DistributionAlgorithm {
 
         commit()
 
-        farmers.forEachIndexed { index, f ->
+        farmers.forEachIndexed { index, farmer ->
             coops[index % coops.size].let { coop ->
-                coop.farmers = SizedCollection(coop.farmers.plus(f))
+                coop.farmers = SizedCollection(coop.farmers.plus(farmer))
             }
         }
 

@@ -3,8 +3,9 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.CommandEvent.splitMessage
+import nl.pindab0ter.eggbot.appendPaddingSpaces
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.format
+import nl.pindab0ter.eggbot.formatAsEB
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
@@ -30,20 +31,16 @@ object LeaderBoard : Command() {
 
         // Make a list of strings, each for a leader board entry, then count how long they are and fit accordingly
         splitMessage(StringBuilder().appendln().apply {
-            val farmersCountLength = farmers.count().toString().length
-            val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName.length
-            val longestEarningsBonus = format(farmers.maxBy { format(it.earningsBonus).length }!!.earningsBonus).length
-
             farmers.forEachIndexed { index, farmer ->
                 append("`")
                 append("${index + 1}:")
-                append(" ".repeat(farmersCountLength - (index + 1).toString().length))
+                appendPaddingSpaces(index + 1, farmers.count())
                 append(" ")
                 append(farmer.inGameName)
-                append(" ".repeat(longestFarmerName - farmer.inGameName.length))
+                appendPaddingSpaces(farmer.inGameName, farmers.map { it.inGameName })
                 append(" ")
-                append(" ".repeat(longestEarningsBonus - format(farmer.earningsBonus).length))
-                append(format(farmer.earningsBonus))
+                appendPaddingSpaces(farmer.earningsBonus.formatAsEB(), farmers.map { it.earningsBonus.formatAsEB() })
+                append(farmer.earningsBonus.formatAsEB())
                 append("`")
                 appendln()
             }
