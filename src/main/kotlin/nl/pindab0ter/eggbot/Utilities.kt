@@ -86,3 +86,8 @@ fun Iterable<BigInteger>.sum(): BigInteger {
     }
     return sum
 }
+
+
+// Exceptions
+
+class PropertyNotFoundException(override val message: String?) : Exception(message)

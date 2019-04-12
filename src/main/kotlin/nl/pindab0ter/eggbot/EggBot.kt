@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder
+import mu.KotlinLogging
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.ContractIDs
 import nl.pindab0ter.eggbot.commands.LeaderBoard
@@ -21,49 +22,53 @@ import java.io.FileInputStream
 import java.sql.Connection
 import java.util.*
 
-// TODO: Move main function to EggBot object?
-fun main() = with(EggBot) {
-    connectToDatabase()
-    initializeDatabase()
-    clearDatabase()
-    startTimerTasks()
-    connectClient()
-}
-
 
 object EggBot {
+    private const val CONFIG_FILE_NAME = "config.properties"
+    private const val CONFIG_BOT_TOKEN = "bot_token"
+    private const val CONFIG_OWNER_ID = "owner_id"
+
+    private val logger = KotlinLogging.logger { }
     private val botToken: String
     private val ownerId: String
 
+    @JvmStatic
+    fun main(args: Array<String>) {
+        connectToDatabase()
+        initializeDatabase()
+        clearDatabase()
+        startTimerTasks()
+        connectClient()
+    }
+
     init {
         Properties().apply {
-            // TODO: Catch FileNotFoundException and print human readable feedback
             load(FileInputStream("config.properties"))
-            botToken = getProperty("bot_token")
-            ownerId = getProperty("owner_id")
+
+            botToken = getProperty(CONFIG_BOT_TOKEN)
+                ?: throw PropertyNotFoundException("Could not load \"$CONFIG_BOT_TOKEN\" from \"$CONFIG_FILE_NAME\".")
+            ownerId = getProperty(CONFIG_OWNER_ID)
+                ?: throw PropertyNotFoundException("Could not load \"$CONFIG_OWNER_ID\" from \"$CONFIG_FILE_NAME\".")
         }
     }
 
-    fun initializeDatabase() = transaction {
+    private fun initializeDatabase() = transaction {
         SchemaUtils.create(DiscordUsers)
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
         SchemaUtils.create(CoopFarmers)
     }
 
-    fun connectToDatabase() {
+    private fun connectToDatabase() {
         Database.connect("jdbc:sqlite:./EggBot.sqlite", driver = "org.sqlite.JDBC")
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
-    fun startTimerTasks() = Timer(true).apply {
+    private fun startTimerTasks() = Timer(true).apply {
         schedule(UpdateFarmersTask, Duration.standardSeconds(2).millis, Duration.standardDays(1).millis)
     }
 
-    fun connectClient() {
-        requireNotNull(botToken) { "Please enter the bot token in the \"bot_token\" environment variable" }
-        requireNotNull(ownerId) { "Please enter the owner id in the \"owner_id\" environment variable" }
-
+    private fun connectClient() {
         val client = CommandClientBuilder()
             .setOwnerId(ownerId)
             .setPrefix("!")
@@ -84,7 +89,7 @@ object EggBot {
             .awaitReady()
     }
 
-    fun clearDatabase() {
+    private fun clearDatabase() {
         transaction {
             CoopFarmers.deleteAll()
             Coops.deleteAll()
