@@ -21,7 +21,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 object RollCall : Command() {
     init {
         name = "roll-call"
-        arguments = "<contract id> [algorithm]"
+        arguments = "<contract id>"
         aliases = arrayOf("rc", "rollcall")
         help = "Create a co-op roll call for the given contract id"
         guildOnly = false

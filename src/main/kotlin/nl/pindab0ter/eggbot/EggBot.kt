@@ -25,6 +25,7 @@ object EggBot {
         .setPrefix(Config.prefix)
         .setHelpWord(Config.helpWord)
         .useHelpBuilder(true)
+        .setHelpConsumer(Help)
         .addCommands(
             ContractIDs,
             LeaderBoard,
