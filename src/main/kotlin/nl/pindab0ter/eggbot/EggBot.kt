@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.command.CommandClientBuilder
-import mu.KotlinLogging
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.ContractIDs
 import nl.pindab0ter.eggbot.commands.LeaderBoard
@@ -18,39 +17,21 @@ import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.Duration
-import java.io.FileInputStream
 import java.sql.Connection
 import java.util.*
 
 
 object EggBot {
-    private const val CONFIG_FILE_NAME = "config.properties"
-    private const val CONFIG_BOT_TOKEN = "bot_token"
-    private const val CONFIG_OWNER_ID = "owner_id"
-
-    private val logger = KotlinLogging.logger { }
-    private val botToken: String
-    private val ownerId: String
 
     @JvmStatic
     fun main(args: Array<String>) {
         connectToDatabase()
         initializeDatabase()
-        clearDatabase()
-        startTimerTasks()
+        if (Config.devMode) clearDatabase()
+        if (!Config.devMode) startTimerTasks()
         connectClient()
     }
 
-    init {
-        Properties().apply {
-            load(FileInputStream("config.properties"))
-
-            botToken = getProperty(CONFIG_BOT_TOKEN)
-                ?: throw PropertyNotFoundException("Could not load \"$CONFIG_BOT_TOKEN\" from \"$CONFIG_FILE_NAME\".")
-            ownerId = getProperty(CONFIG_OWNER_ID)
-                ?: throw PropertyNotFoundException("Could not load \"$CONFIG_OWNER_ID\" from \"$CONFIG_FILE_NAME\".")
-        }
-    }
 
     private fun initializeDatabase() = transaction {
         SchemaUtils.create(DiscordUsers)
@@ -70,7 +51,7 @@ object EggBot {
 
     private fun connectClient() {
         val client = CommandClientBuilder()
-            .setOwnerId(ownerId)
+            .setOwnerId(Config.ownerId)
             .setPrefix("!")
             // TODO: Customize help message; remove "For additional help[...]"; add aliases
             .useHelpBuilder(true)
@@ -83,7 +64,7 @@ object EggBot {
             // TODO: Specify allowed server and roles
             .build()
 
-        JDABuilder(botToken)
+        JDABuilder(Config.botToken)
             .addEventListener(client)
             .build()
             .awaitReady()

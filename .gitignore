@@ -145,6 +145,3 @@ gradle-app.setting
 src/main/java/
 src/main/resources/
 src/test/
-
-### Project specific ###
-config.properties

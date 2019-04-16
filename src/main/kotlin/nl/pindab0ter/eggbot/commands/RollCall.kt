@@ -2,18 +2,18 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import nl.pindab0ter.eggbot.appendPaddingSpaces
-import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.rollcall.PaddingDistribution
 import nl.pindab0ter.eggbot.commands.rollcall.SequentialDistribution
 import nl.pindab0ter.eggbot.commands.rollcall.SnakingDistribution
 import nl.pindab0ter.eggbot.database.Coop
+import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.formatAsEB
+import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
+import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.contracts.ExperimentalContracts
 
 object RollCall : Command() {
     init {
@@ -24,7 +24,6 @@ object RollCall : Command() {
         guildOnly = false
     }
 
-    @ExperimentalContracts
     override fun execute(event: CommandEvent) {
         if (event.arguments.count() < 1) {
             event.replyWarning("Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
@@ -33,6 +32,11 @@ object RollCall : Command() {
         if (event.arguments.count() > 2) {
             event.replyWarning("Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
             return
+        }
+
+        if (Config.devMode) transaction {
+            Coops.deleteAll()
+            CoopFarmers.deleteAll()
         }
 
         val contractInfo = AuxBrain.getContracts().contractsList.find { it.identifier == event.arguments.first() }
@@ -61,7 +65,8 @@ object RollCall : Command() {
                 return@transaction
             }
 
-            val coops: List<Coop> = algorithm.createCoops(contractInfo)
+            val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
+            val coops: List<Coop> = algorithm.createRollCall(farmers, contractInfo)
 
             event.reply(StringBuilder("Co-ops generated for `${contractInfo.identifier}`:").appendln().apply {
                 append("```")
