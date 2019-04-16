@@ -1,11 +1,9 @@
 package nl.pindab0ter.eggbot
 
+import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.JDABuilder
-import nl.pindab0ter.eggbot.commands.ContractIDs
-import nl.pindab0ter.eggbot.commands.LeaderBoard
-import nl.pindab0ter.eggbot.commands.Register
-import nl.pindab0ter.eggbot.commands.RollCall
+import nl.pindab0ter.eggbot.commands.*
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
@@ -22,6 +20,24 @@ import java.util.*
 
 
 object EggBot {
+    val client: CommandClient = CommandClientBuilder()
+        .setOwnerId(Config.ownerId)
+        .setPrefix(Config.prefix)
+        .setHelpWord(Config.helpWord)
+        .useHelpBuilder(true)
+        .addCommands(
+            ContractIDs,
+            LeaderBoard,
+            Register,
+            RollCall
+        )
+        .setEmojis(
+            Config.successEmoji,
+            Config.warningEmoji,
+            Config.errorEmoji
+        )
+        // TODO: Specify allowed server and roles
+        .build()
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -31,7 +47,6 @@ object EggBot {
         if (!Config.devMode) startTimerTasks()
         connectClient()
     }
-
 
     private fun initializeDatabase() = transaction {
         SchemaUtils.create(DiscordUsers)
@@ -50,20 +65,6 @@ object EggBot {
     }
 
     private fun connectClient() {
-        val client = CommandClientBuilder()
-            .setOwnerId(Config.ownerId)
-            .setPrefix("!")
-            // TODO: Customize help message; remove "For additional help[...]"; add aliases
-            .useHelpBuilder(true)
-            .addCommands(
-                ContractIDs,
-                LeaderBoard,
-                Register,
-                RollCall
-            )
-            // TODO: Specify allowed server and roles
-            .build()
-
         JDABuilder(Config.botToken)
             .addEventListener(client)
             .build()
