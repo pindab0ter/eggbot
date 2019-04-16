@@ -10,12 +10,9 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 
 object ContractIDs : Command() {
-    private const val ACTIVE_CONTRACTS = "IDs for currently active contracts:"
-    private const val NO_ACTIVE_CONTRACTS = "There are currently no active contracts"
-
     init {
-        name = "ids"
-        aliases = arrayOf("id", "contracts", "contractids", "contract-ids")
+        name = "contracts"
+        aliases = arrayOf("id", "ids", "contracts", "contractids", "contract-ids")
         help = "Shows the IDs of the currently active contracts"
         guildOnly = false
     }
@@ -25,7 +22,7 @@ object ContractIDs : Command() {
             val contracts = getContractsResponse.contractsList
                 .sortedBy { it.expirationTime }
 
-            if (contracts.isNotEmpty()) event.reply(StringBuilder(ACTIVE_CONTRACTS).appendln().apply {
+            if (contracts.isNotEmpty()) event.reply(StringBuilder("IDs for currently active contracts:").appendln().apply {
                 contracts.forEach { contract ->
                     append("**`${contract.identifier}`**: ")
                     append("${contract.name} (${contract.egg.formattedName})")
@@ -41,7 +38,7 @@ object ContractIDs : Command() {
                     appendln()
                 }
             }.toString())
-            else event.replyWarning(NO_ACTIVE_CONTRACTS)
+            else event.replyWarning("There are currently no active contracts")
 
         }
     }

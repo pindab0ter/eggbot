@@ -10,8 +10,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
     init {
-        name = "lb"
-        aliases = arrayOf("leaderboard", "leader-board")
+        name = "leader-board"
+        aliases = arrayOf("lb", "leaderboard")
         help = "Shows the Earnings Bonus leader board"
         guildOnly = false
     }
