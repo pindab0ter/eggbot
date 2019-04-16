@@ -29,6 +29,10 @@ object Config {
         }
     }
 
-    private fun Properties.getPropertyOrThrow(key: String): String = getProperty(key)
-        ?: throw PropertyNotFoundException("Could not load \"$key\" from \"$FILE_NAME\".")
+    private fun Properties.getPropertyOrThrow(key: String): String = getProperty(key).let {
+        return when {
+            !it.isNullOrBlank() -> it
+            else -> throw PropertyNotFoundException("Could not load \"$key\" from \"$FILE_NAME\".")
+        }
+    }
 }
