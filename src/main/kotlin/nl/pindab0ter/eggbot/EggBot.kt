@@ -25,10 +25,11 @@ object EggBot {
         setPrefix(Config.prefix)
         setHelpWord(Config.helpWord)
         useHelpBuilder(true)
-        setHelpConsumer(Help)
+        setHelpConsumer(HelpConsumer)
         if (Config.game != null) setGame(Config.game)
         addCommands(
             ContractIDs,
+            Inactive,
             LeaderBoard,
             Register,
             RollCall

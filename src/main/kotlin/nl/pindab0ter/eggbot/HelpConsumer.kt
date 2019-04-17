@@ -1,15 +1,15 @@
-package nl.pindab0ter.eggbot.commands
+package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.ChannelType
-import nl.pindab0ter.eggbot.EggBot
 import java.util.function.Consumer
 
 
-object Help : Consumer<CommandEvent> {
+object HelpConsumer : Consumer<CommandEvent> {
     override fun accept(event: CommandEvent) {
-        StringBuilder("**Commands**:").apply {
+        StringBuilder("**Commands**:\n").apply {
+            appendln("`<>` = required argument, `[]` = optional argument")
             fun append(commands: List<Command>) = commands.forEach { command ->
                 if (!command.isHidden && (!command.isOwnerCommand || event.isOwner)) {
                     append("\n`")
