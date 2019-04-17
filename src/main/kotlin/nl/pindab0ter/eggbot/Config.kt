@@ -21,7 +21,7 @@ object Config {
 
     val botToken: String
     val ownerId: String
-    val prefix: String
+    val prefix: String?
     val helpWord: String
     val successEmoji: String
     val warningEmoji: String
@@ -71,9 +71,9 @@ object Config {
     }
 
     private fun Properties.getPropertyOrDefault(key: String, default: String): String = getProperty(key).let {
-        return when {
-            !it.isNullOrBlank() -> it
-            else -> default
+        return when (it) {
+            null -> default
+            else -> it
         }
     }
 }
