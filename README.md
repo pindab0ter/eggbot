@@ -4,9 +4,7 @@ A Discord bot for Egg, Inc. co-op communities.
 ## How to run
 
 1. Install the dependencies listed below
-2. Add a file called `config.properties` to folder you're running the bot from with the following properties:
-    * `bot_id=<Discord Bot ID>`
-    * `owner_id=<Bot owner's Discord user ID>`
+2. Use the supplied `config.properties` in the folder you're running the bot from.
 
 ## Dependencies
 

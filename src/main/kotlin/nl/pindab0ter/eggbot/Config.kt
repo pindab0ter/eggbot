@@ -51,7 +51,7 @@ object Config {
             errorEmoji = getPropertyOrDefault(ERROR_EMOJI, "🚫")
             coopName = getPropertyOrThrow(COOP_NAME)
             coopIncrementChar = getPropertyOrThrow(COOP_INCREMENT_CHAR).first()
-            devMode = getPropertyOrThrow(DEVELOPMENT) == "true"
+            devMode = getPropertyOrDefault(DEVELOPMENT, "false") == "true"
 
             game = if (statusText != null) Game.of(
                 when (statusType) {

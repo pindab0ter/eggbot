@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "nl.pindab0ter"
-version = "0.2.0"
+version = "0.2.1"
 
 plugins {
     idea
@@ -11,7 +11,7 @@ plugins {
 }
 
 application {
-    mainClassName = "nl.pindab0ter.eggbot.MainKt"
+    mainClassName = "nl.pindab0ter.eggbot.EggBot"
 }
 
 repositories {
