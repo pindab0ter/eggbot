@@ -78,7 +78,7 @@ object RollCall : Command() {
                     append(" (")
                     appendPaddingSpaces(coop.farmers.count(), coops.map { it.farmers.count() })
                     append(coop.farmers.count())
-                    append(" members): ")
+                    append("/${contractInfo.maxCoopSize} members): ")
                     appendPaddingSpaces(coop.activeEarningsBonus, coops.map { it.activeEarningsBonus })
                     append(coop.activeEarningsBonus.formatForDisplay())
                     appendln()
