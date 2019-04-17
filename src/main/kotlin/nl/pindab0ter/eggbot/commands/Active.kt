@@ -16,7 +16,7 @@ object Active : Command() {
         val discordUser = transaction { DiscordUser.findById(event.author.id) }
 
         if (discordUser == null) {
-            event.replyWarning("You are not yet registered. Please register using `${event.client.prefix}${Register.name}`.")
+            event.replyWarning("You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.")
             return
         }
 

@@ -25,7 +25,7 @@ object Inactive : Command() {
         val discordUser = transaction { DiscordUser.findById(event.author.id) }
 
         if (discordUser == null) {
-            event.replyWarning("You are not yet registered. Please register using `${event.client.prefix}${Register.name}`.")
+            event.replyWarning("You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.")
             return
         }
 
@@ -37,7 +37,7 @@ object Inactive : Command() {
                     return
                 }
                 else -> {
-                    event.reply("You are inactive until **${monthAndDay.print(discordUser.inactiveUntil)}**.")
+                    event.reply("You are set to be inactive until **${monthAndDay.print(discordUser.inactiveUntil)}**.")
                     return
                 }
             }
@@ -49,7 +49,7 @@ object Inactive : Command() {
                 }
                 else -> DateTime.now().plusDays(days).let { inactiveUntil ->
                     transaction { discordUser.inactiveUntil = inactiveUntil }
-                    event.replySuccess("You will be inactive until **${monthAndDay.print(inactiveUntil)}**.")
+                    event.replySuccess("You will be inactive until **${monthAndDay.print(inactiveUntil)}** or until you use `${event.client.textualPrefix}${Active.name}`.")
                 }
             }
         }
