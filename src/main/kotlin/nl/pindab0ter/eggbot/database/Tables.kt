@@ -4,6 +4,7 @@ import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.jetbrains.exposed.sql.Table
+import org.joda.time.DateTime
 
 object DiscordUsers : IdTable<String>() {
     override val id = text("discord_id").uniqueIndex().entityId()
@@ -19,13 +20,13 @@ object Farmers : IdTable<String>() {
     val prophecyEggs = long("prophecy_eggs")
     val soulBonus = integer("soul_bonus")
     val prophecyBonus = integer("prophecy_bonus")
-    val lastUpdated = datetime("last_updated")
+    val lastUpdated = datetime("last_updated").default(DateTime.now())
 }
 
 object Coops : IntIdTable() {
     val name = text("name")
     val contractId = text("contract_id")
-    val hasStarted = bool("has-started").default(false).nullable()
+    val hasStarted = bool("has-started").default(false)
 
     init {
         this.index(true, name, contractId)
@@ -37,6 +38,6 @@ object CoopFarmers : Table() {
     val coop = reference("coop", Coops.id)
 
     init {
-        this.index(true, CoopFarmers.farmer, CoopFarmers.coop)
+        this.index(true, farmer, coop)
     }
 }

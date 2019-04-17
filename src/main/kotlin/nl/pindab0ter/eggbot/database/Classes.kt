@@ -24,7 +24,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, Farmer>(Farmers)
 
     val inGameId: String get() = id.value
-    var discordId by DiscordUser referencedOn Farmers.discordId
+    var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
     var soulEggs by Farmers.soulEggs
     var prophecyEggs by Farmers.prophecyEggs
