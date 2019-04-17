@@ -35,8 +35,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var lastUpdated by Farmers.lastUpdated
     var coops by Coop via CoopFarmers
 
-    val isActive: Boolean
-        get() = discordUser.isActive
+    val isActive: Boolean get() = discordUser.isActive
 
     val earningsBonus: BigInteger
         get() {
@@ -46,8 +45,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
         }
 
-    val activeEarningsBonus: BigInteger
-        get() = if (isActive) earningsBonus else BigInteger.ZERO
+    val activeEarningsBonus: BigInteger get() = if (isActive) earningsBonus else BigInteger.ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
         if (backup == null) return@let
@@ -69,8 +67,6 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     var hasStarted by Coops.hasStarted
     var farmers by Farmer via CoopFarmers
 
-    val earningsBonus: BigInteger
-        get() = farmers.sumBy { it.earningsBonus }
-    val activeEarningsBonus: BigInteger
-        get() = farmers.sumBy { it.activeEarningsBonus }
+    val earningsBonus: BigInteger get() = farmers.sumBy { it.earningsBonus }
+    val activeEarningsBonus: BigInteger get() = farmers.sumBy { it.activeEarningsBonus }
 }
