@@ -82,13 +82,13 @@ object Register : Command() {
 
             // Add the new in-game name
             Farmer.new(registrant.inGameId) {
-                discordId = discordUser
-                inGameName = backup.name.replace('`', '\'')
-                soulEggs = backup.data.soulEggs
-                prophecyEggs = backup.data.prophecyEggs
-                soulBonus = backup.data.soulBonus
-                prophecyBonus = backup.data.prophecyBonus
-                lastUpdated = DateTime.now()
+                this.discordUser = discordUser
+                this.inGameName = backup.name.replace('`', '\'')
+                this.soulEggs = backup.data.soulEggs
+                this.prophecyEggs = backup.data.prophecyEggs
+                this.soulBonus = backup.data.soulBonus
+                this.prophecyBonus = backup.data.prophecyBonus
+                this.lastUpdated = DateTime.now()
             }
 
             // Finally confirm the registration

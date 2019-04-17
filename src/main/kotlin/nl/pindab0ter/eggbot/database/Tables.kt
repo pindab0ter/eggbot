@@ -8,6 +8,7 @@ import org.jetbrains.exposed.sql.Table
 object DiscordUsers : IdTable<String>() {
     override val id = text("discord_id").uniqueIndex().entityId()
     val discordTag = text("discord_tag").uniqueIndex()
+    val isActive = bool("is_active").default(true)
 }
 
 object Farmers : IdTable<String>() {
@@ -19,7 +20,6 @@ object Farmers : IdTable<String>() {
     val soulBonus = integer("soul_bonus")
     val prophecyBonus = integer("prophecy_bonus")
     val lastUpdated = datetime("last_updated")
-    val isActive = bool("is_active")
 }
 
 object Coops : IntIdTable() {

@@ -16,6 +16,7 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
 
     val discordId: String get() = id.value
     var discordTag by DiscordUsers.discordTag
+    var isActive by DiscordUsers.isActive
     val farmers by Farmer referrersOn Farmers.discordId
 }
 
@@ -30,8 +31,10 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var soulBonus by Farmers.soulBonus
     var prophecyBonus by Farmers.prophecyBonus
     var lastUpdated by Farmers.lastUpdated
-    var isActive by Farmers.isActive
     var coops by Coop via CoopFarmers
+
+    val isActive: Boolean
+        get() = discordUser.isActive
 
     val earningsBonus: BigInteger
         get() {
