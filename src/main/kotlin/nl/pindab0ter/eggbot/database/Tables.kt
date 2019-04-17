@@ -9,7 +9,7 @@ import org.joda.time.DateTime
 object DiscordUsers : IdTable<String>() {
     override val id = text("discord_id").uniqueIndex().entityId()
     val discordTag = text("discord_tag").uniqueIndex()
-    val isActive = bool("is_active").default(true)
+    val inactiveUntil = datetime("inactive_until").nullable()
 }
 
 object Farmers : IdTable<String>() {

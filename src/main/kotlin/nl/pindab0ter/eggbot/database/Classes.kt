@@ -16,8 +16,11 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
 
     val discordId: String get() = id.value
     var discordTag by DiscordUsers.discordTag
-    var isActive by DiscordUsers.isActive
+    var inactiveUntil by DiscordUsers.inactiveUntil
     val farmers by Farmer referrersOn Farmers.discordId
+
+    val isActive: Boolean
+        get() = inactiveUntil?.isAfterNow ?: false
 }
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {

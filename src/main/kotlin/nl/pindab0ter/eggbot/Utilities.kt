@@ -6,6 +6,8 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
+import org.joda.time.format.DateTimeFormatter
+import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 import java.math.BigInteger
@@ -24,6 +26,12 @@ val EggInc.Egg.formattedName: String
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.days())
+
+val monthAndDay: DateTimeFormatter = DateTimeFormatterBuilder()
+    .appendMonthOfYearText()
+    .appendLiteral(" ")
+    .appendDayOfMonth(1)
+    .toFormatter()
 
 val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
@@ -64,8 +72,7 @@ fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 
 // Ease of access
 
-val CommandEvent.arguments: List<String>
-    get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s+"""))
+val CommandEvent.arguments: List<String> get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s+"""))
 
 val EggInc.Game.soulBonus get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
 val EggInc.Game.prophecyBonus get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
