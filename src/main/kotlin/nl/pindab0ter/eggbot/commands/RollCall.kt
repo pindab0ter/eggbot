@@ -12,7 +12,7 @@ import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.formatAsEB
+import nl.pindab0ter.eggbot.formatForDisplay
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.select
@@ -79,8 +79,8 @@ object RollCall : Command() {
                     appendPaddingSpaces(coop.farmers.count(), coops.map { it.farmers.count() })
                     append(coop.farmers.count())
                     append(" members): ")
-                    appendPaddingSpaces(coop.earningsBonus, coops.map { it.earningsBonus })
-                    append(coop.earningsBonus.formatAsEB())
+                    appendPaddingSpaces(coop.activeEarningsBonus, coops.map { it.activeEarningsBonus })
+                    append(coop.activeEarningsBonus.formatForDisplay())
                     appendln()
                 }
                 append("```")
@@ -96,9 +96,10 @@ object RollCall : Command() {
                             farmer.inGameName,
                             coops.flatMap { coop -> coop.farmers.map { it.inGameName } })
                         appendPaddingSpaces(
-                            farmer.earningsBonus.formatAsEB(),
-                            coop.farmers.map { it.earningsBonus.formatAsEB() })
-                        append(farmer.earningsBonus.formatAsEB())
+                            farmer.earningsBonus.formatForDisplay(),
+                            coop.farmers.map { it.earningsBonus.formatForDisplay() })
+                        append(farmer.earningsBonus.formatForDisplay())
+                        if (!farmer.isActive) append(" (Inactive)")
                         appendln()
                     }
                     append("```")

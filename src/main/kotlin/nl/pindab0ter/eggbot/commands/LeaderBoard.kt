@@ -5,7 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.command.CommandEvent.splitMessage
 import nl.pindab0ter.eggbot.appendPaddingSpaces
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.formatAsEB
+import nl.pindab0ter.eggbot.formatForDisplay
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
@@ -39,8 +39,8 @@ object LeaderBoard : Command() {
                 append(farmer.inGameName)
                 appendPaddingSpaces(farmer.inGameName, farmers.map { it.inGameName })
                 append(" ")
-                appendPaddingSpaces(farmer.earningsBonus.formatAsEB(), farmers.map { it.earningsBonus.formatAsEB() })
-                append(farmer.earningsBonus.formatAsEB())
+                appendPaddingSpaces(farmer.earningsBonus.formatForDisplay(), farmers.map { it.earningsBonus.formatForDisplay() })
+                append(farmer.earningsBonus.formatForDisplay())
                 append("`")
                 appendln()
             }

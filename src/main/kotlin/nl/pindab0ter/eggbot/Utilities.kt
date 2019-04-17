@@ -34,7 +34,7 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .appendSuffix("m")
     .toFormatter()
 
-fun BigInteger.formatAsEB(): String = "%,d %%".format(this)
+fun BigInteger.formatForDisplay(): String = "%,d %%".format(this)
 
 fun paddingSpaces(current: Any, longest: Any): String {
     val currentLength = current.toString().length
