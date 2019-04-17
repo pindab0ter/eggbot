@@ -40,18 +40,18 @@ object Config {
         Properties().apply {
             load(FileInputStream("config.properties"))
 
-            botToken = getPropertyOrThrow(BOT_TOKEN)
-            ownerId = getPropertyOrDefault(OWNER_ID, "0")
-            prefix = getPropertyOrDefault(PREFIX, "!")
-            helpWord = getPropertyOrDefault(HELP_WORD, "help")
-            statusType = getPropertyOrDefault(STATUS_TYPE, "DEFAULT")
-            statusText = getPropertyOrDefault(STATUS_TEXT, "").ifBlank { null }
-            successEmoji = getPropertyOrDefault(SUCCESS_EMOJI, "👍")
-            warningEmoji = getPropertyOrDefault(WARNING_EMOJI, "⚠️")
-            errorEmoji = getPropertyOrDefault(ERROR_EMOJI, "🚫")
-            coopName = getPropertyOrThrow(COOP_NAME)
-            coopIncrementChar = getPropertyOrThrow(COOP_INCREMENT_CHAR).first()
-            devMode = getPropertyOrDefault(DEVELOPMENT, "false") == "true"
+            botToken = getRequired(BOT_TOKEN)
+            ownerId = getOptional(OWNER_ID, "0")
+            prefix = getOptional(PREFIX, "!")
+            helpWord = getOptional(HELP_WORD, "help")
+            statusType = getOptional(STATUS_TYPE, "DEFAULT")
+            statusText = getOptional(STATUS_TEXT, "").ifBlank { null }
+            successEmoji = getOptional(SUCCESS_EMOJI, "👍")
+            warningEmoji = getOptional(WARNING_EMOJI, "⚠️")
+            errorEmoji = getOptional(ERROR_EMOJI, "🚫")
+            coopName = getRequired(COOP_NAME)
+            coopIncrementChar = getRequired(COOP_INCREMENT_CHAR).first()
+            devMode = getOptional(DEVELOPMENT, "false") == "true"
 
             game = if (statusText != null) Game.of(
                 when (statusType) {
@@ -82,14 +82,14 @@ object Config {
         }
     }
 
-    private fun Properties.getPropertyOrThrow(key: String): String = getProperty(key).let {
+    private fun Properties.getRequired(key: String): String = getProperty(key).let {
         return when {
             !it.isNullOrBlank() -> it
             else -> throw PropertyNotFoundException("Could not load \"$key\" from \"$FILE_NAME\".")
         }
     }
 
-    private fun Properties.getPropertyOrDefault(key: String, default: String): String = getProperty(key).let {
+    private fun Properties.getOptional(key: String, default: String): String = getProperty(key).let {
         return when (it) {
             null -> default
             else -> it
