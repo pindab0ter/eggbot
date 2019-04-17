@@ -28,6 +28,7 @@ object EggBot {
         setHelpConsumer(HelpConsumer)
         if (Config.game != null) setGame(Config.game)
         addCommands(
+            Active,
             ContractIDs,
             Inactive,
             LeaderBoard,
