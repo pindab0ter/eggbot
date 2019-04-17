@@ -1,9 +1,12 @@
 package nl.pindab0ter.eggbot
 
+import mu.KotlinLogging
 import java.io.FileInputStream
 import java.util.*
 
 object Config {
+    private val logger = KotlinLogging.logger { }
+
     private const val FILE_NAME = "config.properties"
     private const val BOT_TOKEN = "bot_token"
     private const val OWNER_ID = "owner_id"
@@ -41,6 +44,22 @@ object Config {
             coopName = getPropertyOrThrow(COOP_NAME)
             coopIncrementChar = getPropertyOrThrow(COOP_INCREMENT_CHAR).first()
             devMode = getPropertyOrThrow(DEVELOPMENT) == "true"
+
+            logger.info(
+                """
+
+                Bot token      : $botToken
+                Owner ID       : $ownerId
+                Prefix         : $prefix
+                Help word      : $helpWord
+                Success emoji  : $successEmoji
+                Warning emoji  : $warningEmoji
+                Error emoji    : $errorEmoji
+                Co-op increment: $coopIncrementChar
+                Co-op name     : $coopName
+                Dev mode       : $devMode
+                """.replaceIndent("\t")
+            )
         }
     }
 
