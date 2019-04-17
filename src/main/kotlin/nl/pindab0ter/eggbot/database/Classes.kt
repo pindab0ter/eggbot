@@ -19,8 +19,7 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     var inactiveUntil by DiscordUsers.inactiveUntil
     val farmers by Farmer referrersOn Farmers.discordId
 
-    val isActive: Boolean
-        get() = inactiveUntil?.isAfterNow ?: false
+    val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
 }
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
