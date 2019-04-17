@@ -10,6 +10,7 @@ import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 import java.math.BigInteger
 import java.math.BigInteger.ZERO
+import java.text.DecimalFormat
 import java.util.*
 import kotlin.math.roundToLong
 
@@ -35,6 +36,7 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .toFormatter()
 
 fun BigInteger.formatForDisplay(): String = "%,d %%".format(this)
+fun BigInteger.formatScientifically(): String = DecimalFormat("0.000E0").format(toBigDecimal())
 
 fun paddingSpaces(current: Any, longest: Any): String {
     val currentLength = current.toString().length
