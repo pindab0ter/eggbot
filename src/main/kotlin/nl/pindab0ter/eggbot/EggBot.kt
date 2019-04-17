@@ -20,25 +20,25 @@ import java.util.*
 
 
 object EggBot {
-    val client: CommandClient = CommandClientBuilder()
-        .setOwnerId(Config.ownerId)
-        .setPrefix(Config.prefix)
-        .setHelpWord(Config.helpWord)
-        .useHelpBuilder(true)
-        .setHelpConsumer(Help)
-        .addCommands(
+    val client: CommandClient = CommandClientBuilder().apply {
+        setOwnerId(Config.ownerId)
+        setPrefix(Config.prefix)
+        setHelpWord(Config.helpWord)
+        useHelpBuilder(true)
+        setHelpConsumer(Help)
+        if (Config.game != null) setGame(Config.game)
+        addCommands(
             ContractIDs,
             LeaderBoard,
             Register,
             RollCall
         )
-        .setEmojis(
+        setEmojis(
             Config.successEmoji,
             Config.warningEmoji,
             Config.errorEmoji
         )
-        // TODO: Specify allowed server and roles
-        .build()
+    }.build()
 
     @JvmStatic
     fun main(args: Array<String>) {

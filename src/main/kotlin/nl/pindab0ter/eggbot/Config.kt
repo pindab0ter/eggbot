@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import mu.KotlinLogging
+import net.dv8tion.jda.core.entities.Game
 import java.io.FileInputStream
 import java.util.*
 
@@ -12,6 +13,8 @@ object Config {
     private const val OWNER_ID = "owner_id"
     private const val PREFIX = "prefix"
     private const val HELP_WORD = "help_word"
+    private const val STATUS_TYPE = "status_type"
+    private const val STATUS_TEXT = "status_text"
     private const val SUCCESS_EMOJI = "success_emoji"
     private const val WARNING_EMOJI = "warning_emoji"
     private const val ERROR_EMOJI = "error_emoji"
@@ -23,6 +26,9 @@ object Config {
     val ownerId: String
     val prefix: String?
     val helpWord: String
+    val game: Game?
+    private val statusType: String
+    private val statusText: String?
     val successEmoji: String
     val warningEmoji: String
     val errorEmoji: String
@@ -38,12 +44,23 @@ object Config {
             ownerId = getPropertyOrDefault(OWNER_ID, "0")
             prefix = getPropertyOrDefault(PREFIX, "!")
             helpWord = getPropertyOrDefault(HELP_WORD, "help")
+            statusType = getPropertyOrDefault(STATUS_TYPE, "DEFAULT")
+            statusText = getPropertyOrDefault(STATUS_TEXT, "").ifBlank { null }
             successEmoji = getPropertyOrDefault(SUCCESS_EMOJI, "👍")
             warningEmoji = getPropertyOrDefault(WARNING_EMOJI, "⚠️")
             errorEmoji = getPropertyOrDefault(ERROR_EMOJI, "🚫")
             coopName = getPropertyOrThrow(COOP_NAME)
             coopIncrementChar = getPropertyOrThrow(COOP_INCREMENT_CHAR).first()
             devMode = getPropertyOrThrow(DEVELOPMENT) == "true"
+
+            game = if (statusText != null) Game.of(
+                when (statusType) {
+                    "STREAMING" -> Game.GameType.STREAMING
+                    "LISTENING" -> Game.GameType.LISTENING
+                    "WATCHING" -> Game.GameType.WATCHING
+                    else -> Game.GameType.DEFAULT
+                }, statusText
+            ) else null
 
             logger.info(
                 """
@@ -52,6 +69,8 @@ object Config {
                 Owner ID       : $ownerId
                 Prefix         : $prefix
                 Help word      : $helpWord
+                Status type    : $statusType
+                Status text    : $statusText
                 Success emoji  : $successEmoji
                 Warning emoji  : $warningEmoji
                 Error emoji    : $errorEmoji
