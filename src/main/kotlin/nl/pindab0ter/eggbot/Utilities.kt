@@ -103,14 +103,6 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigInteger): BigInteger {
     return sum
 }
 
-fun Iterable<BigInteger>.sum(): BigInteger {
-    var sum: BigInteger = ZERO
-    for (element in this) {
-        sum += element
-    }
-    return sum
-}
-
 
 // Exceptions
 
