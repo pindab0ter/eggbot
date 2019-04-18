@@ -74,8 +74,14 @@ fun String.splitMessage(
 ): List<String> = split(separator)
     .also { lines -> require(lines.none { it.length >= 2000 }) { "Any block cannot be larger than 2000 characters." } }
     .fold(listOf("")) { acc, section ->
-        if (acc.last().length + section.length + (postFix?.length ?: 0) < 2000) acc.init().plus(acc.last().plus(section))
-        else acc.init().plus(acc.last().plus(postFix ?: "")).plus(prefix?.plus("\n") ?: "" + section)
+        // If the section still fits in the last message, add it
+        if (acc.last().length + section.length + (postFix?.length ?: 0) < 2000) {
+            acc.init().plus(acc.last().plus(section))
+        }
+        // Otherwise start a new message
+        else {
+            acc.init().plus(acc.last().plus(postFix ?: "")).plus(prefix?.plus("\n") ?: "" + section)
+        }
     }
     .let { it.init().plus(it.last().plus(postFix ?: "")) }
 
