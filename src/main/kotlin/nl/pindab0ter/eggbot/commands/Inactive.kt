@@ -47,6 +47,10 @@ object Inactive : Command() {
                     event.replyWarning("Could not make sense of `$argument`, please enter a number of days.")
                     return
                 }
+                in Int.MIN_VALUE..0 -> {
+                    event.replyWarning("The number of days must be positive.")
+                    return
+                }
                 else -> DateTime.now().plusDays(days).let { inactiveUntil ->
                     transaction { discordUser.inactiveUntil = inactiveUntil }
                     event.replySuccess("You will be inactive until **${monthAndDay.print(inactiveUntil)}** or until you use `${event.client.textualPrefix}${Active.name}`.")
