@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.commands
 
+import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.daysHoursAndMinutes
@@ -19,28 +20,43 @@ object ContractIDs : Command() {
 
     override fun execute(event: CommandEvent) {
         AuxBrain.getContracts { getContractsResponse ->
-            val contracts = getContractsResponse.contractsList
+            val (soloContracts, coopContracts) = getContractsResponse.contractsList
                 .sortedBy { it.expirationTime }
+                .groupBy { it.coopAllowed }
+                .let { it[0].orEmpty() to it[1].orEmpty() }
 
-            if (contracts.isNotEmpty()) event.reply(StringBuilder("IDs for currently active contracts:").appendln().apply {
-                contracts.forEach { contract ->
-                    append("**`${contract.identifier}`**: ")
-                    append("${contract.name} (${contract.egg.formattedName})")
-                    append(", valid for ")
-                    append(
-                        daysHoursAndMinutes.print(
-                            Duration(
-                                DateTime.now(),
-                                contract.expirationTime.toDateTime()
-                            ).toPeriod().normalizedStandard()
-                        )
-                    )
-                    appendln()
-                }
-            }.toString())
-            else event.replyWarning("There are currently no active contracts")
+            if (soloContracts.plus(coopContracts).isNotEmpty()) {
+                event.reply(StringBuilder("IDs for currently active contracts:").apply {
+                    if (soloContracts.isNotEmpty()) {
+                        append("\n  __Solo contracts__:\n")
+                        append(soloContracts.printContracts())
+                    }
+                    if (coopContracts.isNotEmpty()) {
+                        append("\n  __Co-op contracts__:\n")
+                        append(coopContracts.printContracts())
+                    }
+                }.toString())
+            } else event.replyWarning("There are currently no active contracts")
 
         }
     }
+
+    private fun List<EggInc.Contract>.printContracts(): String = StringBuilder().let { sb ->
+        forEach { contract ->
+            sb.append("**`${contract.identifier}`**: ")
+            sb.append("${contract.name} (${contract.egg.formattedName})")
+            sb.append(", valid for ")
+            sb.append(
+                daysHoursAndMinutes.print(
+                    Duration(
+                        DateTime.now(),
+                        contract.expirationTime.toDateTime()
+                    ).toPeriod().normalizedStandard()
+                )
+            )
+            sb.appendln()
+        }
+        return@let sb
+    }.toString()
 }
 
