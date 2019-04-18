@@ -2,10 +2,10 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.jagrosh.jdautilities.command.CommandEvent.splitMessage
 import nl.pindab0ter.eggbot.appendPaddingSpaces
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.formatForDisplay
+import nl.pindab0ter.eggbot.splitMessage
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
@@ -30,22 +30,23 @@ object LeaderBoard : Command() {
         }
 
         // Make a list of strings, each for a leader board entry, then count how long they are and fit accordingly
-        splitMessage(StringBuilder().appendln().apply {
+        StringBuilder("Earnings Bonus leader board:\n").apply {
+            append("```")
             farmers.forEachIndexed { index, farmer ->
-                append("`")
                 append("${index + 1}:")
                 appendPaddingSpaces(index + 1, farmers.count())
                 append(" ")
                 append(farmer.inGameName)
                 appendPaddingSpaces(farmer.inGameName, farmers.map { it.inGameName })
                 append(" ")
-                appendPaddingSpaces(farmer.earningsBonus.formatForDisplay(), farmers.map { it.earningsBonus.formatForDisplay() })
+                appendPaddingSpaces(
+                    farmer.earningsBonus.formatForDisplay(),
+                    farmers.map { it.earningsBonus.formatForDisplay() })
                 append(farmer.earningsBonus.formatForDisplay())
-                append("`")
                 appendln()
             }
-        }.toString()).forEachIndexed { i, message ->
-            event.reply("${if (i == 0) "Earnings Bonus leader board:" else "Leader board continued…"}\n$message")
+        }.toString().splitMessage(prefix = "Leader board continued…\n```", postFix = "```").forEach { message ->
+            event.reply(message)
         }
     }
 }

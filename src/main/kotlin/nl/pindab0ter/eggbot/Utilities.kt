@@ -26,6 +26,7 @@ val EggInc.Egg.formattedName: String
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.days())
+fun <T> List<T>.init(): List<T> = take((size - 1).coerceAtLeast(0))
 
 val monthAndDay: DateTimeFormatter = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
@@ -65,6 +66,18 @@ fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, longest: T): java.la
 
 fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, containsLongest: Iterable<T>): java.lang.StringBuilder =
     append(paddingSpaces(current, containsLongest))
+
+fun String.splitMessage(
+    prefix: String? = null,
+    postFix: String? = null,
+    separator: Char = '\n'
+): List<String> = split(separator)
+    .also { lines -> require(lines.none { it.length >= 2000 }) { "Any block cannot be larger than 2000 characters." } }
+    .fold(listOf("")) { acc, section ->
+        if (acc.last().length + section.length + (postFix?.length ?: 0) < 2000) acc.init().plus(acc.last().plus(section))
+        else acc.init().plus(acc.last().plus(postFix ?: "")).plus(prefix?.plus("\n") ?: "" + section)
+    }
+    .let { it.init().plus(it.last().plus(postFix ?: "")) }
 
 
 // Networking
