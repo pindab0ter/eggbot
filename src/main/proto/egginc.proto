@@ -228,8 +228,8 @@ message Simulation {
     uint32 silo_count = 11;
     repeated HabLevel habs = 12;
     repeated uint32 hab_population = 13;
-    repeated uint32 hab_population_indound = 14;
-    repeated double hab_incubator_popuplation = 15;
+    repeated uint32 hab_population_inbound = 14;
+    repeated double hab_incubator_population = 15;
     double hatchery_population = 16;
     repeated VehicleType vehicles = 17;
     repeated ResearchItem common_research = 18;
@@ -395,6 +395,8 @@ enum Egg {
     DARK_MATTER = 15;
     AI = 16;
     NEBULA = 17;
+    UNIVERSE = 18;
+    ENLIGHTENMENT = 19;
     CHOCOLATE = 100;
     EASTER = 101;
     WATER_BALLOON = 102;
