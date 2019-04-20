@@ -64,20 +64,20 @@ object Config {
 
             logger.info(
                 """
-
-                Bot token      : $botToken
-                Owner ID       : $ownerId
-                Prefix         : $prefix
-                Help word      : $helpWord
-                Status type    : $statusType
-                Status text    : $statusText
-                Success emoji  : $successEmoji
-                Warning emoji  : $warningEmoji
-                Error emoji    : $errorEmoji
-                Co-op increment: $coopIncrementChar
-                Co-op name     : $coopName
-                Dev mode       : $devMode
-                """.replaceIndent("\t")
+                |Config loaded:
+                |    Bot token      : $botToken
+                |    Owner ID       : $ownerId
+                |    Prefix         : $prefix
+                |    Help word      : $helpWord
+                |    Status type    : $statusType
+                |    Status text    : $statusText
+                |    Success emoji  : $successEmoji
+                |    Warning emoji  : $warningEmoji
+                |    Error emoji    : $errorEmoji
+                |    Co-op increment: $coopIncrementChar
+                |    Co-op name     : $coopName
+                |    Dev mode       : $devMode
+                """.replaceIndentByMargin("")
             )
         }
     }
