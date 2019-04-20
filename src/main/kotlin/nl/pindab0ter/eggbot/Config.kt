@@ -8,7 +8,7 @@ import java.util.*
 object Config {
     private val logger = KotlinLogging.logger { }
 
-    private const val FILE_NAME = "config.properties"
+    private const val FILE_NAME = "eggbot.properties"
     private const val BOT_TOKEN = "bot_token"
     private const val OWNER_ID = "owner_id"
     private const val PREFIX = "prefix"
@@ -38,7 +38,7 @@ object Config {
 
     init {
         Properties().apply {
-            load(FileInputStream("config.properties"))
+            load(FileInputStream(FILE_NAME))
 
             botToken = getRequired(BOT_TOKEN)
             ownerId = getOptional(OWNER_ID, "0")
