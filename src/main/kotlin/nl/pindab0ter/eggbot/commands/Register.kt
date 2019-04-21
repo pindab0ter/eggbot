@@ -4,7 +4,6 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
@@ -58,11 +57,10 @@ object Register : Command() {
             }
 
             // Check if the Discord user is already known, otherwise create a new user
-            val discordUser: DiscordUser = DiscordUser.find {
-                DiscordUsers.id eq registrant.discordId
-            }.firstOrNull() ?: DiscordUser.new(registrant.discordId) {
-                discordTag = registrant.discordTag
-            }
+            val discordUser: DiscordUser = DiscordUser.findById(registrant.discordId)
+                ?: DiscordUser.new(registrant.discordId) {
+                    this.discordTag = registrant.discordTag
+                }
 
             // Check if this Discord user hasn't already registered that in-game name
             if (discordUser.farmers.any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName }) {
