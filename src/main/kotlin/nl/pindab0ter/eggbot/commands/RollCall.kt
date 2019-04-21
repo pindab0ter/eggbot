@@ -6,13 +6,9 @@ import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.rollcall.PaddingDistribution
 import nl.pindab0ter.eggbot.commands.rollcall.SequentialDistribution
 import nl.pindab0ter.eggbot.commands.rollcall.SnakingDistribution
-import nl.pindab0ter.eggbot.database.Coop
-import nl.pindab0ter.eggbot.database.CoopFarmers
-import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.database.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.deleteAll
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object RollCall : Command() {
@@ -58,24 +54,23 @@ object RollCall : Command() {
         }
 
         transaction {
-            val coopsExist = Coops.select { Coops.contractId eq contractInfo.identifier }.any()
-
-            if (coopsExist) {
-                event.replyWarning("Co-ops are already generated for contract `${contractInfo.identifier}`")
+            val contract = Contract.getOrNew(contractInfo)
+            if (!contract.coops.empty()) {
+                event.replyWarning("Co-ops are already generated for contract `${contract.identifier}`")
                 return@transaction
             }
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
-            val coops: List<Coop> = algorithm.createRollCall(farmers, contractInfo)
+            val coops: List<Coop> = algorithm.createRollCall(farmers, contract)
 
-            event.reply(StringBuilder("Co-ops generated for `${contractInfo.identifier}`:").appendln().apply {
+            event.reply(StringBuilder("Co-ops generated for `${contract.identifier}`:").appendln().apply {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
                     append(" (")
                     appendPaddingSpaces(coop.farmers.count(), coops.map { it.farmers.count() })
                     append(coop.farmers.count())
-                    append("/${contractInfo.maxCoopSize} members): ")
+                    append("/${contract.maxCoopSize} members): ")
                     appendPaddingSpaces(coop.activeEarningsBonus, coops.map { it.activeEarningsBonus })
                     append(coop.activeEarningsBonus.formatForDisplay())
                     appendln()

@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
+import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
@@ -12,19 +13,17 @@ import java.math.BigInteger
 import kotlin.math.pow
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
-    companion object : EntityClass<String, DiscordUser>(DiscordUsers)
-
     val discordId: String get() = id.value
     var discordTag by DiscordUsers.discordTag
     var inactiveUntil by DiscordUsers.inactiveUntil
     val farmers by Farmer referrersOn Farmers.discordId
 
     val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
+
+    companion object : EntityClass<String, DiscordUser>(DiscordUsers)
 }
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
-    companion object : EntityClass<String, Farmer>(Farmers)
-
     val inGameId: String get() = id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
@@ -36,7 +35,6 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var coops by Coop via CoopFarmers
 
     val isActive: Boolean get() = discordUser.isActive
-
     val earningsBonus: BigInteger
         get() {
             val soulEggBonus = 10 + soulBonus
@@ -44,7 +42,6 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             val bonusPerSoulEgg = prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
             return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
         }
-
     val activeEarningsBonus: BigInteger get() = if (isActive) earningsBonus else BigInteger.ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
@@ -57,16 +54,47 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             lastUpdated = DateTime.now()
         }
     }
+
+    companion object : EntityClass<String, Farmer>(Farmers)
 }
 
 class Coop(id: EntityID<Int>) : IntEntity(id) {
-    companion object : IntEntityClass<Coop>(Coops)
-
     var name by Coops.name
-    var contractId by Coops.contractId
+    var contract by Contract referencedOn Coops.contractId
     var hasStarted by Coops.hasStarted
+
     var farmers by Farmer via CoopFarmers
 
     val earningsBonus: BigInteger get() = farmers.sumBy { it.earningsBonus }
     val activeEarningsBonus: BigInteger get() = farmers.sumBy { it.activeEarningsBonus }
+
+    companion object : IntEntityClass<Coop>(Coops)
+}
+
+class Contract(id: EntityID<String>) : Entity<String>(id) {
+    val identifier: String get() = id.value
+
+    var name by Contracts.name
+    var description by Contracts.description
+    var egg by Contracts.egg
+    var coopAllowed by Contracts.coopAllowed
+    var maxCoopSize by Contracts.maxCoopSize
+    var validUntil by Contracts.validUntil
+    var durationSeconds by Contracts.durationSeconds
+    val coops by Coop referrersOn Coops.contractId
+
+    companion object : EntityClass<String, Contract>(Contracts) {
+        fun new(contract: EggInc.Contract): Contract = super.new(contract.identifier) {
+            this.name = contract.name
+            this.description = contract.description
+            this.egg = contract.egg
+            this.coopAllowed = contract.coopAllowed == 1
+            this.maxCoopSize = contract.maxCoopSize
+            this.validUntil = DateTime(contract.expirationTime.toLong())
+            this.durationSeconds = contract.lengthSeconds
+        }
+
+        fun getOrNew(contract: EggInc.Contract): Contract =
+            super.findById(contract.identifier) ?: new(contract)
+    }
 }

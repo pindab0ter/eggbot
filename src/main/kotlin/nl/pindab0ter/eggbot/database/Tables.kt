@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
+import com.auxbrain.ei.EggInc
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
@@ -25,7 +26,7 @@ object Farmers : IdTable<String>() {
 
 object Coops : IntIdTable() {
     val name = text("name")
-    val contractId = text("contract_id")
+    val contractId = reference("contract_id", Contracts).references(Contracts.id)
     val hasStarted = bool("has-started").default(false)
 
     init {
@@ -40,4 +41,15 @@ object CoopFarmers : Table() {
     init {
         this.index(true, farmer, coop)
     }
+}
+
+object Contracts : IdTable<String>() {
+    override val id = text("id").uniqueIndex().entityId()
+    val name = text("name")
+    val description = text("description")
+    val egg = enumeration("egg", EggInc.Egg::class)
+    val coopAllowed = bool("coop_allowed")
+    val maxCoopSize = integer("max_coop_size")
+    val validUntil = datetime("valid_until")
+    val durationSeconds = double("duration_seconds")
 }

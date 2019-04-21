@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.commands.rollcall
 
-import com.auxbrain.ei.EggInc
+import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.sumBy
@@ -11,7 +11,7 @@ import kotlin.math.roundToInt
 object PaddingDistribution : DistributionAlgorithm() {
     private const val FILL_PERCENTAGE = 0.8
 
-    override fun createRollCall(farmers: List<Farmer>, contract: EggInc.Contract): List<Coop> {
+    override fun createRollCall(farmers: List<Farmer>, contract: Contract): List<Coop> {
         val coops = createCoops(farmers, contract)
         val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
         val inactiveFarmers = farmers.filter { !it.isActive }

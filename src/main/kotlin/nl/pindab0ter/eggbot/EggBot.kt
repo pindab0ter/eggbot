@@ -56,6 +56,7 @@ object EggBot {
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
         SchemaUtils.create(CoopFarmers)
+        SchemaUtils.create(Contracts)
     }
 
     private fun connectToDatabase() {
@@ -75,7 +76,7 @@ object EggBot {
     }
 
     private fun clearDatabase() {
-        transaction {
+        Contracts.deleteAll()
             CoopFarmers.deleteAll()
             Coops.deleteAll()
         }
