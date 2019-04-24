@@ -45,7 +45,7 @@ object LeaderBoard : Command() {
                 append(farmer.earningsBonus.formatForDisplay())
                 appendln()
             }
-        }.toString().splitMessage(prefix = "Leader board continued…\n```", postFix = "```").forEach { message ->
+        }.toString().splitMessage(prefix = "Leader board continued…\n```", postfix = "```").forEach { message ->
             event.reply(message)
         }
     }
