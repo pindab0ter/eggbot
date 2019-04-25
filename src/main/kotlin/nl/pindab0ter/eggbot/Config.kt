@@ -20,6 +20,9 @@ object Config {
     private const val ERROR_EMOJI = "error_emoji"
     private const val COOP_NAME = "coop_name"
     private const val COOP_INCREMENT_CHAR = "coop_increment_char"
+
+    private const val CHANNEL_LEADER_BOARD = "channel.leader_board"
+
     private const val DEVELOPMENT = "dev_mode"
 
     val botToken: String
@@ -34,6 +37,9 @@ object Config {
     val errorEmoji: String
     val coopName: String
     val coopIncrementChar: Char
+
+    val leaderBoardChannel: String
+
     val devMode: Boolean
 
     init {
@@ -51,6 +57,9 @@ object Config {
             errorEmoji = getOptional(ERROR_EMOJI, "🚫")
             coopName = getRequired(COOP_NAME)
             coopIncrementChar = getRequired(COOP_INCREMENT_CHAR).first()
+
+            leaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD)
+
             devMode = getOptional(DEVELOPMENT, "false") == "true"
 
             game = if (statusText != null) Game.of(
