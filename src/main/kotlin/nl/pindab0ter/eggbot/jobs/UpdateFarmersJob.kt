@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.tasks
+package nl.pindab0ter.eggbot.jobs
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -7,13 +7,15 @@ import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.*
+import org.quartz.Job
+import org.quartz.JobExecutionContext
 import kotlin.system.measureTimeMillis
 
 
-object UpdateFarmersTask : TimerTask() {
-    private val log = KotlinLogging.logger {}
-    override fun run() {
+private val log = KotlinLogging.logger {}
+
+class UpdateFarmersJob : Job {
+    override fun execute(context: JobExecutionContext?) {
         val farmers = transaction { Farmer.all().toList() }
         if (farmers.isEmpty()) {
             log.info("No farmers to update…")

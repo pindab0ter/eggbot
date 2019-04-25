@@ -2,25 +2,27 @@ package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
+import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.*
-import nl.pindab0ter.eggbot.database.CoopFarmers
-import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.database.DiscordUsers
-import nl.pindab0ter.eggbot.database.Farmers
-import nl.pindab0ter.eggbot.tasks.UpdateFarmersTask
+import nl.pindab0ter.eggbot.database.*
+import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.Duration
+import org.quartz.CronScheduleBuilder.weeklyOnDayAndHourAndMinute
+import org.quartz.DateBuilder.FRIDAY
+import org.quartz.JobBuilder.newJob
+import org.quartz.SimpleScheduleBuilder.simpleSchedule
+import org.quartz.TriggerBuilder.newTrigger
+import org.quartz.impl.StdSchedulerFactory
 import java.sql.Connection
-import java.util.*
 
 
 object EggBot {
-    val client: CommandClient = CommandClientBuilder().apply {
+    val commandClient: CommandClient = CommandClientBuilder().apply {
         setOwnerId(Config.ownerId)
         setPrefix(Config.prefix)
         setHelpWord(Config.helpWord)
@@ -42,13 +44,16 @@ object EggBot {
         )
     }.build()
 
+    val jdaClient: JDA = JDABuilder(Config.botToken)
+        .addEventListener(commandClient)
+        .build()
+
     @JvmStatic
     fun main(args: Array<String>) {
         connectToDatabase()
         initializeDatabase()
-        if (Config.devMode) clearDatabase()
-        if (!Config.devMode) startTimerTasks()
-        connectClient()
+        startScheduler()
+        jdaClient.awaitReady()
     }
 
     private fun initializeDatabase() = transaction {
@@ -57,6 +62,13 @@ object EggBot {
         SchemaUtils.create(Coops)
         SchemaUtils.create(CoopFarmers)
         SchemaUtils.create(Contracts)
+
+        if (Config.devMode) {
+            Contracts.deleteAll()
+            Coops.deleteAll()
+            CoopFarmers.deleteAll()
+        }
+
     }
 
     private fun connectToDatabase() {
@@ -64,22 +76,16 @@ object EggBot {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
-    private fun startTimerTasks() = Timer(true).apply {
-        schedule(UpdateFarmersTask, Duration.standardSeconds(2).millis, Duration.standardDays(1).millis)
-    }
-
-    private fun connectClient() {
-        JDABuilder(Config.botToken)
-            .addEventListener(client)
-            .build()
-            .awaitReady()
-    }
-
-    private fun clearDatabase() {
-        Contracts.deleteAll()
-            CoopFarmers.deleteAll()
-            Coops.deleteAll()
-        }
+    private fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply {
+        if (!Config.devMode) scheduleJob(
+            newJob(UpdateFarmersJob::class.java)
+                .withIdentity("update_farmers")
+                .build(),
+            newTrigger()
+                .withIdentity("daily")
+                .withSchedule(simpleSchedule().withIntervalInHours(1))
+                .build()
+        )
+        start()
     }
 }
-

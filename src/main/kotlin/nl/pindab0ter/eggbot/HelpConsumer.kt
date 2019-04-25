@@ -13,15 +13,15 @@ object HelpConsumer : Consumer<CommandEvent> {
             fun append(commands: List<Command>) = commands.forEach { command ->
                 if (!command.isHidden && (!command.isOwnerCommand || event.isOwner)) {
                     append("\n`")
-                    append(EggBot.client.textualPrefix)
-                    append(if (EggBot.client.prefix == null) " " else "")
+                    append(EggBot.commandClient.textualPrefix)
+                    append(if (EggBot.commandClient.prefix == null) " " else "")
                     append(command.name)
                     append(if (command.arguments == null) "`" else " ${command.arguments}`")
                     append(" - ").append(command.help)
                 }
             }
 
-            EggBot.client.commands.let { commands ->
+            EggBot.commandClient.commands.let { commands ->
                 if (commands.any { it.category != null }) {
                     commands.groupBy { it.category }.forEach { (category, commands) ->
                         append("\n\n")

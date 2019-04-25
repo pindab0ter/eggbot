@@ -31,6 +31,7 @@ dependencies {
     implementation("com.google.protobuf", "protobuf-java", "3.7.0")
     implementation("com.google.protobuf", "protobuf-gradle-plugin", "0.8.8")
     implementation("io.github.microutils", "kotlin-logging", "1.6.24")
+    implementation("org.quartz-scheduler", "quartz", "2.3.0")
 
     runtime("org.slf4j", "slf4j-simple", "1.7.26")
 }
