@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import nl.pindab0ter.eggbot.commands.categories.LeaderBoardsCategory
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.leaderBoard
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -11,6 +12,7 @@ object LeaderBoard : Command() {
         name = "leader-board"
         aliases = arrayOf("lb", "leaderboard")
         help = "Shows the Earnings Bonus leader board"
+        category = LeaderBoardsCategory
         guildOnly = false
     }
 

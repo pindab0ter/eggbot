@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.commands.categories.UsersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
@@ -16,6 +17,7 @@ object Register : Command() {
         name = "register"
         arguments = "<in-game name> <in-game id>"
         help = "Register on this server with your in-game name and in-game ID."
+        category = UsersCategory
         guildOnly = false
     }
 
