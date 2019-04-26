@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.commands.categories.LeaderBoardsCategory
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.leaderBoard
@@ -9,6 +10,9 @@ import nl.pindab0ter.eggbot.replyInDms
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
+
+    private val log = KotlinLogging.logger { }
+
     init {
         name = "leader-board"
         aliases = arrayOf("lb", "leaderboard")
@@ -25,8 +29,9 @@ object LeaderBoard : Command() {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
         }
 
-        if (farmers.isEmpty()) {
-            event.replyWarning("There are no registered farmers")
+        if (farmers.isEmpty()) "There are no registered farmers".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
 

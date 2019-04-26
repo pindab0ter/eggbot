@@ -12,9 +12,10 @@ import org.quartz.JobExecutionContext
 import kotlin.system.measureTimeMillis
 
 
-private val log = KotlinLogging.logger {}
-
 class UpdateFarmersJob : Job {
+
+    private val log = KotlinLogging.logger {}
+
     override fun execute(context: JobExecutionContext?) {
         val farmers = transaction { Farmer.all().toList() }
         if (farmers.isEmpty()) {

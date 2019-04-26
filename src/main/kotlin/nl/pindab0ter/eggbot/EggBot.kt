@@ -46,6 +46,7 @@ object EggBot {
     }.build()
 
     val jdaClient: JDA = JDABuilder(Config.botToken)
+        .addEventListener(CommandLogger)
         .addEventListener(commandClient)
         .build()
 
