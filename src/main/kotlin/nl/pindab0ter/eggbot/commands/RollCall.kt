@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.*
@@ -12,6 +13,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.roundToInt
 
 object RollCall : Command() {
+
+    private val log = KotlinLogging.logger { }
+
     init {
         name = "roll-call"
         arguments = "<contract id>"
@@ -22,13 +26,16 @@ object RollCall : Command() {
     }
 
     // TODO: Add dry run option
+    @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
-        if (event.arguments.count() < 1) {
-            event.replyWarning("Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
+        if (event.arguments.count() < 1) "Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
-        if (event.arguments.count() > 1) {
-            event.replyWarning("Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
+        if (event.arguments.count() > 1) "Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
 
@@ -39,23 +46,27 @@ object RollCall : Command() {
 
         val contractInfo = AuxBrain.getContracts().contractsList.find { it.identifier == event.arguments.first() }
 
-        if (contractInfo == null) {
-            event.replyWarning("No active contract found with id `${event.arguments.first()}`")
+        if (contractInfo == null) "No active contract found with id `${event.arguments.first()}`".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
 
-        if (contractInfo.coopAllowed != 1) {
-            event.replyWarning("Co-op is not allowed for this contract")
+        if (contractInfo.coopAllowed != 1) "Co-op is not allowed for this contract".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
 
         transaction {
             val contract = Contract.getOrNew(contractInfo)
-            if (!contract.coops.empty()) {
-                event.replyWarning("Co-ops are already generated for contract `${contract.identifier}`")
+            if (!contract.coops.empty()) "Co-ops are already generated for contract `${contract.identifier}`".let {
+                event.replyWarning(it)
+                log.trace { it }
                 return@transaction
             }
 
+            log.info { "Generating schedule for ${contract.identifier}" }
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contract)
 
@@ -92,10 +103,9 @@ object RollCall : Command() {
                     }
                     append("```")
                 }.toString()
-            }.splitMessage(separator =  '\u000C')
-                .forEach { message ->
-                    event.reply(message)
-                }
+            }.splitMessage(separator = '\u000C').forEach { message ->
+                event.reply(message)
+            }
         }
     }
 

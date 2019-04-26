@@ -2,11 +2,15 @@ package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import java.util.function.Consumer
 
 
 object HelpConsumer : Consumer<CommandEvent> {
+
+    private val log = KotlinLogging.logger { }
+
     override fun accept(event: CommandEvent) {
         StringBuilder("**Commands**:\n").apply {
             appendln("`<>` = required argument, `[]` = optional argument")
@@ -32,10 +36,14 @@ object HelpConsumer : Consumer<CommandEvent> {
                 } else append(commands)
             }
 
-            event.replyInDm(toString(),
-                { if (event.isFromType(ChannelType.TEXT)) event.reactSuccess() },
-                { event.replyWarning("Help cannot be sent because you are blocking Direct Messages.") }
-            )
+            event.replyInDm(toString(), {
+                if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+            }, {
+                "Help cannot be sent because you are blocking Direct Messages.".let {
+                    event.replyWarning(it)
+                    log.trace { it }
+                }
+            })
         }
     }
 }

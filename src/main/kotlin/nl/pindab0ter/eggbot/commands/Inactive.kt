@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.commands.categories.UsersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
@@ -10,6 +11,9 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 
 object Inactive : Command() {
+
+    private val log = KotlinLogging.logger { }
+
     init {
         name = "inactive"
         help = "Set yourself as inactive for `[days]` days or check whether you're inactive if no argument is given."
@@ -19,15 +23,18 @@ object Inactive : Command() {
     }
 
     override fun execute(event: CommandEvent) {
-        if (event.arguments.count() > 1) {
-            event.replyWarning("Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information.")
+        if (event.arguments.count() > 1) "Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information.".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
 
         val discordUser = transaction { DiscordUser.findById(event.author.id) }
 
-        if (discordUser == null) {
-            event.replyWarning("You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.")
+        @Suppress("FoldInitializerAndIfToElvis")
+        if (discordUser == null) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
 
@@ -45,15 +52,18 @@ object Inactive : Command() {
             }
             // If an argument is given
             else -> when (val days = argument.toIntOrNull()) {
-                null -> {
-                    event.replyWarning("Could not make sense of `$argument`, please enter a number of days.")
+                null -> "Could not make sense of `$argument`, please enter a number of days.".let {
+                    event.replyWarning(it)
+                    log.trace { it }
                     return
                 }
-                in Int.MIN_VALUE..0 -> {
-                    event.replyWarning("The number of days must be positive.")
+                in Int.MIN_VALUE..0 -> "The number of days must be positive.".let {
+                    event.replyWarning(it)
+                    log.trace { it }
                     return
                 }
                 else -> DateTime.now().plusDays(days).let { inactiveUntil ->
+                    log.info { "User ${discordUser.discordTag} will be inactive for $days days" }
                     transaction { discordUser.inactiveUntil = inactiveUntil }
                     event.replySuccess("You will be inactive until **${monthAndDay.print(inactiveUntil)}** or until you use `${event.client.textualPrefix}${Active.name}`.")
                 }

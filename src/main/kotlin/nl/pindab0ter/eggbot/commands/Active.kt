@@ -2,11 +2,15 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.commands.categories.UsersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Active : Command() {
+
+    private val log = KotlinLogging.logger { }
+
     init {
         name = "active"
         help = "Set yourself as active."
@@ -14,11 +18,13 @@ object Active : Command() {
         guildOnly = false
     }
 
+    @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
         val discordUser = transaction { DiscordUser.findById(event.author.id) }
 
-        if (discordUser == null) {
-            event.replyWarning("You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.")
+        if (discordUser == null) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
 

@@ -9,9 +9,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 
-private val log = KotlinLogging.logger {}
-
 class UpdateLeaderBoardJob : Job {
+
+    private val log = KotlinLogging.logger {}
+
     override fun execute(context: JobExecutionContext?) {
         val farmers = transaction {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
@@ -24,7 +25,7 @@ class UpdateLeaderBoardJob : Job {
 
         EggBot.jdaClient.getTextChannelById(Config.leaderBoardChannel).apply {
             history.retrievePast(5).complete().let { messages ->
-                log.info { "Purging ${messages.count()} messages…" }
+                log.info { "Purging ${messages.count()} leader board messages…" }
                 purgeMessages(messages)
             }
 

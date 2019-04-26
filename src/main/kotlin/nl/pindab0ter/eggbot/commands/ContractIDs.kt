@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.daysHoursAndMinutes
 import nl.pindab0ter.eggbot.formattedName
@@ -12,6 +13,9 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 
 object ContractIDs : Command() {
+
+    private val log = KotlinLogging.logger { }
+
     init {
         name = "contracts"
         aliases = arrayOf("id", "ids", "contracts", "contractids", "contract-ids")
@@ -21,6 +25,7 @@ object ContractIDs : Command() {
     }
 
     override fun execute(event: CommandEvent) {
+        log.trace { "Getting currently active contracts…" }
         AuxBrain.getContracts { getContractsResponse ->
             val (soloContracts, coopContracts) = getContractsResponse.contractsList
                 .sortedBy { it.expirationTime }
