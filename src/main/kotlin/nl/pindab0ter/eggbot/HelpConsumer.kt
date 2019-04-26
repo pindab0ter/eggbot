@@ -10,6 +10,7 @@ object HelpConsumer : Consumer<CommandEvent> {
     override fun accept(event: CommandEvent) {
         StringBuilder("**Commands**:\n").apply {
             appendln("`<>` = required argument, `[]` = optional argument")
+
             fun append(commands: List<Command>) = commands.forEach { command ->
                 if (!command.isHidden && (!command.isOwnerCommand || event.isOwner)) {
                     append("\n`")
@@ -17,21 +18,20 @@ object HelpConsumer : Consumer<CommandEvent> {
                     append(if (EggBot.commandClient.prefix == null) " " else "")
                     append(command.name)
                     append(if (command.arguments == null) "`" else " ${command.arguments}`")
-                    append(" - ").append(command.help)
+                    append(" - ${command.help}")
                 }
             }
 
             EggBot.commandClient.commands.let { commands ->
                 if (commands.any { it.category != null }) {
-                    commands.groupBy { it.category }.forEach { (category, commands) ->
-                        append("\n\n")
+                    commands.groupBy { it.category }.toList().forEachIndexed { i, (category, commands) ->
+                        append(if (i == 0) "\n" else "\n\n")
                         append("  __${if (category != null) category.name else "No category"}__:")
                         append(commands)
                     }
                 } else append(commands)
             }
 
-            // event.reply(toString())
             event.replyInDm(toString(),
                 { if (event.isFromType(ChannelType.TEXT)) event.reactSuccess() },
                 { event.replyWarning("Help cannot be sent because you are blocking Direct Messages.") }
