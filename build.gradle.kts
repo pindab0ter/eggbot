@@ -33,7 +33,7 @@ dependencies {
     implementation("io.github.microutils", "kotlin-logging", "1.6.24")
     implementation("org.quartz-scheduler", "quartz", "2.3.0")
 
-    runtime("org.slf4j", "slf4j-simple", "1.7.26")
+    runtime("org.apache.logging.log4j", "log4j-slf4j-impl", "2.11.2")
 }
 
 tasks.withType<KotlinCompile> {

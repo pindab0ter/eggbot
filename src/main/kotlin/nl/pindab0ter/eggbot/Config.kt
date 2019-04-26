@@ -6,7 +6,7 @@ import java.io.FileInputStream
 import java.util.*
 
 object Config {
-    private val logger = KotlinLogging.logger { }
+    private val log = KotlinLogging.logger { }
 
     private const val FILE_NAME = "eggbot.properties"
     private const val BOT_TOKEN = "bot_token"
@@ -71,7 +71,7 @@ object Config {
                 }, statusText
             ) else null
 
-            logger.info(
+            log.info(
                 """
                 |Config loaded:
                 |    Bot token      : $botToken

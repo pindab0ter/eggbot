@@ -18,11 +18,11 @@ class UpdateFarmersJob : Job {
     override fun execute(context: JobExecutionContext?) {
         val farmers = transaction { Farmer.all().toList() }
         if (farmers.isEmpty()) {
-            log.info("No farmers to update…")
+            log.info { "No farmers to update…" }
             return
         }
 
-        log.info("Updating farmers…")
+        log.info { "Updating farmers…" }
 
         val timeTaken = measureTimeMillis {
             runBlocking {
@@ -30,6 +30,6 @@ class UpdateFarmersJob : Job {
             }
         }
 
-        log.info("Finished updating farmers in ${timeTaken}ms")
+        log.info { "Finished updating farmers in ${timeTaken}ms" }
     }
 }
