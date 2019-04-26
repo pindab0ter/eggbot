@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot
 import com.auxbrain.ei.EggInc
 import com.github.kittinunf.fuel.core.Body
 import com.jagrosh.jdautilities.command.CommandEvent
+import net.dv8tion.jda.core.entities.ChannelType
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
@@ -109,3 +110,19 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigInteger): BigInteger {
 // Exceptions
 
 class PropertyNotFoundException(override val message: String?) : Exception(message)
+
+
+// JDA Utilities
+
+fun CommandEvent.replyInDms(messages: List<String>) {
+    var successful: Boolean? = null
+    messages.forEachIndexed { i, message ->
+        replyInDm(message, {
+            successful = (successful ?: true) && true
+            if (i == messages.size - 1 && isFromType(ChannelType.TEXT)) reactSuccess()
+        }, {
+            if (successful == null) replyWarning("Help cannot be sent because you are blocking Direct Messages.")
+            successful = false
+        })
+    }
+}

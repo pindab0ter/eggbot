@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.commands.categories.LeaderBoardsCategory
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.leaderBoard
+import nl.pindab0ter.eggbot.replyInDms
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
@@ -29,8 +30,6 @@ object LeaderBoard : Command() {
             return
         }
 
-        leaderBoard(farmers).forEach { message ->
-            event.reply(message)
-        }
+        event.replyInDms(leaderBoard(farmers))
     }
 }
