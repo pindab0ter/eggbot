@@ -28,20 +28,20 @@ object Register : Command() {
 
     override fun execute(event: CommandEvent) {
         if (event.isFromType(TEXT)) {
-            if (botPermissions.contains(MESSAGE_MANAGE)) {
+            if (botPermissions.contains(MESSAGE_MANAGE)) "Registering is only allowed in DMs to protect your in-game ID. Please give it a go here!".let {
                 event.message.delete().queue()
-                "Registering is only allowed in DMs to protect your in-game ID. Please give it a go here!".let {
-                    event.replyInDm(it)
-                    log.trace { it }
-                }
-            } else {
-                event.replyInDm("Registering is only allowed in DMs to protect your in-game ID. Please give it a go here and delete your previous message!")
+                event.replyInDm(it)
+                log.trace { it }
+            } else "Registering is only allowed in DMs to protect your in-game ID. Please give it a go here and delete your previous message!".let {
+                event.replyInDm(it)
+                log.trace { it }
             }
             return
         }
 
-        if (event.arguments.count() < 2) {
-            event.replyWarning("Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
+        if (event.arguments.count() < 2) "Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information".let {
+            event.replyWarning(it)
+            log.trace { it }
             return
         }
         if (event.arguments.count() > 2) "Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information".let {
