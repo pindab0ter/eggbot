@@ -33,6 +33,7 @@ object EggBot {
         addCommands(
             Active,
             ContractIDs,
+            EarningsBonus,
             Inactive,
             LeaderBoard,
             Register,

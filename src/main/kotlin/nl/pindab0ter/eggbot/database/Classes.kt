@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
+import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
@@ -53,6 +54,14 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             prophecyBonus = backup.data.prophecyBonus
             lastUpdated = DateTime.now()
         }
+    }
+
+    fun update(backup: EggInc.Backup) = transaction {
+        soulEggs = backup.data.soulEggs
+        prophecyEggs = backup.data.prophecyEggs
+        soulBonus = backup.data.soulBonus
+        prophecyBonus = backup.data.prophecyBonus
+        lastUpdated = DateTime.now()
     }
 
     companion object : EntityClass<String, Farmer>(Farmers)
