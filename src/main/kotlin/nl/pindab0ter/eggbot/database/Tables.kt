@@ -35,8 +35,8 @@ object Coops : IntIdTable() {
 }
 
 object CoopFarmers : Table() {
-    val farmer = reference("farmer", Farmers.id, CASCADE)
-    val coop = reference("coop", Coops.id)
+    val farmer = reference("farmer", Farmers, CASCADE)
+    val coop = reference("coop", Coops, CASCADE)
 
     init {
         this.index(true, farmer, coop)
