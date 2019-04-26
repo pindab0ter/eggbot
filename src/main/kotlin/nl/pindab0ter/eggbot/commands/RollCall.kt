@@ -3,13 +3,12 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.commands.rollcall.PaddingDistribution
-import nl.pindab0ter.eggbot.commands.rollcall.SequentialDistribution
-import nl.pindab0ter.eggbot.commands.rollcall.SnakingDistribution
 import nl.pindab0ter.eggbot.database.*
 import nl.pindab0ter.eggbot.network.AuxBrain
+import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.math.roundToInt
 
 object RollCall : Command() {
     init {
@@ -20,12 +19,13 @@ object RollCall : Command() {
         guildOnly = false
     }
 
+    // TODO: Add dry run option
     override fun execute(event: CommandEvent) {
         if (event.arguments.count() < 1) {
             event.replyWarning("Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
             return
         }
-        if (event.arguments.count() > 2) {
+        if (event.arguments.count() > 1) {
             event.replyWarning("Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
             return
         }
@@ -36,12 +36,6 @@ object RollCall : Command() {
         }
 
         val contractInfo = AuxBrain.getContracts().contractsList.find { it.identifier == event.arguments.first() }
-        val algorithm = when (event.arguments.getOrNull(1)) {
-            "sequential" -> SequentialDistribution
-            "snaking" -> SnakingDistribution
-            "padding" -> PaddingDistribution
-            else -> PaddingDistribution
-        }
 
         if (contractInfo == null) {
             event.replyWarning("No active contract found with id `${event.arguments.first()}`")
@@ -61,7 +55,7 @@ object RollCall : Command() {
             }
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
-            val coops: List<Coop> = algorithm.createRollCall(farmers, contract)
+            val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contract)
 
             event.reply(StringBuilder("Co-ops generated for `${contract.identifier}`:").appendln().apply {
                 append("```")
@@ -100,6 +94,56 @@ object RollCall : Command() {
                 .forEach { message ->
                     event.reply(message)
                 }
+        }
+    }
+
+    object PaddingDistribution {
+        private const val FILL_PERCENTAGE = 0.8
+
+        private fun createCoops(farmers: List<Farmer>, contract: Contract): List<Coop> = transaction {
+            List(((farmers.count() * 1.2) / contract.maxCoopSize).toInt() + 1) { index ->
+                Coop.new {
+                    this.contract = contract
+                    this.name = Config.coopIncrementChar.plus(index).toString() +
+                            Config.coopName +
+                            contract.maxCoopSize
+                }
+            }
+        }
+
+        fun createRollCall(farmers: List<Farmer>, contract: Contract): List<Coop> {
+            val coops = createCoops(farmers, contract)
+            val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
+            val inactiveFarmers = farmers.filter { !it.isActive }
+            val preferredCoopSize = {
+                val inactiveToActiveFarmerRatio = inactiveFarmers.size.toFloat() / farmers.size.toFloat()
+                val activeFarmerFillRatio = FILL_PERCENTAGE - inactiveToActiveFarmerRatio * FILL_PERCENTAGE
+                (contract.maxCoopSize * activeFarmerFillRatio).roundToInt()
+            }()
+
+            transaction {
+                // Fill each co-op with the next strongest player so that all co-ops have one
+                coops.forEachIndexed { i, coop ->
+                    coop.farmers = SizedCollection(coop.farmers.plus(activeFarmers[i]))
+                }
+
+                // With the remaining active farmers keep adding the next highest rated to the lowest rated co-op
+                activeFarmers.drop(coops.size).forEach { activeFarmer ->
+                    coops.filter { coop -> coop.farmers.count() < preferredCoopSize }
+                        .sortedBy { coop -> coop.farmers.sumBy { it.earningsBonus } }
+                        .first()
+                        .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(activeFarmer)) }
+                }
+
+                // Finally spread inactive farmers over the coops
+                inactiveFarmers.forEach { inactiveFarmer ->
+                    coops.sortedBy { coop -> coop.farmers.count() }
+                        .sortedBy { coop -> coop.farmers.count { farmer -> !farmer.isActive } }
+                        .first()
+                        .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(inactiveFarmer)) }
+                }
+            }
+            return coops
         }
     }
 }
