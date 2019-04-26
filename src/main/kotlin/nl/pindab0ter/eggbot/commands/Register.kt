@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
+import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.commands.categories.UsersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
@@ -16,12 +18,22 @@ object Register : Command() {
     init {
         name = "register"
         arguments = "<in-game name> <in-game id>"
-        help = "Register on this server with your in-game name and in-game ID."
+        help = "Register on this server with your in-game name and in-game ID. **DM only!**"
         category = UsersCategory
         guildOnly = false
     }
 
     override fun execute(event: CommandEvent) {
+        if (event.isFromType(TEXT)) {
+            if (botPermissions.contains(MESSAGE_MANAGE)) {
+                event.message.delete().queue()
+                event.replyInDm("Registering is only allowed in DMs to protect your in-game ID. Please give it a go here!")
+            } else {
+                event.replyInDm("Registering is only allowed in DMs to protect your in-game ID. Please give it a go here and delete your previous message!")
+            }
+            return
+        }
+
         if (event.arguments.count() < 2) {
             event.replyWarning("Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information")
             return
