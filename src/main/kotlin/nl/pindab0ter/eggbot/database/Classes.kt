@@ -27,7 +27,14 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val inGameId: String get() = id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
-    var soulEggs by Farmers.soulEggs
+
+    @Suppress("PrivatePropertyName")
+    private var soulEggs_ by Farmers.soulEggs
+    var soulEggs
+        get() = if (inGameId == "G:1310382811") 39505097770735L else soulEggs_
+        set(value) {
+            soulEggs_ = value
+        }
     var prophecyEggs by Farmers.prophecyEggs
     var soulBonus by Farmers.soulBonus
     var prophecyBonus by Farmers.prophecyBonus
