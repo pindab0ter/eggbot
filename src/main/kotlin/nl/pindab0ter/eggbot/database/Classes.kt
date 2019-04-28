@@ -70,11 +70,14 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     )
     // @formatter:on
 
-    val earningsBonus: BigInteger
+    val bonusPerSoulEgg: BigInteger
         get() {
             val soulEggBonus = 10 + soulBonus
             val prophecyEggBonus = (1.05 + 0.01 * prophecyBonus)
-            val bonusPerSoulEgg = prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
+            return BigDecimal(prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus).toBigInteger()
+        }
+    val earningsBonus: BigInteger
+        get() {
             return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
         }
     val activeEarningsBonus: BigInteger get() = if (isActive) earningsBonus else BigInteger.ZERO

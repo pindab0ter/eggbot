@@ -46,8 +46,8 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .toFormatter()
     .withLocale(Locale.UK)
 
-fun BigInteger.formatForDisplay(): String = "%,d %%".format(this)
-fun BigInteger.formatScientifically(): String = DecimalFormat("##0E0").format(toBigDecimal()) + " %"
+fun BigInteger.formatForDisplay(): String = "%,d".format(this)
+fun BigInteger.formatScientifically(): String = DecimalFormat("##0E0").format(toBigDecimal())
 
 fun paddingSpaces(current: Any, longest: Any): String {
     val currentLength = current.toString().length
