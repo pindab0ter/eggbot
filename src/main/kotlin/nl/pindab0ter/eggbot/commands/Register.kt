@@ -6,9 +6,9 @@ import mu.KotlinLogging
 import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.arguments
-import nl.pindab0ter.eggbot.commands.categories.UsersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.init
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
@@ -44,17 +44,12 @@ object Register : Command() {
             log.trace { it }
             return
         }
-        if (event.arguments.count() > 2) "Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information".let {
-            event.replyWarning(it)
-            log.trace { it }
-            return
-        }
 
         val registrant = object {
             val discordId = event.author.id
             val discordTag = event.author.asTag
-            val inGameId = event.arguments[1]
-            val inGameName = event.arguments[0]
+            val inGameId = event.arguments.last()
+            val inGameName = event.arguments.init().joinToString(" ")
         }
 
         transaction {
