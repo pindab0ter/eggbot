@@ -54,10 +54,11 @@ object Register : Command() {
 
         transaction {
             val farmers = Farmer.all().toList()
-            val (backup, _) = AuxBrain.getFarmerBackup(registrant.inGameId)
+            val (backup, _) = AuxBrain.getFarmerBackup(registrant.inGameId.toUpperCase())
 
-            // Check if the in-game ID is valid
-            if (backup == null) "No information was found for the given Egg, Inc. ID. Did you make a typo?".let {
+            // Check if any back-up was found with the in-game ID
+            if (backup == null || !backup.hasData()) ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID correctly?\n" +
+                    "To register, type `${event.client.textualPrefix}${event.client.helpWord} $arguments` without the brackets.").let {
                 event.replyError(it)
                 log.trace { it }
                 return@transaction
@@ -66,7 +67,8 @@ object Register : Command() {
             // Check if the in-game name matches with the in-game name belonging to the in-game ID's account
             if (registrant.inGameId != backup.userid ||
                 registrant.inGameName.toLowerCase() != backup.name.toLowerCase()
-            ) "The given username (`${registrant.inGameName}`) does not match the username for that Egg, Inc. ID (`${backup.name}`)".let {
+            ) ("The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.name}`)\n" +
+                    "If this is you, please register with `${event.client.textualPrefix}$name ${backup.userid} ${backup.name}`").let {
                 event.replyError(it)
                 log.trace { it }
                 return@transaction
