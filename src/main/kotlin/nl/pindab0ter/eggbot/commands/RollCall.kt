@@ -38,7 +38,8 @@ object RollCall : Command() {
             return
         }
 
-        if (Config.devMode) transaction {
+        // if (Config.devMode) transaction {
+        transaction {
             Coops.deleteAll()
             CoopFarmers.deleteAll()
         }
