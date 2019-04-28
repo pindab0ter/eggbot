@@ -12,7 +12,9 @@ object HelpConsumer : Consumer<CommandEvent> {
     private val log = KotlinLogging.logger { }
 
     override fun accept(event: CommandEvent) {
-        StringBuilder("`<>` = required argument, `[]` = optional argument\n").apply {
+        StringBuilder(
+            "`<>` = required argument, `[]` = optional argument\nType the arguments without the brackets.\n"
+        ).apply {
 
             fun append(commands: List<Command>) = commands.forEach { command ->
                 if (!command.isHidden && (!command.isOwnerCommand || event.isOwner)) {
