@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.leaderBoard
 import nl.pindab0ter.eggbot.replyInDms
@@ -34,6 +35,12 @@ object LeaderBoard : Command() {
             return
         }
 
-        event.replyInDms(leaderBoard(farmers))
+        leaderBoard(farmers).let { messages ->
+            if (event.channel.id == Config.botCommandsChannel) {
+                messages.forEach { message -> event.reply(message) }
+            } else {
+                event.replyInDms(messages)
+            }
+        }
     }
 }
