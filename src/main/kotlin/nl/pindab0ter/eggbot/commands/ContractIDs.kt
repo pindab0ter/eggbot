@@ -4,7 +4,6 @@ import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.daysHoursAndMinutes
 import nl.pindab0ter.eggbot.formattedName
 import nl.pindab0ter.eggbot.network.AuxBrain
@@ -20,7 +19,7 @@ object ContractIDs : Command() {
         name = "contracts"
         aliases = arrayOf("id", "ids", "contracts", "contractids", "contract-ids")
         help = "Shows the IDs of the currently active contracts"
-        category = ContractsCategory
+        // category = ContractsCategory
         guildOnly = false
     }
 

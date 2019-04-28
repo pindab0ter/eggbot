@@ -21,7 +21,7 @@ object EarningsBonus : Command() {
         name = "earnings-bonus"
         aliases = arrayOf("eb", "earningsbonus", "earning-bonus", "earningbonus")
         help = "Shows your EB, EB rank and how much EB till your next rank"
-        category = UsersCategory
+        // category = UsersCategory
         guildOnly = false
     }
 

@@ -4,7 +4,6 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.SizedCollection
@@ -21,7 +20,7 @@ object RollCall : Command() {
         arguments = "<contract id>"
         aliases = arrayOf("rc", "rollcall")
         help = "Create a co-op roll call for the given contract id"
-        category = ContractsCategory
+        // category = ContractsCategory
         guildOnly = false
     }
 

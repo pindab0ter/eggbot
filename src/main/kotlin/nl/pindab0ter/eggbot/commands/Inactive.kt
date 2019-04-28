@@ -4,7 +4,7 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.arguments
-import nl.pindab0ter.eggbot.commands.categories.UsersCategory
+import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.monthAndDay
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,7 +18,7 @@ object Inactive : Command() {
         name = "inactive"
         help = "Set yourself as inactive for `[days]` days or check whether you're inactive if no argument is given."
         arguments = "[days]"
-        category = UsersCategory
+        // category = ContractsCategory
         guildOnly = false
     }
 
