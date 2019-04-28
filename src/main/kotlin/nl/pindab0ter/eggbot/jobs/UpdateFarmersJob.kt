@@ -1,9 +1,5 @@
 package nl.pindab0ter.eggbot.jobs
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -26,9 +22,7 @@ class UpdateFarmersJob : Job {
         log.info { "Updating farmers…" }
 
         val timeTaken = measureTimeMillis {
-            runBlocking {
-                farmers.map { GlobalScope.async { it.update() } }.awaitAll()
-            }
+            farmers.forEach { it.update() }
         }
 
         log.info { "Finished updating farmers in ${timeTaken}ms" }
