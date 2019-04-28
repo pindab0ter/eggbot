@@ -95,7 +95,7 @@ object EggBot {
                 .build(),
             newTrigger()
                 .withIdentity("fridays")
-                .withSchedule(weeklyOnDayAndHourAndMinute(FRIDAY, 7, 0))
+                .withSchedule(weeklyOnDayAndHourAndMinute(FRIDAY, 13, 0))
                 .build()
         )
         start()
