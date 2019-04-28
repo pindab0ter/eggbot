@@ -16,7 +16,7 @@ fun leaderBoard(farmers: List<Farmer>): List<String> = StringBuilder("Earnings B
             farmer.earningsBonus.formatForDisplay() + " %",
             farmers.map { it.earningsBonus.formatForDisplay() + " %" })
         append(farmer.earningsBonus.formatForDisplay() + " %")
-        appendln()
+        if (index < farmers.size - 1) appendln()
     }
 }.toString().splitMessage(prefix = "Leader board continued…\n```", postfix = "```")
 
