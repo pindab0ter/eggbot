@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
-import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
@@ -36,6 +35,34 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var coops by Coop via CoopFarmers
 
     val isActive: Boolean get() = discordUser.isActive
+
+    val role: Role? get() = roles.find { earningsBonus in it.range }
+
+    val nextRole: Role? get() = roles.getOrNull(roles.indexOf(role) + 1)
+
+    // @formatter:off
+    private val roles = listOf(
+        Role(BigInteger("0"),                    BigInteger("999"),                   "Farmer"),
+        Role(BigInteger("1000"),                 BigInteger("9999"),                  "Farmer 2"),
+        Role(BigInteger("10000"),                BigInteger("99999"),                 "Farmer 3"),
+        Role(BigInteger("100000"),               BigInteger("999999"),                "Kilofarmer"),
+        Role(BigInteger("1000000"),              BigInteger("9999999"),               "Kilofarmer 2"),
+        Role(BigInteger("10000000"),             BigInteger("99999999"),              "Kilofarmer 3"),
+        Role(BigInteger("100000000"),            BigInteger("999999999"),             "Megafarmer"),
+        Role(BigInteger("1000000000"),           BigInteger("9999999999"),            "Megafarmer 2"),
+        Role(BigInteger("10000000000"),          BigInteger("99999999999"),           "Megafarmer 3"),
+        Role(BigInteger("100000000000"),         BigInteger("999999999999"),          "Gigafarmer"),
+        Role(BigInteger("1000000000000"),        BigInteger("9999999999999"),         "Gigafarmer 2"),
+        Role(BigInteger("10000000000000"),       BigInteger("99999999999999"),        "Gigafarmer 3"),
+        Role(BigInteger("100000000000000"),      BigInteger("999999999999999"),       "Terafarmer"),
+        Role(BigInteger("1000000000000000"),     BigInteger("9999999999999999"),      "Terafarmer 2"),
+        Role(BigInteger("10000000000000000"),    BigInteger("99999999999999999"),     "Terafarmer 3"),
+        Role(BigInteger("100000000000000000"),   BigInteger("999999999999999999"),    "Petafarmer"),
+        Role(BigInteger("1000000000000000000"),  BigInteger("9999999999999999999"),   "Petafarmer 2"),
+        Role(BigInteger("10000000000000000000"), BigInteger("99999999999999999999"),  "Petafarmer 3")
+    )
+    // @formatter:on
+
     val earningsBonus: BigInteger
         get() {
             val soulEggBonus = 10 + soulBonus
@@ -62,6 +89,14 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         soulBonus = backup.data.soulBonus
         prophecyBonus = backup.data.prophecyBonus
         lastUpdated = DateTime.now()
+    }
+
+    data class Role(
+        val lowerBound: BigInteger,
+        val upperBound: BigInteger,
+        val name: String
+    ) {
+        val range: ClosedRange<BigInteger> = lowerBound..upperBound
     }
 
     companion object : EntityClass<String, Farmer>(Farmers)
