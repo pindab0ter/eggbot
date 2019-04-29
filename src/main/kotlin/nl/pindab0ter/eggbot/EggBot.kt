@@ -38,7 +38,8 @@ object EggBot {
             Inactive,
             LeaderBoard,
             Register,
-            RollCall
+            RollCall,
+            WhoIs
         )
         setEmojis(
             Config.successEmoji,
