@@ -5,7 +5,6 @@ import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
 import org.quartz.JobExecutionContext
-import kotlin.system.measureTimeMillis
 
 
 class UpdateFarmersJob : Job {
@@ -19,12 +18,7 @@ class UpdateFarmersJob : Job {
             return
         }
 
-        log.info { "Updating farmers…" }
-
-        val timeTaken = measureTimeMillis {
-            farmers.forEach { it.update() }
-        }
-
-        log.info { "Finished updating farmers in ${timeTaken}ms" }
+        farmers.map { it.update() }
+            .let { log.info { "Updated ${it.size} farmers." } }
     }
 }

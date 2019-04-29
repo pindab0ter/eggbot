@@ -4,9 +4,8 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.arguments
-import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
+import nl.pindab0ter.eggbot.asMonthAndDay
 import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.monthAndDay
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 
@@ -46,7 +45,7 @@ object Inactive : Command() {
                     return
                 }
                 else -> {
-                    event.reply("You are set to be inactive until **${monthAndDay.print(discordUser.inactiveUntil)}**.")
+                    event.reply("You are set to be inactive until **${discordUser.inactiveUntil?.asMonthAndDay()}**.")
                     return
                 }
             }
@@ -65,7 +64,7 @@ object Inactive : Command() {
                 else -> DateTime.now().plusDays(days).let { inactiveUntil ->
                     log.info { "User ${discordUser.discordTag} will be inactive for $days days" }
                     transaction { discordUser.inactiveUntil = inactiveUntil }
-                    event.replySuccess("You will be inactive until **${monthAndDay.print(inactiveUntil)}** or until you use `${event.client.textualPrefix}${Active.name}`.")
+                    event.replySuccess("You will be inactive until **${inactiveUntil.asMonthAndDay()}** or until you use `${event.client.textualPrefix}${Active.name}`.")
                 }
             }
         }

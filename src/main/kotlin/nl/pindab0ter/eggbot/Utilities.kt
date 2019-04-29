@@ -7,9 +7,7 @@ import net.dv8tion.jda.core.entities.ChannelType
 import org.joda.time.DateTime
 import org.joda.time.Period
 import org.joda.time.PeriodType
-import org.joda.time.format.DateTimeFormatter
 import org.joda.time.format.DateTimeFormatterBuilder
-import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 import java.math.BigInteger
 import java.math.BigInteger.ZERO
@@ -28,14 +26,7 @@ val EggInc.Egg.formattedName: String
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.days())
 
-val monthAndDay: DateTimeFormatter = DateTimeFormatterBuilder()
-    .appendMonthOfYearText()
-    .appendLiteral(" ")
-    .appendDayOfMonth(1)
-    .toFormatter()
-    .withLocale(Locale.UK)
-
-val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
+fun Period.asDayHoursAndMinutes(): String = PeriodFormatterBuilder()
     .printZeroNever()
     .appendDays()
     .appendSuffix("d")
@@ -45,6 +36,29 @@ val daysHoursAndMinutes: PeriodFormatter = PeriodFormatterBuilder()
     .appendSuffix("m")
     .toFormatter()
     .withLocale(Locale.UK)
+    .print(this)
+
+fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
+    .appendMonthOfYearText()
+    .appendLiteral(" ")
+    .appendDayOfMonth(1)
+    .toFormatter()
+    .withLocale(Locale.UK)
+    .print(this)
+
+fun DateTime.asDayHoursAndMinutes(): String = DateTimeFormatterBuilder()
+    .appendDayOfWeekText()
+    .appendLiteral(" ")
+    .appendDayOfMonth(1)
+    .appendLiteral(" ")
+    .appendMonthOfYearText()
+    .appendLiteral(" ")
+    .appendHourOfDay(1)
+    .appendLiteral(":")
+    .appendMinuteOfHour(2)
+    .toFormatter()
+    .withLocale(Locale.UK)
+    .print(this)
 
 fun BigInteger.formatForDisplay(): String = "%,d".format(this)
 fun BigInteger.formatScientifically(): String = DecimalFormat("##0E0").format(toBigDecimal())

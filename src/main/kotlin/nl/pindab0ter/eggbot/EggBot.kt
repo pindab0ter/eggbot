@@ -6,6 +6,7 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.commands.*
 import nl.pindab0ter.eggbot.database.*
+import nl.pindab0ter.eggbot.jobs.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardJob
 import org.jetbrains.exposed.sql.Database
@@ -98,6 +99,7 @@ object EggBot {
                 .withSchedule(weeklyOnDayAndHourAndMinute(FRIDAY, 13, 0))
                 .build()
         )
+        listenerManager.addJobListener(JobLogger)
         start()
     }
 }

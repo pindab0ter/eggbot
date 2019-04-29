@@ -4,7 +4,7 @@ import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.daysHoursAndMinutes
+import nl.pindab0ter.eggbot.asDayHoursAndMinutes
 import nl.pindab0ter.eggbot.formattedName
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.toDateTime
@@ -53,12 +53,10 @@ object ContractIDs : Command() {
             sb.append("${contract.name} (${contract.egg.formattedName})")
             sb.append(", valid for ")
             sb.append(
-                daysHoursAndMinutes.print(
-                    Duration(
-                        DateTime.now(),
-                        contract.expirationTime.toDateTime()
-                    ).toPeriod().normalizedStandard()
-                )
+                Duration(DateTime.now(), contract.expirationTime.toDateTime())
+                    .toPeriod()
+                    .normalizedStandard()
+                    .asDayHoursAndMinutes()
             )
             sb.appendln()
         }
