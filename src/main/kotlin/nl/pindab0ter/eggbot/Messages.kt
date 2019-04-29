@@ -4,41 +4,51 @@ import nl.pindab0ter.eggbot.database.Farmer
 import java.math.BigInteger
 
 object Messages {
-    fun earningsBonusLeaderBoard(farmers: List<Farmer>): List<String> =
-        StringBuilder("Earnings Bonus leader board:\n").apply {
+    private data class NameToValue(val name: String, val value: String)
+
+    private fun leaderBoard(title: String, farmers: List<NameToValue>): List<String> =
+        StringBuilder("$title leader board:\n").apply {
             append("```")
-            farmers.forEachIndexed { index, farmer ->
+            farmers.forEachIndexed { index, (name, value) ->
                 append("${index + 1}:")
                 appendPaddingSpaces(index + 1, farmers.count())
                 append(" ")
-                append(farmer.inGameName)
-                appendPaddingSpaces(farmer.inGameName, farmers.map { it.inGameName })
+                append(name)
+                appendPaddingSpaces(name, farmers.map { it.name })
                 append(" ")
                 appendPaddingSpaces(
-                    farmer.earningsBonus.formatForDisplay() + " %",
-                    farmers.map { it.earningsBonus.formatForDisplay() + " %" })
-                append(farmer.earningsBonus.formatForDisplay() + " %")
+                    value,
+                    farmers.map { it.value })
+                append(value)
                 if (index < farmers.size - 1) appendln()
             }
         }.toString().splitMessage(prefix = "Leader board continued…\n```", postfix = "```")
 
-    fun soulEggsLeaderBoard(farmers: List<Farmer>): List<String> =
-        StringBuilder("Soul Eggs leader board:\n").apply {
-            append("```")
-            farmers.forEachIndexed { index, farmer ->
-                append("${index + 1}:")
-                appendPaddingSpaces(index + 1, farmers.count())
-                append(" ")
-                append(farmer.inGameName)
-                appendPaddingSpaces(farmer.inGameName, farmers.map { it.inGameName })
-                append(" ")
-                appendPaddingSpaces(
-                    farmer.soulEggs.formatForDisplay(),
-                    farmers.map { it.soulEggs.formatForDisplay() })
-                append(farmer.soulEggs.formatForDisplay())
-                if (index < farmers.size - 1) appendln()
-            }
-        }.toString().splitMessage(prefix = "Leader board continued…\n```", postfix = "```")
+    fun earningsBonusLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
+        "Earnings Bonus",
+        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatForDisplay() + " %") }
+    )
+
+    fun soulEggsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
+        "Soul Eggs",
+        farmers.map { NameToValue(it.inGameName, it.soulEggs.formatForDisplay()) }
+    )
+
+    fun prestigesLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
+        "Drone Takedowns",
+        farmers.map { NameToValue(it.inGameName, it.prestiges.formatForDisplay()) }
+    )
+
+    fun droneTakedownsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
+        "Drone Takedowns",
+        farmers.map { NameToValue(it.inGameName, it.droneTakedowns.formatForDisplay()) }
+    )
+
+    fun eliteDroneTakedownsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
+        "Elite Drone Takedowns",
+        farmers.map { NameToValue(it.inGameName, it.eliteDroneTakedowns.formatForDisplay()) }
+    )
+
 
     fun earningsBonus(farmer: Farmer): String = StringBuilder().apply {
         val eb = farmer.earningsBonus.formatForDisplay() + " %"

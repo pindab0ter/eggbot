@@ -4,6 +4,7 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.Messages
+import nl.pindab0ter.eggbot.Messages.prestigesLeaderBoard
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
@@ -23,28 +24,56 @@ class UpdateLeaderBoardsJob : Job {
             return
         }
 
-        EggBot.jdaClient.getTextChannelById(Config.earningsBonusLeaderBoardChannel).apply {
-            history.retrievePast(100).complete().let { messages ->
-                log.info { "Purging ${messages.count()} Earnings Bonus leader board messages…" }
-                purgeMessages(messages)
-            }
+        updateLeaderBoard(
+            "Earnings Bonus",
+            Config.earningsBonusLeaderBoardChannel,
+            farmers.sortedByDescending { it.earningsBonus },
+            Messages::earningsBonusLeaderBoard
+        )
 
-            log.info { "Sending updated Earnings Bonus leader board…" }
-            Messages.earningsBonusLeaderBoard(farmers.sortedByDescending { it.earningsBonus }).forEach { message ->
-                sendMessage(message).queue()
-            }
+        updateLeaderBoard(
+            "Soul Eggs",
+            Config.soulEggsLeaderBoardChannel,
+            farmers.sortedByDescending { it.soulEggs },
+            Messages::soulEggsLeaderBoard
+        )
+
+        updateLeaderBoard(
+            "Prestiges",
+            Config.prestigesLeaderBoardChannel,
+            farmers.sortedByDescending { it.prestiges },
+            Messages::prestigesLeaderBoard
+        )
+
+        updateLeaderBoard(
+            "Drone Takedowns",
+            Config.droneTakedownsLeaderBoardChannel,
+            farmers.sortedByDescending { it.droneTakedowns },
+            Messages::droneTakedownsLeaderBoard
+        )
+
+        updateLeaderBoard(
+            "Elite Drone Takedowns",
+            Config.eliteDroneTakedownsLeaderBoardChannel,
+            farmers.sortedByDescending { it.eliteDroneTakedowns },
+            Messages::eliteDroneTakedownsLeaderBoard
+        )
+    }
+
+    private fun updateLeaderBoard(
+        title: String,
+        channel: String,
+        sortedFarmers: List<Farmer>,
+        messageFunction: (List<Farmer>) -> List<String>
+    ) = EggBot.jdaClient.getTextChannelById(channel).apply {
+        log.info { "Updating $title leader board…" }
+
+        history.retrievePast(100).complete().let {
+            purgeMessages(it)
         }
 
-        EggBot.jdaClient.getTextChannelById(Config.soulEggsLeaderBoardChannel).apply {
-            history.retrievePast(100).complete().let { messages ->
-                log.info { "Purging ${messages.count()} Soul Eggs leader board messages…" }
-                purgeMessages(messages)
-            }
-
-            log.info { "Sending updated Soul Eggs leader board…" }
-            Messages.soulEggsLeaderBoard(farmers.sortedByDescending { it.soulEggs }).forEach { message ->
-                sendMessage(message).queue()
-            }
+        messageFunction(sortedFarmers).forEach { message ->
+            sendMessage(message).queue()
         }
     }
 }

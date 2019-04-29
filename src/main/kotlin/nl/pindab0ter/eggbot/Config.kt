@@ -24,6 +24,9 @@ object Config {
     private const val CHANNEL_BOT_COMMANDS = "channel.bot_commands"
     private const val CHANNEL_LEADER_BOARD_EARNINGS_BONUS = "channel.leader_board.earnings_bonus"
     private const val CHANNEL_LEADER_BOARD_SOUL_EGGS = "channel.leader_board.soul_eggs"
+    private const val CHANNEL_LEADER_BOARD_PRESTIGES = "channel.leader_board.prestiges"
+    private const val CHANNEL_LEADER_BOARD_DRONE_TAKEDOWNS = "channel.leader_board.drone_takedowns"
+    private const val CHANNEL_LEADER_BOARD_ELITE_DRONE_TAKEDOWNS = "channel.leader_board.elite_drone_takedowns"
 
     private const val DEVELOPMENT = "dev_mode"
 
@@ -43,6 +46,9 @@ object Config {
     val botCommandsChannel: String
     val earningsBonusLeaderBoardChannel: String
     val soulEggsLeaderBoardChannel: String
+    val prestigesLeaderBoardChannel: String
+    val droneTakedownsLeaderBoardChannel: String
+    val eliteDroneTakedownsLeaderBoardChannel: String
 
     val devMode: Boolean
 
@@ -65,6 +71,9 @@ object Config {
             botCommandsChannel = getRequired(CHANNEL_BOT_COMMANDS)
             earningsBonusLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_EARNINGS_BONUS)
             soulEggsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_SOUL_EGGS)
+            prestigesLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_PRESTIGES)
+            droneTakedownsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_DRONE_TAKEDOWNS)
+            eliteDroneTakedownsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_ELITE_DRONE_TAKEDOWNS)
 
             devMode = getOptional(DEVELOPMENT, "false") == "true"
 

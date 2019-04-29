@@ -38,6 +38,9 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var prophecyEggs by Farmers.prophecyEggs
     var soulBonus by Farmers.soulBonus
     var prophecyBonus by Farmers.prophecyBonus
+    var prestiges by Farmers.prestiges
+    var droneTakedowns by Farmers.droneTakedowns
+    var eliteDroneTakedowns by Farmers.eliteDroneTakedowns
     var lastUpdated by Farmers.lastUpdated
     var coops by Coop via CoopFarmers
 
@@ -83,21 +86,28 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val activeEarningsBonus: BigInteger get() = if (isActive) earningsBonus else BigInteger.ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
-        if (backup == null) return@let
+        if (backup == null || !backup.hasData()) return@let
         transaction {
             soulEggs = backup.data.soulEggs
             prophecyEggs = backup.data.prophecyEggs
             soulBonus = backup.data.soulBonus
             prophecyBonus = backup.data.prophecyBonus
+            prestiges = backup.stats.prestigeCount
+            droneTakedowns = backup.stats.droneTakedowns
+            eliteDroneTakedowns = backup.stats.droneTakedownsElite
             lastUpdated = DateTime.now()
         }
     }
 
     fun update(backup: EggInc.Backup) = transaction {
+        if (!backup.hasData()) return@transaction
         soulEggs = backup.data.soulEggs
         prophecyEggs = backup.data.prophecyEggs
         soulBonus = backup.data.soulBonus
         prophecyBonus = backup.data.prophecyBonus
+        prestiges = backup.stats.prestigeCount
+        droneTakedowns = backup.stats.droneTakedowns
+        eliteDroneTakedowns = backup.stats.droneTakedownsElite
         lastUpdated = DateTime.now()
     }
 
