@@ -15,7 +15,7 @@ object DiscordUsers : IdTable<String>() {
 
 object Farmers : IdTable<String>() {
     override val id = text("in_game_id").uniqueIndex().entityId()
-    val discordId = reference("discord_id", DiscordUsers)
+    val discordId = reference("discord_id", DiscordUsers, CASCADE)
     val inGameName = text("in_game_name").uniqueIndex()
     val soulEggs = long("soul_eggs")
     val prophecyEggs = long("prophecy_eggs")
