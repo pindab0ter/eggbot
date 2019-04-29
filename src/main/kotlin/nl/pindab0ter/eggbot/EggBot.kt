@@ -86,7 +86,7 @@ object EggBot {
                 .build(),
             newTrigger()
                 .withIdentity("daily")
-                .withSchedule(simpleSchedule().withIntervalInHours(1))
+                .withSchedule(simpleSchedule().withIntervalInHours(1).repeatForever())
                 .build()
         )
         scheduleJob(
