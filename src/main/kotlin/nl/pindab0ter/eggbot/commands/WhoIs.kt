@@ -15,7 +15,7 @@ object WhoIs : Command() {
 
     init {
         name = "whois"
-        aliases = arrayOf("who-is", "who")
+        aliases = arrayOf("who-is", "who", "whothefuckis")
         arguments = "<in-game name>"
         help = "See which Discord user has registered with that in-game name."
         // category = UsersCategory
@@ -32,7 +32,7 @@ object WhoIs : Command() {
 
         val name = event.arguments.joinToString(" ")
         val farmer = transaction {
-            Farmer.find { Farmers.inGameName eq name }.firstOrNull()
+            Farmer.find { Farmers.inGameName like name }.firstOrNull()
         }
 
 
@@ -44,6 +44,6 @@ object WhoIs : Command() {
 
         val discordUser = transaction { farmer.discordUser }
 
-        event.reply("`$name` belongs to `${discordUser.discordTag.dropLast(5)}`")
+        event.reply("`${farmer.inGameName}` belongs to `${discordUser.discordTag.dropLast(5)}`")
     }
 }
