@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.asMonthAndDay
 import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 
@@ -22,7 +23,7 @@ object Inactive : Command() {
     }
 
     override fun execute(event: CommandEvent) {
-        if (event.arguments.count() > 1) "Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information.".let {
+        if (event.arguments.size > 1) tooManyArguments.let {
             event.replyWarning(it)
             log.trace { it }
             return

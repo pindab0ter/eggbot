@@ -27,15 +27,17 @@ object RollCall : Command() {
     // TODO: Add dry run option
     @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
-        if (event.arguments.count() < 1) "Missing argument(s). See `${event.client.textualPrefix}${event.client.helpWord}` for more information".let {
-            event.replyWarning(it)
-            log.trace { it }
-            return
-        }
-        if (event.arguments.count() > 1) "Too many arguments. See `${event.client.textualPrefix}${event.client.helpWord}` for more information".let {
-            event.replyWarning(it)
-            log.trace { it }
-            return
+        when {
+            event.arguments.isEmpty() -> missingArguments.let {
+                event.replyWarning(it)
+                log.trace { it }
+                return
+            }
+            event.arguments.size > 1 -> tooManyArguments.let {
+                event.replyWarning(it)
+                log.trace { it }
+                return
+            }
         }
 
         // if (Config.devMode) transaction {

@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.EggInc
 import com.github.kittinunf.fuel.core.Body
+import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.ChannelType
 import org.joda.time.DateTime
@@ -142,3 +143,10 @@ fun CommandEvent.replyInDms(messages: List<String>) {
         })
     }
 }
+
+
+// Messages
+
+val Command.missingArguments get() = "Missing argument(s). Use `${EggBot.commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
+
+val Command.tooManyArguments get() = "Too many arguments. Use `${EggBot.commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
