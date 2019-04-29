@@ -22,7 +22,8 @@ object Config {
     private const val COOP_INCREMENT_CHAR = "coop_increment_char"
 
     private const val CHANNEL_BOT_COMMANDS = "channel.bot_commands"
-    private const val CHANNEL_LEADER_BOARD = "channel.leader_board"
+    private const val CHANNEL_LEADER_BOARD_EARNINGS_BONUS = "channel.leader_board.earnings_bonus"
+    private const val CHANNEL_LEADER_BOARD_SOUL_EGGS = "channel.leader_board.soul_eggs"
 
     private const val DEVELOPMENT = "dev_mode"
 
@@ -40,7 +41,8 @@ object Config {
     val coopIncrementChar: Char
 
     val botCommandsChannel: String
-    val leaderBoardChannel: String
+    val earningsBonusLeaderBoardChannel: String
+    val soulEggsLeaderBoardChannel: String
 
     val devMode: Boolean
 
@@ -61,7 +63,8 @@ object Config {
             coopIncrementChar = getRequired(COOP_INCREMENT_CHAR).first()
 
             botCommandsChannel = getRequired(CHANNEL_BOT_COMMANDS)
-            leaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD)
+            earningsBonusLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_EARNINGS_BONUS)
+            soulEggsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_SOUL_EGGS)
 
             devMode = getOptional(DEVELOPMENT, "false") == "true"
 

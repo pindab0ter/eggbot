@@ -8,7 +8,7 @@ import nl.pindab0ter.eggbot.commands.*
 import nl.pindab0ter.eggbot.database.*
 import nl.pindab0ter.eggbot.jobs.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
-import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardJob
+import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.deleteAll
@@ -91,7 +91,7 @@ object EggBot {
                 .build()
         )
         scheduleJob(
-            newJob(UpdateLeaderBoardJob::class.java)
+            newJob(UpdateLeaderBoardsJob::class.java)
                 .withIdentity("update_leader_board")
                 .build(),
             newTrigger()

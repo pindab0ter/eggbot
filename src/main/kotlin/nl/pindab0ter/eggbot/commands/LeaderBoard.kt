@@ -4,8 +4,8 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.leaderBoard
 import nl.pindab0ter.eggbot.replyInDms
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -23,8 +23,6 @@ object LeaderBoard : Command() {
 
     override fun execute(event: CommandEvent) {
 
-        // TODO: Add "force-update" argument?
-
         val farmers = transaction {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
         }
@@ -35,7 +33,7 @@ object LeaderBoard : Command() {
             return
         }
 
-        leaderBoard(farmers).let { messages ->
+        Messages.earningsBonusLeaderBoard(farmers).let { messages ->
             if (event.channel.id == Config.botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {

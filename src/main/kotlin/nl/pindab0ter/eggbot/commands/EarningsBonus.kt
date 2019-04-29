@@ -5,8 +5,8 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.earningsBonus
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -37,7 +37,7 @@ object EarningsBonus : Command() {
                 if (backup == null) return@getFarmerBackup
                 farmer.update(backup)
 
-                earningsBonus(farmer).let {
+                Messages.earningsBonus(farmer).let {
                     if (event.channel.id == Config.botCommandsChannel) {
                         event.reply(it)
                     } else event.replyInDm(it) {

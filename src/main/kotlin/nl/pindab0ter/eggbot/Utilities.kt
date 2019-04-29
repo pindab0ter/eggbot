@@ -60,6 +60,7 @@ fun DateTime.asDayHoursAndMinutes(): String = DateTimeFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this)
 
+fun Long.formatForDisplay(): String = "%,d".format(this)
 fun BigInteger.formatForDisplay(): String = "%,d".format(this)
 fun BigInteger.formatScientifically(): String = DecimalFormat("##0E0").format(toBigDecimal())
 
