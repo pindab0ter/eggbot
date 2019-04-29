@@ -86,8 +86,8 @@ object EggBot {
                 .withIdentity("update_farmers")
                 .build(),
             newTrigger()
-                .withIdentity("daily")
-                .withSchedule(simpleSchedule().withIntervalInHours(1).repeatForever())
+                .withIdentity("quarter_daily")
+                .withSchedule(simpleSchedule().withIntervalInHours(6).repeatForever())
                 .build()
         )
         scheduleJob(
