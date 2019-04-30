@@ -17,7 +17,7 @@ object ContractIDs : Command() {
 
     init {
         name = "contracts"
-        aliases = arrayOf("id", "ids", "contracts", "contractids", "contract-ids")
+        aliases = arrayOf("id", "ids", "contractids", "contract-ids")
         help = "Shows the IDs of the currently active contracts"
         // category = ContractsCategory
         guildOnly = false

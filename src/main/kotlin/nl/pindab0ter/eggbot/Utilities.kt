@@ -37,7 +37,7 @@ fun Period.asDayHoursAndMinutes(): String = PeriodFormatterBuilder()
     .appendSuffix("m")
     .toFormatter()
     .withLocale(Locale.UK)
-    .print(this)
+    .print(this.normalizedStandard(PeriodType.dayTime()))
 
 fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
