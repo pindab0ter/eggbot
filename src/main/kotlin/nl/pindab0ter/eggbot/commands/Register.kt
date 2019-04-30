@@ -17,7 +17,7 @@ object Register : Command() {
 
     init {
         name = "register"
-        arguments = "<in-game name> <in-game id>"
+        arguments = "<in-game id> <in-game name>"
         help = "Register on this server with your in-game name and in-game ID. **DM only!**"
         // category = UsersCategory
         guildOnly = false
@@ -45,31 +45,13 @@ object Register : Command() {
         val registrant = object {
             val discordId = event.author.id
             val discordTag = event.author.asTag
-            val inGameId = event.arguments.last()
-            val inGameName = event.arguments.init().joinToString(" ")
+            val inGameId = event.arguments.first()
+            val inGameName = event.arguments.tail().joinToString(" ")
         }
 
         transaction {
             val farmers = Farmer.all().toList()
             val (backup, _) = AuxBrain.getFarmerBackup(registrant.inGameId.toUpperCase())
-
-            // Check if any back-up was found with the in-game ID
-            if (backup == null || !backup.hasData()) ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID correctly?\n" +
-                    "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
-                event.replyError(it)
-                log.trace { it }
-                return@transaction
-            }
-
-            // Check if the in-game name matches with the in-game name belonging to the in-game ID's account
-            if (registrant.inGameId != backup.userid ||
-                registrant.inGameName.toLowerCase() != backup.name.toLowerCase()
-            ) ("The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.name}`)\n" +
-                    "If this is you, please register with `${event.client.textualPrefix}$name ${backup.userid} ${backup.name}`").let {
-                event.replyError(it)
-                log.trace { it }
-                return@transaction
-            }
 
             // Check if the Discord user is already known, otherwise create a new user
             val discordUser: DiscordUser = DiscordUser.findById(registrant.discordId)
@@ -78,22 +60,38 @@ object Register : Command() {
                 }
 
             // Check if this Discord user hasn't already registered that in-game name
-            if (discordUser.farmers
-                    .any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName }
-            ) "You are already registered with the in-game names: `${discordUser.farmers.joinToString("`, `") { it.inGameName }}`.".let {
-                event.replyWarning(it)
-                log.trace { it }
-                return@transaction
-            }
+            if (discordUser.farmers.any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName })
+                "You are already registered with the in-game names: `${discordUser.farmers.joinToString("`, `") { it.inGameName }}`.".let {
+                    event.replyWarning(it)
+                    log.trace { it }
+                    return@transaction
+                }
 
             // Check if someone else hasn't already registered that in-game name
-            if (farmers
-                    .any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName }
-            ) "Someone else has already registered the in-game name `${registrant.inGameName}`.".let {
-                event.replyWarning(it)
-                log.trace { it }
-                return@transaction
-            }
+            if (farmers.any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName })
+                "Someone else has already registered the in-game name `${registrant.inGameName}`.".let {
+                    event.replyWarning(it)
+                    log.trace { it }
+                    return@transaction
+                }
+
+            // Check if any back-up was found with the in-game ID
+            if (backup == null || !backup.hasData())
+                ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID (not name!) correctly?\n" +
+                        "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
+                    event.replyError(it)
+                    log.trace { it }
+                    return@transaction
+                }
+
+            // Check if the in-game name matches with the in-game name belonging to the in-game ID's account
+            if (registrant.inGameId != backup.userid || registrant.inGameName.toLowerCase() != backup.name.toLowerCase())
+                ("The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.name}`)\n" +
+                        "If this is you, please register with `${event.client.textualPrefix}$name ${backup.userid} ${backup.name}`").let {
+                    event.replyError(it)
+                    log.trace { it }
+                    return@transaction
+                }
 
             // Add the new in-game name
             Farmer.new(registrant.inGameId) {
@@ -110,12 +108,11 @@ object Register : Command() {
             }
 
             // Finally confirm the registration
-            if (discordUser.farmers
-                    .filterNot { it.inGameId == registrant.inGameId }.none()
-            ) "You have been registered with the in-game name `${backup.name}`, welcome!".let {
-                event.replySuccess(it)
-                log.trace { it }
-            }
+            if (discordUser.farmers.filterNot { it.inGameId == registrant.inGameId }.none())
+                "You have been registered with the in-game name `${backup.name}`, welcome!".let {
+                    event.replySuccess(it)
+                    log.trace { it }
+                }
             else "You are now registered with the in-game name `${backup.name}`, as well as `${discordUser.farmers
                 .filterNot { it.inGameId == registrant.inGameId }
                 .joinToString(" `, ` ") { it.inGameName }

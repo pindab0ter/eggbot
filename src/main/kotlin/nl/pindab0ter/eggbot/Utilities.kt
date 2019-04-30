@@ -110,6 +110,7 @@ val EggInc.Game.soulBonus get() = epicResearchList.find { it.id == "soul_eggs" }
 val EggInc.Game.prophecyBonus get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
 
 fun <T> Iterable<T>.init() = take((count() - 1).coerceAtLeast(0))
+fun <T> Iterable<T>.tail() = drop(1)
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
 
 
