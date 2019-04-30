@@ -8,15 +8,13 @@ import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object ContractInfo : Command() {
+object ContractsInfo : Command() {
 
     private val log = KotlinLogging.logger { }
 
     init {
         name = "contracts"
-        aliases = arrayOf("contract", "co-op", "coop")
-        arguments = "[co-op ID]"
-        help = "Shows the progress of your own contracts or of a specific co-op."
+        help = "Shows the progress of your own contracts."
         // category = ContractsCategory
         guildOnly = false
     }
