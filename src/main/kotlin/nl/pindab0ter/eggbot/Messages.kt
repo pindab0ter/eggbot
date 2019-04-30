@@ -1,6 +1,9 @@
 package nl.pindab0ter.eggbot
 
+import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.database.Farmer
+import org.joda.time.DateTime
+import org.joda.time.Duration
 import java.math.BigInteger
 
 object Messages {
@@ -81,5 +84,70 @@ object Messages {
         appendPaddingSpaces(seToNext, strings)
         append(seToNext)
         append("```")
+    }.toString()
+
+    fun contractStatus(
+        localContract: EggInc.LocalContract,
+        farm: EggInc.Simulation
+    ): String = StringBuilder("**${localContract.contract.name}**:\n").apply {
+        val eggs = localContract.myEggs
+        val rate = 0.0
+        val hourlyRate = rate.times(60)
+
+        val elapsedTime = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
+        val timeRemaining = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime)
+        val requiredEggs = localContract.contract
+            .goalsList[localContract.contract.goalsList.size - 1]
+            .targetAmount
+        val projectedEggs = rate.times(localContract.coopGracePeriodEndTime / 60)
+
+        appendln("Eggs: ${eggs.formatIllions()}")
+        appendln("Rate: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
+        appendln("Time remaining: ${timeRemaining.asDayHoursAndMinutes()}")
+        append("Projected eggs: ${projectedEggs.formatIllions(true)}")
+        append("/")
+        append("${requiredEggs.formatIllions(true)}\n")
+    }.toString()
+
+    fun coopStatus(
+        localContract: EggInc.LocalContract,
+        coopStatus: EggInc.CoopStatusResponse
+    ): String = StringBuilder("`${localContract.coopIdentifier}` (${localContract.contract.name}):\n").apply {
+        val eggs = coopStatus.contributorsList.sumByDouble { it.contributionAmount }
+        val rate = coopStatus.contributorsList.sumByDouble { it.contributionRate }
+        val hourlyRate = rate.times(60)
+        val timeRemaining = coopStatus.secondsRemaining.toPeriod()
+        val requiredEggs = localContract.contract
+            .goalsList[localContract.contract.goalsList.size - 1]
+            .targetAmount
+        val projectedEggs = coopStatus.contributorsList
+            .sumByDouble { it.contributionRate }
+            .times(coopStatus.secondsRemaining / 60)
+
+        appendln("Eggs: ${eggs.formatIllions()}")
+        appendln("Rate: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
+        appendln("Time remaining: ${timeRemaining.asDayHoursAndMinutes()}")
+        append("Projected eggs: ${projectedEggs.formatIllions(true)}")
+        append("/")
+        append("${requiredEggs.formatIllions(true)}\n")
+        appendln("```")
+        val coopInfo = coopStatus.contributorsList.map {
+            Triple(
+                it.userName,
+                it.contributionAmount.formatIllions(true),
+                it.contributionRate.formatIllions(true) + "/s"
+            )
+        }
+        coopInfo.forEach { (userName, amount, rate) ->
+            append(userName)
+            appendPaddingSpaces(userName, coopInfo.map { it.first })
+            append(" ")
+            appendPaddingSpaces(amount, coopInfo.map { it.second })
+            append(amount)
+            append("|")
+            append(rate)
+            appendln()
+        }
+        appendln("```")
     }.toString()
 }
