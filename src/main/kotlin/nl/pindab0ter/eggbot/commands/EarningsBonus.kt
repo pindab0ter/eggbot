@@ -14,8 +14,6 @@ object EarningsBonus : Command() {
 
     private val log = KotlinLogging.logger { }
 
-    // TODO: Add arguments
-
     init {
         name = "earnings-bonus"
         aliases = arrayOf("eb", "earningsbonus", "earning-bonus", "earningbonus")
@@ -24,14 +22,21 @@ object EarningsBonus : Command() {
         guildOnly = false
     }
 
-    override fun execute(event: CommandEvent): Unit = transaction {
+    override fun execute(event: CommandEvent) {
+        event.channel.sendTyping().queue()
 
-        // TODO: If not called with arguments, get up-to-date EB for all Discord user's Farmers
         // TODO: If called with arguments, calculate scenario
 
-        event.author.openPrivateChannel().queue { it.sendTyping().queue() }
+        val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList() }
 
-        DiscordUser.findById(event.author.id)?.farmers?.forEach { farmer ->
+        @Suppress("FoldInitializerAndIfToElvis")
+        if (farmers.isNullOrEmpty()) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
+            event.replyWarning(it)
+            log.trace { it }
+            return
+        }
+
+        farmers.forEach { farmer ->
             log.trace { "Getting Earnings Bonus for ${farmer.inGameName}…" }
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
                 if (backup == null) return@getFarmerBackup
