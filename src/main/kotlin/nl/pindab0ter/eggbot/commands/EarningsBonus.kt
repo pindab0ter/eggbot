@@ -39,7 +39,12 @@ object EarningsBonus : Command() {
         farmers.forEach { farmer ->
             log.trace { "Getting Earnings Bonus for ${farmer.inGameName}…" }
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
-                if (backup == null) return@getFarmerBackup
+                if (backup == null) "Could not get information on ${farmer.inGameName}".let {
+                    event.replyWarning(it)
+                    log.warn { it }
+                    return@getFarmerBackup
+                }
+
                 farmer.update(backup)
 
                 Messages.earningsBonus(farmer).let {
