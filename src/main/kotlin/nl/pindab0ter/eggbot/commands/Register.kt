@@ -24,6 +24,8 @@ object Register : Command() {
     }
 
     override fun execute(event: CommandEvent) {
+        event.author.openPrivateChannel().queue { it.sendTyping().queue() }
+
         if (event.isFromType(TEXT)) {
             if (botPermissions.contains(MESSAGE_MANAGE)) "Registering is only allowed in DMs to protect your in-game ID. Please give it a go here!".let {
                 event.message.delete().queue()

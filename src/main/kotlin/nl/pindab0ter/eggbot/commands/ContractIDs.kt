@@ -24,6 +24,8 @@ object ContractIDs : Command() {
     }
 
     override fun execute(event: CommandEvent) {
+        event.channel.sendTyping().queue()
+
         log.trace { "Getting currently active contracts…" }
         AuxBrain.getContracts { getContractsResponse ->
             val (soloContracts, coopContracts) = getContractsResponse.contractsList

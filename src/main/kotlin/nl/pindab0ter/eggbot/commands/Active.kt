@@ -19,6 +19,8 @@ object Active : Command() {
 
     @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
+        event.channel.sendTyping().queue()
+
         val discordUser = transaction { DiscordUser.findById(event.author.id) }
 
         if (discordUser == null) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {

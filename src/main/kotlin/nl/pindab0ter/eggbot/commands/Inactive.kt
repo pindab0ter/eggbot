@@ -23,6 +23,8 @@ object Inactive : Command() {
     }
 
     override fun execute(event: CommandEvent) {
+        event.channel.sendTyping().queue()
+
         if (event.arguments.size > 1) tooManyArguments.let {
             event.replyWarning(it)
             log.trace { it }

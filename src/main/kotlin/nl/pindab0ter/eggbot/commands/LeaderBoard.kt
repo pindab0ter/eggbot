@@ -22,6 +22,11 @@ object LeaderBoard : Command() {
     }
 
     override fun execute(event: CommandEvent) {
+        if (event.channel.id == Config.botCommandsChannel) {
+            event.channel.sendTyping()
+        } else {
+            event.author.openPrivateChannel().queue { it.sendTyping().queue() }
+        }
 
         val farmers = transaction {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }

@@ -27,6 +27,8 @@ object RollCall : Command() {
     // TODO: Add dry run option
     @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
+        event.channel.sendTyping().queue()
+
         when {
             event.arguments.isEmpty() -> missingArguments.let {
                 event.replyWarning(it)
