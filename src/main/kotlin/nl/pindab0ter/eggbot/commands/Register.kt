@@ -55,7 +55,7 @@ object Register : Command() {
 
             // Check if any back-up was found with the in-game ID
             if (backup == null || !backup.hasData()) ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID correctly?\n" +
-                    "To register, type `${event.client.textualPrefix}${event.client.helpWord} $arguments` without the brackets.").let {
+                    "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
                 event.replyError(it)
                 log.trace { it }
                 return@transaction
@@ -103,6 +103,9 @@ object Register : Command() {
                 this.prophecyEggs = backup.data.prophecyEggs
                 this.soulBonus = backup.data.soulBonus
                 this.prophecyBonus = backup.data.prophecyBonus
+                this.prestiges = backup.stats.prestigeCount
+                this.droneTakedowns = backup.stats.droneTakedowns
+                this.eliteDroneTakedowns = backup.stats.droneTakedownsElite
                 this.lastUpdated = DateTime.now()
             }
 
