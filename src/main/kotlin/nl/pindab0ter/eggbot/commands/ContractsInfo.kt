@@ -7,6 +7,8 @@ import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
+import org.joda.time.Duration
 
 object ContractsInfo : Command() {
 
@@ -22,12 +24,6 @@ object ContractsInfo : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        if (event.arguments.size > 1) tooManyArguments.let {
-            event.replyWarning(it)
-            log.trace { it }
-            return
-        }
-
         val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList() }
 
         @Suppress("FoldInitializerAndIfToElvis")
@@ -39,8 +35,8 @@ object ContractsInfo : Command() {
 
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
-                if (backup == null || !backup.hasData()) "No data found for ${farmer.inGameName}.".let {
-                    log.trace { it }
+                if (backup == null || !backup.hasData()) "No data found for `${farmer.inGameName}`.".let {
+                    log.warn { it }
                     event.reply(it)
                     return@getFarmerBackup
                 }
@@ -55,36 +51,61 @@ object ContractsInfo : Command() {
                     .groupBy { it.contract.coopAllowed }
                     .let { it[0].orEmpty() to it[1].orEmpty() }
 
-                coopContracts.map { it to AuxBrain.getCoopStatus(it.contract.identifier, it.coopIdentifier).get() }
+                soloContracts
+                    .map { it to backup.farmsList.find { farm -> farm.contractId == it.contract.identifier }!! }
+                    .forEach { (localContract, farm) ->
+                        event.replyInDm(StringBuilder("**${localContract.contract.name}**:\n").apply {
+                            try {
+                                val eggs = localContract.myEggs
+                                val rate = 0.0
+                                val hourlyRate = rate.times(60)
+
+                                val elapsedTime = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
+                                val timeRemaining = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime)
+                                val requiredEggs = localContract.contract
+                                    .goalsList[localContract.contract.goalsList.size - 1]
+                                    .targetAmount
+                                val projectedEggs = rate.times(localContract.coopGracePeriodEndTime / 60)
+
+                                appendln("Eggs: ${eggs.formatIllions()}")
+                                appendln("Rate: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
+                                appendln("Time remaining: ${timeRemaining.asDayHoursAndMinutes()}")
+                                append("Projected eggs: ${projectedEggs.formatIllions(true)}")
+                                append("/")
+                                append("${requiredEggs.formatIllions(true)}\n")
+                            } catch (e: Exception) {
+                                log.error(e) { "" }
+                            }
+                        }.toString())
+                    }
+
+                coopContracts
+                    .map { it to AuxBrain.getCoopStatus(it.contract.identifier, it.coopIdentifier).get() }
                     .forEach { (localContract, coopStatus) ->
-                        event.replyInDm(StringBuilder("Active Contracts:\n").apply {
-
-                            val eggs = coopStatus.contributorsList
-                                .sumByDouble { it.contributionAmount }
-                                .formatShortScaleAbbreviated()
-
+                        event.replyInDm(StringBuilder("**${localContract.contract.name}** (`${localContract.coopIdentifier}`):\n").apply {
+                            val eggs = coopStatus.contributorsList.sumByDouble { it.contributionAmount }
                             val rate = coopStatus.contributorsList.sumByDouble { it.contributionRate }
-                                .formatShortScaleAbbreviated(true)
-
-                            val hourlyRate = coopStatus.contributorsList.sumByDouble { it.contributionRate }
-                                .times(60)
-                                .formatShortScaleAbbreviated(true)
-
+                            val hourlyRate = rate.times(60)
                             val timeRemaining = coopStatus.secondsRemaining.toPeriod()
+                            val requiredEggs = localContract.contract
+                                .goalsList[localContract.contract.goalsList.size - 1]
+                                .targetAmount
+                            val projectedEggs = coopStatus.contributorsList
+                                .sumByDouble { it.contributionRate }
+                                .times(coopStatus.secondsRemaining / 60)
 
-                            val projectedEggs = "???"
-
-                            appendln("**`${localContract.coopIdentifier}`** (${localContract.contract.name}):")
-                            appendln("Eggs: $eggs")
-                            appendln("Rate: $rate ($hourlyRate/hr)")
+                            appendln("Eggs: ${eggs.formatIllions()}")
+                            appendln("Rate: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
                             appendln("Time remaining: ${timeRemaining.asDayHoursAndMinutes()}")
-                            appendln("Projected Eggs: $projectedEggs")
+                            append("Projected eggs: ${projectedEggs.formatIllions(true)}")
+                            append("/")
+                            append("${requiredEggs.formatIllions(true)}\n")
                             appendln("```")
                             val coopInfo = coopStatus.contributorsList.map {
                                 Triple(
                                     it.userName,
-                                    it.contributionAmount.formatShortScaleAbbreviated(true),
-                                    it.contributionRate.formatShortScaleAbbreviated(true) + "/s"
+                                    it.contributionAmount.formatIllions(true),
+                                    it.contributionRate.formatIllions(true) + "/s"
                                 )
                             }
                             coopInfo.forEach { (userName, amount, rate) ->

@@ -6,6 +6,7 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.ChannelType
 import org.joda.time.DateTime
+import org.joda.time.Duration
 import org.joda.time.Period
 import org.joda.time.PeriodType
 import org.joda.time.format.DateTimeFormatterBuilder
@@ -29,6 +30,7 @@ val EggInc.Egg.formattedName: String
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.days())
+fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
 
 fun Period.asDayHoursAndMinutes(): String = PeriodFormatterBuilder()
     .printZeroNever()
@@ -41,6 +43,8 @@ fun Period.asDayHoursAndMinutes(): String = PeriodFormatterBuilder()
     .toFormatter()
     .withLocale(Locale.UK)
     .print(this.normalizedStandard(PeriodType.dayTime()))
+
+fun Duration.asDayHoursAndMinutes(): String = this.toPeriod().asDayHoursAndMinutes()
 
 fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
