@@ -16,8 +16,8 @@ object ContractIDs : Command() {
     private val log = KotlinLogging.logger { }
 
     init {
-        name = "contracts"
-        aliases = arrayOf("id", "ids", "contractids", "contract-ids")
+        name = "contract-ids"
+        aliases = arrayOf("ids", "contractids")
         help = "Shows the IDs of the currently active contracts"
         // category = ContractsCategory
         guildOnly = false

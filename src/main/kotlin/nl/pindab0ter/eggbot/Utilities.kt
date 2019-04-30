@@ -63,98 +63,107 @@ fun DateTime.asDayHoursAndMinutes(): String = DateTimeFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this)
 
+// val displayFormat = DecimalFormat(",###.###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 val displayFormat = DecimalFormat(",###.###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+val roundedDisplayFormat = DecimalFormat(",###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 
 fun Double.formatForDisplay(): String = displayFormat.format(this)
 fun Long.formatForDisplay(): String = displayFormat.format(this)
 fun Int.formatForDisplay(): String = displayFormat.format(this)
 fun BigInteger.formatForDisplay(): String = displayFormat.format(this)
 
-fun Double.formatShortScale(): String = when (this) {
-    in (1.0e006..1.0e009 - 1) -> "${displayFormat.format(this / 1e006)} Million"
-    in (1.0e009..1.0e012 - 1) -> "${displayFormat.format(this / 1e009)} Billion"
-    in (1.0e012..1.0e015 - 1) -> "${displayFormat.format(this / 1e012)} Trillion"
-    in (1.0e015..1.0e018 - 1) -> "${displayFormat.format(this / 1e015)} Quadrillion"
-    in (1.0e018..1.0e021 - 1) -> "${displayFormat.format(this / 1e018)} Quintillion"
-    in (1.0e021..1.0e024 - 1) -> "${displayFormat.format(this / 1e021)} Sextillion"
-    in (1.0e024..1.0e027 - 1) -> "${displayFormat.format(this / 1e024)} Septillion"
-    in (1.0e027..1.0e030 - 1) -> "${displayFormat.format(this / 1e027)} Octillion"
-    in (1.0e030..1.0e033 - 1) -> "${displayFormat.format(this / 1e030)} Nonillion"
-    in (1.0e033..1.0e036 - 1) -> "${displayFormat.format(this / 1e033)} Decillion"
-    in (1.0e036..1.0e039 - 1) -> "${displayFormat.format(this / 1e036)} Undecillion"
-    in (1.0e039..1.0e042 - 1) -> "${displayFormat.format(this / 1e039)} Duodecillion"
-    in (1.0e042..1.0e045 - 1) -> "${displayFormat.format(this / 1e042)} Tredecillion"
-    in (1.0e045..1.0e048 - 1) -> "${displayFormat.format(this / 1e045)} Quattuordecillion"
-    in (1.0e048..1.0e051 - 1) -> "${displayFormat.format(this / 1e048)} Quinquadecillion"
-    in (1.0e051..1.0e054 - 1) -> "${displayFormat.format(this / 1e051)} Sedecillion"
-    in (1.0e054..1.0e057 - 1) -> "${displayFormat.format(this / 1e054)} Septendecillion"
-    in (1.0e057..1.0e060 - 1) -> "${displayFormat.format(this / 1e057)} Octodecillion"
-    in (1.0e060..1.0e063 - 1) -> "${displayFormat.format(this / 1e060)} Novendecillion"
-    in (1.0e063..1.0e066 - 1) -> "${displayFormat.format(this / 1e063)} Vigintillion"
-    in (1.0e066..1.0e069 - 1) -> "${displayFormat.format(this / 1e066)} Unvigintillion"
-    in (1.0e069..1.0e072 - 1) -> "${displayFormat.format(this / 1e069)} Duovigintillion"
-    in (1.0e072..1.0e075 - 1) -> "${displayFormat.format(this / 1e072)} Tresvigintillion"
-    in (1.0e075..1.0e078 - 1) -> "${displayFormat.format(this / 1e075)} Quattuorvigintillion"
-    in (1.0e078..1.0e081 - 1) -> "${displayFormat.format(this / 1e078)} Quinquavigintillion"
-    in (1.0e081..1.0e084 - 1) -> "${displayFormat.format(this / 1e081)} Sesvigintillion"
-    in (1.0e084..1.0e087 - 1) -> "${displayFormat.format(this / 1e084)} Septemvigintillion"
-    in (1.0e087..1.0e090 - 1) -> "${displayFormat.format(this / 1e087)} Octovigintillion"
-    in (1.0e090..1.0e093 - 1) -> "${displayFormat.format(this / 1e090)} Novemvigintillion"
-    in (1.0e093..1.0e096 - 1) -> "${displayFormat.format(this / 1e093)} Trigintillion"
-    in (1.0e096..1.0e099 - 1) -> "${displayFormat.format(this / 1e096)} Untrigintillion"
-    in (1.0e099..1.0e102 - 1) -> "${displayFormat.format(this / 1e099)} Duotrigintillion"
-    in (1.0e102..1.0e105 - 1) -> "${displayFormat.format(this / 1e102)} Trestrigintillion"
-    in (1.0e105..1.0e108 - 1) -> "${displayFormat.format(this / 1e105)} Quattuortrigintillion"
-    in (1.0e108..1.0e111 - 1) -> "${displayFormat.format(this / 1e108)} Quinquatrigintillion"
-    in (1.0e111..1.0e114 - 1) -> "${displayFormat.format(this / 1e111)} Sestrigintillion"
-    in (1.0e114..1.0e117 - 1) -> "${displayFormat.format(this / 1e114)} Septentrigintillion"
-    in (1.0e117..1.0e120 - 1) -> "${displayFormat.format(this / 1e117)} Octotrigintillion"
-    in (1.0e120..1.0e123 - 1) -> "${displayFormat.format(this / 1e120)} Noventrigintillion"
-    else -> BigDecimal(this).toBigInteger().formatForDisplay()
-}
+fun Double.formatShortScale(rounded: Boolean = false): String =
+    (if (rounded) roundedDisplayFormat else displayFormat).let { formatter ->
+        when (this) {
+            in (1.0e006..1.0e009 - 1) -> "${formatter.format(this / 1e006)} Million"
+            in (1.0e009..1.0e012 - 1) -> "${formatter.format(this / 1e009)} Billion"
+            in (1.0e012..1.0e015 - 1) -> "${formatter.format(this / 1e012)} Trillion"
+            in (1.0e015..1.0e018 - 1) -> "${formatter.format(this / 1e015)} Quadrillion"
+            in (1.0e018..1.0e021 - 1) -> "${formatter.format(this / 1e018)} Quintillion"
+            in (1.0e021..1.0e024 - 1) -> "${formatter.format(this / 1e021)} Sextillion"
+            in (1.0e024..1.0e027 - 1) -> "${formatter.format(this / 1e024)} Septillion"
+            in (1.0e027..1.0e030 - 1) -> "${formatter.format(this / 1e027)} Octillion"
+            in (1.0e030..1.0e033 - 1) -> "${formatter.format(this / 1e030)} Nonillion"
+            in (1.0e033..1.0e036 - 1) -> "${formatter.format(this / 1e033)} Decillion"
+            in (1.0e036..1.0e039 - 1) -> "${formatter.format(this / 1e036)} Undecillion"
+            in (1.0e039..1.0e042 - 1) -> "${formatter.format(this / 1e039)} Duodecillion"
+            in (1.0e042..1.0e045 - 1) -> "${formatter.format(this / 1e042)} Tredecillion"
+            in (1.0e045..1.0e048 - 1) -> "${formatter.format(this / 1e045)} Quattuordecillion"
+            in (1.0e048..1.0e051 - 1) -> "${formatter.format(this / 1e048)} Quinquadecillion"
+            in (1.0e051..1.0e054 - 1) -> "${formatter.format(this / 1e051)} Sedecillion"
+            in (1.0e054..1.0e057 - 1) -> "${formatter.format(this / 1e054)} Septendecillion"
+            in (1.0e057..1.0e060 - 1) -> "${formatter.format(this / 1e057)} Octodecillion"
+            in (1.0e060..1.0e063 - 1) -> "${formatter.format(this / 1e060)} Novendecillion"
+            in (1.0e063..1.0e066 - 1) -> "${formatter.format(this / 1e063)} Vigintillion"
+            in (1.0e066..1.0e069 - 1) -> "${formatter.format(this / 1e066)} Unvigintillion"
+            in (1.0e069..1.0e072 - 1) -> "${formatter.format(this / 1e069)} Duovigintillion"
+            in (1.0e072..1.0e075 - 1) -> "${formatter.format(this / 1e072)} Tresvigintillion"
+            in (1.0e075..1.0e078 - 1) -> "${formatter.format(this / 1e075)} Quattuorvigintillion"
+            in (1.0e078..1.0e081 - 1) -> "${formatter.format(this / 1e078)} Quinquavigintillion"
+            in (1.0e081..1.0e084 - 1) -> "${formatter.format(this / 1e081)} Sesvigintillion"
+            in (1.0e084..1.0e087 - 1) -> "${formatter.format(this / 1e084)} Septemvigintillion"
+            in (1.0e087..1.0e090 - 1) -> "${formatter.format(this / 1e087)} Octovigintillion"
+            in (1.0e090..1.0e093 - 1) -> "${formatter.format(this / 1e090)} Novemvigintillion"
+            in (1.0e093..1.0e096 - 1) -> "${formatter.format(this / 1e093)} Trigintillion"
+            in (1.0e096..1.0e099 - 1) -> "${formatter.format(this / 1e096)} Untrigintillion"
+            in (1.0e099..1.0e102 - 1) -> "${formatter.format(this / 1e099)} Duotrigintillion"
+            in (1.0e102..1.0e105 - 1) -> "${formatter.format(this / 1e102)} Trestrigintillion"
+            in (1.0e105..1.0e108 - 1) -> "${formatter.format(this / 1e105)} Quattuortrigintillion"
+            in (1.0e108..1.0e111 - 1) -> "${formatter.format(this / 1e108)} Quinquatrigintillion"
+            in (1.0e111..1.0e114 - 1) -> "${formatter.format(this / 1e111)} Sestrigintillion"
+            in (1.0e114..1.0e117 - 1) -> "${formatter.format(this / 1e114)} Septentrigintillion"
+            in (1.0e117..1.0e120 - 1) -> "${formatter.format(this / 1e117)} Octotrigintillion"
+            in (1.0e120..1.0e123 - 1) -> "${formatter.format(this / 1e120)} Noventrigintillion"
+            else -> BigDecimal(this).toBigInteger().formatForDisplay()
+        }
+    }
 
-fun Double.formatShortScaleAbbreviated(): String = when (this) {
-    in (1.0e006..1.0e009 - 1) -> "${displayFormat.format(this / 1e006)}M"
-    in (1.0e009..1.0e012 - 1) -> "${displayFormat.format(this / 1e009)}B"
-    in (1.0e012..1.0e015 - 1) -> "${displayFormat.format(this / 1e012)}T"
-    in (1.0e015..1.0e018 - 1) -> "${displayFormat.format(this / 1e015)}q"
-    in (1.0e018..1.0e021 - 1) -> "${displayFormat.format(this / 1e018)}Q"
-    in (1.0e021..1.0e024 - 1) -> "${displayFormat.format(this / 1e021)}s"
-    in (1.0e024..1.0e027 - 1) -> "${displayFormat.format(this / 1e024)}S"
-    in (1.0e027..1.0e030 - 1) -> "${displayFormat.format(this / 1e027)}O"
-    in (1.0e030..1.0e033 - 1) -> "${displayFormat.format(this / 1e030)}N"
-    in (1.0e033..1.0e036 - 1) -> "${displayFormat.format(this / 1e033)}D"
-    in (1.0e036..1.0e039 - 1) -> "${displayFormat.format(this / 1e036)}uD"
-    in (1.0e039..1.0e042 - 1) -> "${displayFormat.format(this / 1e039)}dD"
-    in (1.0e042..1.0e045 - 1) -> "${displayFormat.format(this / 1e042)}tD"
-    in (1.0e045..1.0e048 - 1) -> "${displayFormat.format(this / 1e045)}qD"
-    in (1.0e048..1.0e051 - 1) -> "${displayFormat.format(this / 1e048)}QD"
-    in (1.0e051..1.0e054 - 1) -> "${displayFormat.format(this / 1e051)}sD"
-    in (1.0e054..1.0e057 - 1) -> "${displayFormat.format(this / 1e054)}SD"
-    in (1.0e057..1.0e060 - 1) -> "${displayFormat.format(this / 1e057)}OD"
-    in (1.0e060..1.0e063 - 1) -> "${displayFormat.format(this / 1e060)}ND"
-    in (1.0e063..1.0e066 - 1) -> "${displayFormat.format(this / 1e063)}V"
-    in (1.0e066..1.0e069 - 1) -> "${displayFormat.format(this / 1e066)}uV"
-    in (1.0e069..1.0e072 - 1) -> "${displayFormat.format(this / 1e069)}dV"
-    in (1.0e072..1.0e075 - 1) -> "${displayFormat.format(this / 1e072)}tV"
-    in (1.0e075..1.0e078 - 1) -> "${displayFormat.format(this / 1e075)}qV"
-    in (1.0e078..1.0e081 - 1) -> "${displayFormat.format(this / 1e078)}QV"
-    in (1.0e081..1.0e084 - 1) -> "${displayFormat.format(this / 1e081)}sV"
-    in (1.0e084..1.0e087 - 1) -> "${displayFormat.format(this / 1e084)}SV"
-    in (1.0e087..1.0e090 - 1) -> "${displayFormat.format(this / 1e087)}OV"
-    in (1.0e090..1.0e093 - 1) -> "${displayFormat.format(this / 1e090)}NV"
-    in (1.0e093..1.0e096 - 1) -> "${displayFormat.format(this / 1e093)}Tg"
-    in (1.0e096..1.0e099 - 1) -> "${displayFormat.format(this / 1e096)}uTG"
-    in (1.0e099..1.0e102 - 1) -> "${displayFormat.format(this / 1e099)}dTg"
-    in (1.0e102..1.0e105 - 1) -> "${displayFormat.format(this / 1e102)}tTg"
-    in (1.0e105..1.0e108 - 1) -> "${displayFormat.format(this / 1e105)}qTg"
-    in (1.0e108..1.0e111 - 1) -> "${displayFormat.format(this / 1e108)}QTg"
-    in (1.0e111..1.0e114 - 1) -> "${displayFormat.format(this / 1e111)}sTg"
-    in (1.0e114..1.0e117 - 1) -> "${displayFormat.format(this / 1e114)}STg"
-    in (1.0e117..1.0e120 - 1) -> "${displayFormat.format(this / 1e117)}OTg"
-    in (1.0e120..1.0e123 - 1) -> "${displayFormat.format(this / 1e120)}NTg"
-    else -> BigDecimal(this).toBigInteger().formatForDisplay()
-}
+
+fun Double.formatShortScaleAbbreviated(rounded: Boolean = false): String =
+    (if (rounded) roundedDisplayFormat else displayFormat).let { formatter ->
+        when (this) {
+            in (1.0e006..1.0e009 - 1) -> "${formatter.format(this / 1e006)}M"
+            in (1.0e009..1.0e012 - 1) -> "${formatter.format(this / 1e009)}B"
+            in (1.0e012..1.0e015 - 1) -> "${formatter.format(this / 1e012)}T"
+            in (1.0e015..1.0e018 - 1) -> "${formatter.format(this / 1e015)}q"
+            in (1.0e018..1.0e021 - 1) -> "${formatter.format(this / 1e018)}Q"
+            in (1.0e021..1.0e024 - 1) -> "${formatter.format(this / 1e021)}s"
+            in (1.0e024..1.0e027 - 1) -> "${formatter.format(this / 1e024)}S"
+            in (1.0e027..1.0e030 - 1) -> "${formatter.format(this / 1e027)}O"
+            in (1.0e030..1.0e033 - 1) -> "${formatter.format(this / 1e030)}N"
+            in (1.0e033..1.0e036 - 1) -> "${formatter.format(this / 1e033)}D"
+            in (1.0e036..1.0e039 - 1) -> "${formatter.format(this / 1e036)}uD"
+            in (1.0e039..1.0e042 - 1) -> "${formatter.format(this / 1e039)}dD"
+            in (1.0e042..1.0e045 - 1) -> "${formatter.format(this / 1e042)}tD"
+            in (1.0e045..1.0e048 - 1) -> "${formatter.format(this / 1e045)}qD"
+            in (1.0e048..1.0e051 - 1) -> "${formatter.format(this / 1e048)}QD"
+            in (1.0e051..1.0e054 - 1) -> "${formatter.format(this / 1e051)}sD"
+            in (1.0e054..1.0e057 - 1) -> "${formatter.format(this / 1e054)}SD"
+            in (1.0e057..1.0e060 - 1) -> "${formatter.format(this / 1e057)}OD"
+            in (1.0e060..1.0e063 - 1) -> "${formatter.format(this / 1e060)}ND"
+            in (1.0e063..1.0e066 - 1) -> "${formatter.format(this / 1e063)}V"
+            in (1.0e066..1.0e069 - 1) -> "${formatter.format(this / 1e066)}uV"
+            in (1.0e069..1.0e072 - 1) -> "${formatter.format(this / 1e069)}dV"
+            in (1.0e072..1.0e075 - 1) -> "${formatter.format(this / 1e072)}tV"
+            in (1.0e075..1.0e078 - 1) -> "${formatter.format(this / 1e075)}qV"
+            in (1.0e078..1.0e081 - 1) -> "${formatter.format(this / 1e078)}QV"
+            in (1.0e081..1.0e084 - 1) -> "${formatter.format(this / 1e081)}sV"
+            in (1.0e084..1.0e087 - 1) -> "${formatter.format(this / 1e084)}SV"
+            in (1.0e087..1.0e090 - 1) -> "${formatter.format(this / 1e087)}OV"
+            in (1.0e090..1.0e093 - 1) -> "${formatter.format(this / 1e090)}NV"
+            in (1.0e093..1.0e096 - 1) -> "${formatter.format(this / 1e093)}Tg"
+            in (1.0e096..1.0e099 - 1) -> "${formatter.format(this / 1e096)}uTG"
+            in (1.0e099..1.0e102 - 1) -> "${formatter.format(this / 1e099)}dTg"
+            in (1.0e102..1.0e105 - 1) -> "${formatter.format(this / 1e102)}tTg"
+            in (1.0e105..1.0e108 - 1) -> "${formatter.format(this / 1e105)}qTg"
+            in (1.0e108..1.0e111 - 1) -> "${formatter.format(this / 1e108)}QTg"
+            in (1.0e111..1.0e114 - 1) -> "${formatter.format(this / 1e111)}sTg"
+            in (1.0e114..1.0e117 - 1) -> "${formatter.format(this / 1e114)}STg"
+            in (1.0e117..1.0e120 - 1) -> "${formatter.format(this / 1e117)}OTg"
+            in (1.0e120..1.0e123 - 1) -> "${formatter.format(this / 1e120)}NTg"
+            else -> BigDecimal(this).toBigInteger().formatForDisplay()
+        }
+    }
 
 fun paddingSpaces(current: Any, longest: Any): String {
     val currentLength = current.toString().length
@@ -171,7 +180,10 @@ fun <T : Any> paddingSpaces(current: T, containsLongest: Iterable<T>): String =
 fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, longest: T): java.lang.StringBuilder =
     append(paddingSpaces(current, longest))
 
-fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, containsLongest: Iterable<T>): java.lang.StringBuilder =
+fun <T : Any> StringBuilder.appendPaddingSpaces(
+    current: T,
+    containsLongest: Iterable<T>
+): java.lang.StringBuilder =
     append(paddingSpaces(current, containsLongest))
 
 fun String.splitMessage(

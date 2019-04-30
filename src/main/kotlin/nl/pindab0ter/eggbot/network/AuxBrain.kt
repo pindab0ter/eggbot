@@ -43,6 +43,38 @@ object AuxBrain {
                 .encodeBase64ToString()}"
         )
 
+    private fun getCoopStatusPostRequest(contractId: String, coopName: String) = COOP_STATUS_URL.httpPost()
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(
+            "data=${EggInc.CoopStatusRequest
+                .newBuilder()
+                .setContractId(contractId)
+                .setCoopName(coopName)
+                .build()
+                .toByteString()
+                .toStringUtf8()
+                .encodeBase64ToString()}"
+        )
+
+    fun getCoopStatus(
+        contractId: String,
+        coopName: String
+    ): Result<EggInc.CoopStatusResponse, FuelError> =
+        getCoopStatusPostRequest(contractId, coopName).responseObject(ContractDeserializer).third
+
+    fun getCoopStatus(
+        contractId: String,
+        coopName: String,
+        handler: ResultHandler<EggInc.CoopStatusResponse>
+    ): CancellableRequest =
+        getCoopStatusPostRequest(contractId, coopName).responseObject(ContractDeserializer, handler)
+
+    object ContractDeserializer : ResponseDeserializable<EggInc.CoopStatusResponse> {
+        override fun deserialize(content: String): EggInc.CoopStatusResponse? {
+            return EggInc.CoopStatusResponse.parseFrom(content.decodeBase64())
+        }
+    }
+
     /**
      * Retrieve the [EggInc.Backup] asynchronously, using the [handler]
      *
