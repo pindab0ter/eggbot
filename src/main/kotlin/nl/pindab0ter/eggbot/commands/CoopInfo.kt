@@ -3,12 +3,10 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Messages
-import nl.pindab0ter.eggbot.arguments
+import net.dv8tion.jda.core.entities.ChannelType
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.database.Contract
-import nl.pindab0ter.eggbot.missingArguments
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
-import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object CoopInfo : Command() {
@@ -49,7 +47,14 @@ object CoopInfo : Command() {
 
             transaction {
                 Contract.getOrNew(status.contractIdentifier)?.let { contract ->
-                    event.replyInDm(Messages.coopStatus(contract, status))
+                    Messages.coopStatus(contract, status).let { message ->
+                        if (event.channel.id == Config.botCommandsChannel) {
+                            event.reply(message)
+                        } else {
+                            event.replyInDm(message)
+                            if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+                        }
+                    }
                 }
             }
         }
