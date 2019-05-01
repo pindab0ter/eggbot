@@ -25,11 +25,11 @@ object Messages {
                 append(value)
                 if (index < farmers.size - 1) appendln()
             }
-        }.toString().splitMessage(prefix = "Leader board continued…\n```", postfix = "```")
+        }.toString().splitMessage(prefix = "```", postfix = "```")
 
     fun earningsBonusLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Earnings Bonus",
-        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatForDisplay() + " %") }
+        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatForDisplay() + "\u00A0%") }
     )
 
     fun soulEggsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
