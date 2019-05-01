@@ -1,5 +1,8 @@
 package nl.pindab0ter.eggbot.jobs
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,7 +21,11 @@ class UpdateFarmersJob : Job {
             return
         }
 
-        farmers.map { it.update() }
-            .let { log.info { "Updated ${it.size} farmers." } }
+        runBlocking {
+            farmers
+                .map { farmer -> GlobalScope.launch { farmer.update() } }
+                .map { it.join() }
+                .let { log.info { "Updated ${it.size} farmers." } }
+        }
     }
 }
