@@ -116,7 +116,7 @@ object Messages {
     ): String = StringBuilder("`${contract.identifier}` (${contract.name}):\n").apply {
         val eggs = coopStatus.contributorsList.sumByDouble { it.contributionAmount }
         val rate = coopStatus.contributorsList.sumByDouble { it.contributionRate }
-        val hourlyRate = rate.times(60)
+        val hourlyRate = rate.times(3600)
         val timeRemaining = coopStatus.secondsRemaining.toPeriod()
         val requiredEggs = contract.finalAmount
         val projectedEggs = coopStatus.contributorsList
@@ -140,7 +140,7 @@ object Messages {
             Triple(
                 it.userName,
                 it.contributionAmount.formatIllions(true),
-                it.contributionRate.formatIllions() + "/s"
+                it.contributionRate.times(3600).formatIllions() + "/hr"
             )
         }
         coopInfo.forEach { (userName, amount, rate) ->
