@@ -121,7 +121,7 @@ object Messages {
         val requiredEggs = contract.finalAmount
         val projectedEggs = coopStatus.contributorsList
             .sumByDouble { it.contributionRate }
-            .times(coopStatus.secondsRemaining / 60)
+            .times(coopStatus.secondsRemaining)
 
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
         append("**Eggs**: ${eggs.formatIllions(true)}")
