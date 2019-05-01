@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
@@ -9,10 +8,8 @@ import nl.pindab0ter.eggbot.sumBy
 import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
-import java.lang.Exception
 import java.math.BigDecimal
-import java.math.BigInteger
-import kotlin.math.pow
+import java.math.BigDecimal.*
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val discordId: String get() = id.value
@@ -52,37 +49,35 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     val nextRole: Role? get() = roles.getOrNull(roles.indexOf(role) + 1)
 
-    // @formatter:off
     private val roles = listOf(
-        Role(BigInteger("0"),                    BigInteger("999"),                   "Farmer"),
-        Role(BigInteger("1000"),                 BigInteger("9999"),                  "Farmer 2"),
-        Role(BigInteger("10000"),                BigInteger("99999"),                 "Farmer 3"),
-        Role(BigInteger("100000"),               BigInteger("999999"),                "Kilofarmer"),
-        Role(BigInteger("1000000"),              BigInteger("9999999"),               "Kilofarmer 2"),
-        Role(BigInteger("10000000"),             BigInteger("99999999"),              "Kilofarmer 3"),
-        Role(BigInteger("100000000"),            BigInteger("999999999"),             "Megafarmer"),
-        Role(BigInteger("1000000000"),           BigInteger("9999999999"),            "Megafarmer 2"),
-        Role(BigInteger("10000000000"),          BigInteger("99999999999"),           "Megafarmer 3"),
-        Role(BigInteger("100000000000"),         BigInteger("999999999999"),          "Gigafarmer"),
-        Role(BigInteger("1000000000000"),        BigInteger("9999999999999"),         "Gigafarmer 2"),
-        Role(BigInteger("10000000000000"),       BigInteger("99999999999999"),        "Gigafarmer 3"),
-        Role(BigInteger("100000000000000"),      BigInteger("999999999999999"),       "Terafarmer"),
-        Role(BigInteger("1000000000000000"),     BigInteger("9999999999999999"),      "Terafarmer 2"),
-        Role(BigInteger("10000000000000000"),    BigInteger("99999999999999999"),     "Terafarmer 3"),
-        Role(BigInteger("100000000000000000"),   BigInteger("999999999999999999"),    "Petafarmer"),
-        Role(BigInteger("1000000000000000000"),  BigInteger("9999999999999999999"),   "Petafarmer 2"),
-        Role(BigInteger("10000000000000000000"), BigInteger("99999999999999999999"),  "Petafarmer 3")
+        Role(TEN.pow(0), TEN.pow(3).minus(ONE), "Farmer"),
+        Role(TEN.pow(3), TEN.pow(4).minus(ONE), "Farmer 2"),
+        Role(TEN.pow(4), TEN.pow(5).minus(ONE), "Farmer 3"),
+        Role(TEN.pow(5), TEN.pow(6).minus(ONE), "Kilofarmer"),
+        Role(TEN.pow(6), TEN.pow(7).minus(ONE), "Kilofarmer 2"),
+        Role(TEN.pow(7), TEN.pow(8).minus(ONE), "Kilofarmer 3"),
+        Role(TEN.pow(8), TEN.pow(9).minus(ONE), "Megafarmer"),
+        Role(TEN.pow(9), TEN.pow(10).minus(ONE), "Megafarmer 2"),
+        Role(TEN.pow(10), TEN.pow(11).minus(ONE), "Megafarmer 3"),
+        Role(TEN.pow(11), TEN.pow(12).minus(ONE), "Gigafarmer"),
+        Role(TEN.pow(12), TEN.pow(13).minus(ONE), "Gigafarmer 2"),
+        Role(TEN.pow(13), TEN.pow(14).minus(ONE), "Gigafarmer 3"),
+        Role(TEN.pow(14), TEN.pow(15).minus(ONE), "Terafarmer"),
+        Role(TEN.pow(15), TEN.pow(16).minus(ONE), "Terafarmer 2"),
+        Role(TEN.pow(16), TEN.pow(17).minus(ONE), "Terafarmer 3"),
+        Role(TEN.pow(17), TEN.pow(18).minus(ONE), "Petafarmer"),
+        Role(TEN.pow(18), TEN.pow(19).minus(ONE), "Petafarmer 2"),
+        Role(TEN.pow(19), TEN.pow(20).minus(ONE), "Petafarmer 3")
     )
-    // @formatter:on
 
-    val bonusPerSoulEgg: BigInteger
+    val bonusPerSoulEgg: BigDecimal
         get() {
             val soulEggBonus = BigDecimal(10 + soulBonus)
             val prophecyEggBonus = BigDecimal(1.05 + 0.01 * prophecyBonus)
-            return (prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus).toBigInteger()
+            return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
         }
-    val earningsBonus: BigInteger get() = (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
-    val activeEarningsBonus: BigInteger get() = if (isActive) earningsBonus else BigInteger.ZERO
+    val earningsBonus: BigDecimal get() = BigDecimal(soulEggs) * bonusPerSoulEgg
+    val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
         if (backup == null || !backup.hasData()) return@let
@@ -102,11 +97,11 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     }
 
     data class Role(
-        val lowerBound: BigInteger,
-        val upperBound: BigInteger,
+        val lowerBound: BigDecimal,
+        val upperBound: BigDecimal,
         val name: String
     ) {
-        val range: ClosedRange<BigInteger> = lowerBound..upperBound
+        val range: ClosedRange<BigDecimal> = lowerBound..upperBound
     }
 
     companion object : EntityClass<String, Farmer>(Farmers)
@@ -119,8 +114,8 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
 
     var farmers by Farmer via CoopFarmers
 
-    val earningsBonus: BigInteger get() = farmers.sumBy { it.earningsBonus }
-    val activeEarningsBonus: BigInteger get() = farmers.sumBy { it.activeEarningsBonus }
+    val earningsBonus: BigDecimal get() = farmers.sumBy { it.earningsBonus }
+    val activeEarningsBonus: BigDecimal get() = farmers.sumBy { it.activeEarningsBonus }
 
     companion object : IntEntityClass<Coop>(Coops)
 }

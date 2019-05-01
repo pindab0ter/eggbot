@@ -5,7 +5,8 @@ import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Farmer
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import java.math.BigInteger
+import java.math.BigDecimal
+import java.math.RoundingMode.HALF_UP
 
 object Messages {
     private data class NameToValue(val name: String, val value: String)
@@ -30,39 +31,44 @@ object Messages {
 
     fun earningsBonusLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Earnings Bonus",
-        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatForDisplay() + "\u00A0%") }
+        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatDecimal() + "\u00A0%") }
+    )
+
+    fun earningsBonusLeaderBoardCompact(farmers: List<Farmer>): List<String> = leaderBoard(
+        "Earnings Bonus",
+        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatIllions() + "\u00A0%") }
     )
 
     fun soulEggsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Soul Eggs",
-        farmers.map { NameToValue(it.inGameName, it.soulEggs.formatForDisplay()) }
+        farmers.map { NameToValue(it.inGameName, it.soulEggs.formatDecimal()) }
     )
 
     fun prestigesLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Drone Takedowns",
-        farmers.map { NameToValue(it.inGameName, it.prestiges.formatForDisplay()) }
+        farmers.map { NameToValue(it.inGameName, it.prestiges.formatDecimal()) }
     )
 
     fun droneTakedownsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Drone Takedowns",
-        farmers.map { NameToValue(it.inGameName, it.droneTakedowns.formatForDisplay()) }
+        farmers.map { NameToValue(it.inGameName, it.droneTakedowns.formatDecimal()) }
     )
 
     fun eliteDroneTakedownsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Elite Drone Takedowns",
-        farmers.map { NameToValue(it.inGameName, it.eliteDroneTakedowns.formatForDisplay()) }
+        farmers.map { NameToValue(it.inGameName, it.eliteDroneTakedowns.formatDecimal()) }
     )
 
 
     fun earningsBonus(farmer: Farmer): String = StringBuilder().apply {
-        val eb = farmer.earningsBonus.formatForDisplay() + " %"
-        val se = BigInteger.valueOf(farmer.soulEggs).formatForDisplay()
+        val eb = farmer.earningsBonus.formatInteger() + " %"
+        val se = BigDecimal(farmer.soulEggs).formatInteger()
         val seToNext =
             farmer.nextRole
                 ?.lowerBound
                 ?.minus(farmer.earningsBonus)
-                ?.divide(farmer.bonusPerSoulEgg)
-                ?.formatForDisplay() ?: "Unknown"
+                ?.divide(farmer.bonusPerSoulEgg, HALF_UP)
+                ?.formatInteger() ?: "Unknown"
         val role = farmer.role?.name ?: "Unknown"
         val strings = listOf(
             eb, se, seToNext, role
@@ -125,7 +131,7 @@ object Messages {
 
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
         append("**Eggs**: ${eggs.formatIllions(true)}")
-        append("${ EggBot.jdaClient.getEmoteById(Config.eggEmojiIds[contract.egg])?.asMention ?: "" }\n")
+        append("${EggBot.jdaClient.getEmoteById(Config.eggEmojiIds[contract.egg])?.asMention ?: ""}\n")
         appendln("**Rate**: ${rate.formatIllions()} (${hourlyRate.formatIllions()}/hr)")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
         append("**Projected eggs**: ${projectedEggs.formatIllions()}")
