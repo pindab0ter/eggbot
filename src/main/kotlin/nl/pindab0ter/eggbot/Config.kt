@@ -57,14 +57,14 @@ object Config {
             load(FileInputStream(FILE_NAME))
 
             botToken = getRequired(BOT_TOKEN)
-            ownerId = getOptional(OWNER_ID, "0")
-            prefix = getOptional(PREFIX, "!")
-            helpWord = getOptional(HELP_WORD, "help")
-            statusType = getOptional(STATUS_TYPE, "DEFAULT")
-            statusText = getOptional(STATUS_TEXT, "").ifBlank { null }
-            successEmoji = getOptional(SUCCESS_EMOJI, "👍")
-            warningEmoji = getOptional(WARNING_EMOJI, "⚠️")
-            errorEmoji = getOptional(ERROR_EMOJI, "🚫")
+            ownerId = getProperty(OWNER_ID, "0")
+            prefix = getProperty(PREFIX, "!")
+            helpWord = getProperty(HELP_WORD, "help")
+            statusType = getProperty(STATUS_TYPE, "DEFAULT")
+            statusText = getProperty(STATUS_TEXT)
+            successEmoji = getProperty(SUCCESS_EMOJI, "👍")
+            warningEmoji = getProperty(WARNING_EMOJI, "⚠️")
+            errorEmoji = getProperty(ERROR_EMOJI, "🚫")
             coopName = getRequired(COOP_NAME)
             coopIncrementChar = getRequired(COOP_INCREMENT_CHAR).first()
 
@@ -75,7 +75,7 @@ object Config {
             droneTakedownsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_DRONE_TAKEDOWNS)
             eliteDroneTakedownsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_ELITE_DRONE_TAKEDOWNS)
 
-            devMode = getOptional(DEVELOPMENT, "false") == "true"
+            devMode = getProperty(DEVELOPMENT, "false") == "true"
 
             game = if (statusText != null) Game.of(
                 when (statusType) {
@@ -110,13 +110,6 @@ object Config {
         return when {
             !it.isNullOrBlank() -> it
             else -> throw PropertyNotFoundException("Could not load \"$key\" from \"$FILE_NAME\".")
-        }
-    }
-
-    private fun Properties.getOptional(key: String, default: String): String = getProperty(key).let {
-        return when (it) {
-            null -> default
-            else -> it
         }
     }
 }
