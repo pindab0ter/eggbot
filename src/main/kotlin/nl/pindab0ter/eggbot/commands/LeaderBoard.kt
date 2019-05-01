@@ -25,7 +25,7 @@ object LeaderBoard : Command() {
         if (event.channel.id == Config.botCommandsChannel) {
             event.channel.sendTyping()
         } else {
-            event.author.openPrivateChannel().queue { it.sendTyping().queue() }
+            event.author.openPrivateChannel().queue { it.sendTyping().complete() }
         }
 
         val farmers = transaction {
