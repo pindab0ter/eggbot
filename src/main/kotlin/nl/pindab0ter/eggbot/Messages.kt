@@ -124,7 +124,8 @@ object Messages {
             .times(coopStatus.secondsRemaining / 60)
 
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
-        appendln("**Eggs**: ${eggs.formatIllions()}")
+        append("**Eggs**: ${eggs.formatIllions(true)}")
+        append("${ EggBot.jdaClient.getEmoteById(Config.eggEmojiIds[contract.egg])?.asMention ?: "" }\n")
         appendln("**Rate**: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
         append("**Projected eggs**: ${projectedEggs.formatIllions(true)}")
