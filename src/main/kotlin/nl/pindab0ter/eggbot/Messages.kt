@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.EggInc
+import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Farmer
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -110,32 +111,33 @@ object Messages {
     }.toString()
 
     fun coopStatus(
-        localContract: EggInc.LocalContract,
+        contract: Contract,
         coopStatus: EggInc.CoopStatusResponse
-    ): String = StringBuilder("`${localContract.coopIdentifier}` (${localContract.contract.name}):\n").apply {
+    ): String = StringBuilder("`${contract.identifier}` (${contract.name}):\n").apply {
         val eggs = coopStatus.contributorsList.sumByDouble { it.contributionAmount }
         val rate = coopStatus.contributorsList.sumByDouble { it.contributionRate }
         val hourlyRate = rate.times(60)
         val timeRemaining = coopStatus.secondsRemaining.toPeriod()
-        val requiredEggs = localContract.contract
-            .goalsList[localContract.contract.goalsList.size - 1]
-            .targetAmount
+        val requiredEggs = contract.finalAmount
         val projectedEggs = coopStatus.contributorsList
             .sumByDouble { it.contributionRate }
             .times(coopStatus.secondsRemaining / 60)
 
-        appendln("Eggs: ${eggs.formatIllions()}")
-        appendln("Rate: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
-        appendln("Time remaining: ${timeRemaining.asDayHoursAndMinutes()}")
-        append("Projected eggs: ${projectedEggs.formatIllions(true)}")
+        appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
+        appendln("**Eggs**: ${eggs.formatIllions()}")
+        appendln("**Rate**: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
+        appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
+        append("**Projected eggs**: ${projectedEggs.formatIllions(true)}")
         append("/")
         append("${requiredEggs.formatIllions(true)}\n")
+        appendln()
+        appendln("Members (${coopStatus.contributorsCount}/${contract.maxCoopSize}):")
         appendln("```")
         val coopInfo = coopStatus.contributorsList.map {
             Triple(
                 it.userName,
                 it.contributionAmount.formatIllions(true),
-                it.contributionRate.formatIllions(true) + "/s"
+                it.contributionRate.formatIllions() + "/s"
             )
         }
         coopInfo.forEach { (userName, amount, rate) ->

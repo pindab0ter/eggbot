@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Messages
+import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -58,7 +59,9 @@ object ContractsInfo : Command() {
                 coopContracts
                     .map { it to AuxBrain.getCoopStatus(it.contract.identifier, it.coopIdentifier).get() }
                     .forEach { (localContract, coopStatus) ->
-                        event.replyInDm(Messages.coopStatus(localContract, coopStatus))
+                        Contract.getOrNew(localContract.contract).let { contract ->
+                            event.replyInDm(Messages.coopStatus(contract, coopStatus))
+                        }
                     }
             }
         }

@@ -34,6 +34,7 @@ object EggBot {
         addCommands(
             Active,
             ContractIDs,
+            CoopInfo,
             EarningsBonus,
             Inactive,
             LeaderBoard,
@@ -67,8 +68,10 @@ object EggBot {
         SchemaUtils.create(Coops)
         SchemaUtils.create(CoopFarmers)
         SchemaUtils.create(Contracts)
+        SchemaUtils.create(Goals)
 
         if (Config.devMode) {
+            Goals.deleteAll()
             Contracts.deleteAll()
             Coops.deleteAll()
             CoopFarmers.deleteAll()

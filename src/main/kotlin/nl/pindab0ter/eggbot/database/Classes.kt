@@ -160,5 +160,30 @@ class Contract(id: EntityID<String>) : Entity<String>(id) {
 
         fun getOrNew(contract: EggInc.Contract): Contract =
             super.findById(contract.identifier) ?: new(contract)
+
+        fun getOrNew(contractId: String): Contract? =
+            super.findById(contractId) ?: AuxBrain.getContracts().contractsList.find {
+                it.identifier == contractId
+            }?.let { new(it) }
+    }
+}
+
+class Goal(id: EntityID<Int>) : IntEntity(id) {
+    var contract by Contract referencedOn Goals.contract
+    var targetAmount by Goals.targetAmount
+    var rewardType by Goals.rewardType
+    var rewardSubType by Goals.rewardSubType
+    var rewardAmount by Goals.rewardAmount
+    var targetSoulEggs by Goals.targetSoulEggs
+
+    companion object : IntEntityClass<Goal>(Goals) {
+        fun new(contract: Contract, goal: EggInc.Goal) = super.new {
+            this.contract = contract
+            this.targetAmount = goal.targetAmount
+            this.rewardType = goal.rewardType
+            this.rewardSubType = goal.rewardSubType
+            this.rewardAmount = goal.rewardAmount
+            this.targetSoulEggs = goal.targetSoulEggs
+        }
     }
 }

@@ -56,3 +56,12 @@ object Contracts : IdTable<String>() {
     val validUntil = datetime("valid_until")
     val durationSeconds = double("duration_seconds")
 }
+
+object Goals : IntIdTable() {
+    val contract = reference("contract_id", Contracts, CASCADE, NO_ACTION)
+    val targetAmount = double("target_amount")
+    val rewardType = enumeration("reward_type", EggInc.RewardType::class)
+    val rewardSubType = text("reward_sub_type").nullable()
+    val rewardAmount = double("reward_amount")
+    val targetSoulEggs = double("target_soul_eggs")
+}
