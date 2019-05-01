@@ -29,17 +29,19 @@ val EggInc.Egg.formattedName: String
         .joinToString(" ", transform = String::capitalize)
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
-fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.days())
+fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.dayTime())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
 
 fun Period.asDayHoursAndMinutes(): String = PeriodFormatterBuilder()
     .printZeroNever()
     .appendDays()
-    .appendSuffix("d")
+    .appendSuffix(" days")
+    .appendSeparator(", ")
     .appendHours()
-    .appendSuffix("h")
+    .appendSuffix(" hours")
+    .appendSeparator(" and ")
     .appendMinutes()
-    .appendSuffix("m")
+    .appendSuffix(" minutes")
     .toFormatter()
     .withLocale(Locale.UK)
     .print(this.normalizedStandard(PeriodType.dayTime()))
@@ -122,7 +124,6 @@ fun Double.formatIllionsLong(rounded: Boolean = false): String {
         else -> BigDecimal(value).toBigInteger().formatForDisplay()
     }
 }
-
 
 fun Double.formatIllions(rounded: Boolean = false): String {
     val (formatter, value) = if (rounded) (roundedDisplayFormat to this.round()) else (displayFormat to this)
