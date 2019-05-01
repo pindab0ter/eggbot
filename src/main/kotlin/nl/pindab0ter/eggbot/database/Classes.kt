@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
@@ -8,6 +9,7 @@ import nl.pindab0ter.eggbot.sumBy
 import org.jetbrains.exposed.dao.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import java.lang.Exception
 import java.math.BigDecimal
 import java.math.BigInteger
 import kotlin.math.pow
@@ -75,14 +77,11 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     val bonusPerSoulEgg: BigInteger
         get() {
-            val soulEggBonus = 10 + soulBonus
-            val prophecyEggBonus = (1.05 + 0.01 * prophecyBonus)
-            return BigDecimal(prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus).toBigInteger()
+            val soulEggBonus = BigDecimal(10 + soulBonus)
+            val prophecyEggBonus = BigDecimal(1.05 + 0.01 * prophecyBonus)
+            return (prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus).toBigInteger()
         }
-    val earningsBonus: BigInteger
-        get() {
-            return (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
-        }
+    val earningsBonus: BigInteger get() = (BigDecimal(soulEggs) * BigDecimal(bonusPerSoulEgg)).toBigInteger()
     val activeEarningsBonus: BigInteger get() = if (isActive) earningsBonus else BigInteger.ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
