@@ -87,16 +87,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
         if (backup == null || !backup.hasData()) return@let
-        transaction {
-            soulEggs = backup.data.soulEggs
-            prophecyEggs = backup.data.prophecyEggs
-            soulBonus = backup.data.soulBonus
-            prophecyBonus = backup.data.prophecyBonus
-            prestiges = backup.stats.prestigeCount
-            droneTakedowns = backup.stats.droneTakedowns
-            eliteDroneTakedowns = backup.stats.droneTakedownsElite
-            lastUpdated = DateTime.now()
-        }
+        update(backup)
     }
 
     fun update(backup: EggInc.Backup) = transaction {
@@ -124,7 +115,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
 class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
-    var contract by Contract referencedOn Coops.contractId
+    var contract by Contract referencedOn Coops.contract
     var hasStarted by Coops.hasStarted
 
     var farmers by Farmer via CoopFarmers
@@ -145,17 +136,22 @@ class Contract(id: EntityID<String>) : Entity<String>(id) {
     var maxCoopSize by Contracts.maxCoopSize
     var validUntil by Contracts.validUntil
     var durationSeconds by Contracts.durationSeconds
-    val coops by Coop referrersOn Coops.contractId
+    val coops by Coop referrersOn Coops.contract
+    val goals by Goal referrersOn Goals.contract
+
+    val finalAmount get() = goals.sortedByDescending { it.targetAmount }.first().targetAmount
 
     companion object : EntityClass<String, Contract>(Contracts) {
-        fun new(contract: EggInc.Contract): Contract = super.new(contract.identifier) {
-            this.name = contract.name
-            this.description = contract.description
-            this.egg = contract.egg
-            this.coopAllowed = contract.coopAllowed == 1
-            this.maxCoopSize = contract.maxCoopSize
-            this.validUntil = DateTime(contract.expirationTime.toLong())
-            this.durationSeconds = contract.lengthSeconds
+        fun new(contractInfo: EggInc.Contract): Contract = super.new(contractInfo.identifier) {
+            this.name = contractInfo.name
+            this.description = contractInfo.description
+            this.egg = contractInfo.egg
+            this.coopAllowed = contractInfo.coopAllowed == 1
+            this.maxCoopSize = contractInfo.maxCoopSize
+            this.validUntil = DateTime(contractInfo.expirationTime.toLong())
+            this.durationSeconds = contractInfo.lengthSeconds
+        }.also { contract ->
+            contractInfo.goalsList.forEach { goalInfo -> Goal.new(contract, goalInfo) }
         }
 
         fun getOrNew(contract: EggInc.Contract): Contract =

@@ -4,6 +4,7 @@ import com.auxbrain.ei.EggInc
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
+import org.jetbrains.exposed.sql.ReferenceOption.NO_ACTION
 import org.jetbrains.exposed.sql.Table
 import org.joda.time.DateTime
 
@@ -15,7 +16,7 @@ object DiscordUsers : IdTable<String>() {
 
 object Farmers : IdTable<String>() {
     override val id = text("in_game_id").uniqueIndex().entityId()
-    val discordId = reference("discord_id", DiscordUsers, CASCADE)
+    val discordId = reference("discord_id", DiscordUsers, CASCADE, NO_ACTION)
     val inGameName = text("in_game_name").uniqueIndex()
     val soulEggs = long("soul_eggs")
     val prophecyEggs = long("prophecy_eggs")
@@ -29,17 +30,17 @@ object Farmers : IdTable<String>() {
 
 object Coops : IntIdTable() {
     val name = text("name")
-    val contractId = reference("contract_id", Contracts).references(Contracts.id)
+    val contract = reference("contract_id", Contracts, CASCADE, NO_ACTION)
     val hasStarted = bool("has-started").default(false)
 
     init {
-        this.index(true, name, contractId)
+        this.index(true, name, contract)
     }
 }
 
 object CoopFarmers : Table() {
-    val farmer = reference("farmer", Farmers, CASCADE)
-    val coop = reference("coop", Coops, CASCADE)
+    val farmer = reference("farmer", Farmers, CASCADE, NO_ACTION)
+    val coop = reference("coop", Coops, CASCADE, NO_ACTION)
 
     init {
         this.index(true, farmer, coop)
