@@ -68,9 +68,9 @@ object Config {
     val game: Game?
     private val statusType: String
     private val statusText: String?
-    val successEmoji: String
-    val warningEmoji: String
-    val errorEmoji: String
+    val emojiSuccess: String
+    val emojiWarning: String
+    val emojiError: String
     val coopName: String
     val coopIncrementChar: Char
 
@@ -83,9 +83,9 @@ object Config {
 
     val eggEmojiIds: Map<EggInc.Egg, String?>
 
-    val goldenEggEmojiId: String
-    val soulEggEmojiId: String
-    val prophecyEggEmojiId: String
+    val emoteGoldenEgg: String?
+    val emoteSoulEgg: String?
+    val emoteProphecyEgg: String?
 
     val devMode: Boolean
 
@@ -99,9 +99,9 @@ object Config {
             helpWord = getProperty(HELP_WORD, "help")
             statusType = getProperty(STATUS_TYPE, "DEFAULT")
             statusText = getProperty(STATUS_TEXT)
-            successEmoji = getProperty(EMOJI_SUCCESS, "👍")
-            warningEmoji = getProperty(EMOJI_WARNING, "⚠️")
-            errorEmoji = getProperty(EMOJI_ERROR, "🚫")
+            emojiSuccess = getProperty(EMOJI_SUCCESS, "👍")
+            emojiWarning = getProperty(EMOJI_WARNING, "⚠️")
+            emojiError = getProperty(EMOJI_ERROR, "🚫")
             coopName = getRequired(COOP_NAME)
             coopIncrementChar = getRequired(COOP_INCREMENT_CHAR).first()
 
@@ -142,9 +142,9 @@ object Config {
             )
             // @formatter:on
 
-            goldenEggEmojiId = getProperty(EMOTE_GOLD)
-            soulEggEmojiId = getProperty(EMOTE_SOUL)
-            prophecyEggEmojiId = getProperty(EMOTE_PROPHECY)
+            emoteGoldenEgg = getProperty(EMOTE_GOLD)
+            emoteSoulEgg = getProperty(EMOTE_SOUL)
+            emoteProphecyEgg = getProperty(EMOTE_PROPHECY)
 
             devMode = getProperty(DEVELOPMENT, "false") == "true"
 
@@ -166,9 +166,9 @@ object Config {
                 |    Help word      : $helpWord
                 |    Status type    : $statusType
                 |    Status text    : $statusText
-                |    Success emoji  : $successEmoji
-                |    Warning emoji  : $warningEmoji
-                |    Error emoji    : $errorEmoji
+                |    Success emoji  : $emojiSuccess
+                |    Warning emoji  : $emojiWarning
+                |    Error emoji    : $emojiError
                 |    Co-op increment: $coopIncrementChar
                 |    Co-op name     : $coopName
                 |    Dev mode       : $devMode

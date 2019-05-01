@@ -43,9 +43,9 @@ object EggBot {
             WhoIs
         )
         setEmojis(
-            Config.successEmoji,
-            Config.warningEmoji,
-            Config.errorEmoji
+            Config.emojiSuccess,
+            Config.emojiWarning,
+            Config.emojiError
         )
     }.build()
 
