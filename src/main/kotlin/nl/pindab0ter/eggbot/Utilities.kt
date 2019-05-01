@@ -71,7 +71,7 @@ fun DateTime.asDayHoursAndMinutes(): String = DateTimeFormatterBuilder()
     .print(this)
 
 // val displayFormat = DecimalFormat(",###.###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
-val displayFormat = DecimalFormat(",###.###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+val displayFormat = DecimalFormat(",###.00", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 val roundedDisplayFormat = DecimalFormat(",###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 
 fun Double.formatForDisplay(): String = displayFormat.format(this)

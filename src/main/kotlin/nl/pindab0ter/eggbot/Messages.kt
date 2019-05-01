@@ -126,14 +126,16 @@ object Messages {
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
         append("**Eggs**: ${eggs.formatIllions(true)}")
         append("${ EggBot.jdaClient.getEmoteById(Config.eggEmojiIds[contract.egg])?.asMention ?: "" }\n")
-        appendln("**Rate**: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
+        appendln("**Rate**: ${rate.formatIllions()} (${hourlyRate.formatIllions()}/hr)")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
-        append("**Projected eggs**: ${projectedEggs.formatIllions(true)}")
+        append("**Projected eggs**: ${projectedEggs.formatIllions()}")
         append("/")
         append("${requiredEggs.formatIllions(true)}\n")
         appendln()
         appendln("Members (${coopStatus.contributorsCount}/${contract.maxCoopSize}):")
         appendln("```")
+        // TODO: Goal reached at…
+        // TODO: Add sleeping status
         val coopInfo = coopStatus.contributorsList.map {
             Triple(
                 it.userName,
