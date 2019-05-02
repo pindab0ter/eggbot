@@ -28,7 +28,7 @@ object ContractsInfo : Command() {
         @Suppress("FoldInitializerAndIfToElvis")
         if (farmers.isNullOrEmpty()) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
@@ -41,7 +41,7 @@ object ContractsInfo : Command() {
                 }
 
                 if (backup.contracts.contractsList.isEmpty()) "No contracts found for ${farmer.inGameName}.".let {
-                    log.trace { it }
+                    log.debug { it }
                     event.reply(it)
                     return@getFarmerBackup
                 }

@@ -26,7 +26,7 @@ object Active : Command() {
 
         if (discordUser == null) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 

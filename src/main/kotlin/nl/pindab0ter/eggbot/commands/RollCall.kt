@@ -33,12 +33,12 @@ object RollCall : Command() {
         when {
             event.arguments.isEmpty() -> missingArguments.let {
                 event.replyWarning(it)
-                log.trace { it }
+                log.debug { it }
                 return
             }
             event.arguments.size > 1 -> tooManyArguments.let {
                 event.replyWarning(it)
-                log.trace { it }
+                log.debug { it }
                 return
             }
         }
@@ -53,13 +53,13 @@ object RollCall : Command() {
 
         if (contractInfo == null) "No active contract found with id `${event.arguments.first()}`".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
         if (contractInfo.coopAllowed != 1) "Co-op is not allowed for this contract".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
@@ -67,7 +67,7 @@ object RollCall : Command() {
             val contract = Contract.getOrNew(contractInfo)
             if (!contract.coops.empty()) "Co-ops are already generated for contract `${contract.identifier}`".let {
                 event.replyWarning(it)
-                log.trace { it }
+                log.debug { it }
                 return@transaction
             }
 

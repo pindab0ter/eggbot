@@ -28,7 +28,7 @@ object WhoIs : Command() {
 
         if (event.arguments.isEmpty()) missingArguments.let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
@@ -40,7 +40,7 @@ object WhoIs : Command() {
 
         if (farmer == null) "No farmer found with name `$name`.".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 

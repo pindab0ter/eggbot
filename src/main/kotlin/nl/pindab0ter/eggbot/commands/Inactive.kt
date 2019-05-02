@@ -28,7 +28,7 @@ object Inactive : Command() {
 
         if (event.arguments.size > 1) tooManyArguments.let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
@@ -37,7 +37,7 @@ object Inactive : Command() {
         @Suppress("FoldInitializerAndIfToElvis")
         if (discordUser == null) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
@@ -57,12 +57,12 @@ object Inactive : Command() {
             else -> when (val days = argument.toIntOrNull()) {
                 null -> "Could not make sense of `$argument`, please enter a number of days.".let {
                     event.replyWarning(it)
-                    log.trace { it }
+                    log.debug { it }
                     return
                 }
                 in Int.MIN_VALUE..0 -> "The number of days must be positive.".let {
                     event.replyWarning(it)
-                    log.trace { it }
+                    log.debug { it }
                     return
                 }
                 else -> DateTime.now().plusDays(days).let { inactiveUntil ->

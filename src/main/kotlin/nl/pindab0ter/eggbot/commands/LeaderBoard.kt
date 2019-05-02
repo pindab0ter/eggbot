@@ -37,7 +37,7 @@ object LeaderBoard : Command() {
 
         if (farmers.isEmpty()) "There are no registered farmers".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 

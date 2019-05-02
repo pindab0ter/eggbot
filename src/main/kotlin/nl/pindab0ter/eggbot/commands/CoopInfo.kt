@@ -28,12 +28,12 @@ object CoopInfo : Command() {
         when {
             event.arguments.size < 2 -> missingArguments.let {
                 event.replyWarning(it)
-                log.trace { it }
+                log.debug { it }
                 return
             }
             event.arguments.size > 2 -> tooManyArguments.let {
                 event.replyWarning(it)
-                log.trace { it }
+                log.debug { it }
                 return
             }
         }
@@ -41,7 +41,7 @@ object CoopInfo : Command() {
         getCoopStatus(event.arguments[0], event.arguments[1]).let getCoopStatus@{ (status, _) ->
             if (status == null || !status.isInitialized) "Could not get co-op status. Are the `co-op id` and `contract id` correct?.".let {
                 event.replyWarning(it)
-                log.trace { it }
+                log.debug { it }
                 return@getCoopStatus
             }
 

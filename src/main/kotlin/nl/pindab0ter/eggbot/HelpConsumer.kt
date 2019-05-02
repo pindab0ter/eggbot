@@ -42,7 +42,7 @@ object HelpConsumer : Consumer<CommandEvent> {
             }, {
                 "Help cannot be sent because you are blocking Direct Messages.".let {
                     event.replyWarning(it)
-                    log.trace { it }
+                    log.debug { it }
                 }
             })
         }

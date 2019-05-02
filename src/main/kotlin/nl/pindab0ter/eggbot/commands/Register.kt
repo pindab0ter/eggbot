@@ -30,17 +30,17 @@ object Register : Command() {
             if (botPermissions.contains(MESSAGE_MANAGE)) "Registering is only allowed in DMs to protect your in-game ID. Please give it a go here!".let {
                 event.message.delete().queue()
                 event.replyInDm(it)
-                log.trace { it }
+                log.debug { it }
             } else "Registering is only allowed in DMs to protect your in-game ID. Please give it a go here and delete your previous message!".let {
                 event.replyInDm(it)
-                log.trace { it }
+                log.debug { it }
             }
             return
         }
 
         if (event.arguments.size < 2) missingArguments.let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
@@ -65,7 +65,7 @@ object Register : Command() {
             if (discordUser.farmers.any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName })
                 "You are already registered with the in-game names: `${discordUser.farmers.joinToString("`, `") { it.inGameName }}`.".let {
                     event.replyWarning(it)
-                    log.trace { it }
+                    log.debug { it }
                     return@transaction
                 }
 
@@ -73,7 +73,7 @@ object Register : Command() {
             if (farmers.any { it.inGameId == registrant.inGameId || it.inGameName == registrant.inGameName })
                 "Someone else has already registered the in-game name `${registrant.inGameName}`.".let {
                     event.replyWarning(it)
-                    log.trace { it }
+                    log.debug { it }
                     return@transaction
                 }
 
@@ -82,7 +82,7 @@ object Register : Command() {
                 ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID (not name!) correctly?\n" +
                         "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
                     event.replyError(it)
-                    log.trace { it }
+                    log.debug { it }
                     return@transaction
                 }
 
@@ -91,7 +91,7 @@ object Register : Command() {
                 ("The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.name}`)\n" +
                         "If this is you, please register with `${event.client.textualPrefix}$name ${backup.userid} ${backup.name}`").let {
                     event.replyError(it)
-                    log.trace { it }
+                    log.debug { it }
                     return@transaction
                 }
 
@@ -113,14 +113,14 @@ object Register : Command() {
             if (discordUser.farmers.filterNot { it.inGameId == registrant.inGameId }.none())
                 "You have been registered with the in-game name `${backup.name}`, welcome!".let {
                     event.replySuccess(it)
-                    log.trace { it }
+                    log.debug { it }
                 }
             else "You are now registered with the in-game name `${backup.name}`, as well as `${discordUser.farmers
                 .filterNot { it.inGameId == registrant.inGameId }
                 .joinToString(" `, ` ") { it.inGameName }
             }`!".let {
                 event.replySuccess(it)
-                log.trace { it }
+                log.debug { it }
             }
         }
     }

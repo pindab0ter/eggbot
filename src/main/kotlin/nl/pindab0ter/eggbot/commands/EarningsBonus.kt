@@ -34,12 +34,11 @@ object EarningsBonus : Command() {
         @Suppress("FoldInitializerAndIfToElvis")
         if (farmers.isNullOrEmpty()) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
             event.replyWarning(it)
-            log.trace { it }
+            log.debug { it }
             return
         }
 
         farmers.forEach { farmer ->
-            log.trace { "Getting Earnings Bonus for ${farmer.inGameName}…" }
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
                 if (backup == null) "Could not get information on ${farmer.inGameName}".let {
                     event.replyWarning(it)
