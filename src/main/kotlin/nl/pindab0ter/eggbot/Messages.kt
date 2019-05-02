@@ -60,15 +60,15 @@ object Messages {
     )
 
 
-    fun earningsBonus(farmer: Farmer): String = StringBuilder().apply {
-        val eb = farmer.earningsBonus.formatInteger() + " %"
-        val se = BigDecimal(farmer.soulEggs).formatInteger()
+    fun earningsBonus(farmer: Farmer, compact: Boolean = false): String = StringBuilder().apply {
+        val eb = farmer.earningsBonus.let { (if (compact) it.formatIllions() else it.formatInteger()) + " %" }
+        val se = BigDecimal(farmer.soulEggs).let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val seToNext =
             farmer.nextRole
                 ?.lowerBound
                 ?.minus(farmer.earningsBonus)
                 ?.divide(farmer.bonusPerSoulEgg, HALF_UP)
-                ?.formatInteger() ?: "Unknown"
+                ?.let { (if (compact) it.formatIllions() else it.formatInteger()) } ?: "Unknown"
         val role = farmer.role?.name ?: "Unknown"
         val strings = listOf(
             eb, se, seToNext, role

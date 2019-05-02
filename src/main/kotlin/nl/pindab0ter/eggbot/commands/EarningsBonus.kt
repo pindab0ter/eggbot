@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.Messages
+import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -18,6 +19,7 @@ object EarningsBonus : Command() {
         name = "earnings-bonus"
         aliases = arrayOf("eb", "earningsbonus", "earning-bonus", "earningbonus")
         help = "Shows your EB, EB rank and how much EB till your next rank"
+        arguments = "[compact]"
         // category = UsersCategory
         guildOnly = false
     }
@@ -47,7 +49,7 @@ object EarningsBonus : Command() {
 
                 transaction { farmer.update(backup) }
 
-                Messages.earningsBonus(farmer).let {
+                Messages.earningsBonus(farmer, event.arguments.isNotEmpty()).let {
                     if (event.channel.id == Config.botCommandsChannel) {
                         event.reply(it)
                     } else event.replyInDm(it) {

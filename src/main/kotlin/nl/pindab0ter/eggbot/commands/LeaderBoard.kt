@@ -42,14 +42,12 @@ object LeaderBoard : Command() {
         }
 
         (if (event.arguments.isNotEmpty()) Messages::earningsBonusLeaderBoardCompact
-        else Messages::earningsBonusLeaderBoard)
-            .invoke(farmers)
-            .let { messages ->
-                if (event.channel.id == Config.botCommandsChannel) {
-                    messages.forEach { message -> event.reply(message) }
-                } else {
-                    event.replyInDms(messages)
-                }
+        else Messages::earningsBonusLeaderBoard).invoke(farmers).let { messages ->
+            if (event.channel.id == Config.botCommandsChannel) {
+                messages.forEach { message -> event.reply(message) }
+            } else {
+                event.replyInDms(messages)
             }
+        }
     }
 }
