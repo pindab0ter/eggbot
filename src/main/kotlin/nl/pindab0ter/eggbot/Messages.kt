@@ -130,9 +130,9 @@ object Messages {
             .times(coopStatus.secondsRemaining)
 
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
-        append("**Eggs**: ${eggs.formatIllions(true)}")
+        append("**Eggs**: ${eggs.formatIllions()}")
         append("${EggBot.jdaClient.getEmoteById(Config.eggEmojiIds[contract.egg])?.asMention ?: ""}\n")
-        appendln("**Rate**: ${rate.formatIllions()} (${hourlyRate.formatIllions()}/hr)")
+        appendln("**Rate**: ${hourlyRate.formatIllions()}/hr")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
         append("**Projected eggs**: ${projectedEggs.formatIllions()}")
         append("/")
