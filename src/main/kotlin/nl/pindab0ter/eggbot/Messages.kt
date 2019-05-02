@@ -140,20 +140,31 @@ object Messages {
         appendln()
         appendln("Members (${coopStatus.contributorsCount}/${contract.maxCoopSize}):")
         appendln("```")
+
         // TODO: Goal reached at…
-        // TODO: Add sleeping status
-        val coopInfo = coopStatus.contributorsList.map {
-            Triple(
+
+        data class Contributor(
+            val userName: String,
+            val active: Boolean,
+            val contributionAmount: String,
+            val contributionRate: String
+        )
+
+        val coopInfo = coopStatus.contributorsList.mapIndexed { i, it ->
+            Contributor(
                 it.userName,
+                it.active == 1,
                 it.contributionAmount.formatIllions(true),
                 it.contributionRate.times(3600).formatIllions() + "/hr"
             )
         }
-        coopInfo.forEach { (userName, amount, rate) ->
+        coopInfo.forEach { (userName, active, amount, rate) ->
             append(userName)
-            appendPaddingSpaces(userName, coopInfo.map { it.first })
+            appendPaddingSpaces(userName + if (!active) "  zZ" else "",
+                coopInfo.map { it.userName + if (!it.active) "  zZ" else "" })
+            if (!active) append("  zZ")
             append(" ")
-            appendPaddingSpaces(amount, coopInfo.map { it.second })
+            appendPaddingSpaces(amount, coopInfo.map { it.contributionAmount })
             append(amount)
             append("|")
             append(rate)
