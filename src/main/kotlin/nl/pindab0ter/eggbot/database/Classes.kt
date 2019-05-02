@@ -6,7 +6,6 @@ import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
 import nl.pindab0ter.eggbot.sumBy
 import org.jetbrains.exposed.dao.*
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import java.math.BigDecimal
 import java.math.BigDecimal.*
@@ -84,8 +83,8 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         update(backup)
     }
 
-    fun update(backup: EggInc.Backup) = transaction {
-        if (!backup.hasData()) return@transaction
+    fun update(backup: EggInc.Backup) {
+        if (!backup.hasData()) return
         soulEggs = backup.data.soulEggs
         prophecyEggs = backup.data.prophecyEggs
         soulBonus = backup.data.soulBonus

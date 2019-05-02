@@ -45,7 +45,7 @@ object EarningsBonus : Command() {
                     return@getFarmerBackup
                 }
 
-                farmer.update(backup)
+                transaction { farmer.update(backup) }
 
                 Messages.earningsBonus(farmer).let {
                     if (event.channel.id == Config.botCommandsChannel) {
