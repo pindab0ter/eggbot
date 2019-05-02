@@ -161,10 +161,10 @@ object Messages {
         }
         coopInfo.forEach { (userName, active, amount, rate) ->
             append(userName)
-            appendPaddingSpaces(userName + if (!active) "  zZ" else "",
-                coopInfo.map { it.userName + if (!it.active) "  zZ" else "" })
-            if (!active) append("  zZ")
-            append(" ")
+            appendPaddingSpaces(userName + if (!active) "  zZ" else " ",
+                coopInfo.map { it.userName + if (!it.active) "  zZ" else " " })
+            if (!active) append("  zZ ")
+            else append("  ")
             appendPaddingSpaces(amount, coopInfo.map { it.contributionAmount })
             append(amount)
             append("|")
