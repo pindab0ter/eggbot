@@ -131,7 +131,8 @@ object Messages {
 
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
         append("**Eggs**: ${eggs.formatIllions()}")
-        append("${EggBot.jdaClient.getEmoteById(Config.eggEmojiIds[contract.egg])?.asMention ?: ""}\n")
+        Config.eggEmojiIds[contract.egg]?.let { append(EggBot.jdaClient.getEmoteById(it).asMention) }
+        appendln()
         appendln("**Rate**: ${hourlyRate.formatIllions()}/hr")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
         append("**Projected eggs**: ${projectedEggs.formatIllions()}")
