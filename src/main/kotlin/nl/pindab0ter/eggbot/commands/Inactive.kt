@@ -18,6 +18,7 @@ object Inactive : Command() {
         name = "inactive"
         help = "Set yourself as inactive for `[days]` days or check whether you're inactive if no argument is given."
         arguments = "[days]"
+        hidden = true
         // category = ContractsCategory
         guildOnly = false
     }

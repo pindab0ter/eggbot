@@ -13,6 +13,7 @@ object Active : Command() {
     init {
         name = "active"
         help = "Set yourself as active."
+        hidden = true
         // category = ContractsCategory
         guildOnly = false
     }

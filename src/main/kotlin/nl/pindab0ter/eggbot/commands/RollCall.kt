@@ -20,6 +20,7 @@ object RollCall : Command() {
         arguments = "<contract id>"
         aliases = arrayOf("rc", "rollcall")
         help = "Create a co-op roll call for the given contract id"
+        hidden = true
         // category = ContractsCategory
         guildOnly = false
     }
