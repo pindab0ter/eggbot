@@ -4,7 +4,6 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.Messages
-import nl.pindab0ter.eggbot.Messages.prestigesLeaderBoard
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job

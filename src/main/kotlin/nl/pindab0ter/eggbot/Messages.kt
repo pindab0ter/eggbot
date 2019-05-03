@@ -31,7 +31,7 @@ object Messages {
 
     fun earningsBonusLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Earnings Bonus",
-        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatDecimal() + "\u00A0%") }
+        farmers.map { NameToValue(it.inGameName, it.earningsBonus.formatInteger() + "\u00A0%") }
     )
 
     fun earningsBonusLeaderBoardCompact(farmers: List<Farmer>): List<String> = leaderBoard(
@@ -41,22 +41,22 @@ object Messages {
 
     fun soulEggsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Soul Eggs",
-        farmers.map { NameToValue(it.inGameName, it.soulEggs.formatDecimal()) }
+        farmers.map { NameToValue(it.inGameName, it.soulEggs.formatInteger()) }
     )
 
     fun prestigesLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
-        "Drone Takedowns",
-        farmers.map { NameToValue(it.inGameName, it.prestiges.formatDecimal()) }
+        "Prestiges",
+        farmers.map { NameToValue(it.inGameName, it.prestiges.formatInteger()) }
     )
 
     fun droneTakedownsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Drone Takedowns",
-        farmers.map { NameToValue(it.inGameName, it.droneTakedowns.formatDecimal()) }
+        farmers.map { NameToValue(it.inGameName, it.droneTakedowns.formatInteger()) }
     )
 
     fun eliteDroneTakedownsLeaderBoard(farmers: List<Farmer>): List<String> = leaderBoard(
         "Elite Drone Takedowns",
-        farmers.map { NameToValue(it.inGameName, it.eliteDroneTakedowns.formatDecimal()) }
+        farmers.map { NameToValue(it.inGameName, it.eliteDroneTakedowns.formatInteger()) }
     )
 
 

@@ -13,8 +13,7 @@ import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.PeriodFormatterBuilder
 import java.math.BigDecimal
 import java.math.BigDecimal.*
-import java.math.MathContext
-import java.math.MathContext.*
+import java.math.MathContext.UNLIMITED
 import java.math.RoundingMode
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -74,9 +73,9 @@ fun DateTime.asDayHoursAndMinutes(): String = DateTimeFormatterBuilder()
 val decimalFormat = DecimalFormat(",###.00", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 val integerFormat = DecimalFormat(",###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 
-fun Double.formatDecimal(): String = decimalFormat.format(this)
+fun Int.formatInteger(): String = integerFormat.format(this)
 fun Long.formatDecimal(): String = decimalFormat.format(this)
-fun Int.formatDecimal(): String = decimalFormat.format(this)
+fun Long.formatInteger(): String = integerFormat.format(this)
 fun BigDecimal.formatDecimal(): String = decimalFormat.format(this.round(UNLIMITED))
 fun BigDecimal.formatInteger(): String = integerFormat.format(this)
 
