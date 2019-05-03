@@ -21,8 +21,8 @@ repositories {
 
 dependencies {
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.jagrosh", "jda-utilities-command", "2.1.2")
-    implementation("net.dv8tion", "JDA", "3.8.3_462") {
+    implementation("com.jagrosh", "jda-utilities-command", "2.1.5")
+    implementation("net.dv8tion", "JDA", "3.8.3_463") {
         exclude("opus-java")
     }
     implementation("org.jetbrains.exposed", "exposed", "0.13.4")
