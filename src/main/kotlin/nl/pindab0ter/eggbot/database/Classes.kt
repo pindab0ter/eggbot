@@ -5,6 +5,7 @@ import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.prophecyBonus
 import nl.pindab0ter.eggbot.soulBonus
 import nl.pindab0ter.eggbot.sumBy
+import nl.pindab0ter.eggbot.toDateTime
 import org.jetbrains.exposed.dao.*
 import org.joda.time.DateTime
 import java.math.BigDecimal
@@ -92,7 +93,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         prestiges = backup.stats.prestigeCount
         droneTakedowns = backup.stats.droneTakedowns
         eliteDroneTakedowns = backup.stats.droneTakedownsElite
-        lastUpdated = DateTime.now()
+        lastUpdated = backup.approxTime.toDateTime()
     }
 
     data class Role(
