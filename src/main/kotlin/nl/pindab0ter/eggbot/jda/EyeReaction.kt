@@ -15,12 +15,13 @@ object EyeReaction : ListenerAdapter() {
     private const val EYES = "👀"
 
     override fun onMessageReceived(event: MessageReceivedEvent?) {
-        if (event?.author?.id == "430901418925359126" // Scanram
-            && event.channelType == TEXT
-            && random.nextInt(9) == 0 // 1:10 chance
-        ) {
-            log.trace { EYES }
-            event.message.addReaction(EYES).queue()
+        val roll = random.nextInt(9) // 1:10 chance
+
+        if (event?.author?.id == "430901418925359126" && event.channelType == TEXT) {
+            if (roll == 0) {
+                log.trace { EYES }
+                event.message.addReaction(EYES).queue()
+            } else log.trace { "$roll ≠ 0" }
         }
     }
 }
