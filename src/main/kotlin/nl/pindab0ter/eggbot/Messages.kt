@@ -128,10 +128,13 @@ object Messages {
         val projectedEggs = coopStatus.contributorsList
             .sumByDouble { it.contributionRate }
             .times(coopStatus.secondsRemaining)
+        val eggEmote = Config.eggEmojiIds[contract.egg]?.let { id ->
+            EggBot.jdaClient.getEmoteById(id)?.asMention
+        } ?: ""
 
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
         append("**Eggs**: ${eggs.formatIllions()}")
-        Config.eggEmojiIds[contract.egg]?.let { append(EggBot.jdaClient.getEmoteById(it).asMention) }
+        append(eggEmote)
         appendln()
         appendln("**Rate**: ${hourlyRate.formatIllions()}/hr")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
