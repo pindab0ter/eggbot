@@ -5,6 +5,7 @@ import com.github.kittinunf.fuel.core.Body
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.ChannelType
+import nl.pindab0ter.eggbot.jda.commandClient
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Period
@@ -349,6 +350,6 @@ fun CommandEvent.replyInDms(messages: List<String>) {
 
 // Messages
 
-val Command.missingArguments get() = "Missing argument(s). Use `${EggBot.commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
+val Command.missingArguments get() = "Missing argument(s). Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
 
-val Command.tooManyArguments get() = "Too many arguments. Use `${EggBot.commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
+val Command.tooManyArguments get() = "Too many arguments. Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."

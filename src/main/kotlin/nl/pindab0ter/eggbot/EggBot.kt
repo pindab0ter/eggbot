@@ -1,11 +1,10 @@
 package nl.pindab0ter.eggbot
 
-import com.jagrosh.jdautilities.command.CommandClient
-import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
-import nl.pindab0ter.eggbot.commands.*
 import nl.pindab0ter.eggbot.database.*
+import nl.pindab0ter.eggbot.jda.CommandLogger
+import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.jobs.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
@@ -24,31 +23,6 @@ import java.sql.Connection
 
 
 object EggBot {
-    val commandClient: CommandClient = CommandClientBuilder().apply {
-        setOwnerId(Config.ownerId)
-        setPrefix(Config.prefix)
-        setHelpWord(Config.helpWord)
-        useHelpBuilder(true)
-        setHelpConsumer(HelpConsumer)
-        if (Config.game != null) setGame(Config.game)
-        addCommands(
-            Active,
-            ContractIDs,
-            CoopInfo,
-            EarningsBonus,
-            Inactive,
-            LeaderBoard,
-            Register,
-            RollCall,
-            WhoIs
-        )
-        setEmojis(
-            Config.emojiSuccess,
-            Config.emojiWarning,
-            Config.emojiError
-        )
-    }.build()
-
     val jdaClient: JDA = JDABuilder(Config.botToken)
         .addEventListener(CommandLogger)
         .addEventListener(commandClient)

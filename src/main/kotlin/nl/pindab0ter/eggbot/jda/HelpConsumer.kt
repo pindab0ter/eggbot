@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot
+package nl.pindab0ter.eggbot.jda
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -19,15 +19,15 @@ object HelpConsumer : Consumer<CommandEvent> {
             fun append(commands: List<Command>) = commands.forEach { command ->
                 if (!command.isHidden && (!command.isOwnerCommand || event.isOwner)) {
                     append("\n`")
-                    append(EggBot.commandClient.textualPrefix)
-                    append(if (EggBot.commandClient.prefix == null) " " else "")
+                    append(commandClient.textualPrefix)
+                    append(if (commandClient.prefix == null) " " else "")
                     append(command.name)
                     append(if (command.arguments == null) "`" else " ${command.arguments}`")
                     append(" - ${command.help}")
                 }
             }
 
-            EggBot.commandClient.commands.let { commands ->
+            commandClient.commands.let { commands ->
                 if (commands.any { it.category != null }) {
                     commands.groupBy { it.category }.toList().forEachIndexed { i, (category, commands) ->
                         append(if (i == 0) "\n" else "\n\n")
