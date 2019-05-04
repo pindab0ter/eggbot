@@ -15,8 +15,8 @@ object Messages {
         StringBuilder("$title leader board:\n").apply {
             append("```")
             farmers.forEachIndexed { index, (name, value) ->
-                append("${index + 1}:")
                 appendPaddingSpaces(index + 1, farmers.count())
+                append("${index + 1}:")
                 append(" ")
                 append(name)
                 appendPaddingSpaces(name, farmers.map { it.name })
