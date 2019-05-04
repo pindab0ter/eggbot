@@ -9,7 +9,6 @@ import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.replyInDms
 import org.jetbrains.exposed.sql.transactions.transaction
-import sun.plugin2.message.Message
 
 object LeaderBoard : Command() {
 
