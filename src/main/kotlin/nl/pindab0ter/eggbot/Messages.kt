@@ -20,10 +20,10 @@ object Messages {
                 append(" ")
                 append(name)
                 appendPaddingSpaces(name, farmers.map { it.name })
-                append(" ")
+                append("  ")
                 appendPaddingSpaces(
-                    value,
-                    farmers.map { it.value })
+                    value.split(Regex("[^,.\\d]"), 2).first(),
+                    farmers.map { it.value.split(Regex("[^,.\\d]"), 2).first() })
                 append(value)
                 if (index < farmers.size - 1) appendln()
             }
