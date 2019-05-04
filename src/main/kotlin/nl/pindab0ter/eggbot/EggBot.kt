@@ -4,6 +4,7 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import nl.pindab0ter.eggbot.database.*
 import nl.pindab0ter.eggbot.jda.CommandLogger
+import nl.pindab0ter.eggbot.jda.EyeReaction
 import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.jobs.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
@@ -25,6 +26,7 @@ import java.sql.Connection
 object EggBot {
     val jdaClient: JDA = JDABuilder(Config.botToken)
         .addEventListener(CommandLogger)
+        .addEventListener(EyeReaction)
         .addEventListener(commandClient)
         .build()
 
