@@ -21,6 +21,8 @@ import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz.impl.StdSchedulerFactory
 import java.sql.Connection
+import java.time.ZoneId
+import java.util.*
 
 
 object EggBot {
@@ -61,6 +63,9 @@ object EggBot {
     }
 
     private fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply {
+        // Use Europe/London because it moves with Daylight Saving Time
+        val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
+
         if (!Config.devMode) scheduleJob(
             newJob(UpdateFarmersJob::class.java)
                 .withIdentity("update_farmers")
@@ -75,8 +80,10 @@ object EggBot {
                 .withIdentity("update_leader_board")
                 .build(),
             newTrigger()
-                .withIdentity("fridays")
-                .withSchedule(weeklyOnDayAndHourAndMinute(FRIDAY, 13, 0))
+                .withIdentity("every_friday_at_noon")
+                .withSchedule(
+                    weeklyOnDayAndHourAndMinute(FRIDAY, 12, 0).inTimeZone(london)
+                )
                 .build()
         )
         listenerManager.addJobListener(JobLogger)
