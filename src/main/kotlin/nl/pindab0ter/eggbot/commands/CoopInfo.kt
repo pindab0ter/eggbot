@@ -16,7 +16,7 @@ object CoopInfo : Command() {
     init {
         name = "coop"
         aliases = arrayOf("coopinfo", "ci", "coop-info")
-        arguments = "<co-op id> <contract id>"
+        arguments = "<contract id> <co-op id>"
         help = "Shows the progress of a specific co-op."
         // category = ContractsCategory
         guildOnly = false
@@ -38,7 +38,9 @@ object CoopInfo : Command() {
             }
         }
 
-        getCoopStatus(event.arguments[0], event.arguments[1]).let getCoopStatus@{ (status, _) ->
+        val (contractId, coopId) = event.arguments
+
+        getCoopStatus(contractId, coopId).let getCoopStatus@{ (status, _) ->
             if (status == null || !status.isInitialized) "Could not get co-op status. Are the `co-op id` and `contract id` correct?.".let {
                 event.replyWarning(it)
                 log.debug { it }
