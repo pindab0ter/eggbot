@@ -158,11 +158,13 @@ object Messages {
             Contributor(
                 it.userName,
                 it.active == 1,
-                it.contributionAmount.formatIllions(true),
+                it.contributionAmount.formatIllions(),
                 it.contributionRate.times(3600).formatIllions() + "/hr"
             )
         }
-        coopInfo.forEach { (userName, active, amount, rate) ->
+        coopInfo.forEachIndexed { index, (userName, active, amount, rate) ->
+            appendPaddingSpaces(index + 1, coopStatus.contributorsCount)
+            append("${index + 1}: ")
             append(userName)
             appendPaddingSpaces(userName + if (!active) "  zZ" else " ",
                 coopInfo.map { it.userName + if (!it.active) "  zZ" else " " })
