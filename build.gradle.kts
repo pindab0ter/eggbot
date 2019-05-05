@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "nl.pindab0ter"
-version = "0.2.1"
+version = "1.0.0"
 
 plugins {
     idea
