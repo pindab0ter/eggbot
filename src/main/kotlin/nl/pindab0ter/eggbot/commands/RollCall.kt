@@ -149,6 +149,7 @@ object RollCall : Command() {
                 // With the remaining active farmers keep adding the next highest rated to the lowest rated co-op
                 activeFarmers.drop(coops.size).forEach { activeFarmer ->
                     coops.filter { coop -> coop.farmers.count() < preferredCoopSize }
+                        .filter { coop -> coop.farmers.count() == coops.map { it.farmers.count() }.min() }
                         .sortedBy { coop -> coop.farmers.sumBy { it.earningsBonus } }
                         .first()
                         .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(activeFarmer)) }
