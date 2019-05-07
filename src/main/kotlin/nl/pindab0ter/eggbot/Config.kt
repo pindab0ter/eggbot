@@ -29,6 +29,7 @@ object Config {
     private const val CHANNEL_LEADER_BOARD_DRONE_TAKEDOWNS = "channel.leader_board.drone_takedowns"
     private const val CHANNEL_LEADER_BOARD_ELITE_DRONE_TAKEDOWNS = "channel.leader_board.elite_drone_takedowns"
 
+    private const val ROLE_ROLL_CALL = "role.roll_call"
 
     private const val EMOTE_DEFAULT = "emote.default"
     private const val EMOTE_EDIBLE = "emote.edible"
@@ -81,6 +82,8 @@ object Config {
     val droneTakedownsLeaderBoardChannel: String
     val eliteDroneTakedownsLeaderBoardChannel: String
 
+    val rollCallRole: String?
+
     val eggEmojiIds: Map<EggInc.Egg, String?>
 
     val emoteGoldenEgg: String?
@@ -111,6 +114,8 @@ object Config {
             prestigesLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_PRESTIGES)
             droneTakedownsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_DRONE_TAKEDOWNS)
             eliteDroneTakedownsLeaderBoardChannel = getRequired(CHANNEL_LEADER_BOARD_ELITE_DRONE_TAKEDOWNS)
+
+            rollCallRole = getOptional(ROLE_ROLL_CALL)
 
             // @formatter:off
             eggEmojiIds = mapOf (

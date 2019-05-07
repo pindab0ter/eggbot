@@ -30,6 +30,20 @@ object RollCall : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
+        // If the admin role is defined check whether the author has at least that role or is the guild owner
+        if (Config.rollCallRole != null && event.author.mutualGuilds.none { guild ->
+                guild.getMember(event.author).let { author ->
+                    author.isOwner || author.roles.any { memberRole ->
+                        guild.getRolesByName(Config.rollCallRole, true)
+                            .any { adminRole -> memberRole.position >= adminRole.position }
+                    }
+                }
+            }) "You must have at least a role called `${Config.rollCallRole}` to use that!".let {
+            event.replyError(it)
+            log.debug { it }
+            return
+        }
+
         when {
             event.arguments.isEmpty() -> missingArguments.let {
                 event.replyWarning(it)
@@ -71,7 +85,6 @@ object RollCall : Command() {
                 return@transaction
             }
 
-            log.info { "Generating schedule for ${contract.identifier}" }
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contract)
 
