@@ -94,14 +94,14 @@ object Config {
             load(FileInputStream(FILE_NAME))
 
             botToken = getRequired(BOT_TOKEN)
-            ownerId = getProperty(OWNER_ID, "0")
-            prefix = getProperty(PREFIX, "!")
-            helpWord = getProperty(HELP_WORD, "help")
-            statusType = getProperty(STATUS_TYPE, "DEFAULT")
-            statusText = getProperty(STATUS_TEXT)
-            emojiSuccess = getProperty(EMOJI_SUCCESS, "👍")
-            emojiWarning = getProperty(EMOJI_WARNING, "⚠️")
-            emojiError = getProperty(EMOJI_ERROR, "🚫")
+            ownerId = getOptional(OWNER_ID, "0")
+            prefix = getOptional(PREFIX, "!")
+            helpWord = getOptional(HELP_WORD, "help")
+            statusType = getOptional(STATUS_TYPE, "DEFAULT")
+            statusText = getOptional(STATUS_TEXT)
+            emojiSuccess = getOptional(EMOJI_SUCCESS, "👍")
+            emojiWarning = getOptional(EMOJI_WARNING, "⚠️")
+            emojiError = getOptional(EMOJI_ERROR, "🚫")
             coopName = getRequired(COOP_NAME)
             coopIncrementChar = getRequired(COOP_INCREMENT_CHAR).first()
 
@@ -114,39 +114,39 @@ object Config {
 
             // @formatter:off
             eggEmojiIds = mapOf (
-                EggInc.Egg.DEFAULT        to getProperty(EMOTE_DEFAULT),
-                EggInc.Egg.EDIBLE         to getProperty(EMOTE_EDIBLE),
-                EggInc.Egg.SUPERFOOD      to getProperty(EMOTE_SUPERFOOD),
-                EggInc.Egg.MEDICAL        to getProperty(EMOTE_MEDICAL),
-                EggInc.Egg.ROCKET_FUEL    to getProperty(EMOTE_ROCKET_FUEL),
-                EggInc.Egg.SUPER_MATERIAL to getProperty(EMOTE_SUPER_MATERIAL),
-                EggInc.Egg.FUSION         to getProperty(EMOTE_FUSION),
-                EggInc.Egg.QUANTUM        to getProperty(EMOTE_QUANTUM),
-                EggInc.Egg.IMMORTALITY    to getProperty(EMOTE_IMMORTALITY),
-                EggInc.Egg.TACHYON        to getProperty(EMOTE_TACHYON),
-                EggInc.Egg.GRAVITON       to getProperty(EMOTE_GRAVITON),
-                EggInc.Egg.DILITHIUM      to getProperty(EMOTE_DILITHIUM),
-                EggInc.Egg.PRODIGY        to getProperty(EMOTE_PRODIGY),
-                EggInc.Egg.TERRAFORM      to getProperty(EMOTE_TERRAFORM),
-                EggInc.Egg.ANTIMATTER     to getProperty(EMOTE_ANTIMATTER),
-                EggInc.Egg.DARK_MATTER    to getProperty(EMOTE_DARK_MATTER),
-                EggInc.Egg.AI             to getProperty(EMOTE_AI),
-                EggInc.Egg.NEBULA         to getProperty(EMOTE_NEBULA),
-                EggInc.Egg.UNIVERSE       to getProperty(EMOTE_UNIVERSE),
-                EggInc.Egg.ENLIGHTENMENT  to getProperty(EMOTE_ENLIGHTENMENT),
-                EggInc.Egg.CHOCOLATE      to getProperty(EMOTE_CHOCOLATE),
-                EggInc.Egg.EASTER         to getProperty(EMOTE_EASTER),
-                EggInc.Egg.WATER_BALLOON  to getProperty(EMOTE_WATER_BALLOON),
-                EggInc.Egg.FIREWORK       to getProperty(EMOTE_FIREWORK),
-                EggInc.Egg.PUMPKIN        to getProperty(EMOTE_PUMPKIN)
+                EggInc.Egg.DEFAULT        to getOptional(EMOTE_DEFAULT),
+                EggInc.Egg.EDIBLE         to getOptional(EMOTE_EDIBLE),
+                EggInc.Egg.SUPERFOOD      to getOptional(EMOTE_SUPERFOOD),
+                EggInc.Egg.MEDICAL        to getOptional(EMOTE_MEDICAL),
+                EggInc.Egg.ROCKET_FUEL    to getOptional(EMOTE_ROCKET_FUEL),
+                EggInc.Egg.SUPER_MATERIAL to getOptional(EMOTE_SUPER_MATERIAL),
+                EggInc.Egg.FUSION         to getOptional(EMOTE_FUSION),
+                EggInc.Egg.QUANTUM        to getOptional(EMOTE_QUANTUM),
+                EggInc.Egg.IMMORTALITY    to getOptional(EMOTE_IMMORTALITY),
+                EggInc.Egg.TACHYON        to getOptional(EMOTE_TACHYON),
+                EggInc.Egg.GRAVITON       to getOptional(EMOTE_GRAVITON),
+                EggInc.Egg.DILITHIUM      to getOptional(EMOTE_DILITHIUM),
+                EggInc.Egg.PRODIGY        to getOptional(EMOTE_PRODIGY),
+                EggInc.Egg.TERRAFORM      to getOptional(EMOTE_TERRAFORM),
+                EggInc.Egg.ANTIMATTER     to getOptional(EMOTE_ANTIMATTER),
+                EggInc.Egg.DARK_MATTER    to getOptional(EMOTE_DARK_MATTER),
+                EggInc.Egg.AI             to getOptional(EMOTE_AI),
+                EggInc.Egg.NEBULA         to getOptional(EMOTE_NEBULA),
+                EggInc.Egg.UNIVERSE       to getOptional(EMOTE_UNIVERSE),
+                EggInc.Egg.ENLIGHTENMENT  to getOptional(EMOTE_ENLIGHTENMENT),
+                EggInc.Egg.CHOCOLATE      to getOptional(EMOTE_CHOCOLATE),
+                EggInc.Egg.EASTER         to getOptional(EMOTE_EASTER),
+                EggInc.Egg.WATER_BALLOON  to getOptional(EMOTE_WATER_BALLOON),
+                EggInc.Egg.FIREWORK       to getOptional(EMOTE_FIREWORK),
+                EggInc.Egg.PUMPKIN        to getOptional(EMOTE_PUMPKIN)
             )
             // @formatter:on
 
-            emoteGoldenEgg = getProperty(EMOTE_GOLD)
-            emoteSoulEgg = getProperty(EMOTE_SOUL)
-            emoteProphecyEgg = getProperty(EMOTE_PROPHECY)
+            emoteGoldenEgg = getOptional(EMOTE_GOLD)
+            emoteSoulEgg = getOptional(EMOTE_SOUL)
+            emoteProphecyEgg = getOptional(EMOTE_PROPHECY)
 
-            devMode = getProperty(DEVELOPMENT, "false") == "true"
+            devMode = getOptional(DEVELOPMENT, "false") == "true"
 
             game = if (statusText != null) Game.of(
                 when (statusType) {
@@ -181,6 +181,20 @@ object Config {
         return when {
             !it.isNullOrBlank() -> it
             else -> throw PropertyNotFoundException("Could not load \"$key\" from \"$FILE_NAME\".")
+        }
+    }
+
+    private fun Properties.getOptional(key: String): String? = getProperty(key).let {
+        return when {
+            !it.isNullOrBlank() -> it
+            else -> null
+        }
+    }
+
+    private fun Properties.getOptional(key: String, default: String): String = getProperty(key).let {
+        return when {
+            !it.isNullOrBlank() -> it
+            else -> default
         }
     }
 }
