@@ -97,9 +97,9 @@ object RollCall : Command() {
                     append(coop.farmers.count())
                     append("/${contract.maxCoopSize} members): ")
                     appendPaddingSpaces(
-                        coop.activeEarningsBonus.formatInteger(),
-                        coops.map { it.activeEarningsBonus.formatInteger() })
-                    append(coop.activeEarningsBonus.formatInteger() + " %")
+                        coop.activeEarningsBonus.formatIllions(true),
+                        coops.map { it.activeEarningsBonus.formatIllions(true) })
+                    append(coop.activeEarningsBonus.formatIllions(true) + " %")
                     appendln()
                 }
                 append("```")
@@ -115,9 +115,9 @@ object RollCall : Command() {
                             farmer.inGameName,
                             coops.flatMap { coop -> coop.farmers.map { it.inGameName } })
                         appendPaddingSpaces(
-                            farmer.earningsBonus.formatInteger() + " %",
-                            coop.farmers.map { it.earningsBonus.formatInteger() + " %" })
-                        append(farmer.earningsBonus.formatInteger() + " %")
+                            farmer.earningsBonus.formatIllions(true) + " %",
+                            coop.farmers.map { it.earningsBonus.formatIllions(true) + " %" })
+                        append(farmer.earningsBonus.formatIllions(true) + " %")
                         if (!farmer.isActive) append(" (Inactive)")
                         appendln()
                     }
