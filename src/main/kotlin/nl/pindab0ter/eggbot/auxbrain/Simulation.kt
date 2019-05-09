@@ -10,9 +10,11 @@ import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.MathContext.DECIMAL128
 
-class Simulation(val backup: Backup, contractId: String) {
+class Simulation(val backup: Backup, val contractId: String) {
     private val farm = backup.farmsList.find { it.contractId == contractId }!!
     private val localContract = backup.contracts.contractsList.find { it.contract.identifier == contractId }!!
+    val egg = localContract.contract.egg
+    val contractName = localContract.contract.name
 
     val eggLayingBonus = listOf(
         1 + .10 * farm.commonResearchList[COMFORTABLE_NESTS.ordinal].level,
@@ -55,17 +57,25 @@ class Simulation(val backup: Backup, contractId: String) {
         .times(shippingRateBonus)
 
     val effectiveEggLayingRateSecond = minOf(eggLayingRateSecond, shippingRateSecond)
+    val effectiveEggLayingRateHour = effectiveEggLayingRateSecond * BigDecimal(60 * 60)
 
     val elapsedTime = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
-    val secondsRemaining = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime).standardSeconds
+    val timeRemaining = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime)
+    private val secondsRemaining = timeRemaining.standardSeconds
     val requiredEggs = localContract.contract.goalsList[localContract.contract.goalsList.size - 1].targetAmount
+    private val eggLayingBaseRate = internalHatcheryRateMinute.divide(BigDecimal(60 * 30), DECIMAL128) // 1/3rd per second?
+    val eggsLaid = farm.eggsLaid
 
-    val `hatchery` = internalHatcheryRateMinute.divide(BigDecimal(60 * 30), DECIMAL128) // 1/3rd per second?
-
-    val finalTarget = BigDecimal(farm.eggsLaid) +
+    val finalTarget = BigDecimal(eggsLaid) +
             (eggLayingRateSecond * secondsRemaining.toBigDecimal()) +
-            (BigDecimal(0.5) * (`hatchery` * eggLayingBonus)) *
+            (BigDecimal(0.5) * (eggLayingBaseRate * eggLayingBonus)) *
             secondsRemaining.toBigDecimal() *
             secondsRemaining.toBigDecimal() *
             BigDecimal(1 + 0.10 * backup.data.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
+
+    val finalTargetWithCalm = BigDecimal(eggsLaid) +
+            (eggLayingRateSecond * secondsRemaining.toBigDecimal()) +
+            (BigDecimal(0.5) * (eggLayingBaseRate * eggLayingBonus)) *
+            secondsRemaining.toBigDecimal() *
+            secondsRemaining.toBigDecimal()
 }

@@ -1,10 +1,9 @@
 package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.EggInc
+import nl.pindab0ter.eggbot.auxbrain.Simulation
 import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Farmer
-import org.joda.time.DateTime
-import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.RoundingMode.HALF_UP
 
@@ -94,26 +93,19 @@ object Messages {
     }.toString()
 
     fun contractStatus(
-        localContract: EggInc.LocalContract,
-        farm: EggInc.Simulation
-    ): String = StringBuilder("**${localContract.contract.name}**:\n").apply {
-        val eggs = localContract.myEggs
-        val rate = 0.0
-        val hourlyRate = rate.times(60)
+        simulation: Simulation
+    ): String = StringBuilder("`${simulation.contractId}` (${simulation.contractName}):\n").apply {
+        val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
+            EggBot.jdaClient.getEmoteById(id)?.asMention
+        } ?: ""
 
-        val elapsedTime = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
-        val timeRemaining = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime)
-        val requiredEggs = localContract.contract
-            .goalsList[localContract.contract.goalsList.size - 1]
-            .targetAmount
-        val projectedEggs = rate.times(localContract.coopGracePeriodEndTime / 60)
-
-        appendln("Eggs: ${eggs.formatIllions()}")
-        appendln("Rate: ${rate.formatIllions(true)} (${hourlyRate.formatIllions(true)}/hr)")
-        appendln("Time remaining: ${timeRemaining.asDayHoursAndMinutes()}")
-        append("Projected eggs: ${projectedEggs.formatIllions(true)}")
-        append("/")
-        append("${requiredEggs.formatIllions(true)}\n")
+        appendln("**Farmer**: `${simulation.backup.name}`")
+        appendln("**Eggs**: ${simulation.eggsLaid.formatIllions()}")
+        append(eggEmote)
+        appendln("**Rate**: ${simulation.effectiveEggLayingRateHour.formatIllions(true)}/hr")
+        appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes()}")
+        appendln("**Required eggs**: ${simulation.requiredEggs.formatIllions(true)}")
+        appendln("**Projected eggs with int. hatchery calm**: ${simulation.finalTargetWithCalm.formatIllions()}")
     }.toString()
 
     fun coopStatus(

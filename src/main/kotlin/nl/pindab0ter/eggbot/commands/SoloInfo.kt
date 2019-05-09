@@ -4,22 +4,28 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Messages
-import nl.pindab0ter.eggbot.database.Contract
+import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.auxbrain.Simulation
 import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.missingArguments
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object ContractsInfo : Command() {
+object SoloInfo : Command() {
 
     private val log = KotlinLogging.logger { }
 
     init {
-        name = "contracts"
-        help = "Shows the progress of your own contracts."
+        name = "solo"
+        aliases = arrayOf("soloinfo", "si", "solo-info")
+        help = "Shows the progress of one of your own contracts."
+        arguments = "<contract id>"
         // category = ContractsCategory
         guildOnly = false
     }
 
+    @Suppress("ReplaceSizeZeroCheckWithIsEmpty")
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
@@ -32,6 +38,21 @@ object ContractsInfo : Command() {
             return
         }
 
+        when {
+            event.arguments.size < 1 -> missingArguments.let {
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
+            event.arguments.size > 1 -> tooManyArguments.let {
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
+        }
+
+        val contractId = event.arguments.first()
+
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
                 if (backup == null || !backup.hasData()) "No data found for `${farmer.inGameName}`.".let {
@@ -40,29 +61,14 @@ object ContractsInfo : Command() {
                     return@getFarmerBackup
                 }
 
-                if (backup.contracts.contractsList.isEmpty()) "No contracts found for ${farmer.inGameName}.".let {
-                    log.debug { it }
-                    event.reply(it)
-                    return@getFarmerBackup
-                }
-
-                val (soloContracts, coopContracts) = backup.contracts.contractsList
-                    .groupBy { it.contract.coopAllowed }
-                    .let { it[0].orEmpty() to it[1].orEmpty() }
-
-                soloContracts
-                    .map { it to backup.farmsList.find { farm -> farm.contractId == it.contract.identifier }!! }
-                    .forEach { (localContract, farm) ->
-                        event.replyInDm(Messages.contractStatus(localContract, farm))
+                if (backup.contracts.contractsList.find { it.contract.identifier == contractId } == null)
+                    "No contract found with ID `$contractId`. Try using `${event.client.textualPrefix}${ContractIDs.name}`".let {
+                        log.debug { it }
+                        event.reply(it)
+                        return@getFarmerBackup
                     }
 
-                coopContracts
-                    .map { it to AuxBrain.getCoopStatus(it.contract.identifier, it.coopIdentifier).get() }
-                    .forEach { (localContract, coopStatus) ->
-                        Contract.getOrNew(localContract.contract).let { contract ->
-                            event.replyInDm(Messages.coopStatus(contract, coopStatus))
-                        }
-                    }
+                event.replyInDm(Messages.contractStatus(Simulation(backup, contractId)))
             }
         }
     }

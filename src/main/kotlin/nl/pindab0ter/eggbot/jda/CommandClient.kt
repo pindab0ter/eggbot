@@ -21,6 +21,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         LeaderBoard,
         Register,
         RollCall,
+        SoloInfo,
         WhoIs
     )
     setEmojis(
