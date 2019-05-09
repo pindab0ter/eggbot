@@ -1,49 +1,73 @@
 package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.EggInc
+import nl.pindab0ter.eggbot.CommonResearch.*
+import org.joda.time.DateTime
+import org.joda.time.Duration
+import java.math.BigDecimal
+import java.math.MathContext.DECIMAL128
 import kotlin.collections.sumBy
 
-class Simulation(val backup: EggInc.Backup) {
+class Simulation(val backup: EggInc.Backup, contractId: String) {
+    private val farm = backup.farmsList.find { it.contractId == contractId }!!
+    private val localContract = backup.contracts.contractsList.find { it.contract.identifier == contractId }!!
 
-    private val farm = backup.farmsList.find { it.farmType == EggInc.FarmType.HOME }!!
-
-    val eggLayingBonus = listOf(
-        1 + .10 * farm.commonResearchList[CommonResearch.COMFORTABLE_NESTS.ordinal].level,
-        1 + .05 * farm.commonResearchList[CommonResearch.HEN_HOUSE_AC.ordinal].level,
-        1 + .15 * farm.commonResearchList[CommonResearch.IMPROVED_GENETICS.ordinal].level,
-        1 + .10 * farm.commonResearchList[CommonResearch.TIME_COMPRESSION.ordinal].level,
-        1 + .02 * farm.commonResearchList[CommonResearch.TIMELINE_DIVERSION.ordinal].level,
+    val eggLayingBonus = BigDecimal(listOf(
+        1 + .10 * farm.commonResearchList[COMFORTABLE_NESTS.ordinal].level,
+        1 + .05 * farm.commonResearchList[HEN_HOUSE_AC.ordinal].level,
+        1 + .15 * farm.commonResearchList[IMPROVED_GENETICS.ordinal].level,
+        1 + .10 * farm.commonResearchList[TIME_COMPRESSION.ordinal].level,
+        1 + .02 * farm.commonResearchList[TIMELINE_DIVERSION.ordinal].level,
         1 + .05 * backup.data.epicResearchList[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
-    ).fold1 { acc, bonus -> acc * bonus }
+    ).reduce { acc, bonus -> acc * bonus })
 
-    val internalHatcheryPerMinute = listOf(
-        2 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY1.ordinal].level,
-        5 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY2.ordinal].level,
-        10 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY3.ordinal].level,
-        25 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY4.ordinal].level,
-        5 * farm.commonResearchList[CommonResearch.MACHINE_LEARNING_INCUBATORS.ordinal].level,
-        50 * farm.commonResearchList[CommonResearch.NEURAL_LINKING.ordinal].level
-    ).sum()
-        .times(1 + .05 * backup.data.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level)
-        .times(4) // Assumes four non-full habs
+    val internalHatcheryRateMinute = BigDecimal(
+        listOf(
+            2 * farm.commonResearchList[INTERNAL_HATCHERY1.ordinal].level,
+            5 * farm.commonResearchList[INTERNAL_HATCHERY2.ordinal].level,
+            10 * farm.commonResearchList[INTERNAL_HATCHERY3.ordinal].level,
+            25 * farm.commonResearchList[INTERNAL_HATCHERY4.ordinal].level,
+            5 * farm.commonResearchList[MACHINE_LEARNING_INCUBATORS.ordinal].level,
+            50 * farm.commonResearchList[NEURAL_LINKING.ordinal].level
+        ).sum().times(1 + .05 * backup.data.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level).times(4) // Assumes four habitats
+    )
 
-    val eggLayingRate = farm.numChickens * eggLayingBonus / 30
+    val eggLayingRateMinute =
+        BigDecimal(farm.numChickens) * eggLayingBonus.divide(BigDecimal(30), DECIMAL128)
 
-    val shippingRateBonus = listOf(
-        1 + .05 * farm.commonResearchList[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
-        1 + .10 * farm.commonResearchList[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
-        1 + .05 * farm.commonResearchList[CommonResearch.DRIVER_TRAINING.ordinal].level,
-        1 + .05 * farm.commonResearchList[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level,
-        1 + .05 * farm.commonResearchList[CommonResearch.QUANTUM_STORAGE.ordinal].level,
-        1 + .05 * farm.commonResearchList[CommonResearch.HOVER_UPGRADES.ordinal].level,
-        1 + .05 * farm.commonResearchList[CommonResearch.DARK_CONTAINMENT.ordinal].level,
-        1 + .05 * farm.commonResearchList[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level,
+    val shippingRateBonus = BigDecimal(listOf(
+        1 + .05 * farm.commonResearchList[IMPROVED_LEAFSPRINGS.ordinal].level,
+        1 + .10 * farm.commonResearchList[LIGHTWEIGHT_BOXES.ordinal].level,
+        1 + .05 * farm.commonResearchList[DRIVER_TRAINING.ordinal].level,
+        1 + .05 * farm.commonResearchList[SUPER_ALLOY_FRAMES.ordinal].level,
+        1 + .05 * farm.commonResearchList[QUANTUM_STORAGE.ordinal].level,
+        1 + .05 * farm.commonResearchList[HOVER_UPGRADES.ordinal].level,
+        1 + .05 * farm.commonResearchList[DARK_CONTAINMENT.ordinal].level,
+        1 + .05 * farm.commonResearchList[NEURAL_NET_REFINEMENT.ordinal].level,
         1 + .05 * backup.data.epicResearchList[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
-    ).fold1 { acc, bonus -> acc * bonus }
+    ).reduce { acc, bonus -> acc * bonus })
 
-    val shippingPerMinute = farm.vehiclesList
+    val shippingRate = farm.vehiclesList
         .sumBy { it.capacity }
+        .let { BigDecimal(it) }
         .times(shippingRateBonus)
+
+    val effectiveEggLayingRateMinute = minOf(eggLayingRateMinute, shippingRate)
+
+    val elapsedTime = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
+    val secondsRemaining = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime).standardSeconds
+    val requiredEggs = localContract.contract
+        .goalsList[localContract.contract.goalsList.size - 1]
+        .targetAmount
+
+    val `hatchery` = internalHatcheryRateMinute.divide(BigDecimal(60 * 30), DECIMAL128) // 1/3rd per second?
+
+    val finalTarget = BigDecimal(farm.eggsLaid) +
+            (eggLayingRateMinute * BigDecimal(secondsRemaining)) +
+            (BigDecimal(0.5) * (`hatchery` * eggLayingBonus)) *
+            BigDecimal(secondsRemaining) *
+            BigDecimal(secondsRemaining) *
+            BigDecimal(1 + 0.10 * backup.data.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
 }
 
 
