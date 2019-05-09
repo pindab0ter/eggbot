@@ -1,8 +1,9 @@
 package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.EggInc
+import kotlin.collections.sumBy
 
-class FarmCalculator(val backup: EggInc.Backup) {
+class Simulation(val backup: EggInc.Backup) {
 
     private val farm = backup.farmsList.find { it.farmType == EggInc.FarmType.HOME }!!
 
@@ -13,8 +14,55 @@ class FarmCalculator(val backup: EggInc.Backup) {
         1 + .10 * farm.commonResearchList[CommonResearch.TIME_COMPRESSION.ordinal].level,
         1 + .02 * farm.commonResearchList[CommonResearch.TIMELINE_DIVERSION.ordinal].level,
         1 + .05 * backup.data.epicResearchList[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
-    )
+    ).fold1 { acc, bonus -> acc * bonus }
+
+    val internalHatcheryPerMinute = listOf(
+        2 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY1.ordinal].level,
+        5 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY2.ordinal].level,
+        10 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY3.ordinal].level,
+        25 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY4.ordinal].level,
+        5 * farm.commonResearchList[CommonResearch.MACHINE_LEARNING_INCUBATORS.ordinal].level,
+        50 * farm.commonResearchList[CommonResearch.NEURAL_LINKING.ordinal].level
+    ).sum()
+        .times(1 + .05 * backup.data.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level)
+        .times(4) // Assumes four non-full habs
+
+    val eggLayingRate = farm.numChickens * eggLayingBonus / 30
+
+    val shippingRateBonus = listOf(
+        1 + .05 * farm.commonResearchList[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
+        1 + .10 * farm.commonResearchList[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
+        1 + .05 * farm.commonResearchList[CommonResearch.DRIVER_TRAINING.ordinal].level,
+        1 + .05 * farm.commonResearchList[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level,
+        1 + .05 * farm.commonResearchList[CommonResearch.QUANTUM_STORAGE.ordinal].level,
+        1 + .05 * farm.commonResearchList[CommonResearch.HOVER_UPGRADES.ordinal].level,
+        1 + .05 * farm.commonResearchList[CommonResearch.DARK_CONTAINMENT.ordinal].level,
+        1 + .05 * farm.commonResearchList[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level,
+        1 + .05 * backup.data.epicResearchList[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
+    ).fold1 { acc, bonus -> acc * bonus }
+
+    val shippingPerMinute = farm.vehiclesList
+        .sumBy { it.capacity }
+        .times(shippingRateBonus)
 }
+
+
+// @formatter:off
+val EggInc.VehicleType.capacity get() = when (this){
+    EggInc.VehicleType.UNRECOGNIZED         -> 0
+    EggInc.VehicleType.TRIKE                -> 5000
+    EggInc.VehicleType.TRANSIT              -> 15000
+    EggInc.VehicleType.PICKUP               -> 50000
+    EggInc.VehicleType.VEHICLE_10_FOOT      -> 100000
+    EggInc.VehicleType.VEHICLE_24_FOOT      -> 250000
+    EggInc.VehicleType.SEMI                 -> 500000
+    EggInc.VehicleType.DOUBLE_SEMI          -> 1000000
+    EggInc.VehicleType.FUTURE_SEMI          -> 5000000
+    EggInc.VehicleType.MEGA_SEMI            -> 15000000
+    EggInc.VehicleType.HOVER_SEMI           -> 30000000
+    EggInc.VehicleType.QUANTUM_TRANSPORTER  -> 50000000
+}
+// @formatter:on
 
 enum class EpicResearch(val id: String) {
     HOLD_TO_HATCH("hold_to_hatch"),

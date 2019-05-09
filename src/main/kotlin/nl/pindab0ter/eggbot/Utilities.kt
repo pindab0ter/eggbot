@@ -219,6 +219,11 @@ fun <T> Iterable<T>.init() = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.tail() = drop(1)
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
 
+inline fun <T> Iterable<T>.fold1(operation: (acc: T, T) -> T): T {
+    var accumulator = this.first()
+    for (element in this.init()) accumulator = operation(accumulator, element)
+    return accumulator
+}
 
 // Maths
 
