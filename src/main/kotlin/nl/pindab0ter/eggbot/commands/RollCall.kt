@@ -92,6 +92,7 @@ object RollCall : Command() {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
+                    appendPaddingSpaces(coop.name, coops.map { it.name })
                     append(" (")
                     appendPaddingSpaces(coop.farmers.count(), coops.map { it.farmers.count() })
                     append(coop.farmers.count())
