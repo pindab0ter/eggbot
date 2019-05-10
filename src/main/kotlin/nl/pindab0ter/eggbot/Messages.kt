@@ -117,9 +117,10 @@ object Messages {
         val hourlyRate = rate.times(3600)
         val timeRemaining = coopStatus.secondsRemaining.toPeriod()
         val requiredEggs = contract.finalAmount
-        val projectedEggs = coopStatus.contributorsList
-            .sumByDouble { it.contributionRate }
-            .times(coopStatus.secondsRemaining)
+        val projectedEggs = coopStatus.contributorsList.sumByDouble { it.contributionAmount } +
+                coopStatus.contributorsList
+                    .sumByDouble { it.contributionRate }
+                    .times(coopStatus.secondsRemaining)
         val eggEmote = Config.eggEmojiIds[contract.egg]?.let { id ->
             EggBot.jdaClient.getEmoteById(id)?.asMention
         } ?: ""
@@ -130,9 +131,13 @@ object Messages {
         appendln()
         appendln("**Rate**: ${hourlyRate.formatIllions()}/hr")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
+
         append("**Projected eggs**: ${projectedEggs.formatIllions()}")
         append("/")
-        append("${requiredEggs.formatIllions(true)}\n")
+        append(requiredEggs.formatIllions(true))
+        append(" (No new chickens)")
+
+        appendln()
         appendln()
         appendln("Members (${coopStatus.contributorsCount}/${contract.maxCoopSize}):")
         appendln("```")
