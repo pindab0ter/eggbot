@@ -3,13 +3,11 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Messages
-import nl.pindab0ter.eggbot.arguments
+import net.dv8tion.jda.core.entities.ChannelType
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.auxbrain.Simulation
 import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.missingArguments
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object SoloInfo : Command() {
@@ -25,7 +23,7 @@ object SoloInfo : Command() {
         guildOnly = false
     }
 
-    @Suppress("ReplaceSizeZeroCheckWithIsEmpty")
+    @Suppress("ReplaceSizeZeroCheckWithIsEmpty", "FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
@@ -55,22 +53,35 @@ object SoloInfo : Command() {
 
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
-                if (backup == null || !backup.hasData()) "No data found for `${farmer.inGameName}`.".let {
-                    log.warn { it }
-                    event.reply(it)
-                    return@getFarmerBackup
-                }
+                val contract = if (backup == null || !backup.hasData())
+                    "No data found for `${farmer.inGameName}`.".let {
+                        log.warn { it }
+                        event.reply(it)
+                        return@getFarmerBackup
+                    } else backup.contracts.contractsList.find { it.contract.identifier == contractId }
 
-                if (backup.contracts.contractsList.find { it.contract.identifier == contractId } == null)
+                if (contract == null)
                     "No contract found with ID `$contractId`. Try using `${event.client.textualPrefix}${ContractIDs.name}`".let {
                         log.debug { it }
                         event.reply(it)
                         return@getFarmerBackup
                     }
+                if (contract.contract.coopAllowed == 1)
+                    "The contract with ID `$contractId` is not a solo contract.".let {
+                        log.debug { it }
+                        event.reply(it)
+                        return@getFarmerBackup
+                    }
 
-                event.replyInDm(Messages.contractStatus(Simulation(backup, contractId)))
+                Messages.soloStatus(Simulation(backup, contractId)).let { message ->
+                    if (event.channel.id == Config.botCommandsChannel) {
+                        event.reply(message)
+                    } else {
+                        event.replyInDm(message)
+                        if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+                    }
+                }
             }
         }
     }
 }
-
