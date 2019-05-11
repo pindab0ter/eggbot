@@ -4,8 +4,11 @@ import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.auxbrain.Simulation
 import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Farmer
+import org.joda.time.DateTime
+import org.joda.time.Period
 import java.math.BigDecimal
 import java.math.RoundingMode.HALF_UP
+import kotlin.math.roundToInt
 
 object Messages {
     private data class NameToValue(val name: String, val value: String)
@@ -110,38 +113,52 @@ object Messages {
     fun coopStatus(
         contract: Contract,
         coopStatus: EggInc.CoopStatusResponse
-    ): String = StringBuilder("`${contract.identifier}` (${contract.name}):\n").apply {
-        val eggs = coopStatus.contributorsList.sumByDouble { it.contributionAmount }
-        val rate = coopStatus.contributorsList.sumByDouble { it.contributionRate }
-        val hourlyRate = rate.times(3600)
+    ): String = StringBuilder().apply {
+        val eggsLaid = coopStatus.contributorsList.sumByDouble { it.contributionAmount }
+        val eggsPerSecond = coopStatus.contributorsList.sumByDouble { it.contributionRate }
+        val eggsPerHour = eggsPerSecond.times(3600)
         val timeRemaining = coopStatus.secondsRemaining.toPeriod()
         val requiredEggs = contract.finalAmount
-        val projectedEggs = coopStatus.contributorsList.sumByDouble { it.contributionAmount } +
-                coopStatus.contributorsList
-                    .sumByDouble { it.contributionRate }
-                    .times(coopStatus.secondsRemaining)
+        val projectedEggs = eggsLaid + eggsPerSecond * coopStatus.secondsRemaining
         val eggEmote = Config.eggEmojiIds[contract.egg]?.let { id ->
             EggBot.jdaClient.getEmoteById(id)?.asMention
         } ?: ""
 
+        appendln("`${contract.identifier}` (${contract.name}):${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
-        append("**Eggs**: ${eggs.formatIllions()}")
-        append(eggEmote)
-        appendln()
-        appendln("**Rate**: ${hourlyRate.formatIllions()}/hr")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
-
-        append("**Projected eggs**: ${projectedEggs.formatIllions()}")
-        append("/")
-        append(requiredEggs.formatIllions(true))
-        append(" (No new chickens)")
-
+        appendln("**Current**: ${eggsLaid.formatIllions()} (${eggsPerHour.formatIllions()}/hr)")
+        appendln("**Required**: ${requiredEggs.formatIllions(true)}")
+        appendln("**Expected**: ${projectedEggs.formatIllions()}")
         appendln()
-        appendln()
+
+        append("Goals (${contract.goals.count { eggsLaid >= it.targetAmount }}/${contract.goals.count()}):\n```")
+        contract.goals.forEachIndexed { index, goal ->
+            if (eggsLaid < goal.targetAmount) {
+                val finishedIn = Period(
+                    DateTime.now(),
+                    DateTime.now().plusSeconds((goal.targetAmount - eggsLaid).div(eggsPerSecond).roundToInt())
+                )
+                val success = finishedIn.toStandardSeconds() < timeRemaining.toStandardSeconds()
+
+                appendPaddingSpaces(index + 1, coopStatus.contributorsCount)
+                append("${index + 1}: ")
+                appendPaddingSpaces(
+                    goal.targetAmount.formatIllions(true),
+                    contract.goals
+                        .filter { eggsLaid < it.targetAmount }
+                        .map { it.targetAmount.formatIllions(true) }
+                )
+                append(goal.targetAmount.formatIllions(true))
+                append(if (success) " ✔ " else " ✘ ")
+                append(finishedIn.asDayHoursAndMinutes())
+                if (index + 1== contract.goals.count()) appendln("```")
+                else appendln()
+            }
+        }
+
         appendln("Members (${coopStatus.contributorsCount}/${contract.maxCoopSize}):")
         appendln("```")
-
-        // TODO: Goal reached at…
 
         data class Contributor(
             val userName: String,
