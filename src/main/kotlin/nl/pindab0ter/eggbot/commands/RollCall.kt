@@ -87,6 +87,10 @@ object RollCall : Command() {
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contract)
+            val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName
+            val longestEarningsBonus = farmers
+                .maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
+
 
             event.reply(StringBuilder("Co-ops generated for `${contract.identifier}`:").appendln().apply {
                 append("```")
@@ -114,10 +118,12 @@ object RollCall : Command() {
                         append(": ")
                         appendPaddingSpaces(
                             farmer.inGameName,
-                            coops.flatMap { coop -> coop.farmers.map { it.inGameName } })
+                            longestFarmerName
+                        )
                         appendPaddingSpaces(
-                            farmer.earningsBonus.formatIllions(true) + " %",
-                            coop.farmers.map { it.earningsBonus.formatIllions(true) + " %" })
+                            farmer.earningsBonus.formatIllions(true),
+                            longestEarningsBonus
+                        )
                         append(farmer.earningsBonus.formatIllions(true) + " %")
                         if (!farmer.isActive) append(" (Inactive)")
                         appendln()
