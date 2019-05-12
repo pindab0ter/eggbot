@@ -29,8 +29,8 @@ val EggInc.Egg.formattedName: String
         .split('_')
         .joinToString(" ", transform = String::capitalize)
 
+fun Long.toDuration(): Duration = Duration((this * 1000))
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
-fun Double.toPeriod(): Period = Period((this * 1000).roundToLong()).normalizedStandard(PeriodType.dayTime())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
 
 fun Period.asDayHoursAndMinutes(): String = PeriodFormatterBuilder()

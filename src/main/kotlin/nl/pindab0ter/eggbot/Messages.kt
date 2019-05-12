@@ -4,10 +4,10 @@ import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.auxbrain.Simulation
 import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Farmer
-import org.joda.time.Period
+import org.joda.time.DateTime
+import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.RoundingMode.HALF_UP
-import kotlin.math.roundToInt
 
 object Messages {
     private data class NameToValue(val name: String, val value: String)
@@ -134,7 +134,7 @@ object Messages {
         val eggsLaid = coopStatus.contributorsList.sumByDouble { it.contributionAmount }
         val eggsPerSecond = coopStatus.contributorsList.sumByDouble { it.contributionRate }
         val eggsPerHour = eggsPerSecond.times(3600)
-        val timeRemaining = coopStatus.secondsRemaining.toPeriod()
+        val timeRemaining = coopStatus.secondsRemaining.toDuration()
         val requiredEggs = contract.finalAmount
         val projectedEggs = eggsLaid + eggsPerSecond * coopStatus.secondsRemaining
         val eggEmote = Config.eggEmojiIds[contract.egg]?.let { id ->
@@ -155,27 +155,34 @@ object Messages {
         appendln("**Expected**: ${projectedEggs.formatIllions()}")
         appendln()
 
-        append("Goals (${contract.goals.count { eggsLaid >= it.targetAmount }}/${contract.goals.count()}):\n```")
-        contract.goals.forEachIndexed { index, goal ->
-            if (eggsLaid < goal.targetAmount) {
-                val finishedIn = Period.seconds((goal.targetAmount - eggsLaid).div(eggsPerSecond).roundToInt())
-                val success = finishedIn.toStandardSeconds() < timeRemaining.toStandardSeconds()
+        if (contract.goals.all { goal -> eggsLaid >= goal.targetAmount }) {
+            appendln("**Contract finished! ${Config.emojiSuccess}**")
+            appendln()
+        } else {
+            append("Goals (${contract.goals.count { eggsLaid >= it.targetAmount }}/${contract.goals.count()}):\n```")
+            contract.goals
+                .mapIndexed { index, goal -> index to goal }
+                .filter { (_, goal) -> eggsLaid < goal.targetAmount }
+                .forEach { (index, goal) ->
+                    val finishedIn = (goal.targetAmount - eggsLaid).div(eggsPerSecond).toDuration()
+                    val success = finishedIn < timeRemaining
+                    val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
-                appendPaddingSpaces(index + 1, coopStatus.contributorsCount)
-                append("${index + 1}: ")
-                appendPaddingSpaces(
-                    goal.targetAmount.formatIllions(true),
-                    contract.goals
-                        .filter { eggsLaid < it.targetAmount }
-                        .map { it.targetAmount.formatIllions(true) }
-                )
-                append(goal.targetAmount.formatIllions(true))
-                append(if (success) " ✔ " else " ✘ ")
-                if (finishedIn.seconds > Period.years(1).seconds) append("More than a year")
-                else append(finishedIn.asDayHoursAndMinutes())
-                if (index + 1 == contract.goals.count()) appendln("```")
-                else appendln()
-            }
+                    appendPaddingSpaces(index + 1, coopStatus.contributorsCount)
+                    append("${index + 1}: ")
+                    appendPaddingSpaces(
+                        goal.targetAmount.formatIllions(true),
+                        contract.goals
+                            .filter { eggsLaid < it.targetAmount }
+                            .map { it.targetAmount.formatIllions(true) }
+                    )
+                    append(goal.targetAmount.formatIllions(true))
+                    append(if (success) " ✔ " else " ✘ ")
+                    if (finishedIn > oneYear) append("More than a year")
+                    else append(finishedIn.asDayHoursAndMinutes())
+                    if (index + 1 < contract.goals.count()) appendln()
+                }
+            appendln("```")
         }
 
         appendln("Members (${coopStatus.contributorsCount}/${contract.maxCoopSize}):")
