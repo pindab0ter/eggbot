@@ -71,8 +71,8 @@ fun DateTime.asDayHoursAndMinutes(): String = DateTimeFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this)
 
-val decimalFormat = DecimalFormat(",###.00", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
-val integerFormat = DecimalFormat(",###", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+val decimalFormat = DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+val integerFormat = DecimalFormat(",##0", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 
 fun Int.formatInteger(): String = integerFormat.format(this)
 fun Long.formatDecimal(): String = decimalFormat.format(this)

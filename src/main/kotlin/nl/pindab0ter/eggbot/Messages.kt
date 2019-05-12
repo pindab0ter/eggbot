@@ -4,7 +4,6 @@ import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.auxbrain.Simulation
 import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Farmer
-import org.joda.time.DateTime
 import org.joda.time.Period
 import java.math.BigDecimal
 import java.math.RoundingMode.HALF_UP
@@ -145,6 +144,12 @@ object Messages {
         appendln("`${contract.identifier}` (${contract.name}):${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Co-op**: `${coopStatus.coopIdentifier}`")
         appendln("**Time remaining**: ${timeRemaining.asDayHoursAndMinutes()}")
+
+        if (coopStatus.contributorsCount == 0) {
+            appendln("\nThis co-op has no members.")
+            return@apply
+        }
+
         appendln("**Current**: ${eggsLaid.formatIllions()} (${eggsPerHour.formatIllions()}/hr)")
         appendln("**Required**: ${requiredEggs.formatIllions(true)}")
         appendln("**Expected**: ${projectedEggs.formatIllions()}")
@@ -153,10 +158,7 @@ object Messages {
         append("Goals (${contract.goals.count { eggsLaid >= it.targetAmount }}/${contract.goals.count()}):\n```")
         contract.goals.forEachIndexed { index, goal ->
             if (eggsLaid < goal.targetAmount) {
-                val finishedIn = Period(
-                    DateTime.now(),
-                    DateTime.now().plusSeconds((goal.targetAmount - eggsLaid).div(eggsPerSecond).roundToInt())
-                )
+                val finishedIn = Period.seconds((goal.targetAmount - eggsLaid).div(eggsPerSecond).roundToInt())
                 val success = finishedIn.toStandardSeconds() < timeRemaining.toStandardSeconds()
 
                 appendPaddingSpaces(index + 1, coopStatus.contributorsCount)
@@ -169,7 +171,8 @@ object Messages {
                 )
                 append(goal.targetAmount.formatIllions(true))
                 append(if (success) " ✔ " else " ✘ ")
-                append(finishedIn.asDayHoursAndMinutes())
+                if (finishedIn.seconds > Period.years(1).seconds) append("More than a year")
+                else append(finishedIn.asDayHoursAndMinutes())
                 if (index + 1 == contract.goals.count()) appendln("```")
                 else appendln()
             }
