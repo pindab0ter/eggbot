@@ -177,7 +177,7 @@ object Messages {
                             .map { it.targetAmount.formatIllions(true) }
                     )
                     append(goal.targetAmount.formatIllions(true))
-                    append(if (success) " ✔ " else " ✘ ")
+                    append(if (success) " ✓ " else " ✗ ")
                     if (finishedIn > oneYear) append("More than a year")
                     else append(finishedIn.asDayHoursAndMinutes())
                     if (index + 1 < contract.goals.count()) appendln()
