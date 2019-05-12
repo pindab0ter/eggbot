@@ -63,14 +63,18 @@ object Messages {
 
 
     fun earningsBonus(farmer: Farmer, compact: Boolean = false): String = StringBuilder().apply {
-        val eb = farmer.earningsBonus.let { (if (compact) it.formatIllions() else it.formatInteger()) + " %" }
+        val eb = farmer.earningsBonus.let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val se = BigDecimal(farmer.soulEggs).let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val pe = farmer.prophecyEggs.formatInteger()
+        val sb = "${farmer.soulBonus.formatInteger()}/140"
+        val pb = "${farmer.prophecyBonus.formatInteger()}/5"
         val seToNext =
             farmer.nextRole
                 ?.lowerBound
                 ?.minus(farmer.earningsBonus)
                 ?.divide(farmer.bonusPerSoulEgg, HALF_UP)
-                ?.let { (if (compact) it.formatIllions() else it.formatInteger()) } ?: "Unknown"
+                ?.let { (if (compact) it.formatIllions() else it.formatInteger()) }
+                ?.let { "+ $it" } ?: "Unknown"
         val role = farmer.role?.name ?: "Unknown"
         val strings = listOf(
             eb, se, seToNext, role
@@ -79,19 +83,33 @@ object Messages {
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
         append("Role:            ")
         append(" ".repeat(strings.maxBy { it.length }?.length?.minus(role.length) ?: 0))
-        append(farmer.role?.name ?: "Unknown")
-        appendln()
+        appendln(farmer.role?.name ?: "Unknown")
         append("Earnings bonus:  ")
-        appendPaddingSpaces(eb.dropLast(2), strings)
-        append(eb)
-        appendln()
+        appendPaddingSpaces(eb, strings)
+        appendln("$eb %")
         append("Soul Eggs:       ")
         appendPaddingSpaces(se, strings)
-        append(se)
-        appendln()
+        appendln("$se SE")
+
+        if (farmer.soulBonus < 140) {
+            append("Soul Food:       ")
+            appendPaddingSpaces(sb, strings)
+            appendln(sb)
+        }
+
+        append("Prophecy Eggs:   ")
+        appendPaddingSpaces(pe, strings)
+        appendln("$pe PE")
+
+        if (farmer.prophecyBonus < 5) {
+            append("Prophecy Bonus:  ")
+            appendPaddingSpaces(pb, strings)
+            appendln(pb)
+        }
+
         append("SE to next rank: ")
         appendPaddingSpaces(seToNext, strings)
-        append(seToNext)
+        append("$seToNext SE")
         append("```")
     }.toString()
 
@@ -152,7 +170,7 @@ object Messages {
                 append(goal.targetAmount.formatIllions(true))
                 append(if (success) " ✔ " else " ✘ ")
                 append(finishedIn.asDayHoursAndMinutes())
-                if (index + 1== contract.goals.count()) appendln("```")
+                if (index + 1 == contract.goals.count()) appendln("```")
                 else appendln()
             }
         }
