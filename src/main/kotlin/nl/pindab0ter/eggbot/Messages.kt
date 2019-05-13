@@ -121,9 +121,9 @@ object Messages {
 
         appendln("**Farmer**: `${simulation.backup.name}`")
         appendln("**Eggs**: ${simulation.eggsLaid.formatIllions()}$eggEmote")
-        appendln("**Rate**: ${simulation.effectiveEggLayingRateHour.formatIllions(true)}/hr")
+        appendln("**Rate**: ${simulation.effectiveEggLayingRatePerHour.formatIllions(true)}/hr")
         appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes()}")
-        appendln("**Required eggs**: ${simulation.requiredEggs.formatIllions(true)}")
+        appendln("**Required eggs**: ${simulation.goals.map { it.value }.maxBy { it }!!.formatIllions(true)}")
         appendln("**Projected eggs with int. hatchery calm**: ${simulation.finalTargetWithCalm.formatIllions()}")
     }.toString()
 
