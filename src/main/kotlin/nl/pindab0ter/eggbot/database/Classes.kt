@@ -80,9 +80,9 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         Role(TEN.pow(23), TEN.pow(24) - ONE, "Zettafarmer"),
         Role(TEN.pow(24), TEN.pow(25) - ONE, "Zettafarmer 2"),
         Role(TEN.pow(25), TEN.pow(26) - ONE, "Zettafarmer 3"),
-        Role(TEN.pow(26), TEN.pow(27) - ONE, "Yottafarmer"),
-        Role(TEN.pow(27), TEN.pow(28) - ONE, "Yottafarmer 2"),
-        Role(TEN.pow(28), TEN.pow(29) - ONE, "Yottafarmer 3")
+        Role(TEN.pow(26), TEN.pow(27) - ONE, "Yodafarmer"),
+        Role(TEN.pow(27), TEN.pow(28) - ONE, "Yodafarmer 2"),
+        Role(TEN.pow(28), TEN.pow(29) - ONE, "Yodafarmer 3")
     )
 
     val bonusPerSoulEgg: BigDecimal
