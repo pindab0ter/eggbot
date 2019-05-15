@@ -34,7 +34,7 @@ object WhoIs : Command() {
             return
         }
 
-        val name = event.arguments.joinToString(" ").replace(Regex("""^@?(\w*)(?:#\d{4})?$"""),"$1")
+        val name = event.arguments.joinToString(" ").replace(Regex("""^@?(\w*)(?:#\d{4})?$"""), "$1")
 
         transaction {
             val discordUser = DiscordUser.find {
@@ -42,10 +42,12 @@ object WhoIs : Command() {
             }.firstOrNull()
 
             if (discordUser != null) {
-                val discordUserName = "@${discordUser.discordTag.dropLast(5)}"
+                val discordUserName = discordUser.discordTag.dropLast(5)
+                val nickname = event.author.mutualGuilds.first().getMemberById(discordUser.discordId)?.nickname
+                    ?.let { nickname -> " ($nickname)" } ?: ""
                 val farmerNames = discordUser.farmers.joinToString("`, `") { it.inGameName }
 
-                "`$discordUserName` is registered with: `$farmerNames`".let {
+                "`@$discordUserName$nickname` is registered with: `$farmerNames`".let {
                     event.reply(it)
                     return@transaction
                 }
@@ -57,8 +59,10 @@ object WhoIs : Command() {
 
             if (farmer != null) {
                 val discordUserName = farmer.discordUser.discordTag.dropLast(5)
+                val nickname = event.author.mutualGuilds.first().getMemberById(farmer.discordUser.discordId)?.nickname
+                    ?.let { nickname -> " ($nickname)" } ?: ""
 
-                "`${farmer.inGameName}` belongs to `@$discordUserName`".let {
+                "`${farmer.inGameName}` belongs to `@$discordUserName$nickname`".let {
                     event.reply(it)
                     return@transaction
                 }
