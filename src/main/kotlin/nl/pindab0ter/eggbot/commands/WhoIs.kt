@@ -38,38 +38,39 @@ object WhoIs : Command() {
         val name = event.arguments.joinToString(" ").replace(Regex("""^@?(\w*)(?:#\d{4})?$"""), "$1")
 
         transaction {
-            DiscordUser.find { DiscordUsers.discordTag like "$name%" }.firstOrNull().let { discordUser: DiscordUser? ->
-                discordUser to discordUser?.farmers?.toList()
-            }
-        }.takeIf { (discordUser, _) -> discordUser != null }?.let { (discordUser, farmers) ->
-            val discordUserName = discordUser!!.discordTag.dropLast(5)
-            val nickname = EggBot.guild.getMemberById(discordUser.discordId)?.nickname
-                ?.let { nickname -> " ($nickname)" } ?: ""
-            val farmerNames = farmers!!.joinToString("`, `") { it.inGameName }
+            (DiscordUser.find {
+                DiscordUsers.discordTag like "$name%"
+            }.firstOrNull() ?: EggBot.guild.getMembersByNickname(name, true).firstOrNull()?.let { discordUser ->
+                DiscordUser[discordUser.user.id]
+            })?.let { discordUser ->
+                val discordUserName = discordUser.discordTag.dropLast(5)
+                val nickname = EggBot.guild.getMemberById(discordUser.discordId)?.nickname
+                    ?.let { nickname -> " ($nickname)" } ?: ""
+                val farmerNames = discordUser.farmers.joinToString("`, `") { it.inGameName }
 
-            "`@$discordUserName$nickname` is registered with: `$farmerNames`".let {
+                "`@$discordUserName$nickname` is registered with: `$farmerNames`".let {
+                    event.reply(it)
+                    return@transaction
+                }
+            }
+
+            Farmer.find { Farmers.inGameName like name }.firstOrNull()?.let { farmer ->
+                val discordUserName = farmer.discordUser.discordTag.dropLast(5)
+                val nickname = EggBot.guild.getMemberById(farmer.discordUser.discordId)?.nickname
+                    ?.let { nickname -> " ($nickname)" } ?: ""
+
+                "`${farmer.inGameName}` belongs to `@$discordUserName$nickname`".let {
+                    event.reply(it)
+                    return@transaction
+                }
+            }
+
+
+            "No farmers or discord users found by the name of `$name`.".let {
                 event.reply(it)
-                return
+                log.debug { it }
+                return@transaction
             }
-        }
-
-        transaction {
-            Farmer.find { Farmers.inGameName like name }.firstOrNull()
-        }?.let { farmer ->
-            val discordUserName = farmer.discordUser.discordTag.dropLast(5)
-            val nickname = EggBot.guild.getMemberById(farmer.discordUser.discordId)?.nickname
-                ?.let { nickname -> " ($nickname)" } ?: ""
-
-            "`${farmer.inGameName}` belongs to `@$discordUserName$nickname`".let {
-                event.reply(it)
-                return
-            }
-        }
-
-        "No farmers or discord users found by the name of `$name`.".let {
-            event.reply(it)
-            log.debug { it }
-            return
         }
     }
 }
