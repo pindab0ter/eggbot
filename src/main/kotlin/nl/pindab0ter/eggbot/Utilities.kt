@@ -210,7 +210,7 @@ fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 
 // Ease of access
 
-val CommandEvent.arguments: List<String> get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s+"""))
+val CommandEvent.arguments: List<String> get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s"""))
 
 val EggInc.Game.soulBonus get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
 val EggInc.Game.prophecyBonus get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
