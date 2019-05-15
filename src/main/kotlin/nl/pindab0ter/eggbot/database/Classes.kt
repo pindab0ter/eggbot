@@ -1,11 +1,8 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.prophecyBonus
-import nl.pindab0ter.eggbot.soulBonus
-import nl.pindab0ter.eggbot.sumBy
-import nl.pindab0ter.eggbot.toDateTime
 import org.jetbrains.exposed.dao.*
 import org.joda.time.DateTime
 import java.math.BigDecimal
@@ -18,6 +15,10 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val farmers by Farmer referrersOn Farmers.discordId
 
     val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
+
+    fun updateTag() = EggBot.guild.getMemberById(discordId)?.user?.asTag.takeIf { it != discordTag }?.let { tag ->
+        discordTag = tag
+    }
 
     companion object : EntityClass<String, DiscordUser>(DiscordUsers)
 }

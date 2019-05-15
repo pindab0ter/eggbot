@@ -8,6 +8,7 @@ import nl.pindab0ter.eggbot.jda.CommandLogger
 import nl.pindab0ter.eggbot.jda.EyeReaction
 import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.jobs.JobLogger
+import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
 import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
 import org.jetbrains.exposed.sql.Database
@@ -72,7 +73,16 @@ object EggBot {
                 .withIdentity("update_farmers")
                 .build(),
             newTrigger()
-                .withIdentity("quarter_daily")
+                .withIdentity("quarter_daily_farmer_update")
+                .withSchedule(simpleSchedule().withIntervalInHours(6).repeatForever())
+                .build()
+        )
+        if (!Config.devMode) scheduleJob(
+            newJob(UpdateDiscordTagsJob::class.java)
+                .withIdentity("update_discord_tags")
+                .build(),
+            newTrigger()
+                .withIdentity("quarter_daily_discord_tags_update")
                 .withSchedule(simpleSchedule().withIntervalInHours(6).repeatForever())
                 .build()
         )
