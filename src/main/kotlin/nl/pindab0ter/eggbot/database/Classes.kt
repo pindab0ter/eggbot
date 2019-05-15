@@ -28,19 +28,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
 
-    // @formatter:off
-    @Suppress("PrivatePropertyName")
-    private var soulEggs_ by Farmers.soulEggs
-    var soulEggs get() = when (inGameId) {
-            "G:1310382811"          -> 39505097770735L
-            "104311114077828861120" ->  2500000000000L
-            else -> soulEggs_
-        }
-        set(value) {
-            soulEggs_ = value
-        }
-    // @formatter:on
-
+    var soulEggs by Farmers.soulEggs
     var prophecyEggs by Farmers.prophecyEggs
     var soulBonus by Farmers.soulBonus
     var prophecyBonus by Farmers.prophecyBonus
