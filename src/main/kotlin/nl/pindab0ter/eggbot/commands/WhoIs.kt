@@ -4,6 +4,8 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.missingArguments
@@ -16,7 +18,7 @@ object WhoIs : Command() {
     init {
         name = "whois"
         aliases = arrayOf("who-is", "who", "whothefuckis")
-        arguments = "<in-game name>"
+        arguments = "<in-game name OR discord name>"
         help = "See which Discord user has registered with that in-game name."
         // category = UsersCategory
         guildOnly = false
@@ -32,20 +34,41 @@ object WhoIs : Command() {
             return
         }
 
-        val name = event.arguments.joinToString(" ")
-        val farmer = transaction {
-            Farmer.find { Farmers.inGameName like name }.firstOrNull()
+        val name = event.arguments.joinToString(" ").replace(Regex("""^@?(\w*)(?:#\d{4})?$"""),"$1")
+
+        transaction {
+            val discordUser = DiscordUser.find {
+                DiscordUsers.discordTag like "$name%"
+            }.firstOrNull()
+
+            if (discordUser != null) {
+                val discordUserName = "@${discordUser.discordTag.dropLast(5)}"
+                val farmerNames = discordUser.farmers.joinToString("`, `") { it.inGameName }
+
+                "`$discordUserName` is registered with: `$farmerNames`".let {
+                    event.reply(it)
+                    return@transaction
+                }
+            }
+
+            val farmer = Farmer.find {
+                Farmers.inGameName like name
+            }.firstOrNull()
+
+            if (farmer != null) {
+                val discordUserName = farmer.discordUser.discordTag.dropLast(5)
+
+                "`${farmer.inGameName}` belongs to `@$discordUserName`".let {
+                    event.reply(it)
+                    return@transaction
+                }
+            }
+
+            "No farmers or discord users found by the name of `$name`.".let {
+                event.reply(it)
+                log.debug { it }
+                return@let
+            }
         }
-
-
-        if (farmer == null) "No farmer found with name `$name`.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val discordUser = transaction { farmer.discordUser }
-
-        event.reply("`${farmer.inGameName}` belongs to `${discordUser.discordTag.dropLast(5)}`")
     }
 }
