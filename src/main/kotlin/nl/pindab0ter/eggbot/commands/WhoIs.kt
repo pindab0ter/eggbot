@@ -39,7 +39,7 @@ object WhoIs : Command() {
 
         transaction {
             (DiscordUser.find {
-                DiscordUsers.discordTag like "$name%"
+                DiscordUsers.discordTag like "${name}_____"
             }.firstOrNull() ?: EggBot.guild.getMembersByNickname(name, true).firstOrNull()?.let { discordUser ->
                 DiscordUser[discordUser.user.id]
             })?.let { discordUser ->
