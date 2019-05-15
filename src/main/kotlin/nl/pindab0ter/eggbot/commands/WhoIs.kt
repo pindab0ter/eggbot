@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
@@ -37,42 +38,39 @@ object WhoIs : Command() {
         val name = event.arguments.joinToString(" ").replace(Regex("""^@?(\w*)(?:#\d{4})?$"""), "$1")
 
         transaction {
-            val discordUser = DiscordUser.find {
-                DiscordUsers.discordTag like "$name%"
-            }.firstOrNull()
-
-            if (discordUser != null) {
-                val discordUserName = discordUser.discordTag.dropLast(5)
-                val nickname = event.author.mutualGuilds.first().getMemberById(discordUser.discordId)?.nickname
-                    ?.let { nickname -> " ($nickname)" } ?: ""
-                val farmerNames = discordUser.farmers.joinToString("`, `") { it.inGameName }
-
-                "`@$discordUserName$nickname` is registered with: `$farmerNames`".let {
-                    event.reply(it)
-                    return@transaction
-                }
+            DiscordUser.find { DiscordUsers.discordTag like "$name%" }.firstOrNull().let { discordUser: DiscordUser? ->
+                discordUser to discordUser?.farmers?.toList()
             }
+        }.takeIf { (discordUser, _) -> discordUser != null }?.let { (discordUser, farmers) ->
+            val discordUserName = discordUser!!.discordTag.dropLast(5)
+            val nickname = EggBot.guild.getMemberById(discordUser.discordId)?.nickname
+                ?.let { nickname -> " ($nickname)" } ?: ""
+            val farmerNames = farmers!!.joinToString("`, `") { it.inGameName }
 
-            val farmer = Farmer.find {
-                Farmers.inGameName like name
-            }.firstOrNull()
-
-            if (farmer != null) {
-                val discordUserName = farmer.discordUser.discordTag.dropLast(5)
-                val nickname = event.author.mutualGuilds.first().getMemberById(farmer.discordUser.discordId)?.nickname
-                    ?.let { nickname -> " ($nickname)" } ?: ""
-
-                "`${farmer.inGameName}` belongs to `@$discordUserName$nickname`".let {
-                    event.reply(it)
-                    return@transaction
-                }
-            }
-
-            "No farmers or discord users found by the name of `$name`.".let {
+            "`@$discordUserName$nickname` is registered with: `$farmerNames`".let {
                 event.reply(it)
-                log.debug { it }
-                return@let
+                return
             }
+        }
+
+        transaction {
+            Farmer.find { Farmers.inGameName like name }.firstOrNull()
+        }?.let { farmer ->
+            val discordUserName = farmer.discordUser.discordTag.dropLast(5)
+            val nickname = EggBot.guild.getMemberById(farmer.discordUser.discordId)?.nickname
+                ?.let { nickname -> " ($nickname)" } ?: ""
+
+            "`${farmer.inGameName}` belongs to `@$discordUserName$nickname`".let {
+                event.reply(it)
+                return
+            }
+        }
+
+        "No farmers or discord users found by the name of `$name`.".let {
+            event.reply(it)
+            log.debug { it }
+            return
         }
     }
 }
+

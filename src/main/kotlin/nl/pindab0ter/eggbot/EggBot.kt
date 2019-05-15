@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot
 
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
+import net.dv8tion.jda.core.entities.Guild
 import nl.pindab0ter.eggbot.database.*
 import nl.pindab0ter.eggbot.jda.CommandLogger
 import nl.pindab0ter.eggbot.jda.EyeReaction
@@ -89,4 +90,6 @@ object EggBot {
         listenerManager.addJobListener(JobLogger)
         start()
     }
+
+    val guild: Guild get() = jdaClient.guilds.first()
 }
