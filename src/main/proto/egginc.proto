@@ -187,6 +187,7 @@ message Game {
     uint32 long_idle_notification_set = 25;
     double long_idle_notification_threshold = 26;
     double long_idle_reward = 27;
+    // TODO: Hyperloop
 }
 
 message Missions {
@@ -313,7 +314,6 @@ message ContractCoopStatusUpdateResponse {
     uint32 finalized = 1;
 }
 
-
 enum HabLevel {
     COOP = 0;
     SHACK = 1;
@@ -333,9 +333,9 @@ enum HabLevel {
     EGGTOPIA = 15;
     MONOLITH = 16;
     PLANET_PORTAL = 17;
-    NO_HAB = 18;
+    CHICKEN_UNIVERSE = 18;
+    NO_HAB = 19;
 }
-
 
 enum VehicleType {
     TRIKE = 0;

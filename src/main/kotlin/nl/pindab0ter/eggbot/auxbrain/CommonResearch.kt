@@ -74,9 +74,12 @@ enum class CommonResearch(val id: String) {
     // Tier 12
     WORMHOLE_DAMPENING("wormhole_dampening"),
     EGGSISTOR_MINIATURIZATION("eggsistor"),
+    MICRO_COUPLING("micro_coupling"),
     NEURAL_NET_REFINEMENT("neural_net_refine"),
 
     // Tier 13
     MATTER_RECONFIGURATION("matter_reconfig"),
     TIMELINE_SPLICING("timeline_splicing"),
+    HYPER_PORTALLING("hyper_portalling"),
+    RELATIVITY_OPTIMIZATION("relativity_optimization")
 }

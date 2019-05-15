@@ -61,6 +61,7 @@ class Simulation(val backup: Backup, val contractId: String) {
         BigDecimal(1 + .15 * farm.commonResearchList[IMPROVED_GENETICS.ordinal].level),
         BigDecimal(1 + .10 * farm.commonResearchList[TIME_COMPRESSION.ordinal].level),
         BigDecimal(1 + .02 * farm.commonResearchList[TIMELINE_DIVERSION.ordinal].level),
+        BigDecimal(1 + .10 * farm.commonResearchList[RELATIVITY_OPTIMIZATION.ordinal].level),
         BigDecimal(1 + .05 * backup.data.epicResearchList[EPIC_COMFY_NESTS.ordinal].level)
     )
 
