@@ -149,11 +149,12 @@ message Tutorial {
 
 message Stats {
     uint32 egg_totals_OLD = 1;
-    uint32 refill_uses = 2;
+    uint32 unused = 2;
     uint32 video_multiplier_videos_watched = 3;
     uint32 warp_1_uses = 4;
     uint32 warp_8_uses = 5;
     uint32 drone_takedowns = 6;
+    uint32 unlimited_chicken_uses = 7;
     repeated double eggs_laid = 8; // indexed by actual egg
     uint32 prestige_count = 9;
     uint32 drone_takedowns_elite = 10;
@@ -181,12 +182,14 @@ message Game {
     uint32 unclaimed_soul_eggs = 17;
     repeated uint32 max_farm_size_reached = 18;
     repeated TrophyLevel egg_medal_level = 19;
-    uint32 current_farm = 22;
-    uint64 prophecyEggs = 23;
+    uint32 daily_gift_sequence = 20; // Days since 1-1-2000, controlled by server
+    uint32 unknown22 = 22;
+    uint64 prophecy_eggs = 23;
     uint32 unknown24 = 24;
     uint32 long_idle_notification_set = 25;
     double long_idle_notification_threshold = 26;
     double long_idle_reward = 27;
+    uint32 daily_gift_index = 28;
     uint32 hyperloop_station = 29;
 }
 
