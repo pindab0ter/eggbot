@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.auxbrain
 
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.Backup
-import com.auxbrain.ei.EggInc.VehicleType
+import com.auxbrain.ei.EggInc.VehicleType.HYPERLOOP_TRAIN
 import nl.pindab0ter.eggbot.auxbrain.CommonResearch.*
 import nl.pindab0ter.eggbot.auxbrain.EpicResearch.*
 import nl.pindab0ter.eggbot.sumBy
@@ -161,8 +161,13 @@ class Simulation(val backup: Backup, val contractId: String) {
     private val shippingRateBonus: BigDecimal
         get() = shippingRatePercentageIncreases.reduce { acc, bonus -> acc.multiply(bonus) }
 
-    private val shippingRate: BigDecimal
-        get() = farm.vehiclesList.sumBy(VehicleType::capacity).multiply(shippingRateBonus)
+    val shippingRate: BigDecimal
+        get() = farm.vehiclesList.foldIndexed(ZERO) { index, acc, vehicleType ->
+            when (vehicleType) {
+                HYPERLOOP_TRAIN -> acc + vehicleType.capacity * farm.hyperloopCarsList[index]
+                else -> acc + vehicleType.capacity
+            }
+        }.multiply(shippingRateBonus)
 
     val effectiveEggLayingRate
         get() = minOf(eggLayingRate, shippingRate)

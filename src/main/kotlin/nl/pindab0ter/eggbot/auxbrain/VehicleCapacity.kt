@@ -18,5 +18,6 @@ val EggInc.VehicleType.capacity: BigDecimal get() = when (this) {
     MEGA_SEMI            -> BigDecimal(15000000)
     HOVER_SEMI           -> BigDecimal(30000000)
     QUANTUM_TRANSPORTER  -> BigDecimal(50000000)
+    HYPERLOOP_TRAIN      -> BigDecimal(50000000)
 }
 // @formatter:on

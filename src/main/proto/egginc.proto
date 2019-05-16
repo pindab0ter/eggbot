@@ -187,7 +187,7 @@ message Game {
     uint32 long_idle_notification_set = 25;
     double long_idle_notification_threshold = 26;
     double long_idle_reward = 27;
-    // TODO: Hyperloop
+    uint32 hyperloop_station = 29;
 }
 
 message Missions {
@@ -236,6 +236,7 @@ message Simulation {
     repeated ResearchItem common_research = 18;
     FarmType farm_type = 19;
     string contract_id = 20;
+    repeated uint32 hyperloop_cars = 21;
 }
 
 // contract-related
@@ -349,6 +350,7 @@ enum VehicleType {
     MEGA_SEMI = 8;
     HOVER_SEMI = 9;
     QUANTUM_TRANSPORTER = 10;
+    HYPERLOOP_TRAIN = 11;
 }
 
 message MissionInfo {
