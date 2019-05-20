@@ -101,5 +101,5 @@ object EggBot {
         start()
     }
 
-    val guild: Guild get() = jdaClient.guilds.first()
+    val guild: Guild by lazy { jdaClient.guilds.first() }
 }
