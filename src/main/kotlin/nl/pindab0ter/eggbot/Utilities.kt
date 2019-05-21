@@ -16,7 +16,7 @@ import java.math.BigDecimal
 import java.math.BigDecimal.*
 import java.math.MathContext.DECIMAL32
 import java.math.MathContext.UNLIMITED
-import java.math.RoundingMode
+import java.math.RoundingMode.HALF_UP
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
@@ -243,7 +243,7 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigDecimal): BigDecimal {
     return sum
 }
 
-fun Double.round(places: Int = 0) = BigDecimal(this).setScale(places, RoundingMode.HALF_UP).toDouble()
+fun Double.round(places: Int = 0) = BigDecimal(this).setScale(places, HALF_UP).toDouble()
 fun List<BigDecimal>.sum(): BigDecimal = this.reduce { acc, duration -> acc + duration }
 fun List<Duration>.sum(): Duration = this.reduce { acc, duration -> acc + duration }
 operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * other

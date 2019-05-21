@@ -79,7 +79,7 @@ open class HomeSimulation(val backup: Backup) {
     // Chickens
     //
 
-    val chickens: BigDecimal
+    val population: BigDecimal
         get() = farm.numChickens.toBigDecimal()
 
     //
@@ -95,6 +95,8 @@ open class HomeSimulation(val backup: Backup) {
     val habsMaxCapacity: BigDecimal
         get() = farm.habsList.sumBy { hab -> hab.maxCapacity }
 
+    // Disregards Internal Hatchery Sharing and takes the average of each hab's time to full.
+    // TODO: Include Internal Hatchery Sharing and soft knees for each full hab
     val timeToMaxHabs: Duration
         get() = farm.habsList
             .mapIndexed { index, hab -> hab.maxCapacity - farm.habPopulation[index] }
@@ -131,10 +133,6 @@ open class HomeSimulation(val backup: Backup) {
     val eggsLaid
         get() = farm.eggsLaid.toBigDecimal()
 
-    //
-    // Egg laying rate
-    //
-
     val eggLayingBaseRate: BigDecimal
         get() = ONE.divide(BigDecimal(30), 64, HALF_UP)
 
@@ -142,7 +140,7 @@ open class HomeSimulation(val backup: Backup) {
         get() = eggLayingMultipliers.reduce { acc, bonus -> acc.multiply(bonus) }
 
     val eggLayingRate: BigDecimal
-        get() = chickens * eggLayingBaseRate * eggLayingBonus
+        get() = population * eggLayingBaseRate * eggLayingBonus
 
     //
     // Shipping rate (max egg laying rate)
@@ -159,14 +157,17 @@ open class HomeSimulation(val backup: Backup) {
             }
         }.multiply(shippingRateBonus)
 
-    val effectiveEggLayingRate
+    val currentEggLayingRate
         get() = minOf(eggLayingRate, shippingRate)
 
-    val effectiveEggLayingRatePerHour
-        get() = effectiveEggLayingRate.multiply(BigDecimal(60 * 60))
+    val currentEggLayingRatePerHour
+        get() = currentEggLayingRate.multiply(BigDecimal(60 * 60))
 
     //
     // Bottlenecks
     //
+
+    val timeToMaxShippingRate: Duration
+        get() = Duration(((shippingRate / eggLayingRate * population - population) / internalHatcheryRate).toLong())
 
 }
