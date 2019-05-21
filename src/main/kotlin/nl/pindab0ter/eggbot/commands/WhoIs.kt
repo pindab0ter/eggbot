@@ -20,7 +20,7 @@ object WhoIs : Command() {
         name = "whois"
         aliases = arrayOf("who-is", "who", "whothefuckis")
         arguments = "<in-game name OR discord (nick)name>"
-        help = "See which Discord user has registered with that in-game name or vice versa."
+        help = "See which Discord user is registered with the given in-game name or vice versa."
         // category = UsersCategory
         guildOnly = false
     }
