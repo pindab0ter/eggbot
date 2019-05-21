@@ -109,7 +109,7 @@ open class HomeSimulation(val backup: Backup) {
             .sum()
             .dividedBy(farm.habsList.foldIndexed(0L) { index, acc, hab ->
                 acc + if (hab.capacity.toInt() >= farm.habPopulationList[index]) 0L else 1L
-            })
+            }.coerceAtLeast(1))
 
     //
     // Internal hatchery (chicken increase)
