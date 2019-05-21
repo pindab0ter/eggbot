@@ -3,15 +3,15 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 group = "nl.pindab0ter"
 version = "1.2.0"
 
+application {
+    mainClassName = "nl.pindab0ter.eggbot.EggBot"
+}
+
 plugins {
     idea
     application
-    kotlin("jvm") version "1.3.21"
+    kotlin("jvm") version "1.3.31"
     id("com.google.protobuf").version("0.8.8")
-}
-
-application {
-    mainClassName = "nl.pindab0ter.eggbot.EggBot"
 }
 
 repositories {
@@ -28,6 +28,7 @@ dependencies {
         exclude("club.minnced", "opus-java")
     }
     implementation("org.jetbrains.exposed", "exposed", "0.13.4")
+    implementation("joda-time", "joda-time", "2.10.2")
     implementation("com.github.kittinunf.fuel", "fuel", "2.0.1")
     implementation("com.google.protobuf", "protobuf-java", "3.7.0")
     implementation("io.github.microutils", "kotlin-logging", "1.6.24")
