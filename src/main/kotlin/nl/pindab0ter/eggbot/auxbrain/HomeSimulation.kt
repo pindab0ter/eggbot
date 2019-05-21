@@ -2,13 +2,11 @@ package nl.pindab0ter.eggbot.auxbrain
 
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.Backup
+import com.auxbrain.ei.EggInc.FarmType.HOME
 import com.auxbrain.ei.EggInc.VehicleType.HYPERLOOP_TRAIN
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.auxbrain.CommonResearch.*
 import nl.pindab0ter.eggbot.auxbrain.EpicResearch.*
-import nl.pindab0ter.eggbot.sumBy
-import nl.pindab0ter.eggbot.toDateTime
-import nl.pindab0ter.eggbot.toDuration
-import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
@@ -17,20 +15,17 @@ import java.math.MathContext.DECIMAL32
 import java.math.RoundingMode.HALF_UP
 
 
-class Simulation(val backup: Backup, val contractId: String) {
+open class HomeSimulation(val backup: Backup) {
 
     // Unless stated otherwise, all rates are per second
 
-    private val farm = backup.farmsList.find { it.contractId == contractId }!!
-    private val localContract = backup.contracts.contractsList.find { it.contract.identifier == contractId }!!
+    private val farm = backup.farmsList.find { it.farmType == HOME }!!
 
     //
     // Basic info
     //
 
     val farmerName: String = backup.name
-    val contractName: String = localContract.contract.name
-    val egg: EggInc.Egg = localContract.contract.egg
 
     //
     // Research
@@ -71,7 +66,7 @@ class Simulation(val backup: Backup, val contractId: String) {
         BigDecimal(1 + .05 * farm.commonResearchList[DRIVER_TRAINING.ordinal].level),
         BigDecimal(1 + .05 * farm.commonResearchList[SUPER_ALLOY_FRAMES.ordinal].level),
         BigDecimal(1 + .05 * farm.commonResearchList[QUANTUM_STORAGE.ordinal].level),
-        BigDecimal(1 + .05 * farm.commonResearchList[HOVER_UPGRADES.ordinal].level),
+        BigDecimal(1 + .05 * farm.commonResearchList[HOVER_UPGRADES.ordinal].level), // Assumes at least Hover Semi
         BigDecimal(1 + .05 * farm.commonResearchList[DARK_CONTAINMENT.ordinal].level),
         BigDecimal(1 + .05 * farm.commonResearchList[NEURAL_NET_REFINEMENT.ordinal].level),
         BigDecimal(1 + .05 * backup.data.epicResearchList[TRANSPORTATION_LOBBYISTS.ordinal].level)
@@ -118,13 +113,13 @@ class Simulation(val backup: Backup, val contractId: String) {
     // Internal hatchery (chicken increase)
     //
 
-    private val internalHatcheryRate: BigDecimal
+    val internalHatcheryRate: BigDecimal
         get() = (internalHatcheryFlatIncreases.sum() * internalHatcheryMultiplier)
             .divide(BigDecimal(60), 8, HALF_UP) // Convert from minutes to seconds
 
 
     // TODO: Include Internal Hatchery Sharing for full habs
-    private val populationIncreaseRate: BigDecimal
+    val populationIncreaseRate: BigDecimal
         get() = farm.habsList
             .foldIndexed(ZERO) { index, acc, hab -> acc + if (hab.capacity >= farm.habPopulation[index]) ONE else ZERO }
             .times(internalHatcheryRate)
@@ -132,11 +127,6 @@ class Simulation(val backup: Backup, val contractId: String) {
     //
     // Eggs
     //
-
-    val goals: Map<Int, BigDecimal>
-        get() = localContract.contract.goalsList
-            .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
-            .toMap()
 
     val eggsLaid
         get() = farm.eggsLaid.toBigDecimal()
@@ -172,50 +162,11 @@ class Simulation(val backup: Backup, val contractId: String) {
     val effectiveEggLayingRate
         get() = minOf(eggLayingRate, shippingRate)
 
-    val effectiveEggLayingRatePerMinute
-        get() = effectiveEggLayingRate.multiply(BigDecimal(60))
-
     val effectiveEggLayingRatePerHour
         get() = effectiveEggLayingRate.multiply(BigDecimal(60 * 60))
-
-    //
-    // Time
-    //
-
-    val elapsedTime
-        get() = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
-
-    val timeRemaining
-        get() = localContract.contract.lengthSeconds.toDuration() - elapsedTime
 
     //
     // Bottlenecks
     //
 
-
-    //
-    //  Projection
-    //
-
-    val finalTarget
-        get() = eggsLaid +
-                (eggLayingRate * timeRemaining) +
-                (BigDecimal(0.5) * (eggLayingBaseRate * eggLayingBonus)) *
-                timeRemaining *
-                timeRemaining *
-                internalHatcheryCalm
-
-    val finalTargetWithCalm
-        get() = eggsLaid +
-                (eggLayingRate * timeRemaining) +
-                (BigDecimal(0.5) * (eggLayingBaseRate * eggLayingBonus)) *
-                timeRemaining *
-                timeRemaining
 }
-
-val EggInc.Simulation.habPopulation: List<BigDecimal> get() = habPopulationList.map { it.toBigDecimal() }
-fun List<BigDecimal>.sum(): BigDecimal = this.reduce { acc, duration -> acc + duration }
-fun List<Duration>.sum(): Duration = this.reduce { acc, duration -> acc + duration }
-operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * other
-operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBigDecimal())
-operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())

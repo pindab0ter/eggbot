@@ -5,7 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.auxbrain.Simulation
+import nl.pindab0ter.eggbot.auxbrain.ContractSimulation
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -73,8 +73,14 @@ object SoloInfo : Command() {
                         event.reply(it)
                         return@getFarmerBackup
                     }
+                val simulation = ContractSimulation(backup, contractId)
+                    ?: "You haven't started this contract yet.".let {
+                        log.debug { it }
+                        event.reply(it)
+                        return@getFarmerBackup
+                    }
 
-                Messages.soloStatus(Simulation(backup, contractId)).let { message ->
+                Messages.soloStatus(simulation).let { message ->
                     if (event.channel.id == Config.botCommandsChannel) {
                         event.reply(message)
                     } else {

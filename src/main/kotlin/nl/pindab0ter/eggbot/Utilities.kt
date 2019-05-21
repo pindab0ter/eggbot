@@ -227,9 +227,6 @@ fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 
 val CommandEvent.arguments: List<String> get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s"""))
 
-val EggInc.Game.soulBonus get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
-val EggInc.Game.prophecyBonus get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
-
 fun <T> Iterable<T>.init() = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.tail() = drop(1)
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
@@ -246,6 +243,11 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigDecimal): BigDecimal {
 }
 
 fun Double.round(places: Int = 0) = BigDecimal(this).setScale(places, RoundingMode.HALF_UP).toDouble()
+fun List<BigDecimal>.sum(): BigDecimal = this.reduce { acc, duration -> acc + duration }
+fun List<Duration>.sum(): Duration = this.reduce { acc, duration -> acc + duration }
+operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * other
+operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBigDecimal())
+operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())
 
 
 // Exceptions
@@ -267,6 +269,13 @@ fun CommandEvent.replyInDms(messages: List<String>) {
         })
     }
 }
+
+
+// AuxBrain
+
+val EggInc.Game.soulBonus: Int get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
+val EggInc.Game.prophecyBonus: Int get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
+val EggInc.Simulation.habPopulation: List<BigDecimal> get() = habPopulationList.map { it.toBigDecimal() }
 
 
 // Messages

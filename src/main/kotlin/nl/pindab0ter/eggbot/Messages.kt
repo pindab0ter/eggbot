@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.EggInc
-import nl.pindab0ter.eggbot.auxbrain.Simulation
+import nl.pindab0ter.eggbot.auxbrain.ContractSimulation
 import nl.pindab0ter.eggbot.database.Contract
 import nl.pindab0ter.eggbot.database.Farmer
 import org.joda.time.DateTime
@@ -113,7 +113,7 @@ object Messages {
     }.toString()
 
     fun soloStatus(
-        simulation: Simulation
+        simulation: ContractSimulation
     ): String = StringBuilder("`${simulation.contractId}` (${simulation.contractName}):\n").apply {
         val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
             EggBot.jdaClient.getEmoteById(id)?.asMention
@@ -122,9 +122,9 @@ object Messages {
         appendln("**Farmer**: `${simulation.backup.name}`")
         appendln("**Eggs**: ${simulation.eggsLaid.formatIllions()}$eggEmote")
         appendln("**Rate**: ${simulation.effectiveEggLayingRatePerHour.formatIllions(true)}/hr")
-        appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes()}")
-        appendln("**Required eggs**: ${simulation.goals.map { it.value }.maxBy { it }!!.formatIllions(true)}")
-        appendln("**Projected eggs with int. hatchery calm**: ${simulation.finalTargetWithCalm.formatIllions()}")
+        // appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes()}")
+        // appendln("**Required eggs**: ${simulation.goals.map { it.value }.maxBy { it }!!.formatIllions(true)}")
+        // appendln("**Projected eggs with int. hatchery calm**: ${simulation.finalTargetWithCalm.formatIllions()}")
     }.toString()
 
     fun coopStatus(
