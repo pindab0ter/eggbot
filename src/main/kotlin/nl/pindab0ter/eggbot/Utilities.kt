@@ -60,7 +60,7 @@ fun Period.asHoursMinutesAndSeconds(): String = PeriodFormatterBuilder()
     .appendSuffix("s")
     .toFormatter()
     .withLocale(Locale.UK)
-    .print(this.normalizedStandard(PeriodType.dayTime()))
+    .print(this.normalizedStandard(PeriodType.time()))
 
 fun Duration.asDayHoursAndMinutes(): String = this.toPeriod().asDayHoursAndMinutes()
 fun Duration.asHoursMinutesAndSeconds(): String = this.toPeriod().asHoursMinutesAndSeconds()
@@ -243,11 +243,13 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigDecimal): BigDecimal {
     return sum
 }
 
+fun Iterable<BigDecimal>.product(): BigDecimal = reduce { acc, bonus -> acc * bonus }
 fun Double.round(places: Int = 0) = BigDecimal(this).setScale(places, HALF_UP).toDouble()
 fun List<BigDecimal>.sum(): BigDecimal = this.reduce { acc, duration -> acc + duration }
 fun List<Duration>.sum(): Duration = this.reduce { acc, duration -> acc + duration }
 operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * other
 operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBigDecimal())
+operator fun BigDecimal.times(other: Long): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())
 
 
