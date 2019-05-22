@@ -53,7 +53,6 @@ class ContractSimulation private constructor(
         abstract val isReached: Boolean
         val rateWhenReached: BigDecimal
             get() = currentEggLayingRatePerMinute * (population + internalHatcheryRatePerMinute * timeToReached.standardMinutes)
-
     }
 
     val noBottleNeck = object : Projection() {

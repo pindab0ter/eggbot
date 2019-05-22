@@ -1,8 +1,11 @@
 package nl.pindab0ter.eggbot.auxbrain
 
 import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
 import nl.pindab0ter.eggbot.*
 import java.math.BigDecimal
+import java.math.BigDecimal.ONE
+import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import java.math.MathContext.DECIMAL32
 
@@ -83,13 +86,25 @@ abstract class Simulation(val backup: EggInc.Backup) {
     // Internal hatchery (chicken increase)
     //
 
-    val internalHatcheryRatePerMinute: BigDecimal by lazy { (internalHatcheryFlatIncreases.sum() * internalHatcheryMultiplier) }
+    val internalHatcheryRatePerMinute: BigDecimal by lazy {
+        (internalHatcheryFlatIncreases.sum() * internalHatcheryMultiplier)
+    }
+
+    val internalHatcheryRatePerSecond: BigDecimal by lazy {
+        internalHatcheryRatePerMinute.divide(BigDecimal(60), DECIMAL32)
+    }
 
     // TODO: Include Internal Hatchery Sharing for full habs
-    val populationIncreaseRate: BigDecimal by lazy {
+    val populationIncreaseRatePerMinute: BigDecimal by lazy {
         farm.habsList
-            .foldIndexed(BigDecimal.ZERO) { index, acc, hab -> acc + if (hab.capacity >= farm.habPopulation[index]) BigDecimal.ONE else BigDecimal.ZERO }
+            .foldIndexed(ZERO) { index, acc, hab ->
+                acc + if (hab.maxCapacity < farm.habPopulation[index] || hab == NO_HAB) ZERO else ONE
+            }
             .times(internalHatcheryRatePerMinute)
+    }
+
+    val populationIncreaseRatePerSecond: BigDecimal by lazy {
+        populationIncreaseRatePerMinute.divide(BigDecimal(60), DECIMAL32)
     }
 
     //
@@ -106,7 +121,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     val eggsLaid by lazy { farm.eggsLaid.toBigDecimal() }
 
-    val eggLayingBaseRatePerSecond: BigDecimal by lazy { BigDecimal.ONE.divide(BigDecimal(30), MathContext.DECIMAL64) }
+    val eggLayingBaseRatePerSecond: BigDecimal by lazy { ONE.divide(BigDecimal(30), MathContext.DECIMAL64) }
 
     val eggLayingRatePerSecond: BigDecimal by lazy { population * eggLayingBaseRatePerSecond * eggLayingBonus }
 
@@ -119,12 +134,16 @@ abstract class Simulation(val backup: EggInc.Backup) {
     private val shippingRateBonus: BigDecimal by lazy { shippingRatePercentageIncreases.product() }
 
     val shippingRatePerMinute: BigDecimal by lazy {
-        farm.vehiclesList.foldIndexed(BigDecimal.ZERO) { index, acc, vehicleType ->
+        farm.vehiclesList.foldIndexed(ZERO) { index, acc, vehicleType ->
             when (vehicleType) {
                 EggInc.VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * farm.hyperloopCarsList[index]
                 else -> acc + vehicleType.capacity
             }
         }.multiply(shippingRateBonus)
+    }
+
+    val shippingRatePerSecond: BigDecimal by lazy {
+        shippingRatePerMinute.divide(BigDecimal(60), DECIMAL32)
     }
 
     val currentEggLayingRatePerSecond by lazy { minOf(eggLayingRatePerSecond, shippingRatePerMinute) }
