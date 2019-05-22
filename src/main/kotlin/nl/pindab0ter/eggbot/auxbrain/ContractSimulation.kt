@@ -1,7 +1,9 @@
 package nl.pindab0ter.eggbot.auxbrain
 
 import com.auxbrain.ei.EggInc
-import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.times
+import nl.pindab0ter.eggbot.toDateTime
+import nl.pindab0ter.eggbot.toDuration
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Duration.ZERO
@@ -15,7 +17,8 @@ class ContractSimulation private constructor(
     private val localContract: EggInc.LocalContract
 ) : HomeSimulation(backup) {
 
-    override val farm: EggInc.Simulation = backup.farmsList.find { it.contractId == localContract.contract.identifier }!!
+    override val farm: EggInc.Simulation =
+        backup.farmsList.find { it.contractId == localContract.contract.identifier }!!
 
     //
     // Basic info
@@ -52,7 +55,7 @@ class ContractSimulation private constructor(
         abstract val timeToReached: Duration
         abstract val isReached: Boolean
         val rateWhenReached: BigDecimal
-            get() = currentEggLayingRatePerMinute * (population + internalHatcheryRatePerMinute * timeToReached.standardMinutes)
+            get() = currentEggLayingRatePerSecond * (population + internalHatcheryRatePerSecond * timeToReached.standardSeconds)
     }
 
     val noBottleNeck = object : Projection() {
@@ -64,25 +67,22 @@ class ContractSimulation private constructor(
 
     val shippingRateBottleNeck = object : Projection() {
         override val timeToReached: Duration
-            get() = ((shippingRatePerMinute / eggLayingRatePerMinute * population - population) / internalHatcheryRatePerMinute).toLong().toDuration()
+            get() = timeToMaxShippingRate
         override val isReached: Boolean
             get() = timeToReached < timeRemaining
     }
 
     val habitatsBottleNeck = object : Projection() {
         override val timeToReached: Duration
-            get() = farm.habsList
-                .mapIndexed { index, hab -> hab.maxCapacity - farm.habPopulation[index] }
-                .map { roomToGrow ->
-                    roomToGrow.divide(internalHatcheryRatePerMinute, RoundingMode.HALF_UP).toLong().toDuration()
-                }
-                .sum()
-                .dividedBy(farm.habsList.foldIndexed(0L) { index, acc, hab ->
-                    acc + if (hab.capacity.toInt() >= farm.habPopulationList[index]) 0L else 1L
-                }.coerceAtLeast(1))
+            get() = timeToFullHabs
         override val isReached: Boolean
             get() = timeToReached < timeRemaining
     }
+
+    //
+    //  Projection
+    //
+
 
     val timeToFirstProjection: Duration
         get() = minOf(
@@ -93,18 +93,19 @@ class ContractSimulation private constructor(
 
     val firstProjectionReached: Projection
         get() = when {
+            habitatsBottleNeck.timeToReached > timeRemaining && shippingRateBottleNeck.timeToReached > timeRemaining -> noBottleNeck
             habitatsBottleNeck.timeToReached <= shippingRateBottleNeck.timeToReached -> habitatsBottleNeck
             habitatsBottleNeck.timeToReached >= shippingRateBottleNeck.timeToReached -> shippingRateBottleNeck
             else -> noBottleNeck
         }
 
     val eggLayingRateAtFirstProjection: BigDecimal
-        get() = (eggLayingRatePerMinute * (population + internalHatcheryRatePerMinute * firstProjectionReached.timeToReached.standardMinutes))
+        get() = (eggLayingRatePerSecond * (population + internalHatcheryRatePerSecond * firstProjectionReached.timeToReached.standardSeconds))
             .divide(population, DECIMAL64)
 
     val eggsToFirstProjection: BigDecimal
-        get() = (eggLayingRateAtFirstProjection + currentEggLayingRatePerMinute)
-            .divide(BigDecimal(2), RoundingMode.HALF_UP) * timeToFirstProjection.standardMinutes + eggsLaid
+        get() = (eggLayingRateAtFirstProjection + currentEggLayingRatePerSecond)
+            .divide(BigDecimal(2), RoundingMode.HALF_UP) * timeToFirstProjection.standardSeconds + eggsLaid
 
     val eggsRemainingAfterFirstProjection: BigDecimal
         get() = finalGoal - eggsToFirstProjection
@@ -113,54 +114,14 @@ class ContractSimulation private constructor(
         get() = eggsRemainingAfterFirstProjection
             .divide(eggLayingRateAtFirstProjection, DECIMAL64).toLong().toDuration()
 
+    val timeRequired: Duration
+        get() = (finalGoal - eggsLaid)
+            .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
+
+    // TODO: Add Internal Hatchery Calm
     val projectedTimeRequired: Duration
         get() = timeToFirstProjection + timeRequiredAfterFirstProjection
 
-    val timeRequired: Duration
-        get() = (finalGoal - eggsLaid)
-            .divide(eggLayingRatePerMinute, DECIMAL64).toLong().toDuration()
-
-    /*val timeToMaxShippingRate: Duration
-        get() = Duration(((shippingRatePerMinute / eggLayingRatePerSecond * population - population) / internalHatcheryRatePerMinute).toLong())
-
-    val shippingRateIsBottleNeck = timeToMaxShippingRate < timeRemaining
-
-    // Disregards Internal Hatchery Sharing and takes the average of each hab's time to full.
-    // TODO: Include Internal Hatchery Sharing and soft knees for each full hab
-    val timeToFullHabs: Duration
-        get() = farm.habsList
-            .mapIndexed { index, hab -> hab.maxCapacity - farm.habPopulation[index] }
-            .map { roomToGrow ->
-                roomToGrow
-                    .divide(internalHatcheryRatePerMinute, RoundingMode.HALF_UP)
-                    .toLong()
-                    .toDuration()
-            }
-            .sum()
-            .dividedBy(farm.habsList.foldIndexed(0L) { index, acc, hab ->
-                acc + if (hab.capacity.toInt() >= farm.habPopulationList[index]) 0L else 1L
-            }.coerceAtLeast(1))
-
-    val habsIsBottleNeck = timeToFullHabs < timeRemaining*/
-
-    //
-    //  Projection
-    //
-
-    // val finalTarget
-    //     get() = eggsLaid +
-    //             (eggLayingRatePerSecond * timeRemaining) +
-    //             (BigDecimal(0.5) * (eggLayingBaseRatePerSecond * eggLayingBonus)) *
-    //             timeRemaining *
-    //             timeRemaining *
-    //             internalHatcheryCalm
-
-    // val finalTargetWithCalm
-    //     get() = eggsLaid +
-    //             (eggLayingRatePerSecond * timeRemaining) +
-    //             (BigDecimal(0.5) * (eggLayingBaseRatePerSecond * eggLayingBonus)) *
-    //             timeRemaining *
-    //             timeRemaining
 
     companion object {
         operator fun invoke(

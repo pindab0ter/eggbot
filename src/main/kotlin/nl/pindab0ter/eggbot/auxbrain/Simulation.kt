@@ -3,11 +3,12 @@ package nl.pindab0ter.eggbot.auxbrain
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
 import nl.pindab0ter.eggbot.*
+import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
-import java.math.MathContext
 import java.math.MathContext.DECIMAL32
+import java.math.MathContext.DECIMAL64
 
 abstract class Simulation(val backup: EggInc.Backup) {
 
@@ -82,6 +83,14 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     val habsMaxCapacity: BigDecimal by lazy { farm.habsList.sumBy { hab -> hab.maxCapacity } }
 
+
+    // TODO: Fix dealing with no Internal Hatcheries (divide by zero)
+    val timeToFullHabs: Duration by lazy {
+        val remainingCapacity = habsMaxCapacity - population
+        val secondsToFullHabs = remainingCapacity.divide(populationIncreaseRatePerSecond, DECIMAL64)
+        secondsToFullHabs.toLong().toDuration()
+    }
+
     //
     // Internal hatchery (chicken increase)
     //
@@ -121,11 +130,13 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     val eggsLaid by lazy { farm.eggsLaid.toBigDecimal() }
 
-    val eggLayingBaseRatePerSecond: BigDecimal by lazy { ONE.divide(BigDecimal(30), MathContext.DECIMAL64) }
+    val eggLayingBaseRatePerChickenPerSecond: BigDecimal by lazy { ONE.divide(BigDecimal(30), DECIMAL64) }
 
-    val eggLayingRatePerSecond: BigDecimal by lazy { population * eggLayingBaseRatePerSecond * eggLayingBonus }
+    val eggLayingRatePerChickenPerSecond: BigDecimal by lazy { eggLayingBaseRatePerChickenPerSecond * eggLayingBonus }
 
-    val eggLayingRatePerMinute: BigDecimal by lazy { population * eggLayingBaseRatePerSecond * eggLayingBonus * 60 }
+    val eggLayingRatePerSecond: BigDecimal by lazy { eggLayingRatePerChickenPerSecond * population }
+
+    val eggLayingRatePerMinute: BigDecimal by lazy { eggLayingRatePerSecond * 60 }
 
     //
     // Shipping rate (max egg laying rate)
@@ -146,10 +157,17 @@ abstract class Simulation(val backup: EggInc.Backup) {
         shippingRatePerMinute.divide(BigDecimal(60), DECIMAL32)
     }
 
-    val currentEggLayingRatePerSecond by lazy { minOf(eggLayingRatePerSecond, shippingRatePerMinute) }
+    // TODO: Fix dealing with no Internal Hatcheries (divide by zero)
+    val timeToMaxShippingRate: Duration by lazy {
+        val shippingRateRemaining = shippingRatePerSecond - currentEggLayingRatePerSecond
+        val chickensRequired = shippingRateRemaining.divide(eggLayingRatePerChickenPerSecond, DECIMAL64)
+        val secondsToMaxShipping = chickensRequired.divide(populationIncreaseRatePerSecond, DECIMAL64)
+        secondsToMaxShipping.toLong().toDuration()
+    }
 
-    val currentEggLayingRatePerMinute by lazy { currentEggLayingRatePerSecond * 60 }
+    val currentEggLayingRatePerSecond by lazy { minOf(eggLayingRatePerSecond, shippingRatePerSecond) }
 
-    val currentEggLayingRatePerHour by lazy { currentEggLayingRatePerSecond * 60 * 60 }
+    val currentEggLayingRatePerMinute by lazy { minOf(eggLayingRatePerMinute, shippingRatePerMinute) }
 
+    val currentEggLayingRatePerHour by lazy { currentEggLayingRatePerMinute * 60 }
 }
