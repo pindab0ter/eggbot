@@ -279,6 +279,13 @@ fun CommandEvent.replyInDms(messages: List<String>) {
 val EggInc.Game.soulBonus: Int get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
 val EggInc.Game.prophecyBonus: Int get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
 val EggInc.Simulation.habPopulation: List<BigDecimal> get() = habPopulationList.map { it.toBigDecimal() }
+val EggInc.Game.bonusPerSoulEgg: BigDecimal
+    get() {
+        val soulEggBonus = BigDecimal(10 + soulBonus)
+        val prophecyEggBonus = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyBonus)
+        return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
+    }
+val EggInc.Game.earningsBonus: BigDecimal get() = BigDecimal(soulEggs) * bonusPerSoulEgg
 
 
 // Messages

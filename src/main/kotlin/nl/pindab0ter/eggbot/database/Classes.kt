@@ -77,7 +77,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val bonusPerSoulEgg: BigDecimal
         get() {
             val soulEggBonus = BigDecimal(10 + soulBonus)
-            val prophecyEggBonus = BigDecimal(1.05 + 0.01 * prophecyBonus)
+            val prophecyEggBonus = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyBonus)
             return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
         }
     val earningsBonus: BigDecimal get() = BigDecimal(soulEggs) * bonusPerSoulEgg
