@@ -296,5 +296,10 @@ val EggInc.Game.earningsBonus: BigDecimal get() = BigDecimal(soulEggs) * bonusPe
 // Messages
 
 val Command.missingArguments get() = "Missing argument(s). Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
-
 val Command.tooManyArguments get() = "Too many arguments. Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
+
+// Joda Time
+
+// TODO: Update when available as language feature
+// val Duration.Companion.INFINITE get() = Duration(Long.MAX_VALUE)
+val Duration.INFINITE get() = Duration(Long.MAX_VALUE)

@@ -83,12 +83,12 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     val habsMaxCapacity: BigDecimal by lazy { farm.habsList.sumBy { hab -> hab.maxCapacity } }
 
-
-    // TODO: Fix dealing with no Internal Hatcheries (divide by zero)
     val timeToFullHabs: Duration by lazy {
-        val remainingCapacity = habsMaxCapacity - population
-        val secondsToFullHabs = remainingCapacity.divide(populationIncreaseRatePerSecond, DECIMAL64)
-        secondsToFullHabs.toLong().toDuration()
+        if (internalHatcheriesAreActive) {
+            val remainingCapacity = habsMaxCapacity - population
+            val secondsToFullHabs = remainingCapacity.divide(populationIncreaseRatePerSecond, DECIMAL64)
+            secondsToFullHabs.toLong().toDuration()
+        } else Duration(Long.MAX_VALUE)
     }
 
     //
@@ -101,6 +101,10 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     val internalHatcheryRatePerSecond: BigDecimal by lazy {
         internalHatcheryRatePerMinute.divide(BigDecimal(60), DECIMAL32)
+    }
+
+    val internalHatcheriesAreActive: Boolean by lazy {
+        internalHatcheryRatePerMinute > ZERO
     }
 
     // TODO: Include Internal Hatchery Sharing for full habs
@@ -157,12 +161,13 @@ abstract class Simulation(val backup: EggInc.Backup) {
         shippingRatePerMinute.divide(BigDecimal(60), DECIMAL32)
     }
 
-    // TODO: Fix dealing with no Internal Hatcheries (divide by zero)
     val timeToMaxShippingRate: Duration by lazy {
-        val shippingRateRemaining = shippingRatePerSecond - currentEggLayingRatePerSecond
-        val chickensRequired = shippingRateRemaining.divide(eggLayingRatePerChickenPerSecond, DECIMAL64)
-        val secondsToMaxShipping = chickensRequired.divide(populationIncreaseRatePerSecond, DECIMAL64)
-        secondsToMaxShipping.toLong().toDuration()
+        if (internalHatcheriesAreActive) {
+            val shippingRateRemaining = shippingRatePerSecond - currentEggLayingRatePerSecond
+            val chickensRequired = shippingRateRemaining.divide(eggLayingRatePerChickenPerSecond, DECIMAL64)
+            val secondsToMaxShipping = chickensRequired.divide(populationIncreaseRatePerSecond, DECIMAL64)
+            secondsToMaxShipping.toLong().toDuration()
+        } else Duration(Long.MAX_VALUE)
     }
 
     val currentEggLayingRatePerSecond by lazy { minOf(eggLayingRatePerSecond, shippingRatePerSecond) }
