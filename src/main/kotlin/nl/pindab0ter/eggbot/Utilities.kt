@@ -11,6 +11,7 @@ import org.joda.time.Duration
 import org.joda.time.Period
 import org.joda.time.PeriodType
 import org.joda.time.format.DateTimeFormatterBuilder
+import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 import java.math.BigDecimal
 import java.math.BigDecimal.*
@@ -34,21 +35,23 @@ fun Long.toDuration(): Duration = Duration((this * 1000))
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
 
-fun Period.asDayHoursAndMinutes(): String = PeriodFormatterBuilder()
+private val daysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
     .appendDays()
-    .appendSuffix(" days")
+    .appendSuffix(" day", " days")
     .appendSeparator(", ")
     .appendHours()
-    .appendSuffix(" hours")
+    .appendSuffix(" hour", " hours")
     .appendSeparator(" and ")
     .appendMinutes()
-    .appendSuffix(" minutes")
+    .appendSuffix(" minute", " minutes")
     .toFormatter()
+
+fun Period.asDayHoursAndMinutes(): String = daysHoursAndMinutesFormatter
     .withLocale(Locale.UK)
     .print(this.normalizedStandard(PeriodType.dayTime()))
 
-fun Period.asHoursMinutesAndSeconds(): String = PeriodFormatterBuilder()
+private val hoursMinutesAndSecondsFormatter = PeriodFormatterBuilder()
     .printZeroNever()
     .appendHours()
     .appendSuffix("h")
@@ -59,6 +62,8 @@ fun Period.asHoursMinutesAndSeconds(): String = PeriodFormatterBuilder()
     .appendSeconds()
     .appendSuffix("s")
     .toFormatter()
+
+fun Period.asHoursMinutesAndSeconds(): String = hoursMinutesAndSecondsFormatter
     .withLocale(Locale.UK)
     .print(this.normalizedStandard(PeriodType.time()))
 
