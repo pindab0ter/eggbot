@@ -98,8 +98,10 @@ class CoopContractSimulation constructor(
     companion object {
         operator fun invoke(
             coopStatus: EggInc.CoopStatusResponse
-        ): CoopContractSimulation? = CoopContractSimulation(coopStatus.contributorsList.map {
-            AuxBrain.getFarmerBackup(it.userId).get()
-        }, coopStatus)
+        ): CoopContractSimulation? = runBlocking {
+            CoopContractSimulation(coopStatus.contributorsList.map {
+                GlobalScope.async { AuxBrain.getFarmerBackup(it.userId) }
+            }.map { it.await().get() }, coopStatus)
+        }
     }
 }
