@@ -21,7 +21,7 @@ class CoopContractSimulation constructor(
     backups: List<EggInc.Backup>,
     val coopStatus: EggInc.CoopStatusResponse
 ) {
-    val localContract = backups.first().contracts.contractsList.find { localContract ->
+    val localContract = backups.maxBy { it.approxTime }!!.contracts.contractsList.find { localContract ->
         localContract.contract.identifier == coopStatus.contractIdentifier
     }!!
 
