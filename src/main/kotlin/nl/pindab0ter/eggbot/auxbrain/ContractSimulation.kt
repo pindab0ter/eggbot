@@ -14,7 +14,7 @@ import java.math.MathContext.DECIMAL64
 import java.math.RoundingMode
 import java.util.*
 
-class ContractSimulation private constructor(
+class ContractSimulation constructor(
     backup: EggInc.Backup,
     private val localContract: EggInc.LocalContract
 ) : HomeSimulation(backup) {
