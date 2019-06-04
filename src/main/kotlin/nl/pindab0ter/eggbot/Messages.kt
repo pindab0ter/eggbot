@@ -6,7 +6,6 @@ import nl.pindab0ter.eggbot.database.Farmer
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
-import java.math.MathContext.DECIMAL64
 import java.math.RoundingMode.HALF_UP
 
 object Messages {
@@ -162,10 +161,8 @@ object Messages {
             append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):\n```")
             simulation.goals
                 .filter { (_, goal) -> simulation.eggsLaid < goal }
-                .forEach { (index, goal) ->
-                    val finishedIn =
-                        (goal - simulation.eggsLaid).divide(simulation.currentEggLayingRatePerSecond, DECIMAL64)
-                            .toLong().toDuration()
+                .forEach { (index, goal: BigDecimal) ->
+                    val finishedIn = simulation.projectedTimeRequired(goal)
                     val success = finishedIn < simulation.timeRemaining
                     val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
 

@@ -1,6 +1,9 @@
 package nl.pindab0ter.eggbot.auxbrain
 
 import com.auxbrain.ei.EggInc
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.sqrt
 import nl.pindab0ter.eggbot.sumBy
@@ -10,6 +13,7 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
+import java.math.BigDecimal.ZERO
 import java.math.MathContext.DECIMAL64
 import java.util.*
 
@@ -74,10 +78,10 @@ class CoopContractSimulation constructor(
     //  Projection
     //
 
-    val timeRequired: Duration by lazy {
-        (finalGoal - eggsLaid)
+    fun timeRequired(goal: BigDecimal): Duration =
+        (goal - eggsLaid).coerceAtLeast(ZERO)
             .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
-    }
+
 
     val accelerationFactor: BigDecimal by lazy {
         (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
@@ -85,10 +89,11 @@ class CoopContractSimulation constructor(
     }
 
     // TODO: Take bottlenecks into account
-    val projectedTimeRequired: Duration by lazy {
-        (eggLayingRatePerSecond * BigDecimal(-1L) + sqrt(eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (finalGoal - eggsLaid)))
-            .divide(accelerationFactor, DECIMAL64).toLong().toDuration()
-    }
+    fun projectedTimeRequired(goal: BigDecimal): Duration =
+        (eggLayingRatePerSecond * BigDecimal(-1L) + sqrt(
+            eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ZERO)
+        )).divide(accelerationFactor, DECIMAL64).toLong().toDuration()
+
 
     companion object {
         operator fun invoke(
