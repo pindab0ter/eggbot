@@ -64,7 +64,7 @@ class CoopContractSimulation constructor(
 
     val elapsedTime: Duration = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
 
-    val timeRemaining: Duration = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime)
+    val timeRemaining: Duration = coopStatus.secondsRemaining.toDuration()
 
     val goals: SortedMap<Int, BigDecimal> = localContract.contract.goalsList
         .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
