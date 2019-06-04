@@ -197,11 +197,11 @@ object Messages {
             appendPaddingCharacters("Name", farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
             appendPaddingCharacters("Eggs", farms.map { it.eggsLaid.formatIllions() })
             append("Eggs│")
-            append(" Egg Rate")
             appendPaddingCharacters(
-                " Egg Rate",
-                farms.map { it.eggLayingRatePerHour.formatIllions() + "/hr" }.plus(" Egg Rate")
+                "Egg Rate",
+                farms.map { it.eggLayingRatePerHour.formatIllions() + "/hr" }.plus("Egg Rate")
             )
+            append("Egg Rate")
             append("│Chickens")
             appendln()
 
@@ -211,7 +211,7 @@ object Messages {
             append("╪")
             appendPaddingCharacters(
                 "",
-                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus(" Egg Rate "),
+                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus("Egg Rate"),
                 "═"
             )
             append("╪")
