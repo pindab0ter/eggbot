@@ -17,11 +17,13 @@ import java.math.BigDecimal
 import java.math.BigDecimal.*
 import java.math.MathContext.DECIMAL32
 import java.math.MathContext.UNLIMITED
+import java.math.RoundingMode
 import java.math.RoundingMode.HALF_UP
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import kotlin.math.roundToLong
+
 
 // Formatting
 
@@ -257,6 +259,23 @@ operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBi
 operator fun BigDecimal.times(other: Long): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())
 
+// Taken from https://stackoverflow.com/a/13831245/3021748
+fun sqrt(value: BigDecimal, scale: Int = 32): BigDecimal {
+    var sqrt = BigDecimal(1)
+    sqrt.setScale(scale + 3, RoundingMode.FLOOR)
+    var store = BigDecimal(value.toString())
+    var first = true
+    do {
+        if (!first) {
+            store = BigDecimal(sqrt.toString())
+        } else first = false
+        store.setScale(scale + 3, RoundingMode.FLOOR)
+        sqrt = value.divide(store, scale + 3, RoundingMode.FLOOR).add(store).divide(
+            valueOf(2), scale + 3, RoundingMode.FLOOR
+        )
+    } while (store != sqrt)
+    return sqrt.setScale(scale, RoundingMode.FLOOR)
+}
 
 // Exceptions
 
