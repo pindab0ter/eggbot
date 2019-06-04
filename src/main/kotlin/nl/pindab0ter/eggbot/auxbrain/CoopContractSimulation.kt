@@ -77,7 +77,11 @@ class ContractSimulation private constructor(
             get() = timeToReached < timeRemaining
     }
 
-    val timeToFirstBottleNeck: Duration by lazy {
+    //
+    //  Projection
+    //
+
+    val timeToFirstProjection: Duration by lazy {
         minOf(
             shippingRateBottleNeck.timeToReached,
             habitatsBottleNeck.timeToReached,
@@ -94,30 +98,25 @@ class ContractSimulation private constructor(
         }
     }
 
-    val eggLayingRateAtFirstBottleNeck: BigDecimal by lazy {
+    val eggLayingRateAtFirstProjection: BigDecimal by lazy {
         (eggLayingRatePerSecond * (population + internalHatcheryRatePerSecond * firstBottleNeckReached.timeToReached.standardSeconds))
             .divide(population, DECIMAL64)
     }
 
 
-    val eggsToFirstBottleNeck: BigDecimal by lazy {
-        (eggLayingRateAtFirstBottleNeck + currentEggLayingRatePerSecond)
-            .divide(BigDecimal(2), RoundingMode.HALF_UP) * timeToFirstBottleNeck.standardSeconds + eggsLaid
+    val eggsToFirstProjection: BigDecimal by lazy {
+        (eggLayingRateAtFirstProjection + currentEggLayingRatePerSecond)
+            .divide(BigDecimal(2), RoundingMode.HALF_UP) * timeToFirstProjection.standardSeconds + eggsLaid
     }
 
-    val eggsRemainingAfterFirstBottleNeck: BigDecimal by lazy {
-        finalGoal - eggsToFirstBottleNeck
+    val eggsRemainingAfterFirstProjection: BigDecimal by lazy {
+        finalGoal - eggsToFirstProjection
     }
 
-    val timeRequiredAfterFirstBottleNeck: Duration by lazy {
-        eggsRemainingAfterFirstBottleNeck
-            .divide(eggLayingRateAtFirstBottleNeck, DECIMAL64).toLong().toDuration()
+    val timeRequiredAfterFirstProjection: Duration by lazy {
+        eggsRemainingAfterFirstProjection
+            .divide(eggLayingRateAtFirstProjection, DECIMAL64).toLong().toDuration()
     }
-
-
-    //
-    //  Projection
-    //
 
     val timeRequired: Duration by lazy {
         (finalGoal - eggsLaid)
