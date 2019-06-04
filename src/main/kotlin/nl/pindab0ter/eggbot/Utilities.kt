@@ -195,23 +195,32 @@ fun BigDecimal.formatIllions(rounded: Boolean = false): String {
     }
 }
 
-fun paddingSpaces(current: Any, longest: Any): String {
+fun paddingCharacters(current: Any, longest: Any, character: String = " "): String {
     val currentLength = current.toString().length
     val longestLength = longest.toString().length
 
     if (longestLength < currentLength) throw IllegalArgumentException("Longest's length ($longestLength) must be longer than current's length ($currentLength)")
 
-    return " ".repeat(longestLength - currentLength)
+    return character.repeat(longestLength - currentLength)
 }
 
-fun <T : Any> paddingSpaces(current: T, containsLongest: Iterable<T>): String =
-    paddingSpaces(current, containsLongest.maxBy { it.toString().length }!!)
+fun <T : Any> paddingCharacters(
+    current: T,
+    containsLongest: Iterable<T>,
+    character: String = " "
+): String = paddingCharacters(current, containsLongest.maxBy { it.toString().length }!!, character)
 
-fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, longest: T): java.lang.StringBuilder =
-    append(paddingSpaces(current, longest))
+fun <T : Any> StringBuilder.appendPaddingCharacters(
+    current: T,
+    longest: T,
+    character: String = " "
+): StringBuilder = append(paddingCharacters(current, longest, character))
 
-fun <T : Any> StringBuilder.appendPaddingSpaces(current: T, containsLongest: Iterable<T>): java.lang.StringBuilder =
-    append(paddingSpaces(current, containsLongest))
+fun <T : Any> StringBuilder.appendPaddingCharacters(
+    current: T,
+    containsLongest: Iterable<T>,
+    character: String = " "
+): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
 
 fun String.splitMessage(
     prefix: String = "",

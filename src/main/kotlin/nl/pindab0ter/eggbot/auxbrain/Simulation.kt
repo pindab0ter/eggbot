@@ -120,6 +120,10 @@ abstract class Simulation(val backup: EggInc.Backup) {
         populationIncreaseRatePerMinute.divide(BigDecimal(60), DECIMAL32)
     }
 
+    val populationIncreaseRatePerHour: BigDecimal by lazy {
+        populationIncreaseRatePerMinute * BigDecimal(60)
+    }
+
     //
     // Chickens
     //
@@ -141,6 +145,8 @@ abstract class Simulation(val backup: EggInc.Backup) {
     val eggLayingRatePerSecond: BigDecimal by lazy { eggLayingRatePerChickenPerSecond * population }
 
     val eggLayingRatePerMinute: BigDecimal by lazy { eggLayingRatePerSecond * 60 }
+
+    val eggLayingRatePerHour: BigDecimal by lazy { eggLayingRatePerSecond * 60 * 60 }
 
     //
     // Shipping rate (max egg laying rate)

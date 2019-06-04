@@ -96,12 +96,12 @@ object RollCall : Command() {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
-                    appendPaddingSpaces(coop.name, coops.map { it.name })
+                    appendPaddingCharacters(coop.name, coops.map { it.name })
                     append(" (")
-                    appendPaddingSpaces(coop.farmers.count(), coops.map { it.farmers.count() })
+                    appendPaddingCharacters(coop.farmers.count(), coops.map { it.farmers.count() })
                     append(coop.farmers.count())
                     append("/${contract.maxCoopSize} members): ")
-                    appendPaddingSpaces(
+                    appendPaddingCharacters(
                         coop.activeEarningsBonus.formatIllions(true),
                         coops.map { it.activeEarningsBonus.formatIllions(true) })
                     append(coop.activeEarningsBonus.formatIllions(true) + " %")
@@ -116,11 +116,11 @@ object RollCall : Command() {
                     coop.farmers.forEach { farmer ->
                         append(farmer.inGameName)
                         append(": ")
-                        appendPaddingSpaces(
+                        appendPaddingCharacters(
                             farmer.inGameName,
                             longestFarmerName
                         )
-                        appendPaddingSpaces(
+                        appendPaddingCharacters(
                             farmer.earningsBonus.formatIllions(true),
                             longestEarningsBonus
                         )

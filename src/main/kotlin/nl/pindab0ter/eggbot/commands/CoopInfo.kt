@@ -5,10 +5,10 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.database.Contract
+import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulation
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
-import org.jetbrains.exposed.sql.transactions.transaction
 
+@Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : Command() {
 
     private val log = KotlinLogging.logger { }
@@ -47,16 +47,20 @@ object CoopInfo : Command() {
                 return@getCoopStatus
             }
 
-            transaction {
-                Contract.getOrNew(status.contractIdentifier)?.let { contract ->
-                    Messages.coopStatus(contract, status).let { message ->
-                        if (event.channel.id == Config.botCommandsChannel) {
-                            event.reply(message)
-                        } else {
-                            event.replyInDm(message)
-                            if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
-                        }
-                    }
+            val coopContractSimulation = CoopContractSimulation(status)
+
+            if (coopContractSimulation == null) "Could not get co-op status. Are the `contract id` and `co-op id` correct?.".let {
+                event.replyWarning(it)
+                log.debug { it }
+                return@getCoopStatus
+            }
+
+            Messages.coopStatus(coopContractSimulation).let { message ->
+                if (event.channel.id == Config.botCommandsChannel) {
+                    event.reply(message)
+                } else {
+                    event.replyInDm(message)
+                    if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
                 }
             }
         }
