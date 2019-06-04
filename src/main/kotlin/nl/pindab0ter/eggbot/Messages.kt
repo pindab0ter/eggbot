@@ -146,8 +146,12 @@ object Messages {
             return@apply
         }
 
-        appendln("**Current eggs**: ${simulation.eggsLaid.formatIllions()} _(${simulation.eggLayingRatePerHour.formatIllions()}/hr)_")
-        appendln("**Current chickens**: ${simulation.population.formatIllions()} _(${simulation.populationIncreaseRatePerHour.formatIllions()}/hr)_")
+        append("**Total eggs**: ${simulation.eggsLaid.formatIllions()} ")
+        append("(${simulation.eggLayingRatePerHour.formatIllions()}/hr)")
+        appendln()
+        append("**Total chickens**: ${simulation.population.formatIllions()} ")
+        append("(${simulation.populationIncreaseRatePerHour.formatIllions()}/hr)")
+        appendln()
         appendln()
 
         //
