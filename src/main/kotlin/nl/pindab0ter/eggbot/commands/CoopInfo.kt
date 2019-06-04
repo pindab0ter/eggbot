@@ -16,7 +16,7 @@ object CoopInfo : Command() {
     init {
         name = "coop"
         aliases = arrayOf("coopinfo", "ci", "coop-info")
-        arguments = "<contract id> <co-op id>"
+        arguments = "<contract id> <co-op id> [compact]"
         help = "Shows the progress of a specific co-op."
         // category = ContractsCategory
         guildOnly = false
@@ -31,14 +31,16 @@ object CoopInfo : Command() {
                 log.debug { it }
                 return
             }
-            event.arguments.size > 2 -> tooManyArguments.let {
+            event.arguments.size > 3 -> tooManyArguments.let {
                 event.replyWarning(it)
                 log.debug { it }
                 return
             }
         }
 
-        val (contractId, coopId) = event.arguments
+        val contractId: String = event.arguments[0]
+        val coopId: String = event.arguments[1]
+        val compact: Boolean = event.arguments.getOrNull(2)?.isNotBlank() == true
 
         getCoopStatus(contractId, coopId).let getCoopStatus@{ (status, _) ->
             if (status == null || !status.isInitialized) "Could not get co-op status. Are the `contract id` and `co-op id` correct?.".let {
@@ -55,7 +57,7 @@ object CoopInfo : Command() {
                 return@getCoopStatus
             }
 
-            Messages.coopStatus(coopContractSimulation).let { message ->
+            Messages.coopStatus(coopContractSimulation, compact).let { message ->
                 if (event.channel.id == Config.botCommandsChannel) {
                     event.reply(message)
                 } else {

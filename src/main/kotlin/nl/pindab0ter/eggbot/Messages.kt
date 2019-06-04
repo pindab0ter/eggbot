@@ -127,17 +127,22 @@ object Messages {
         // appendln("**Projected eggs with int. hatchery calm**: ${simulation.finalTargetWithCalm.formatIllions()}")
     }.toString()
 
-    fun coopStatus(simulation: CoopContractSimulation): String = StringBuilder().apply {
+    fun coopStatus(simulation: CoopContractSimulation, compact: Boolean = false): String = StringBuilder().apply {
         val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
             EggBot.jdaClient.getEmoteById(id)?.asMention
         } ?: ""
 
         val farms = simulation.farms
 
+        //
+        // Basic info and totals
+        //
+
         appendln("`${simulation.coopId}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
-        appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes()}")
+        appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
 
         if (farms.count() == 0) {
+            appendln()
             appendln("\nThis co-op has no members.")
             return@apply
         }
@@ -145,6 +150,10 @@ object Messages {
         appendln("**Current eggs**: ${simulation.eggsLaid.formatIllions()} _(${simulation.eggLayingRatePerHour.formatIllions()}/hr)_")
         appendln("**Current chickens**: ${simulation.population.formatIllions()} _(${simulation.populationIncreaseRatePerHour.formatIllions()}/hr)_")
         appendln()
+
+        //
+        // Goals
+        //
 
         if (simulation.goals.all { goal -> simulation.eggsLaid >= goal.value }) {
             appendln("**Contract finished! ${Config.emojiSuccess}**")
@@ -171,56 +180,83 @@ object Messages {
                     append(goal.formatIllions(true))
                     append(if (success) " ✓ " else " ✗ ")
                     if (finishedIn > oneYear) append("More than a year")
-                    else append(finishedIn.asDayHoursAndMinutes())
+                    else append(finishedIn.asDayHoursAndMinutes(compact))
                     if (index + 1 < simulation.goals.count()) appendln()
                 }
             appendln("```")
         }
 
+        //
+        // Members
+        //
+
         appendln("Members (${farms.count()}/${simulation.maxCoopSize}):")
         appendln("```")
 
-        appendPaddingCharacters("", farms.count(), "#")
-        append(": Name   ")
-        appendPaddingCharacters("Name", farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
-        append("Eggs│")
-        appendPaddingCharacters(
-            "Egg Rate",
-            farms.map { it.eggsLaid.formatIllions() + "/hr" }.plus("Egg Rate")
-        )
-        append("Egg Rate │Chickens")
-        appendln()
+        // Table header
+        if (!compact) {
+            appendPaddingCharacters("", farms.count(), "#")
+            append(": Name ")
+            appendPaddingCharacters("Name", farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
+            appendPaddingCharacters("Eggs", farms.map { it.eggsLaid.formatIllions() })
+            append("Eggs│")
+            append(" Egg Rate")
+            appendPaddingCharacters(
+                " Egg Rate",
+                farms.map { it.eggLayingRatePerHour.formatIllions() + "/hr" }.plus(" Egg Rate")
+            )
+            append("│Chickens")
+            appendln()
 
-        append("════")
-        appendPaddingCharacters("", farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " }, "═")
-        appendPaddingCharacters("", farms.map { it.eggsLaid.formatIllions() }, "═")
-        append("╪")
-        appendPaddingCharacters("", farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus("Egg Rate"), "═")
-        append("╪")
-        appendPaddingCharacters(
-            "",
-            farms.map { "${it.populationIncreaseRatePerHour.formatIllions()}/hr" }.plus("Chickens"),
-            "═"
-        )
-        appendln()
+            append("════")
+            appendPaddingCharacters("", farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " }, "═")
+            appendPaddingCharacters("", farms.map { it.eggsLaid.formatIllions() }, "═")
+            append("╪")
+            appendPaddingCharacters(
+                "",
+                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus(" Egg Rate "),
+                "═"
+            )
+            append("╪")
+            appendPaddingCharacters(
+                "",
+                farms.map { "${it.populationIncreaseRatePerHour.formatIllions()}/hr" }.plus("Chickens"),
+                "═"
+            )
+            appendln()
+        }
 
         farms.forEachIndexed { index, farm ->
             appendPaddingCharacters(index + 1, farms.count())
             append("${index + 1}: ")
-            append(farm.farmerName)
-            appendPaddingCharacters(farm.farmerName + if (!farm.isActive) "  zZ" else " ",
-                farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
-            if (!farm.isActive) append("  zZ ")
-            else append("  ")
+            when (compact) {
+                true -> {
+                    append("${farm.farmerName.substring(0..4)}… ")
+                    appendPaddingCharacters(
+                        "${farm.farmerName.substring(0..4)}… ${if (!farm.isActive) "  zZ" else " "}",
+                        farms.map { "${farm.farmerName.substring(0..4)}… ${if (!farm.isActive) "  zZ" else " "}" }
+                    )
+                }
+                false -> {
+                    append(farm.farmerName)
+                    appendPaddingCharacters(farm.farmerName + if (!farm.isActive) "  zZ" else " ",
+                        farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
+                    if (!farm.isActive) append("  zZ ")
+                    else append("  ")
+                }
+            }
             appendPaddingCharacters(farm.eggsLaid.formatIllions(), farms.map { it.eggsLaid.formatIllions() })
             append(farm.eggsLaid.formatIllions())
             append("│")
-            appendPaddingCharacters(
-                farm.currentEggLayingRatePerHour.formatIllions(),
+            if (!compact) appendPaddingCharacters(
+                farm.currentEggLayingRatePerHour.formatIllions()
+                ,
                 farms.map { it.currentEggLayingRatePerHour.formatIllions() })
             append("${farm.currentEggLayingRatePerHour.formatIllions()}/hr")
-            append("│")
-            append("${farm.populationIncreaseRatePerHour.formatIllions()}/hr")
+            if (!compact) {
+                append("│")
+                append("${farm.populationIncreaseRatePerHour.formatIllions()}/hr")
+            }
             appendln()
         }
         appendln("```")

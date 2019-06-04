@@ -37,7 +37,7 @@ fun Long.toDuration(): Duration = Duration((this * 1000))
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
 
-private val daysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
+private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
     .appendDays()
     .appendSuffix(" day", " days")
@@ -49,9 +49,22 @@ private val daysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuild
     .appendSuffix(" minute", " minutes")
     .toFormatter()
 
-fun Period.asDayHoursAndMinutes(): String = daysHoursAndMinutesFormatter
-    .withLocale(Locale.UK)
-    .print(this.normalizedStandard(PeriodType.dayTime()))
+private val shortDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
+    .printZeroNever()
+    .appendDays()
+    .appendSuffix("d")
+    .appendSeparator(" ")
+    .appendHours()
+    .appendSuffix("h")
+    .appendSeparator(" ")
+    .appendMinutes()
+    .appendSuffix("m")
+    .toFormatter()
+
+fun Period.asDayHoursAndMinutes(compact: Boolean = false): String =
+    (if (compact) shortDaysHoursAndMinutesFormatter else longDaysHoursAndMinutesFormatter)
+        .withLocale(Locale.UK)
+        .print(this.normalizedStandard(PeriodType.dayTime()))
 
 private val hoursMinutesAndSecondsFormatter = PeriodFormatterBuilder()
     .printZeroNever()
@@ -65,11 +78,12 @@ private val hoursMinutesAndSecondsFormatter = PeriodFormatterBuilder()
     .appendSuffix("s")
     .toFormatter()
 
+// TODO: Add compact option
 fun Period.asHoursMinutesAndSeconds(): String = hoursMinutesAndSecondsFormatter
     .withLocale(Locale.UK)
     .print(this.normalizedStandard(PeriodType.time()))
 
-fun Duration.asDayHoursAndMinutes(): String = this.toPeriod().asDayHoursAndMinutes()
+fun Duration.asDayHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDayHoursAndMinutes(compact)
 fun Duration.asHoursMinutesAndSeconds(): String = this.toPeriod().asHoursMinutesAndSeconds()
 
 fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
@@ -106,6 +120,7 @@ fun BigDecimal.formatInteger(): String = integerFormat.format(this)
 fun Double.formatIllions(rounded: Boolean = false): String {
     val f = if (rounded) integerFormat else decimalFormat
     return when (this) {
+        in (1.0e003..1.0e006 - 1) -> f.format(this / 1e003) + "k"
         in (1.0e006..1.0e009 - 1) -> f.format(this / 1e006) + "M"
         in (1.0e009..1.0e012 - 1) -> f.format(this / 1e009) + "B"
         in (1.0e012..1.0e015 - 1) -> f.format(this / 1e012) + "T"
@@ -152,6 +167,7 @@ fun Double.formatIllions(rounded: Boolean = false): String {
 fun BigDecimal.formatIllions(rounded: Boolean = false): String {
     val f = if (rounded) integerFormat else decimalFormat
     return when (this) {
+        in (TEN.pow(3)..TEN.pow(6) - ONE) -> f.format(this.divide(TEN.pow(3), DECIMAL32)) + "k"
         in (TEN.pow(6)..TEN.pow(9) - ONE) -> f.format(this.divide(TEN.pow(6), DECIMAL32)) + "M"
         in (TEN.pow(9)..TEN.pow(12) - ONE) -> f.format(this.divide(TEN.pow(9), DECIMAL32)) + "B"
         in (TEN.pow(12)..TEN.pow(15) - ONE) -> f.format(this.divide(TEN.pow(12), DECIMAL32)) + "T"
