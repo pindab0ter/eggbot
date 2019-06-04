@@ -128,7 +128,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     // Chickens
     //
 
-    val population: BigDecimal by lazy { farm.numChickens.toBigDecimal() }
+    val population: BigDecimal by lazy { farm.habPopulation.sum() }
 
     //
     // Eggs
