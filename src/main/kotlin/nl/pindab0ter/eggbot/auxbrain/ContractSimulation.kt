@@ -17,7 +17,7 @@ import java.util.*
 class ContractSimulation constructor(
     backup: EggInc.Backup,
     private val localContract: EggInc.LocalContract
-) : HomeSimulation(backup) {
+) : Simulation(backup) {
 
     override val farm: EggInc.Simulation =
         backup.farmsList.find { it.contractId == localContract.contract.identifier }!!
