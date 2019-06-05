@@ -83,16 +83,19 @@ class CoopContractSimulation constructor(
             .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
 
 
-    val accelerationFactor: BigDecimal by lazy {
-        (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
-            .divide(population, DECIMAL64) - eggLayingRatePerSecond).divide(ONE, DECIMAL64)
+    val accelerationFactor: BigDecimal? by lazy {
+        if (population == ZERO) null
+        else (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
+            .divide(population, DECIMAL64) - eggLayingRatePerSecond)
+            .divide(ONE, DECIMAL64)
     }
 
     // TODO: Take bottlenecks into account
-    fun projectedTimeRequired(goal: BigDecimal): Duration =
+    fun projectedTimeRequired(goal: BigDecimal): Duration? = accelerationFactor?.let { accelerationFactor ->
         (eggLayingRatePerSecond * BigDecimal(-1L) + sqrt(
             eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ZERO)
         )).divide(accelerationFactor, DECIMAL64).toLong().toDuration()
+    }
 
 
     companion object {

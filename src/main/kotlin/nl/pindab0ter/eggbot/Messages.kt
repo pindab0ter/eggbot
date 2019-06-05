@@ -170,7 +170,7 @@ object Messages {
                 .filter { (_, goal) -> simulation.eggsLaid < goal }
                 .forEach { (index, goal: BigDecimal) ->
                     val finishedIn = simulation.projectedTimeRequired(goal)
-                    val success = finishedIn < simulation.timeRemaining
+                    val success = finishedIn != null && finishedIn < simulation.timeRemaining
                     val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
                     appendPaddingCharacters(index + 1, farms.count())
@@ -183,8 +183,11 @@ object Messages {
                     )
                     append(goal.formatIllions(true))
                     append(if (success) " ✓ " else " ✗ ")
-                    if (finishedIn > oneYear) append("More than a year")
-                    else append(finishedIn.asDayHoursAndMinutes(compact))
+                    when {
+                        finishedIn == null -> append("∞")
+                        finishedIn > oneYear -> append("More than a year")
+                        else -> append(finishedIn.asDayHoursAndMinutes(compact))
+                    }
                     if (index + 1 < simulation.goals.count()) appendln()
                 }
             appendln("```")
