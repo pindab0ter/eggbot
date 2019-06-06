@@ -6,10 +6,12 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.database.Coop
+import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.SizedCollection
+import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -21,7 +23,7 @@ object RollCall : Command() {
 
     init {
         name = "roll-call"
-        arguments = "<contract id>"
+        arguments = "<contract id> [force]"
         aliases = arrayOf("rc", "rollcall")
         help = "Create a co-op roll call for the given contract id"
         hidden = true
@@ -54,7 +56,7 @@ object RollCall : Command() {
                 log.debug { it }
                 return
             }
-            event.arguments.size > 1 -> tooManyArguments.let {
+            event.arguments.size > 2 -> tooManyArguments.let {
                 event.replyWarning(it)
                 log.debug { it }
                 return
@@ -71,6 +73,8 @@ object RollCall : Command() {
             it.identifier == event.arguments.first()
         }
 
+        val force: Boolean = event.arguments.getOrNull(1)?.startsWith("f") == true
+
         if (contractInfo == null) "No active contract found with id `${event.arguments.first()}`".let {
             event.replyWarning(it)
             log.debug { it }
@@ -84,12 +88,17 @@ object RollCall : Command() {
         }
 
         transaction {
-            if (!Coops.select { Coops.contract eq contractInfo.identifier }.empty())
-                "Co-ops are already generated for contract `${contractInfo.identifier}`. Add `force` to override.".let {
+            if (!Coops.select { Coops.contract eq contractInfo.identifier }.empty()) {
+                if (force) {
+                    transaction {
+                        Coops.deleteWhere { Coops.contract eq contractInfo.identifier }
+                    }
+                } else "Co-ops are already generated for contract `${contractInfo.identifier}`. Add `force` to override.".let {
                     event.replyWarning(it)
                     log.debug { it }
                     return@transaction
                 }
+            }
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
