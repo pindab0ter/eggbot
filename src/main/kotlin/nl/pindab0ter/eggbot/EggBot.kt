@@ -1,9 +1,13 @@
 package nl.pindab0ter.eggbot
 
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.Guild
-import nl.pindab0ter.eggbot.database.*
+import nl.pindab0ter.eggbot.database.CoopFarmers
+import nl.pindab0ter.eggbot.database.Coops
+import nl.pindab0ter.eggbot.database.DiscordUsers
+import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.jda.CommandLogger
 import nl.pindab0ter.eggbot.jda.EyeReaction
 import nl.pindab0ter.eggbot.jda.commandClient
@@ -13,7 +17,6 @@ import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.CronScheduleBuilder.weeklyOnDayAndHourAndMinute
@@ -47,20 +50,15 @@ object EggBot {
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
         SchemaUtils.create(CoopFarmers)
-        SchemaUtils.create(Contracts)
-        SchemaUtils.create(Goals)
-
-        if (Config.devMode) {
-            Goals.deleteAll()
-            Contracts.deleteAll()
-            Coops.deleteAll()
-            CoopFarmers.deleteAll()
-        }
-
     }
 
     private fun connectToDatabase() {
-        Database.connect("jdbc:sqlite:./EggBot.sqlite", driver = "org.sqlite.JDBC")
+        Database.connect(
+            url = "jdbc:sqlite:./EggBot.sqlite",
+            driver = "org.sqlite.JDBC",
+            setupConnection = { connection ->
+                connection.createStatement().execute("PRAGMA foreign_keys = ON")
+            })
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 

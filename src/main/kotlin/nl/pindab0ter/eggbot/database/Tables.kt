@@ -1,6 +1,5 @@
 package nl.pindab0ter.eggbot.database
 
-import com.auxbrain.ei.EggInc
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
@@ -30,8 +29,7 @@ object Farmers : IdTable<String>() {
 
 object Coops : IntIdTable() {
     val name = text("name")
-    val contract = reference("contract_id", Contracts, CASCADE, NO_ACTION)
-    val hasStarted = bool("has-started").default(false)
+    val contract = text("contract_id")
 
     init {
         this.index(true, name, contract)
@@ -45,24 +43,4 @@ object CoopFarmers : Table() {
     init {
         this.index(true, farmer, coop)
     }
-}
-
-object Contracts : IdTable<String>() {
-    override val id = text("id").uniqueIndex().entityId()
-    val name = text("name")
-    val description = text("description")
-    val egg = enumeration("egg", EggInc.Egg::class)
-    val coopAllowed = bool("coop_allowed")
-    val maxCoopSize = integer("max_coop_size")
-    val validUntil = datetime("valid_until")
-    val durationSeconds = double("duration_seconds")
-}
-
-object Goals : IntIdTable() {
-    val contract = reference("contract_id", Contracts, CASCADE, NO_ACTION)
-    val targetAmount = double("target_amount")
-    val rewardType = enumeration("reward_type", EggInc.RewardType::class)
-    val rewardSubType = text("reward_sub_type").nullable()
-    val rewardAmount = double("reward_amount")
-    val targetSoulEggs = double("target_soul_eggs")
 }

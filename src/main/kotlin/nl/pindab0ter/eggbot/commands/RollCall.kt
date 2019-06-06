@@ -1,13 +1,17 @@
 package nl.pindab0ter.eggbot.commands
 
+import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.database.*
+import nl.pindab0ter.eggbot.database.Coop
+import nl.pindab0ter.eggbot.database.Coops
+import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.SizedCollection
-import org.jetbrains.exposed.sql.deleteAll
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.roundToInt
 
@@ -63,7 +67,9 @@ object RollCall : Command() {
             CoopFarmers.deleteAll()
         }
 
-        val contractInfo = AuxBrain.getContracts().contractsList.find { it.identifier == event.arguments.first() }
+        val contractInfo: EggInc.Contract? = AuxBrain.getContracts().contractsList.find {
+            it.identifier == event.arguments.first()
+        }
 
         if (contractInfo == null) "No active contract found with id `${event.arguments.first()}`".let {
             event.replyWarning(it)
@@ -78,21 +84,21 @@ object RollCall : Command() {
         }
 
         transaction {
-            val contract = Contract.getOrNew(contractInfo)
-            if (!contract.coops.empty()) "Co-ops are already generated for contract `${contract.identifier}`".let {
-                event.replyWarning(it)
-                log.debug { it }
-                return@transaction
-            }
+            if (!Coops.select { Coops.contract eq contractInfo.identifier }.empty())
+                "Co-ops are already generated for contract `${contractInfo.identifier}`. Add `force` to override.".let {
+                    event.replyWarning(it)
+                    log.debug { it }
+                    return@transaction
+                }
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
-            val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contract)
+            val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
             val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName
             val longestEarningsBonus = farmers
                 .maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
 
 
-            event.reply(StringBuilder("Co-ops generated for `${contract.identifier}`:").appendln().apply {
+            event.reply(StringBuilder("Co-ops generated for `${contractInfo.identifier}`:").appendln().apply {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
@@ -100,7 +106,7 @@ object RollCall : Command() {
                     append(" (")
                     appendPaddingCharacters(coop.farmers.count(), coops.map { it.farmers.count() })
                     append(coop.farmers.count())
-                    append("/${contract.maxCoopSize} members): ")
+                    append("/${contractInfo.maxCoopSize} members): ")
                     appendPaddingCharacters(
                         coop.activeEarningsBonus.formatIllions(true),
                         coops.map { it.activeEarningsBonus.formatIllions(true) })
@@ -139,10 +145,10 @@ object RollCall : Command() {
     object PaddingDistribution {
         private const val FILL_PERCENTAGE = 0.8
 
-        private fun createCoops(farmers: List<Farmer>, contract: Contract): List<Coop> = transaction {
+        private fun createCoops(farmers: List<Farmer>, contract: EggInc.Contract): List<Coop> = transaction {
             List(((farmers.count() * 1.2) / contract.maxCoopSize).toInt() + 1) { index ->
                 Coop.new {
-                    this.contract = contract
+                    this.contract = contract.identifier
                     this.name = Config.coopIncrementChar.plus(index).toString() +
                             Config.coopName +
                             contract.maxCoopSize
@@ -150,7 +156,7 @@ object RollCall : Command() {
             }
         }
 
-        fun createRollCall(farmers: List<Farmer>, contract: Contract): List<Coop> {
+        fun createRollCall(farmers: List<Farmer>, contract: EggInc.Contract): List<Coop> {
             val coops = createCoops(farmers, contract)
             val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
             val inactiveFarmers = farmers.filter { !it.isActive }

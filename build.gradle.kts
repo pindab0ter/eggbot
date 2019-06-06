@@ -28,7 +28,7 @@ dependencies {
     implementation("net.dv8tion", "JDA", "3.8.3_463") {
         exclude("club.minnced", "opus-java")
     }
-    implementation("org.jetbrains.exposed", "exposed", "0.13.4")
+    implementation("org.jetbrains.exposed", "exposed", "0.14.1")
     implementation("joda-time", "joda-time", "2.10.2")
     implementation("com.github.kittinunf.fuel", "fuel", "2.0.1")
     implementation("com.google.protobuf", "protobuf-java", "3.7.0")

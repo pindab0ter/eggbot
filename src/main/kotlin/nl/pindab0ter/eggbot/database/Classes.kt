@@ -4,7 +4,6 @@ import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.dao.*
-import org.joda.time.DateTime
 import java.math.BigDecimal
 import java.math.BigDecimal.*
 
@@ -113,8 +112,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
 class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
-    var contract by Contract referencedOn Coops.contract
-    var hasStarted by Coops.hasStarted
+    var contract by Coops.contract
 
     var farmers by Farmer via CoopFarmers
 
@@ -122,62 +120,4 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     val activeEarningsBonus: BigDecimal get() = farmers.sumBy { it.activeEarningsBonus }
 
     companion object : IntEntityClass<Coop>(Coops)
-}
-
-class Contract(id: EntityID<String>) : Entity<String>(id) {
-    val identifier: String get() = id.value
-
-    var name by Contracts.name
-    var description by Contracts.description
-    var egg by Contracts.egg
-    var coopAllowed by Contracts.coopAllowed
-    var maxCoopSize by Contracts.maxCoopSize
-    var validUntil by Contracts.validUntil
-    var durationSeconds by Contracts.durationSeconds
-    val coops by Coop referrersOn Coops.contract
-    val goals by Goal referrersOn Goals.contract
-
-    val finalAmount get() = goals.sortedByDescending { it.targetAmount }.first().targetAmount
-
-    companion object : EntityClass<String, Contract>(Contracts) {
-        fun new(contractInfo: EggInc.Contract): Contract = super.new(contractInfo.identifier) {
-            this.name = contractInfo.name
-            this.description = contractInfo.description
-            this.egg = contractInfo.egg
-            this.coopAllowed = contractInfo.coopAllowed == 1
-            this.maxCoopSize = contractInfo.maxCoopSize
-            this.validUntil = DateTime(contractInfo.expirationTime.toLong())
-            this.durationSeconds = contractInfo.lengthSeconds
-        }.also { contract ->
-            contractInfo.goalsList.forEach { goalInfo -> Goal.new(contract, goalInfo) }
-        }
-
-        fun getOrNew(contract: EggInc.Contract): Contract =
-            super.findById(contract.identifier) ?: new(contract)
-
-        fun getOrNew(contractId: String): Contract? =
-            super.findById(contractId) ?: AuxBrain.getContracts().contractsList.find {
-                it.identifier == contractId
-            }?.let { new(it) }
-    }
-}
-
-class Goal(id: EntityID<Int>) : IntEntity(id) {
-    var contract by Contract referencedOn Goals.contract
-    var targetAmount by Goals.targetAmount
-    var rewardType by Goals.rewardType
-    var rewardSubType by Goals.rewardSubType
-    var rewardAmount by Goals.rewardAmount
-    var targetSoulEggs by Goals.targetSoulEggs
-
-    companion object : IntEntityClass<Goal>(Goals) {
-        fun new(contract: Contract, goal: EggInc.Goal) = super.new {
-            this.contract = contract
-            this.targetAmount = goal.targetAmount
-            this.rewardType = goal.rewardType
-            this.rewardSubType = goal.rewardSubType
-            this.rewardAmount = goal.rewardAmount
-            this.targetSoulEggs = goal.targetSoulEggs
-        }
-    }
 }
