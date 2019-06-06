@@ -21,6 +21,7 @@ repositories {
 
 dependencies {
     compileOnly(kotlin("stdlib-jdk8"))
+    compileOnly("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.2.1")
     compileOnly("com.google.protobuf", "protobuf-gradle-plugin", "0.8.8")
 
     implementation("com.jagrosh", "jda-utilities-command", "2.1.5")
