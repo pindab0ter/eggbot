@@ -91,9 +91,10 @@ class CoopContractSimulation constructor(
     }
 
     // TODO: Take bottlenecks into account
+    // TODO: Take Internal Hatchery Calm into account
     fun projectedTimeRequired(goal: BigDecimal): Duration? = accelerationFactor?.let { accelerationFactor ->
-        (eggLayingRatePerSecond * BigDecimal(-1L) + sqrt(
-            eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ZERO)
+        (eggLayingRatePerSecond.negate() + sqrt(
+            eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ONE)
         )).divide(accelerationFactor, DECIMAL64).toLong().toDuration()
     }
 
