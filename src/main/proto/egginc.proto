@@ -224,14 +224,14 @@ message Simulation {
     double cash_spent = 3;
     double unclaimed_cash = 4;
     double last_online_time = 5;
-    uint32 num_chickens = 6;
+    uint64 num_chickens = 6;
     uint32 num_chickens_unsettled = 7;
     uint32 num_chickens_running = 8;
     double eggs_laid = 9;
     double eggs_paid_for = 10;
     uint32 silo_count = 11;
     repeated HabLevel habs = 12;
-    repeated uint32 hab_population = 13;
+    repeated uint64 hab_population = 13;
     repeated uint32 hab_population_inbound = 14;
     repeated double hab_incubator_population = 15;
     double hatchery_population = 16;
