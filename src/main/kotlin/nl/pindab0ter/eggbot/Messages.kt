@@ -228,7 +228,8 @@ object Messages {
             append("|$CHICKEN_RATE")
             appendln()
 
-            append("════")
+            appendPaddingCharacters("", farms.count(), "═")
+            append("═══")
             appendPaddingCharacters("", farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " }, "═")
             appendPaddingCharacters("", farms.map { it.eggsLaid.formatIllions() }, "═")
             append("╪")
