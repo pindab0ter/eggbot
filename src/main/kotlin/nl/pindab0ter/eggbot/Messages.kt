@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot
 
 import nl.pindab0ter.eggbot.auxbrain.ContractSimulation
 import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulation
+import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.database.Farmer
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -126,7 +127,23 @@ object Messages {
         // appendln("**Projected eggs with int. hatchery calm**: ${simulation.finalTargetWithCalm.formatIllions()}")
     }.toString()
 
-    fun coopStatus(simulation: CoopContractSimulation, compact: Boolean = false): String = StringBuilder().apply {
+    fun coopStatus(result: CoopContractSimulationResult, compact: Boolean = false): String = when (result) {
+        is CoopContractSimulationResult.InProgress -> coopInProgress(result.simulation, compact)
+        is CoopContractSimulationResult.NotFound -> """
+            No co-op found for contract `${result.contractId}` with name `${result.coopId}
+
+            Use """.trimIndent()
+        is CoopContractSimulationResult.Empty -> """
+            `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
+
+            This co-op has no members.""".trimIndent()
+        is CoopContractSimulationResult.Finished -> """
+            `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
+
+            This co-op has successfully finished their contract!""".trimIndent()
+    }
+
+    private fun coopInProgress(simulation: CoopContractSimulation, compact: Boolean): String = StringBuilder().apply {
         val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
             EggBot.jdaClient.getEmoteById(id)?.asMention
         } ?: ""
@@ -139,13 +156,6 @@ object Messages {
 
         appendln("`${simulation.coopId}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
-
-        if (farms.count() == 0) {
-            appendln()
-            appendln("\nThis co-op has no members.")
-            return@apply
-        }
-
         append("**Total eggs**: ${simulation.eggsLaid.formatIllions()} ")
         append("(${simulation.eggLayingRatePerHour.formatIllions()}/hr)")
         appendln()

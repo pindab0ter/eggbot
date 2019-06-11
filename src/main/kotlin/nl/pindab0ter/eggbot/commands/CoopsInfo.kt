@@ -7,13 +7,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
-import nl.pindab0ter.eggbot.EggBot
-import nl.pindab0ter.eggbot.asyncMap
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulation
 import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.jda.commandClient
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.concurrent.TimeUnit.MINUTES
 
@@ -21,11 +20,13 @@ object CoopsInfo : Command() {
 
     private val log = KotlinLogging.logger { }
 
-    // TODO: Allow coop-id argument
     init {
         name = "coops"
+        aliases = arrayOf("coopsinfo", "coops-info", "co-ops", "co-ops-info")
+        arguments = "<contract id>"
         help = "Shows info on all co-ops for the chosen contract."
         // category = ContractsCategory
+        hidden = true
         guildOnly = false
         botPermissions = arrayOf(MESSAGE_EMBED_LINKS)
     }
@@ -41,42 +42,72 @@ object CoopsInfo : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        val availableContracts: List<String> = transaction { Coop.all().map { it.contract } }.distinct()
-        val contracts = AuxBrain.getContracts().contractsList.filter { availableContracts.contains(it.identifier) }
-
-        builder
-            .setText("Currently active contracts:")
-            .clearChoices()
-            .setSelection { m, i ->
-                // TODO: Add progress indication and extend sendTyping when not done yet.
-                m.channel.sendTyping().queue()
-
-                val coops = runBlocking(Dispatchers.IO) {
-                    transaction {
-                        Coop.find { Coops.contract eq contracts[i - 1].identifier }.toList()
-                    }.asyncMap { coop ->
-                        CoopContractSimulation.Factory(coop.contract, coop.name)
+        // If the admin role is defined check whether the author has at least that role or is the guild owner
+        if (Config.rollCallRole != null && event.author.mutualGuilds.none { guild ->
+                guild.getMember(event.author).let { author ->
+                    author.isOwner || author.roles.any { memberRole ->
+                        guild.getRolesByName(Config.rollCallRole, true)
+                            .any { adminRole -> memberRole.position >= adminRole.position }
                     }
                 }
+            }) "You must have at least a role called `${Config.rollCallRole}` to use that!".let {
+            event.replyError(it)
+            log.debug { it }
+            return
+        }
 
-                m.channel.sendMessage(coops.joinToString("\n") { coop ->
-                    when (coop) {
-                        is Finished ->
-                            "`${coop.coopId}`: ✓ Finished"
-                        is InProgress -> when {
-                            coop.simulation.projectedToFinish() -> "`${coop.simulation.coopId}`: ✓ Will finish"
-                            else -> "`${coop.simulation.coopId}`: ✗ Won't finish"
-                        }
-                        is Empty -> "`${coop.coopId}`: ✗ Empty co-op, remove using `!co-op-remove ${coop.coopId}`?"
-                        is NotFound -> "`${coop.coopId}`: ✗ No active co-op found, remove using `!co-op-remove ${coop.coopId}`?"
-                    }
-                }).queue()
+        when {
+            event.arguments.isEmpty() -> missingArguments.let {
+                event.replyWarning(it)
+                log.debug { it }
+                return
             }
-            .setCancel {}
-            .setUsers(event.author)
+            event.arguments.size > 2 -> tooManyArguments.let {
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
+        }
 
-        contracts.forEach { builder.addChoice("**`${it.identifier}`**: ${it.name}\n_${it.description}_") }
+        val contractId = event.arguments.first()
+        val coops = runBlocking(Dispatchers.IO) {
+            transaction {
+                Coop.find { Coops.contract eq contractId }.toList()
+            }.asyncMap { coop ->
+                CoopContractSimulation.Factory(coop.contract, coop.name)
+            }
+        }
 
-        builder.build().display(event.channel)
+        if (coops.isEmpty()) "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
+        }
+
+        event.reply("Registered co-ops for `$contractId`:\n${coops.joinToString("\n") { result ->
+            when (result) {
+                is NotFound -> StringBuilder().apply {
+                    append("`${result.coopId}`: ✗ No active co-op found, remove using ")
+                    append("`${commandClient.prefix}${CoopRemove.name} ${result.contractId} ${result.coopId}`?")
+                }.toString()
+                is Empty -> StringBuilder().apply {
+                    append("`${result.coopStatus.coopIdentifier}`: ✗ Empty co-op, remove using ")
+                    append("`${commandClient.prefix}${CoopRemove.name} ${result.coopStatus.contractIdentifier} ${result.coopStatus.coopIdentifier}`?")
+                }.toString()
+                is InProgress -> when {
+                    result.simulation.projectedToFinish() -> StringBuilder().apply {
+                        append("`${result.simulation.coopId}`: ✓ Will finish ")
+                        append("(${result.simulation.projectedTimeToFinalGoal()?.asDayHoursAndMinutes(true)}/")
+                        append("${result.simulation.timeRemaining.asDayHoursAndMinutes(true)})")
+                    }
+                    else -> StringBuilder().apply {
+                        append("`${result.simulation.coopId}`: ✗ Won't finish ")
+                        append("(${result.simulation.projectedTimeToFinalGoal()?.asDayHoursAndMinutes(true)}/")
+                        append("${result.simulation.timeRemaining.asDayHoursAndMinutes(true)})")
+                    }
+                }
+                is Finished -> "`${result.coopStatus.coopIdentifier}`: ✓ Finished"
+            }
+        }}")
     }
 }

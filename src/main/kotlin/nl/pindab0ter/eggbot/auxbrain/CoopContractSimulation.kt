@@ -105,20 +105,20 @@ class CoopContractSimulation private constructor(
     companion object Factory {
         operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
             val (coopStatus, error) = AuxBrain.getCoopStatus(contractId, coopId)
+            val contractName: String? = AuxBrain.getContracts().contractsList.find { contract ->
+                contract.identifier == contractId
+            }!!.name
 
             // Co-op not found?
             if (coopStatus == null || error != null) return NotFound(contractId, coopId)
 
-            // Co-op not empty?
             val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
                 coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
             }.mapNotNull {
                 it.component1()
-            }.takeIf { backups ->
-                backups.any { backup -> backup.farmsList.any { it.contractId == coopStatus.contractIdentifier } }
-            } ?: return Empty(contractId, coopId)
+            }
 
-            // Co-op finished?
+            // Co-op not empty?
             if (backups.any { contributor ->
                     contributor.contracts.archiveList.find { contract ->
                         contract.contract.identifier == coopStatus.contractIdentifier
@@ -126,7 +126,15 @@ class CoopContractSimulation private constructor(
                         contract.lastAmountWhenRewardGiven >= contract.contract.goalsList.last().targetAmount
                     } == true
                 }
-            ) return Finished(contractId, coopId)
+            ) return Finished(coopStatus, contractName!!)
+
+            // Co-op finished?
+            if (backups.none { backup ->
+                    backup.farmsList.any { farm ->
+                        farm.contractId == coopStatus.contractIdentifier
+                    }
+                }
+            ) return Empty(coopStatus, contractName!!)
 
             // Co-op in progress
             return InProgress(CoopContractSimulation(backups, coopStatus))

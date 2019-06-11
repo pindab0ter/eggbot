@@ -6,7 +6,6 @@ import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulation
-import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 
 @Suppress("FoldInitializerAndIfToElvis")
@@ -51,19 +50,15 @@ object CoopInfo : Command() {
             }
 
             // TODO: Expand status messages
-            CoopContractSimulation.Factory(status.contractIdentifier, status.coopIdentifier).let { result ->
-                when (result) {
-                    is InProgress -> Messages.coopStatus(result.simulation, compact)
-                    is Finished -> "Finished"
-                    is NotFound -> "Could not get co-op status. Are the `contract id` and `co-op id` correct?."
-                    is Empty -> "Co-op is empty"
-                }.let { message ->
-                    if (event.channel.id == Config.botCommandsChannel) {
-                        event.reply(message)
-                    } else {
-                        event.replyInDm(message)
-                        if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
-                    }
+            Messages.coopStatus(
+                CoopContractSimulation.Factory(status.contractIdentifier, status.coopIdentifier),
+                compact
+            ).let { message ->
+                if (event.channel.id == Config.botCommandsChannel) {
+                    event.reply(message)
+                } else {
+                    event.replyInDm(message)
+                    if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
                 }
             }
         }

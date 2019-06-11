@@ -15,13 +15,16 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
     addCommands(
         Active,
         ContractIDs,
+        CoopAdd,
         CoopInfo,
+        CoopRemove,
         EarningsBonus,
         Inactive,
         LeaderBoard,
         Register,
         RollCall,
         SoloInfo,
+        CoopsInfo,
         WhoIs
     )
     setEmojis(
