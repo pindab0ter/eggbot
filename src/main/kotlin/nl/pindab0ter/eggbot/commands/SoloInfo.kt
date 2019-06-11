@@ -18,7 +18,7 @@ object SoloInfo : Command() {
         name = "solo"
         aliases = arrayOf("soloinfo", "si", "solo-info")
         help = "Shows the progress of one of your own contracts."
-        arguments = "<contract id>"
+        arguments = "<contract id> [compact]"
         // category = ContractsCategory
         guildOnly = false
     }
@@ -42,7 +42,7 @@ object SoloInfo : Command() {
                 log.debug { it }
                 return
             }
-            event.arguments.size > 1 -> tooManyArguments.let {
+            event.arguments.size > 2 -> tooManyArguments.let {
                 event.replyWarning(it)
                 log.debug { it }
                 return
@@ -50,6 +50,7 @@ object SoloInfo : Command() {
         }
 
         val contractId = event.arguments.first()
+        val compact: Boolean = event.arguments.getOrNull(1)?.startsWith("c") == true
 
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
@@ -80,7 +81,7 @@ object SoloInfo : Command() {
                         return@getFarmerBackup
                     }
 
-                Messages.soloStatus(simulation).let { message ->
+                Messages.soloStatus(simulation, compact).let { message ->
                     if (event.channel.id == Config.botCommandsChannel) {
                         event.reply(message)
                     } else {
