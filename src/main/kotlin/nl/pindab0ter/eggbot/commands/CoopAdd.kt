@@ -33,14 +33,14 @@ object CoopAdd : Command() {
 
         // TODO: Move to (extension) function
         // If the admin role is defined check whether the author has at least that role or is the guild owner
-        if (Config.rollCallRole != null && event.author.mutualGuilds.none { guild ->
+        if (Config.adminRole != null && event.author.mutualGuilds.none { guild ->
                 guild.getMember(event.author).let { author ->
                     author.isOwner || author.roles.any { memberRole ->
-                        guild.getRolesByName(Config.rollCallRole, true)
+                        guild.getRolesByName(Config.adminRole, true)
                             .any { adminRole -> memberRole.position >= adminRole.position }
                     }
                 }
-            } || event.author.id == Config.ownerId) "You must have at least a role called `${Config.rollCallRole}` to use that!".let {
+            } || event.author.id == Config.ownerId) "You must have at least a role called `${Config.adminRole}` to use that!".let {
             event.replyError(it)
             log.debug { it }
             return
