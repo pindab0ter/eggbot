@@ -60,7 +60,7 @@ class ContractSimulation constructor(
 
     val noBottleNeck = object : BottleNeck() {
         override val timeToReached: Duration
-            get() = timeRequired
+            get() = timeToFinalGoal()
         override val isReached: Boolean
             get() = timeRemaining <= ZERO
     }
@@ -121,21 +121,30 @@ class ContractSimulation constructor(
     //  Projection
     //
 
-    val timeRequired: Duration by lazy {
-        (finalGoal - eggsLaid)
+    fun timeTo(goal: BigDecimal): Duration =
+        (goal - eggsLaid).coerceAtLeast(BigDecimal.ZERO)
             .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
-    }
 
-    val accelerationFactor: BigDecimal by lazy {
-        (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
-            .divide(population, DECIMAL64) - eggLayingRatePerSecond).divide(ONE, DECIMAL64)
+    fun timeToFinalGoal(): Duration = timeTo(finalGoal)
+
+    val accelerationFactor: BigDecimal? by lazy {
+        if (population == BigDecimal.ZERO) null
+        else (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
+            .divide(population, DECIMAL64) - eggLayingRatePerSecond)
+            .divide(ONE, DECIMAL64)
     }
 
     // TODO: Take bottlenecks into account
-    val projectedTimeRequired: Duration by lazy {
-        (eggLayingRatePerSecond * BigDecimal(-1L) + sqrt(eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (finalGoal - eggsLaid)))
-            .divide(accelerationFactor, DECIMAL64).toLong().toDuration()
+    // TODO: Take Internal Hatchery Calm into account
+    fun projectedTimeTo(goal: BigDecimal): Duration? = accelerationFactor?.let { accelerationFactor ->
+        (eggLayingRatePerSecond.negate() + sqrt(
+            eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ONE)
+        )).divide(accelerationFactor, DECIMAL64).toLong().toDuration()
     }
+
+    fun projectedTimeToFinalGoal(): Duration? = projectedTimeTo(finalGoal)
+
+    fun projectedToFinish(): Boolean = projectedTimeToFinalGoal()?.let { it < timeRemaining } == true
 
     companion object {
         operator fun invoke(

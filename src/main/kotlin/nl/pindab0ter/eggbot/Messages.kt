@@ -113,18 +113,64 @@ object Messages {
     }.toString()
 
     fun soloStatus(
-        simulation: ContractSimulation
-    ): String = StringBuilder("`${simulation.contractId}` (${simulation.contractName}):\n").apply {
+        simulation: ContractSimulation,
+        compact: Boolean = false
+    ): String = StringBuilder().apply {
         val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
             EggBot.jdaClient.getEmoteById(id)?.asMention
         } ?: ""
 
-        appendln("**Farmer**: `${simulation.backup.name}`")
-        appendln("**Eggs**: ${simulation.eggsLaid.formatIllions()}$eggEmote")
-        appendln("**Rate**: ${simulation.currentEggLayingRatePerHour.formatIllions(true)}/hr")
-        // appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes()}")
-        // appendln("**Required eggs**: ${simulation.goals.map { it.value }.maxBy { it }!!.formatIllions(true)}")
-        // appendln("**Projected eggs with int. hatchery calm**: ${simulation.finalTargetWithCalm.formatIllions()}")
+        //
+        // Basic info and totals
+        //
+
+        appendln("`${simulation.farmerName}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
+        appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
+        append("**Total eggs**: ${simulation.eggsLaid.formatIllions()} ")
+        append("(${simulation.eggLayingRatePerHour.formatIllions()}/hr)")
+        appendln()
+        append("**Total chickens**: ${simulation.population.formatIllions()} ")
+        append("(${simulation.populationIncreaseRatePerHour.formatIllions()}/hr)")
+        appendln()
+        appendln()
+
+        //
+        // Goals
+        //
+
+        if (simulation.goals.all { goal -> simulation.eggsLaid >= goal.value }) {
+            appendln("**Contract finished! ${Config.emojiSuccess}**")
+            appendln()
+        } else {
+            append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):")
+            if (!compact) append("  _(Includes new chickens and assumes no bottlenecks)_")
+            append("```")
+            appendln()
+            simulation.goals
+                .filter { (_, goal) -> simulation.eggsLaid < goal }
+                .forEach { (index, goal: BigDecimal) ->
+                    val finishedIn = simulation.projectedTimeTo(goal)
+                    val success = finishedIn != null && finishedIn < simulation.timeRemaining
+                    val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
+
+                    append("${index + 1}: ")
+                    appendPaddingCharacters(
+                        goal.formatIllions(true),
+                        simulation.goals
+                            .filter { simulation.eggsLaid < it.value }
+                            .map { it.value.formatIllions(true) }
+                    )
+                    append(goal.formatIllions(true))
+                    append(if (success) " ✓ " else " ✗ ")
+                    when {
+                        finishedIn == null -> append("∞")
+                        finishedIn > oneYear -> append("More than a year")
+                        else -> append(finishedIn.asDayHoursAndMinutes(compact))
+                    }
+                    if (index + 1 < simulation.goals.count()) appendln()
+                }
+            appendln("```")
+        }
     }.toString()
 
     fun coopStatus(result: CoopContractSimulationResult, compact: Boolean = false): String = when (result) {

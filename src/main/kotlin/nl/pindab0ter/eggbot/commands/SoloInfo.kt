@@ -19,7 +19,6 @@ object SoloInfo : Command() {
         aliases = arrayOf("soloinfo", "si", "solo-info")
         help = "Shows the progress of one of your own contracts."
         arguments = "<contract id>"
-        hidden = true
         // category = ContractsCategory
         guildOnly = false
     }
