@@ -4,6 +4,9 @@ import com.auxbrain.ei.EggInc
 import com.github.kittinunf.fuel.core.Body
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.jda.commandClient
 import org.joda.time.DateTime
@@ -346,3 +349,9 @@ val Command.tooManyArguments get() = "Too many arguments. Use `${commandClient.t
 // TODO: Update when available as language feature
 // val Duration.Companion.INFINITE get() = Duration(Long.MAX_VALUE)
 val Duration.INFINITE get() = Duration(Long.MAX_VALUE)
+
+// Coroutines
+
+suspend fun <T, R> Iterable<T>.asyncMap(transform: suspend (T) -> R): List<R> = coroutineScope {
+    map { async { transform(it) } }.awaitAll()
+}

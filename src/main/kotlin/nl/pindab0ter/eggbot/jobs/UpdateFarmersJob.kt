@@ -1,9 +1,9 @@
 package nl.pindab0ter.eggbot.jobs
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.asyncMap
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -22,10 +22,9 @@ class UpdateFarmersJob : Job {
             return
         }
 
-        runBlocking {
+        runBlocking(Dispatchers.IO) {
             farmers
-                .map { farmer -> farmer to GlobalScope.async { AuxBrain.getFarmerBackup(farmer.inGameId) } }
-                .map { (farmer, backupJob) -> farmer to backupJob.await().get() }
+                .asyncMap { farmer -> farmer to AuxBrain.getFarmerBackup(farmer.inGameId).get() }
                 .let { farmers ->
                     transaction {
                         farmers.forEach { (farmer, backup) -> farmer.update(backup) }
