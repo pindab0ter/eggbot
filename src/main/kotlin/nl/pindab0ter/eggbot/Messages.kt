@@ -61,12 +61,12 @@ object Messages {
 
 
     fun earningsBonus(farmer: Farmer, compact: Boolean = false): String = StringBuilder().apply {
-        val eb = farmer.earningsBonus.let { (if (compact) it.formatIllions() else it.formatInteger()) }
-        val se = BigDecimal(farmer.soulEggs).let { (if (compact) it.formatIllions() else it.formatInteger()) }
-        val pe = farmer.prophecyEggs.formatInteger()
-        val sb = "${farmer.soulBonus.formatInteger()}/140"
-        val pb = "${farmer.prophecyBonus.formatInteger()}/5"
-        val seToNext =
+        val earningsBonus = farmer.earningsBonus.let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val soulEggs = BigDecimal(farmer.soulEggs).let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val prophecyEggs = farmer.prophecyEggs.formatInteger()
+        val soulBonus = "${farmer.soulBonus.formatInteger()}/140"
+        val prophecyBonus = "${farmer.prophecyBonus.formatInteger()}/5"
+        val soulEggsToNext =
             farmer.nextRole
                 ?.lowerBound
                 ?.minus(farmer.earningsBonus)
@@ -75,7 +75,7 @@ object Messages {
                 ?.let { "+ $it" } ?: "Unknown"
         val role = farmer.role?.name ?: "Unknown"
         val strings = listOf(
-            eb, se, seToNext, role
+            earningsBonus, soulEggs, soulEggsToNext, role
         )
 
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
@@ -83,31 +83,31 @@ object Messages {
         append(" ".repeat(strings.maxBy { it.length }?.length?.minus(role.length) ?: 0))
         appendln(farmer.role?.name ?: "Unknown")
         append("Earnings bonus:  ")
-        appendPaddingCharacters(eb, strings)
-        appendln("$eb %")
+        appendPaddingCharacters(earningsBonus, strings)
+        appendln("$earningsBonus %")
         append("Soul Eggs:       ")
-        appendPaddingCharacters(se, strings)
-        appendln("$se SE")
+        appendPaddingCharacters(soulEggs, strings)
+        appendln("$soulEggs SE")
 
         if (farmer.soulBonus < 140) {
             append("Soul Food:       ")
-            appendPaddingCharacters(sb, strings)
-            appendln(sb)
+            appendPaddingCharacters(soulBonus, strings)
+            appendln(soulBonus)
         }
 
         append("Prophecy Eggs:   ")
-        appendPaddingCharacters(pe, strings)
-        appendln("$pe PE")
+        appendPaddingCharacters(prophecyEggs, strings)
+        appendln("$prophecyEggs PE")
 
         if (farmer.prophecyBonus < 5) {
             append("Prophecy Bonus:  ")
-            appendPaddingCharacters(pb, strings)
-            appendln(pb)
+            appendPaddingCharacters(prophecyBonus, strings)
+            appendln(prophecyBonus)
         }
 
         append("SE to next rank: ")
-        appendPaddingCharacters(seToNext, strings)
-        append("$seToNext SE")
+        appendPaddingCharacters(soulEggsToNext, strings)
+        append("$soulEggsToNext SE")
         append("```")
     }.toString()
 
@@ -283,7 +283,8 @@ object Messages {
             append("${farm.currentEggLayingRatePerHour.formatIllions()}/hr")
             if (!compact) appendPaddingCharacters(
                 "${farm.currentEggLayingRatePerHour.formatIllions()}/hr",
-                farms.map { "${it.currentEggLayingRatePerHour.formatIllions()}/hr" }.plus(EGG_RATE))
+                farms.map { "${it.currentEggLayingRatePerHour.formatIllions()}/hr" }.plus(EGG_RATE)
+            )
             if (!compact) {
                 append("│")
                 appendPaddingCharacters(
