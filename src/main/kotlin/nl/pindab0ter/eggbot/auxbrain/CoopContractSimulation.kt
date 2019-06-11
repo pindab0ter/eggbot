@@ -1,14 +1,11 @@
 package nl.pindab0ter.eggbot.auxbrain
 
 import com.auxbrain.ei.EggInc
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.sqrt
-import nl.pindab0ter.eggbot.sumBy
-import nl.pindab0ter.eggbot.toDateTime
-import nl.pindab0ter.eggbot.toDuration
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -17,11 +14,13 @@ import java.math.BigDecimal.ZERO
 import java.math.MathContext.DECIMAL64
 import java.util.*
 
-class CoopContractSimulation constructor(
+class CoopContractSimulation private constructor(
     backups: List<EggInc.Backup>,
     val coopStatus: EggInc.CoopStatusResponse
 ) {
-    val localContract = backups.maxBy { it.approxTime }!!.contracts.contractsList.find { localContract ->
+    val localContract: EggInc.LocalContract = backups.filter { backup ->
+        backup.farmsList.any { it.contractId == coopStatus.contractIdentifier }
+    }.maxBy { it.approxTime }!!.contracts.contractsList.find { localContract ->
         localContract.contract.identifier == coopStatus.contractIdentifier
     }!!
 
@@ -78,10 +77,11 @@ class CoopContractSimulation constructor(
     //  Projection
     //
 
-    fun timeRequired(goal: BigDecimal): Duration =
+    fun timeTo(goal: BigDecimal): Duration =
         (goal - eggsLaid).coerceAtLeast(ZERO)
             .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
 
+    fun timeToFinalGoal(): Duration = timeTo(finalGoal)
 
     val accelerationFactor: BigDecimal? by lazy {
         if (population == ZERO) null
@@ -92,20 +92,44 @@ class CoopContractSimulation constructor(
 
     // TODO: Take bottlenecks into account
     // TODO: Take Internal Hatchery Calm into account
-    fun projectedTimeRequired(goal: BigDecimal): Duration? = accelerationFactor?.let { accelerationFactor ->
+    fun projectedTimeTo(goal: BigDecimal): Duration? = accelerationFactor?.let { accelerationFactor ->
         (eggLayingRatePerSecond.negate() + sqrt(
             eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ONE)
         )).divide(accelerationFactor, DECIMAL64).toLong().toDuration()
     }
 
+    fun projectedTimeToFinalGoal(): Duration? = projectedTimeTo(finalGoal)
 
-    companion object {
-        operator fun invoke(
-            coopStatus: EggInc.CoopStatusResponse
-        ): CoopContractSimulation? = runBlocking {
-            CoopContractSimulation(coopStatus.contributorsList.map {
-                GlobalScope.async { AuxBrain.getFarmerBackup(it.userId) }
-            }.map { it.await().get() }, coopStatus)
+    fun projectedToFinish(): Boolean = projectedTimeToFinalGoal()?.let { it < timeRemaining } == true
+
+    companion object Factory {
+        operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
+            val (coopStatus, error) = AuxBrain.getCoopStatus(contractId, coopId)
+
+            // Co-op not found?
+            if (coopStatus == null || error != null) return NotFound(contractId, coopId)
+
+            // Co-op not empty?
+            val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
+                coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
+            }.mapNotNull {
+                it.component1()
+            }.takeIf { backups ->
+                backups.any { backup -> backup.farmsList.any { it.contractId == coopStatus.contractIdentifier } }
+            } ?: return Empty(contractId, coopId)
+
+            // Co-op finished?
+            if (backups.any { contributor ->
+                    contributor.contracts.archiveList.find { contract ->
+                        contract.contract.identifier == coopStatus.contractIdentifier
+                    }?.let { contract ->
+                        contract.lastAmountWhenRewardGiven >= contract.contract.goalsList.last().targetAmount
+                    } == true
+                }
+            ) return Finished(contractId, coopId)
+
+            // Co-op in progress
+            return InProgress(CoopContractSimulation(backups, coopStatus))
         }
     }
 }

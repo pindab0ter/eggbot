@@ -24,7 +24,7 @@ dependencies {
     compileOnly("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.2.1")
     compileOnly("com.google.protobuf", "protobuf-gradle-plugin", "0.8.8")
 
-    implementation("com.jagrosh", "jda-utilities-command", "2.1.5")
+    implementation("com.jagrosh", "jda-utilities", "2.1.5")
     implementation("net.dv8tion", "JDA", "3.8.3_463") {
         exclude("club.minnced", "opus-java")
     }

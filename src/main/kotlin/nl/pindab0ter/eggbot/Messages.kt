@@ -169,7 +169,7 @@ object Messages {
             simulation.goals
                 .filter { (_, goal) -> simulation.eggsLaid < goal }
                 .forEach { (index, goal: BigDecimal) ->
-                    val finishedIn = simulation.projectedTimeRequired(goal)
+                    val finishedIn = simulation.projectedTimeTo(goal)
                     val success = finishedIn != null && finishedIn < simulation.timeRemaining
                     val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
 

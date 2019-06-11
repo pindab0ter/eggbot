@@ -31,9 +31,12 @@ import java.util.*
 
 
 object EggBot {
+    val eventWaiter: EventWaiter = EventWaiter()
+
     val jdaClient: JDA = JDABuilder(Config.botToken)
         .addEventListener(CommandLogger)
         .addEventListener(EyeReaction)
+        .addEventListener(eventWaiter)
         .addEventListener(commandClient)
         .build()
 

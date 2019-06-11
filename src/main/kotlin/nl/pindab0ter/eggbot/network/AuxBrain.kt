@@ -58,9 +58,9 @@ object AuxBrain {
 
     fun getCoopStatus(
         contractId: String,
-        coopName: String
+        coopId: String
     ): Result<EggInc.CoopStatusResponse, FuelError> =
-        getCoopStatusPostRequest(contractId, coopName).responseObject(ContractDeserializer).third
+        getCoopStatusPostRequest(contractId, coopId).responseObject(ContractDeserializer).third
 
     fun getCoopStatus(
         contractId: String,
