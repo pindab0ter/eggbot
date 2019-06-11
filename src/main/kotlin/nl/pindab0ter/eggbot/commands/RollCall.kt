@@ -39,12 +39,12 @@ object RollCall : Command() {
         // If the admin role is defined check whether the author has at least that role or is the guild owner
         if (Config.adminRole != null && event.author.mutualGuilds.none { guild ->
                 guild.getMember(event.author).let { author ->
-                    author.isOwner || author.roles.any { memberRole ->
+                    author.isOwner || author.user.id == Config.ownerId || author.roles.any { memberRole ->
                         guild.getRolesByName(Config.adminRole, true)
                             .any { adminRole -> memberRole.position >= adminRole.position }
                     }
                 }
-            } || event.author.id == Config.ownerId) "You must have at least a role called `${Config.adminRole}` to use that!".let {
+            }) "You must have at least a role called `${Config.adminRole}` to use that!".let {
             event.replyError(it)
             log.debug { it }
             return

@@ -66,6 +66,7 @@ object SoloInfo : Command() {
                         event.reply(it)
                         return@getFarmerBackup
                     }
+                // TODO: Allow solo runs of co-op contracts
                 if (contract.contract.coopAllowed == 1)
                     "The contract with ID `$contractId` is not a solo contract.".let {
                         log.debug { it }
