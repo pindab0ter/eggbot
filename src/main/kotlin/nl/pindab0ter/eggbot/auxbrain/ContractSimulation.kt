@@ -29,7 +29,6 @@ class ContractSimulation constructor(
     val contractId: String = localContract.contract.identifier
     val contractName: String = localContract.contract.name
     val egg: EggInc.Egg = localContract.contract.egg
-    // TODO: Split up SoloContractSimulation and CoopContractSimulation
     var isActive: Boolean = true
 
     //
