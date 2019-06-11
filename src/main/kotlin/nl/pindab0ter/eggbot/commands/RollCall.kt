@@ -44,7 +44,7 @@ object RollCall : Command() {
                             .any { adminRole -> memberRole.position >= adminRole.position }
                     }
                 }
-            }) "You must have at least a role called `${Config.rollCallRole}` to use that!".let {
+            } || event.author.id == Config.ownerId) "You must have at least a role called `${Config.rollCallRole}` to use that!".let {
             event.replyError(it)
             log.debug { it }
             return
