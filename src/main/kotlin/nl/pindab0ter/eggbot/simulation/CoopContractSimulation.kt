@@ -1,10 +1,10 @@
-package nl.pindab0ter.eggbot.auxbrain
+package nl.pindab0ter.eggbot.simulation
 
 import com.auxbrain.ei.EggInc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulationResult.*
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.joda.time.DateTime
 import org.joda.time.Duration

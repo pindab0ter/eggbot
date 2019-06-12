@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.auxbrain
+package nl.pindab0ter.eggbot.simulation
 
 enum class CommonResearch(val id: String) {
     // Tier 1

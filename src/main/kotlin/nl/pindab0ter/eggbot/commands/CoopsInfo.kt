@@ -8,8 +8,8 @@ import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulation
-import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulationResult.*
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.jda.commandClient

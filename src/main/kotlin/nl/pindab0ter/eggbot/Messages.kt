@@ -1,8 +1,8 @@
 package nl.pindab0ter.eggbot
 
-import nl.pindab0ter.eggbot.auxbrain.ContractSimulation
-import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulation
-import nl.pindab0ter.eggbot.auxbrain.CoopContractSimulationResult
+import nl.pindab0ter.eggbot.simulation.ContractSimulation
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.database.Farmer
 import org.joda.time.DateTime
 import org.joda.time.Duration

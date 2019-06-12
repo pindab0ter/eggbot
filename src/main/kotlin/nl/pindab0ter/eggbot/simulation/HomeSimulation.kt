@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.auxbrain
+package nl.pindab0ter.eggbot.simulation
 
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.Backup

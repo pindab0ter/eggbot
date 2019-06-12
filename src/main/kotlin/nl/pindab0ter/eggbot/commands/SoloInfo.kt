@@ -5,7 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.auxbrain.ContractSimulation
+import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
