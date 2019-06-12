@@ -1,9 +1,9 @@
 package nl.pindab0ter.eggbot
 
+import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
-import nl.pindab0ter.eggbot.database.Farmer
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -256,32 +256,32 @@ object Messages {
         appendln("Members (${farms.count()}/${simulation.maxCoopSize}):")
         appendln("```")
 
-        val NAME = "Name"
-        val EGGS = "Eggs"
-        val EGG_RATE = "Egg Rate"
-        val CHICKENS = "Chickens"
-        val CHICKEN_RATE = "Chicken Rate"
+        val name = "Name"
+        val eggs = "Eggs"
+        val eggRate = "Egg Rate"
+        val chickens = "Chickens"
+        val chickenRate = "Chicken Rate"
 
         // Table header
         if (!compact) {
             appendPaddingCharacters("", farms.count(), "#")
-            append(": $NAME ")
-            appendPaddingCharacters(NAME, farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
-            appendPaddingCharacters(EGGS, farms.map { it.eggsLaid.formatIllions() })
-            append(EGGS)
+            append(": $name ")
+            appendPaddingCharacters(name, farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
+            appendPaddingCharacters(eggs, farms.map { it.eggsLaid.formatIllions() })
+            append(eggs)
             append("│")
-            append(EGG_RATE)
+            append(eggRate)
             appendPaddingCharacters(
-                EGG_RATE,
-                farms.map { it.eggLayingRatePerHour.formatIllions() + "/hr" }.plus(EGG_RATE)
+                eggRate,
+                farms.map { it.eggLayingRatePerHour.formatIllions() + "/hr" }.plus(eggRate)
             )
             append("│")
             appendPaddingCharacters(
-                CHICKENS,
-                farms.map { it.population.formatIllions() }.plus(CHICKENS)
+                chickens,
+                farms.map { it.population.formatIllions() }.plus(chickens)
             )
-            append(CHICKENS)
-            append("|$CHICKEN_RATE")
+            append(chickens)
+            append("|$chickenRate")
             appendln()
 
             appendPaddingCharacters("", farms.count(), "═")
@@ -291,24 +291,25 @@ object Messages {
             append("╪")
             appendPaddingCharacters(
                 "",
-                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus(EGG_RATE),
+                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus(eggRate),
                 "═"
             )
             append("╪")
             appendPaddingCharacters(
                 "",
-                farms.map { it.population.formatIllions() }.plus(CHICKENS),
+                farms.map { it.population.formatIllions() }.plus(chickens),
                 "═"
             )
             append("╪")
             appendPaddingCharacters(
                 "",
-                farms.map { "${it.populationIncreaseRatePerHour.formatIllions()}/hr" }.plus(CHICKEN_RATE),
+                farms.map { "${it.populationIncreaseRatePerHour.formatIllions()}/hr" }.plus(chickenRate),
                 "═"
             )
             appendln()
         }
 
+        // Table body
         farms.forEachIndexed { index, farm ->
             appendPaddingCharacters(index + 1, farms.count())
             append("${index + 1}: ")
@@ -324,7 +325,7 @@ object Messages {
                     append(farm.farmerName)
                     appendPaddingCharacters(
                         farm.farmerName + if (!farm.isActive) "  zZ" else " ",
-                        farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " }.plus(NAME)
+                        farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " }.plus(name)
                     )
                     if (!farm.isActive) append("  zZ ")
                     else append("  ")
@@ -332,20 +333,20 @@ object Messages {
             }
             appendPaddingCharacters(
                 farm.eggsLaid.formatIllions(),
-                farms.map { it.eggsLaid.formatIllions() }.plus(EGGS)
+                farms.map { it.eggsLaid.formatIllions() }.plus(eggs)
             )
             append(farm.eggsLaid.formatIllions())
             append("│")
             append("${farm.currentEggLayingRatePerHour.formatIllions()}/hr")
             if (!compact) appendPaddingCharacters(
                 "${farm.currentEggLayingRatePerHour.formatIllions()}/hr",
-                farms.map { "${it.currentEggLayingRatePerHour.formatIllions()}/hr" }.plus(EGG_RATE)
+                farms.map { "${it.currentEggLayingRatePerHour.formatIllions()}/hr" }.plus(eggRate)
             )
             if (!compact) {
                 append("│")
                 appendPaddingCharacters(
                     farm.population.formatIllions(),
-                    farms.map { it.population.formatIllions() }.plus(CHICKENS)
+                    farms.map { it.population.formatIllions() }.plus(chickens)
                 )
                 append(farm.population.formatIllions())
                 append("│")
