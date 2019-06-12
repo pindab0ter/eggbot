@@ -6,13 +6,12 @@ import com.jagrosh.jdautilities.menu.OrderedMenu
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
-import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.jda.commandClient
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.util.concurrent.TimeUnit.MINUTES
 
@@ -28,7 +27,6 @@ object CoopsInfo : Command() {
         // category = ContractsCategory
         hidden = true
         guildOnly = false
-        botPermissions = arrayOf(MESSAGE_EMBED_LINKS)
     }
 
     val builder = OrderedMenu.Builder()
