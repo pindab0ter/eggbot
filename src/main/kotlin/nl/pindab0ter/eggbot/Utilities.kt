@@ -341,6 +341,48 @@ val EggInc.Contract.finalGoal: BigDecimal get() = BigDecimal(goalsList.maxBy { i
 val EggInc.LocalContract.finalGoal: BigDecimal get() = contract.finalGoal
 val EggInc.CoopStatusResponse.eggsLaid: BigDecimal get() = BigDecimal(totalAmount)
 
+// @formatter:off
+val EggInc.HabLevel.capacity: BigDecimal get() = when(this) {
+    EggInc.HabLevel.NO_HAB ->                            ZERO
+    EggInc.HabLevel.COOP ->                   BigDecimal(250)
+    EggInc.HabLevel.SHACK ->                  BigDecimal(500)
+    EggInc.HabLevel.SUPER_SHACK ->           BigDecimal(1000)
+    EggInc.HabLevel.SHORT_HOUSE ->           BigDecimal(2000)
+    EggInc.HabLevel.THE_STANDARD ->          BigDecimal(5000)
+    EggInc.HabLevel.LONG_HOUSE ->           BigDecimal(10000)
+    EggInc.HabLevel.DOUBLE_DECKER ->        BigDecimal(20000)
+    EggInc.HabLevel.WAREHOUSE ->            BigDecimal(50000)
+    EggInc.HabLevel.CENTER ->              BigDecimal(100000)
+    EggInc.HabLevel.BUNKER ->              BigDecimal(200000)
+    EggInc.HabLevel.EGGKEA ->              BigDecimal(500000)
+    EggInc.HabLevel.HAB_1000 ->           BigDecimal(1000000)
+    EggInc.HabLevel.HANGAR ->             BigDecimal(2000000)
+    EggInc.HabLevel.TOWER ->              BigDecimal(5000000)
+    EggInc.HabLevel.HAB_10_000 ->        BigDecimal(10000000)
+    EggInc.HabLevel.EGGTOPIA ->          BigDecimal(25000000)
+    EggInc.HabLevel.MONOLITH ->          BigDecimal(50000000)
+    EggInc.HabLevel.PLANET_PORTAL ->    BigDecimal(100000000)
+    EggInc.HabLevel.CHICKEN_UNIVERSE -> BigDecimal(600000000)
+    EggInc.HabLevel.UNRECOGNIZED ->                      ZERO
+}
+
+val EggInc.VehicleType.capacity: BigDecimal get() = when (this) {
+    EggInc.VehicleType.UNRECOGNIZED -> BigDecimal.ZERO
+    EggInc.VehicleType.TRIKE -> BigDecimal(5000)
+    EggInc.VehicleType.TRANSIT -> BigDecimal(15000)
+    EggInc.VehicleType.PICKUP -> BigDecimal(50000)
+    EggInc.VehicleType.VEHICLE_10_FOOT -> BigDecimal(100000)
+    EggInc.VehicleType.VEHICLE_24_FOOT -> BigDecimal(250000)
+    EggInc.VehicleType.SEMI -> BigDecimal(500000)
+    EggInc.VehicleType.DOUBLE_SEMI -> BigDecimal(1000000)
+    EggInc.VehicleType.FUTURE_SEMI -> BigDecimal(5000000)
+    EggInc.VehicleType.MEGA_SEMI -> BigDecimal(15000000)
+    EggInc.VehicleType.HOVER_SEMI -> BigDecimal(30000000)
+    EggInc.VehicleType.QUANTUM_TRANSPORTER -> BigDecimal(50000000)
+    EggInc.VehicleType.HYPERLOOP_TRAIN -> BigDecimal(50000000)
+}
+// @formatter:on
+
 
 // Messages
 
