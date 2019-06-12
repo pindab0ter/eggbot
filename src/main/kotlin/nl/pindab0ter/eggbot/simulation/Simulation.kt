@@ -69,7 +69,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
         )
 
     private val internalHatcheryCalm: BigDecimal
-        get() = BigDecimal(1 + 0.10 * backup.data.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
+        get() = BigDecimal(1 + .10 * backup.data.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
 
     //
     // Habitats (chicken cap)
@@ -112,6 +112,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
                 acc + if (hab.maxCapacity < farm.habPopulation[index] || hab == NO_HAB) ZERO else ONE
             }
             .times(internalHatcheryRatePerMinute)
+            .times(internalHatcheryCalm)
     }
 
     val populationIncreaseRatePerSecond: BigDecimal by lazy {
