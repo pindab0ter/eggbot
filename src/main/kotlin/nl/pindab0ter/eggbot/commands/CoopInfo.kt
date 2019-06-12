@@ -5,8 +5,8 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : Command() {
@@ -49,7 +49,6 @@ object CoopInfo : Command() {
                 return@getCoopStatus
             }
 
-            // TODO: Expand status messages
             Messages.coopStatus(
                 CoopContractSimulation.Factory(status.contractIdentifier, status.coopIdentifier),
                 compact
