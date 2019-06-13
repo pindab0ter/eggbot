@@ -139,7 +139,7 @@ class CoopContractSimulation private constructor(
                     } && contributor.contracts.archiveList.find { contract ->
                         contract.contract.identifier == coopStatus.contractIdentifier
                     }?.let { contract ->
-                        contract.lastAmountWhenRewardGiven >= contract.contract.goalsList.last().targetAmount
+                        contract.finished
                     } == true
                 }
             ) return Finished(coopStatus, contractName!!)

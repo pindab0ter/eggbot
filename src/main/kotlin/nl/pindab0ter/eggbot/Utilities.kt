@@ -339,6 +339,7 @@ val EggInc.Game.bonusPerSoulEgg: BigDecimal
 val EggInc.Game.earningsBonus: BigDecimal get() = BigDecimal(soulEggs) * bonusPerSoulEgg
 val EggInc.Contract.finalGoal: BigDecimal get() = BigDecimal(goalsList.maxBy { it.targetAmount }!!.targetAmount)
 val EggInc.LocalContract.finalGoal: BigDecimal get() = contract.finalGoal
+val EggInc.LocalContract.finished: Boolean get() = BigDecimal(lastAmountWhenRewardGiven) > contract.finalGoal
 val EggInc.CoopStatusResponse.eggsLaid: BigDecimal get() = BigDecimal(totalAmount)
 
 // @formatter:off
