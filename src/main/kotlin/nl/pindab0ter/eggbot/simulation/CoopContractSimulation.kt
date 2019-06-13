@@ -3,9 +3,10 @@ package nl.pindab0ter.eggbot.simulation
 import com.auxbrain.ei.EggInc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -18,17 +19,29 @@ class CoopContractSimulation private constructor(
     backups: List<EggInc.Backup>,
     val coopStatus: EggInc.CoopStatusResponse
 ) {
-    val localContract: EggInc.LocalContract = backups.filter { backup ->
-        backup.farmsList.any { it.contractId == coopStatus.contractIdentifier }
-    }.maxBy { it.approxTime }!!.contracts.contractsList.find { localContract ->
-        localContract.contract.identifier == coopStatus.contractIdentifier
-    }!!
+    val log = KotlinLogging.logger { }
 
-    val farms: List<ContractSimulation> = backups.map { backup ->
+    val localContract: EggInc.LocalContract = backups.filter { backup ->
+        backup.contracts.contractsList.plus(backup.contracts.archiveList).any { contract ->
+            contract.contract.identifier == coopStatus.contractIdentifier
+        }
+    }.maxBy { backup ->
+        backup.approxTime
+    }!!.let { backup ->
+        backup.contracts.contractsList.plus(backup.contracts.archiveList).find { contract ->
+            contract.contract.identifier == coopStatus.contractIdentifier
+        }!!
+    }
+
+    val farms: List<ContractSimulation> = backups.filter { backup ->
+        backup.farmsList.any { farm ->
+            farm.contractId == coopStatus.contractIdentifier
+        }
+    }.map { backup ->
         ContractSimulation(backup, localContract).also {
             it.isActive = coopStatus.contributorsList.find { contributor ->
                 contributor.userId == backup.userid
-            }!!.active == 1
+            }?.active == 1
         }
     }
 
@@ -36,50 +49,51 @@ class CoopContractSimulation private constructor(
     // Basic info
     //
 
-    val contractId: String = localContract.contract.identifier
-    val contractName: String = localContract.contract.name
-    val coopId: String = localContract.coopIdentifier
-    val egg: EggInc.Egg = localContract.contract.egg
-    val maxCoopSize = localContract.contract.maxCoopSize
+    val contractId: String by lazy { localContract.contract.identifier }
+    val contractName: String by lazy { localContract.contract.name }
+    val coopId: String by lazy { localContract.coopIdentifier }
+    val egg: EggInc.Egg by lazy { localContract.contract.egg }
+    val maxCoopSize by lazy { localContract.contract.maxCoopSize }
 
     //
     // Totals
     //
 
-    val eggsLaid: BigDecimal = farms.sumBy { farm -> farm.eggsLaid }
-    val eggLayingRatePerSecond: BigDecimal = farms.sumBy { farm -> farm.eggLayingRatePerSecond }
-    val population: BigDecimal = farms.sumBy { farm -> farm.population }
-    val populationIncreaseRatePerSecond: BigDecimal = farms.sumBy { farm -> farm.populationIncreaseRatePerSecond }
-    val populationIncreaseRatePerMinute: BigDecimal = farms.sumBy { farm -> farm.populationIncreaseRatePerMinute }
-    val populationIncreaseRatePerHour: BigDecimal = farms.sumBy { farm -> farm.populationIncreaseRatePerHour }
-    val eggLayingRatePerMinute: BigDecimal = farms.sumBy { farm -> farm.eggLayingRatePerMinute }
-    val eggLayingRatePerHour: BigDecimal = farms.sumBy { farm -> farm.eggLayingRatePerMinute }
-    val currentEggLayingRatePerSecond: BigDecimal = farms.sumBy { farm -> farm.currentEggLayingRatePerSecond }
-    val currentEggLayingRatePerMinute: BigDecimal = farms.sumBy { farm -> farm.currentEggLayingRatePerMinute }
+    val eggsLaid: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaid } }
+    val eggLayingRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerSecond } }
+    val population: BigDecimal by lazy { farms.sumBy { farm -> farm.population } }
+    val populationIncreaseRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerSecond } }
+    val populationIncreaseRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerMinute } }
+    val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerHour } }
+    val eggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerMinute } }
+    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerMinute } }
+    val currentEggLayingRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerSecond } }
+    val currentEggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerMinute } }
 
     //
     // Contract details
     //
 
-    val elapsedTime: Duration = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
+    val elapsedTime: Duration by lazy { Duration(localContract.timeAccepted.toDateTime(), DateTime.now()) }
 
-    val timeRemaining: Duration = coopStatus.secondsRemaining.toDuration()
+    val timeRemaining: Duration by lazy { coopStatus.secondsRemaining.toDuration() }
 
-    val goals: SortedMap<Int, BigDecimal> = localContract.contract.goalsList
-        .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
-        .toMap()
-        .toSortedMap()
+    val goals: SortedMap<Int, BigDecimal> by lazy {
+        localContract.contract.goalsList
+            .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
+            .toMap()
+            .toSortedMap()
+    }
 
-    val finalGoal: BigDecimal = goals[goals.lastKey()]!!
+    val finalGoal: BigDecimal by lazy { goals[goals.lastKey()]!! }
 
 
     //
     //  Projection
     //
 
-    fun timeTo(goal: BigDecimal): Duration =
-        (goal - eggsLaid).coerceAtLeast(ZERO)
-            .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
+    fun timeTo(goal: BigDecimal): Duration = (goal - eggsLaid).coerceAtLeast(ZERO)
+        .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
 
     fun timeToFinalGoal(): Duration = timeTo(finalGoal)
 
@@ -118,9 +132,11 @@ class CoopContractSimulation private constructor(
                 it.component1()
             }
 
-            // Co-op not empty?
+            // Co-op finished?
             if (backups.any { contributor ->
-                    contributor.contracts.archiveList.find { contract ->
+                    contributor.farmsList.none { farm ->
+                        farm.contractId == coopStatus.contractIdentifier
+                    } && contributor.contracts.archiveList.find { contract ->
                         contract.contract.identifier == coopStatus.contractIdentifier
                     }?.let { contract ->
                         contract.lastAmountWhenRewardGiven >= contract.contract.goalsList.last().targetAmount
@@ -128,7 +144,7 @@ class CoopContractSimulation private constructor(
                 }
             ) return Finished(coopStatus, contractName!!)
 
-            // Co-op finished?
+            // Co-op not empty?
             if (backups.none { backup ->
                     backup.farmsList.any { farm ->
                         farm.contractId == coopStatus.contractIdentifier
