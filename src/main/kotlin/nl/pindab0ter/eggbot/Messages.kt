@@ -138,9 +138,8 @@ object Messages {
         // Goals
         //
 
-        if (simulation.goals.all { goal -> simulation.eggsLaid >= goal.value }) {
-            appendln("**Contract finished! ${Config.emojiSuccess}**")
-            appendln()
+        if (simulation.finished) {
+            appendln("**You have successfully finished this contract! ${Config.emojiSuccess}**")
         } else {
             append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):")
             if (!compact) append("  _(Includes new chickens and assumes no bottlenecks)_")
@@ -186,7 +185,7 @@ object Messages {
         is CoopContractSimulationResult.Finished -> """
             `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
 
-            This co-op has successfully finished their contract!""".trimIndent()
+            This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent()
     }
 
     private fun coopInProgress(simulation: CoopContractSimulation, compact: Boolean): String = StringBuilder().apply {
@@ -214,40 +213,35 @@ object Messages {
         // Goals
         //
 
-        if (simulation.goals.all { goal -> simulation.eggsLaid >= goal.value }) {
-            appendln("**Contract finished! ${Config.emojiSuccess}**")
-            appendln()
-        } else {
-            append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):")
-            if (!compact) append("  _(Includes new chickens and assumes no bottlenecks)_")
-            append("```")
-            appendln()
-            simulation.goals
-                .filter { (_, goal) -> simulation.eggsLaid < goal }
-                .forEach { (index, goal: BigDecimal) ->
-                    val finishedIn = simulation.projectedTimeTo(goal)
-                    val success = finishedIn != null && finishedIn < simulation.timeRemaining
-                    val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
+        append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):")
+        if (!compact) append("  _(Includes new chickens and assumes no bottlenecks)_")
+        append("```")
+        appendln()
+        simulation.goals
+            .filter { (_, goal) -> simulation.eggsLaid < goal }
+            .forEach { (index, goal: BigDecimal) ->
+                val finishedIn = simulation.projectedTimeTo(goal)
+                val success = finishedIn != null && finishedIn < simulation.timeRemaining
+                val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
-                    appendPaddingCharacters(index + 1, farms.count())
-                    append("${index + 1}: ")
-                    appendPaddingCharacters(
-                        goal.formatIllions(true),
-                        simulation.goals
-                            .filter { simulation.eggsLaid < it.value }
-                            .map { it.value.formatIllions(true) }
-                    )
-                    append(goal.formatIllions(true))
-                    append(if (success) " ✓ " else " ✗ ")
-                    when {
-                        finishedIn == null -> append("∞")
-                        finishedIn > oneYear -> append("More than a year")
-                        else -> append(finishedIn.asDayHoursAndMinutes(compact))
-                    }
-                    if (index + 1 < simulation.goals.count()) appendln()
+                appendPaddingCharacters(index + 1, farms.count())
+                append("${index + 1}: ")
+                appendPaddingCharacters(
+                    goal.formatIllions(true),
+                    simulation.goals
+                        .filter { simulation.eggsLaid < it.value }
+                        .map { it.value.formatIllions(true) }
+                )
+                append(goal.formatIllions(true))
+                append(if (success) " ✓ " else " ✗ ")
+                when {
+                    finishedIn == null -> append("∞")
+                    finishedIn > oneYear -> append("More than a year")
+                    else -> append(finishedIn.asDayHoursAndMinutes(compact))
                 }
-            appendln("```")
-        }
+                if (index + 1 < simulation.goals.count()) appendln()
+            }
+        appendln("```")
 
         //
         // Members

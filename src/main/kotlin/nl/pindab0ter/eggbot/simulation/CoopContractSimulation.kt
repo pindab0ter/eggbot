@@ -21,17 +21,7 @@ class CoopContractSimulation private constructor(
 ) {
     val log = KotlinLogging.logger { }
 
-    val localContract: EggInc.LocalContract = backups.filter { backup ->
-        backup.contracts.contractsList.plus(backup.contracts.archiveList).any { contract ->
-            contract.contract.identifier == coopStatus.contractIdentifier
-        }
-    }.maxBy { backup ->
-        backup.approxTime
-    }!!.let { backup ->
-        backup.contracts.contractsList.plus(backup.contracts.archiveList).find { contract ->
-            contract.contract.identifier == coopStatus.contractIdentifier
-        }!!
-    }
+    val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractIdentifier)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
         backup.farmsList.any { farm ->
@@ -132,8 +122,26 @@ class CoopContractSimulation private constructor(
                 it.component1()
             }
 
+            // Co-op not empty?
+            if (backups.none { backup ->
+                    backup.farmsList.any { farm ->
+                        farm.contractId == coopStatus.contractIdentifier
+                    }
+                }
+            ) return Empty(coopStatus, contractName!!)
+
+            val contract = backups.findContract(contractId)
+
+            //
             // Co-op finished?
-            if (backups.any { contributor ->
+            //
+            // The amount of eggs laid according to the co-op status is higher than the final goal
+            // or
+            // There is no active farm with this contract
+            // and the contract archive contains this contract
+            // and that contract has reached it's final goal
+            // for any of the contributors
+            if (coopStatus.eggsLaid >= contract?.finalGoal ?: ZERO || backups.any { contributor ->
                     contributor.farmsList.none { farm ->
                         farm.contractId == coopStatus.contractIdentifier
                     } && contributor.contracts.archiveList.find { contract ->
@@ -143,14 +151,6 @@ class CoopContractSimulation private constructor(
                     } == true
                 }
             ) return Finished(coopStatus, contractName!!)
-
-            // Co-op not empty?
-            if (backups.none { backup ->
-                    backup.farmsList.any { farm ->
-                        farm.contractId == coopStatus.contractIdentifier
-                    }
-                }
-            ) return Empty(coopStatus, contractName!!)
 
             // Co-op in progress
             return InProgress(CoopContractSimulation(backups, coopStatus))

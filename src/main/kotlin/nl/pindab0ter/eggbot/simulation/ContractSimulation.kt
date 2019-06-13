@@ -1,10 +1,7 @@
 package nl.pindab0ter.eggbot.simulation
 
 import com.auxbrain.ei.EggInc
-import nl.pindab0ter.eggbot.sqrt
-import nl.pindab0ter.eggbot.times
-import nl.pindab0ter.eggbot.toDateTime
-import nl.pindab0ter.eggbot.toDuration
+import nl.pindab0ter.eggbot.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Duration.ZERO
@@ -30,6 +27,7 @@ class ContractSimulation constructor(
     val contractName: String = localContract.contract.name
     val egg: EggInc.Egg = localContract.contract.egg
     var isActive: Boolean = true
+    val finished: Boolean = localContract.finished
 
     //
     // Contract details

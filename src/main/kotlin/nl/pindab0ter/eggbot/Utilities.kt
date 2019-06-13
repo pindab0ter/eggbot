@@ -341,6 +341,15 @@ val EggInc.Contract.finalGoal: BigDecimal get() = BigDecimal(goalsList.maxBy { i
 val EggInc.LocalContract.finalGoal: BigDecimal get() = contract.finalGoal
 val EggInc.LocalContract.finished: Boolean get() = BigDecimal(lastAmountWhenRewardGiven) > contract.finalGoal
 val EggInc.CoopStatusResponse.eggsLaid: BigDecimal get() = BigDecimal(totalAmount)
+fun List<EggInc.Backup>.findContract(contractId: String): EggInc.LocalContract? = filter { backup ->
+    backup.contracts.contractsList.plus(backup.contracts.archiveList).any { contract ->
+        contract.contract.identifier == contractId
+    }
+}.maxBy { backup -> backup.approxTime }?.let { backup ->
+    backup.contracts.contractsList.plus(backup.contracts.archiveList).find { contract ->
+        contract.contract.identifier == contractId
+    }
+}
 
 // @formatter:off
 val EggInc.HabLevel.capacity: BigDecimal get() = when(this) {
