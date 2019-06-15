@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
@@ -23,11 +24,10 @@ object RollCall : Command() {
 
     init {
         name = "roll-call"
-        arguments = "<contract id> [force]"
+        arguments = "<contract id> [overwrite]"
         aliases = arrayOf("rc", "rollcall")
-        help = "Create a co-op roll call for the given contract id"
-        hidden = true
-        // category = ContractsCategory
+        help = "Create a co-op roll call for the specified contract id."
+        category = AdminCategory
         guildOnly = false
     }
 
@@ -65,7 +65,7 @@ object RollCall : Command() {
             it.identifier == event.arguments.first()
         }
 
-        val force: Boolean = event.arguments.getOrNull(1)?.startsWith("f") == true
+        val force: Boolean = event.arguments.getOrNull(1)?.equals("overwrite") == true
 
         if (contractInfo == null) "No active contract found with id `${event.arguments.first()}`".let {
             event.replyWarning(it)
@@ -85,7 +85,7 @@ object RollCall : Command() {
                     transaction {
                         Coops.deleteWhere { Coops.contract eq contractInfo.identifier }
                     }
-                } else "Co-ops are already generated for contract `${contractInfo.identifier}`. Add `force` to override.".let {
+                } else "Co-ops are already generated for contract `${contractInfo.identifier}`. Add `overwrite` to override.".let {
                     event.replyWarning(it)
                     log.debug { it }
                     return@transaction

@@ -7,6 +7,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.jda.commandClient
@@ -23,9 +24,8 @@ object CoopsInfo : Command() {
         name = "coops"
         aliases = arrayOf("coopsinfo", "coops-info", "co-ops", "co-ops-info")
         arguments = "<contract id>"
-        help = "Shows info on all co-ops for the chosen contract."
-        // category = ContractsCategory
-        hidden = true
+        help = "Shows info on all co-ops for the specified contract."
+        category = AdminCategory
         guildOnly = false
     }
 

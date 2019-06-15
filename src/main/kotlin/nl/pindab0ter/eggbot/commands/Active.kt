@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -13,7 +14,7 @@ object Active : Command() {
     init {
         name = "active"
         help = "Set yourself as active, taking part in co-ops again."
-        // category = ContractsCategory
+        category = FarmersCategory
         guildOnly = false
     }
 

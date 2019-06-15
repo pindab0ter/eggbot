@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 
@@ -18,7 +19,7 @@ object CoopInfo : Command() {
         aliases = arrayOf("coopinfo", "ci", "coop-info", "co-op", "co-op-info")
         arguments = "<contract id> <co-op id> [compact]"
         help = "Shows the progress of a specific co-op."
-        // category = ContractsCategory
+        category = ContractsCategory
         guildOnly = false
     }
 

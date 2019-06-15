@@ -7,6 +7,7 @@ import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -20,7 +21,7 @@ object EarningsBonus : Command() {
         aliases = arrayOf("eb", "earningsbonus", "earning-bonus", "earningbonus")
         help = "Shows your EB, EB rank and how much SE till your next rank"
         arguments = "[compact]"
-        // category = UsersCategory
+        category = FarmersCategory
         guildOnly = false
     }
 

@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.replyInDms
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -19,7 +20,7 @@ object LeaderBoard : Command() {
         aliases = arrayOf("lb", "leaderboard")
         help = "Shows the Earnings Bonus leader board"
         arguments = "[compact]"
-        // category = LeaderBoardsCategory
+        category = FarmersCategory
         guildOnly = false
     }
 

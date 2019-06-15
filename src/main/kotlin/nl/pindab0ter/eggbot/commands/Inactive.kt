@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.asMonthAndDay
+import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -16,9 +17,9 @@ object Inactive : Command() {
 
     init {
         name = "inactive"
-        help = "Set yourself as inactive (not participating in co-ops) for `[days]` days or check whether you're inactive."
+        help = "Set yourself as inactive (not having your EB count in co-op generation) for `[days]` days or check whether you're inactive."
         arguments = "[days]"
-        // category = ContractsCategory
+        category = FarmersCategory
         guildOnly = false
     }
 

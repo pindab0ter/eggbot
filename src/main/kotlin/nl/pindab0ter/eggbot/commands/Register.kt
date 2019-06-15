@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
@@ -19,7 +20,7 @@ object Register : Command() {
         name = "register"
         arguments = "<in-game id> <in-game name>"
         help = "Register on this server with your in-game name and in-game ID. **DM only!**"
-        // category = UsersCategory
+        category = FarmersCategory
         guildOnly = false
     }
 

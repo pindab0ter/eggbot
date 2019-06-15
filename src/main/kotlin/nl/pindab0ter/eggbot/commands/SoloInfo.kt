@@ -5,9 +5,10 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.simulation.ContractSimulation
+import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object SoloInfo : Command() {
@@ -19,7 +20,7 @@ object SoloInfo : Command() {
         aliases = arrayOf("soloinfo", "si", "solo-info")
         help = "Shows the progress of one of your own contracts."
         arguments = "<contract id> [compact]"
-        // category = ContractsCategory
+        category = ContractsCategory
         guildOnly = false
     }
 

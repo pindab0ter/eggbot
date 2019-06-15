@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
@@ -21,7 +22,7 @@ object WhoIs : Command() {
         aliases = arrayOf("who-is", "who", "whothefuckis")
         arguments = "<in-game name OR discord (nick)name>"
         help = "See which Discord user is registered with the given in-game name or vice versa."
-        // category = UsersCategory
+        category = FarmersCategory
         guildOnly = false
     }
 

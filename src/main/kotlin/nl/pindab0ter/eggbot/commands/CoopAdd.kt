@@ -3,13 +3,11 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.missingArguments
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
-import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -23,8 +21,7 @@ object CoopAdd : Command() {
         aliases = arrayOf("co-op-add", "ca")
         arguments = "<contract-id> <co-op id>"
         help = "Shows the progress of a specific co-op."
-        hidden = true
-        // category = ContractsCategory
+        category = AdminCategory
         guildOnly = false
     }
 
