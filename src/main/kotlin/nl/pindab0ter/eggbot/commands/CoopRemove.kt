@@ -30,19 +30,12 @@ object CoopRemove : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        // If the admin role is defined check whether the author has at least that role or is the guild owner
-        if (Config.adminRole != null && event.author.mutualGuilds.none { guild ->
-                guild.getMember(event.author).let { author ->
-                    author.isOwner || author.user.id == Config.ownerId || author.roles.any { memberRole ->
-                        guild.getRolesByName(Config.adminRole, true)
-                            .any { adminRole -> memberRole.position >= adminRole.position }
-                    }
-                }
-            }) "You must have at least a role called `${Config.adminRole}` to use that!".let {
-            event.replyError(it)
-            log.debug { it }
-            return
-        }
+        if (!hasPermission(event.author, Config.adminRole))
+            "You must have at least a role called `${Config.adminRole}` to use that!".let {
+                event.replyError(it)
+                log.debug { it }
+                return
+            }
 
         when {
             event.arguments.size < 2 -> missingArguments.let {

@@ -8,6 +8,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import net.dv8tion.jda.core.entities.ChannelType
+import net.dv8tion.jda.core.entities.User
 import nl.pindab0ter.eggbot.jda.commandClient
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -321,6 +322,17 @@ fun CommandEvent.replyInDms(messages: List<String>) {
             if (successful == null) replyWarning("Help cannot be sent because you are blocking Direct Messages.")
             successful = false
         })
+    }
+}
+
+
+fun Command.hasPermission(author: User, role: String?): Boolean = role != null && author.mutualGuilds.any { guild ->
+    guild.getMember(author).let { author ->
+        author.isOwner || author.user.id == Config.ownerId || author.roles.any { memberRole ->
+            guild.getRolesByName(role, true).any { guildRole ->
+                memberRole.position >= guildRole.position
+            }
+        }
     }
 }
 
