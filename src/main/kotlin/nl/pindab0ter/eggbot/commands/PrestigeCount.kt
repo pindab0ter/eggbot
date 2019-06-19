@@ -6,7 +6,6 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.formatIllions
-import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.missingArguments
 import nl.pindab0ter.eggbot.tooManyArguments
 import kotlin.math.E
@@ -63,9 +62,6 @@ object PrestigeCount : Command() {
             }
         ).toInt()
 
-        event.reply(StringBuilder().apply {
-            appendln("You’re in backup bug territory! ${commandClient.warning}")
-            appendln("You need **$requiredPrestiges prestiges** to be in the clear for `${soulEggs.formatIllions()} SE`.")
-        }.toString())
+        event.reply("You need **$requiredPrestiges prestiges** to be in the clear for `${soulEggs.formatIllions()} SE`.")
     }
 }
