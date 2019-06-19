@@ -40,7 +40,7 @@ object PrestigeCount : Command() {
             return
         }
 
-        val soulEggs = event.arguments.getOrNull(0)?.toDoubleOrNull()
+        val soulEggs = event.arguments.getOrNull(0)?.replace(Regex("""\D"""), "")?.toDoubleOrNull()
             ?: "Could not parse the first argument (`${event.arguments.getOrNull(0)}`) as a number.".let {
                 event.replyWarning(it)
                 log.debug { it }
