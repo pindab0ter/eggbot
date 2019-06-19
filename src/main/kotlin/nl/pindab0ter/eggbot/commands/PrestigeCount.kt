@@ -26,8 +26,6 @@ object PrestigeCount : Command() {
     }
 
     override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
         if (event.arguments.isEmpty()) missingArguments.let {
             event.replyWarning(it)
             log.debug { it }
