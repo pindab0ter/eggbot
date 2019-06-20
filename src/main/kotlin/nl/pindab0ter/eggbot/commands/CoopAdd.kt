@@ -20,7 +20,7 @@ object CoopAdd : Command() {
         name = "coop-add"
         aliases = arrayOf("co-op-add", "ca")
         arguments = "<contract-id> <co-op id>"
-        help = "Shows the progress of a specific co-op."
+        help = "Registers a co-op so it shows up in the co-ops info listing."
         category = AdminCategory
         guildOnly = false
     }
