@@ -19,8 +19,7 @@ import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 import java.math.BigDecimal
 import java.math.BigDecimal.*
-import java.math.MathContext.DECIMAL32
-import java.math.MathContext.UNLIMITED
+import java.math.MathContext.*
 import java.math.RoundingMode.FLOOR
 import java.math.RoundingMode.HALF_UP
 import java.text.DecimalFormat
@@ -287,6 +286,7 @@ operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * ot
 operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Long): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())
+operator fun BigDecimal.div(other: BigDecimal): BigDecimal = this.divide(other, DECIMAL128)
 
 // Taken from https://stackoverflow.com/a/13831245/3021748
 fun sqrt(value: BigDecimal, scale: Int = 32): BigDecimal {

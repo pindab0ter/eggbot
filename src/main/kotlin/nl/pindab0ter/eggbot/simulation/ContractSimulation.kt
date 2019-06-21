@@ -4,9 +4,9 @@ import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.joda.time.Duration.ZERO
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
+import java.math.BigDecimal.ZERO
 import java.math.MathContext.DECIMAL64
 import java.math.RoundingMode
 import java.util.*
@@ -59,7 +59,7 @@ class ContractSimulation constructor(
         override val timeToReached: Duration
             get() = timeToFinalGoal()
         override val isReached: Boolean
-            get() = timeRemaining <= ZERO
+            get() = timeRemaining <= Duration.ZERO
     }
 
     val shippingRateBottleNeck = object : BottleNeck() {
@@ -119,24 +119,20 @@ class ContractSimulation constructor(
     //
 
     fun timeTo(goal: BigDecimal): Duration =
-        (goal - eggsLaid).coerceAtLeast(BigDecimal.ZERO)
-            .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
+        (goal - eggsLaid).coerceAtLeast(ZERO).divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
 
     fun timeToFinalGoal(): Duration = timeTo(finalGoal)
 
-    val accelerationFactor: BigDecimal? by lazy {
-        if (population == BigDecimal.ZERO) null
-        else (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
-            .divide(population, DECIMAL64) - eggLayingRatePerSecond)
-            .divide(ONE, DECIMAL64)
-    }
+    // TODO: Take habitat and transport bottlenecks into account
+    fun projectedTimeTo(goal: BigDecimal): Duration? = if (population == ZERO) null else {
+        val accelerationFactor: BigDecimal =
+            (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond) / population - eggLayingRatePerSecond) / ONE
 
-    // TODO: Take bottlenecks into account
-    // TODO: Take Internal Hatchery Calm into account
-    fun projectedTimeTo(goal: BigDecimal): Duration? = accelerationFactor?.let { accelerationFactor ->
-        (eggLayingRatePerSecond.negate() + sqrt(
+        val duration: BigDecimal = (eggLayingRatePerSecond.negate() + sqrt(
             eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ONE)
-        )).divide(accelerationFactor, DECIMAL64).toLong().toDuration()
+        )) / accelerationFactor
+
+        duration.toLong().toDuration()
     }
 
     fun projectedTimeToFinalGoal(): Duration? = projectedTimeTo(finalGoal)
