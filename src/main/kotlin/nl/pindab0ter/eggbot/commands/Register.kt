@@ -54,7 +54,7 @@ object Register : Command() {
 
         transaction {
             val farmers = Farmer.all().toList()
-            val (backup, _) = AuxBrain.getFarmerBackup(registrant.inGameId.toUpperCase())
+            val (backup, _) = AuxBrain.getFarmerBackup(registrant.inGameId)
 
             // Check if the Discord user is already known, otherwise create a new user
             val discordUser: DiscordUser = DiscordUser.findById(registrant.discordId)
