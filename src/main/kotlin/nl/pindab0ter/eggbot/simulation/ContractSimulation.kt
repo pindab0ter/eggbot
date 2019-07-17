@@ -94,8 +94,7 @@ class ContractSimulation constructor(
     }
 
     val eggLayingRateAtFirstBottleNeck: BigDecimal by lazy {
-        (eggLayingRatePerSecond * (population + internalHatcheryRatePerSecond * firstBottleNeckReached.timeToReached.standardSeconds))
-            .divide(population, DECIMAL64)
+        (eggLayingRatePerSecond * (population + internalHatcheryRatePerSecond * firstBottleNeckReached.timeToReached.standardSeconds)) / population
     }
 
 

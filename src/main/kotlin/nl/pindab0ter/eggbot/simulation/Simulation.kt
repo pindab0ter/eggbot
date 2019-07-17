@@ -84,7 +84,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     val timeToFullHabs: Duration by lazy {
         if (internalHatcheriesAreActive) {
             val remainingCapacity = habsMaxCapacity - population
-            val secondsToFullHabs = remainingCapacity.divide(populationIncreaseRatePerSecond, DECIMAL64)
+            val secondsToFullHabs = remainingCapacity / populationIncreaseRatePerSecond
             secondsToFullHabs.toLong().toDuration()
         } else Duration(Long.MAX_VALUE)
     }
@@ -98,7 +98,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     }
 
     val internalHatcheryRatePerSecond: BigDecimal by lazy {
-        internalHatcheryRatePerMinute.divide(BigDecimal(60), DECIMAL64)
+        internalHatcheryRatePerMinute / BigDecimal(60)
     }
 
     val internalHatcheriesAreActive: Boolean by lazy {
@@ -116,7 +116,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     }
 
     val populationIncreaseRatePerSecond: BigDecimal by lazy {
-        populationIncreaseRatePerMinute.divide(BigDecimal(60), DECIMAL64)
+        populationIncreaseRatePerMinute / BigDecimal(60)
     }
 
     val populationIncreaseRatePerHour: BigDecimal by lazy {
@@ -137,7 +137,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     val eggsLaid by lazy { farm.eggsLaid.toBigDecimal() }
 
-    val eggLayingBaseRatePerChickenPerSecond: BigDecimal by lazy { ONE.divide(BigDecimal(30), DECIMAL64) }
+    val eggLayingBaseRatePerChickenPerSecond: BigDecimal by lazy { ONE / BigDecimal(30) }
 
     val eggLayingRatePerChickenPerSecond: BigDecimal by lazy { eggLayingBaseRatePerChickenPerSecond * eggLayingBonus }
 
