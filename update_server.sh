@@ -7,7 +7,6 @@ rsync \
     --compress \
     --progress \
     --human-readable \
-    --dry-run \
     -e ssh \
     ./bin \
     ./lib \
