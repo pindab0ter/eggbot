@@ -53,11 +53,11 @@ object CoopInfo : Command() {
             Messages.coopStatus(
                 CoopContractSimulation.Factory(status.contractIdentifier, status.coopIdentifier),
                 compact
-            ).let { message ->
+            ).let { messages ->
                 if (event.channel.id == Config.botCommandsChannel) {
-                    event.reply(message)
+                    messages.forEach { message -> event.reply(message) }
                 } else {
-                    event.replyInDm(message)
+                    event.replyInDms(messages)
                     if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
                 }
             }

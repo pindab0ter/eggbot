@@ -172,23 +172,27 @@ object Messages {
         }
     }.toString()
 
-    fun coopStatus(result: CoopContractSimulationResult, compact: Boolean = false): String = when (result) {
+    fun coopStatus(result: CoopContractSimulationResult, compact: Boolean = false): List<String> = when (result) {
         is CoopContractSimulationResult.InProgress -> coopInProgress(result.simulation, compact)
-        is CoopContractSimulationResult.NotFound -> """
-            No co-op found for contract `${result.contractId}` with name `${result.coopId}
-
-            Use """.trimIndent()
-        is CoopContractSimulationResult.Empty -> """
-            `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
-
-            This co-op has no members.""".trimIndent()
-        is CoopContractSimulationResult.Finished -> """
-            `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
-
-            This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent()
+        is CoopContractSimulationResult.NotFound -> listOf(
+            "No co-op found for contract `${result.contractId}` with name `${result.coopId}"
+        )
+        is CoopContractSimulationResult.Empty -> listOf(
+            """ `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
+                
+                This co-op has no members.""".trimIndent()
+        )
+        is CoopContractSimulationResult.Finished -> listOf(
+            """ `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
+                
+                This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent()
+        )
     }
 
-    private fun coopInProgress(simulation: CoopContractSimulation, compact: Boolean): String = StringBuilder().apply {
+    private fun coopInProgress(
+        simulation: CoopContractSimulation,
+        compact: Boolean
+    ): List<String> = StringBuilder().apply {
         val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
             EggBot.jdaClient.getEmoteById(id)?.asMention
         } ?: ""
@@ -348,6 +352,5 @@ object Messages {
             }
             appendln()
         }
-        appendln("```")
-    }.toString()
+    }.toString().splitMessage(prefix = "```", postfix = "```")
 }
