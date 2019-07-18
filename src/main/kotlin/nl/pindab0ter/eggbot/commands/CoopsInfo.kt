@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.jagrosh.jdautilities.menu.OrderedMenu
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -14,7 +13,6 @@ import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.util.concurrent.TimeUnit.MINUTES
 
 object CoopsInfo : Command() {
 
@@ -28,13 +26,6 @@ object CoopsInfo : Command() {
         category = AdminCategory
         guildOnly = false
     }
-
-    val builder = OrderedMenu.Builder()
-        .allowTextInput(true)
-        .useNumbers()
-        .setEventWaiter(EggBot.eventWaiter)
-        .useCancelButton(true)
-        .setTimeout(1, MINUTES)
 
     @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
