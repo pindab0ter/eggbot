@@ -197,6 +197,7 @@ object Messages {
         }
     }.toString()
 
+    // TODO: Display which bottlenecks will be reached when
     fun soloStatus(
         simulation: ContractSimulation,
         compact: Boolean = false
@@ -227,7 +228,7 @@ object Messages {
             appendln("**You have successfully finished this contract! ${Config.emojiSuccess}**")
         } else {
             append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):")
-            if (!compact) append("  _(Includes new chickens and assumes no bottlenecks)_")
+            if (!compact) append("  _(Includes new chickens and takes bottlenecks into account)_")
             append("```")
             appendln()
             simulation.goals
@@ -303,7 +304,7 @@ object Messages {
         //
 
         append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):")
-        if (!compact) append("  _(Includes new chickens and assumes no bottlenecks)_")
+        if (!compact) append("  _(Includes new chickens and takes bottlenecks into account)_")
         append("```")
         appendln()
         simulation.goals

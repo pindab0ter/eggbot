@@ -10,9 +10,7 @@ import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
-import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
-import java.math.MathContext.DECIMAL64
 import java.util.*
 
 class CoopContractSimulation private constructor(
@@ -65,16 +63,13 @@ class CoopContractSimulation private constructor(
     //
 
     val elapsedTime: Duration by lazy { Duration(localContract.timeAccepted.toDateTime(), DateTime.now()) }
-
     val timeRemaining: Duration by lazy { coopStatus.secondsRemaining.toDuration() }
-
     val goals: SortedMap<Int, BigDecimal> by lazy {
         localContract.contract.goalsList
             .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
             .toMap()
             .toSortedMap()
     }
-
     val finalGoal: BigDecimal by lazy { goals[goals.lastKey()]!! }
 
 
@@ -82,30 +77,30 @@ class CoopContractSimulation private constructor(
     //  Projection
     //
 
-    fun timeTo(goal: BigDecimal): Duration = (goal - eggsLaid).coerceAtLeast(ZERO)
-        .divide(eggLayingRatePerSecond, DECIMAL64).toLong().toDuration()
+    // TODO: Calculate time to multiple goals in one go
+    fun projectedTimeTo(goal: BigDecimal): Duration? = if (population == ZERO) null else {
+        var eggsLaid = eggsLaid
+        var duration = Duration.ZERO
 
-    fun timeToFinalGoal(): Duration = timeTo(finalGoal)
+        do {
+            farms.forEach { farm ->
+                eggsLaid += farm.currentEggLayingRatePerMinute
+                if (farm.population < farm.habsMaxCapacity) farm.population =
+                    (farm.population + populationIncreaseRatePerMinute).coerceAtMost(farm.habsMaxCapacity)
+            }
+            duration += Duration.standardSeconds(60)
+        } while (eggsLaid < goal)
 
-    val accelerationFactor: BigDecimal? by lazy {
-        if (population == ZERO) null
-        else (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
-            .divide(population, DECIMAL64) - eggLayingRatePerSecond)
-            .divide(ONE, DECIMAL64)
-            .coerceAtLeast(ONE)
-    }
-
-    // TODO: Take bottlenecks into account
-    // TODO: Take Internal Hatchery Calm into account
-    fun projectedTimeTo(goal: BigDecimal): Duration? = accelerationFactor?.let { accelerationFactor ->
-        (eggLayingRatePerSecond.negate() + sqrt(
-            eggLayingRatePerSecond.pow(2) + BigDecimal(2) * accelerationFactor * (goal - eggsLaid).coerceAtLeast(ONE)
-        )).divide(accelerationFactor, DECIMAL64).toLong().toDuration()
+        duration
     }
 
     fun projectedTimeToFinalGoal(): Duration? = projectedTimeTo(finalGoal)
 
     fun projectedToFinish(): Boolean = projectedTimeToFinalGoal()?.let { it < timeRemaining } == true
+
+    //
+    // Object Factory
+    //
 
     companion object Factory {
         operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
