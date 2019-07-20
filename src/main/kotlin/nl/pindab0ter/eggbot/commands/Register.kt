@@ -107,6 +107,7 @@ object Register : Command() {
                 this.prestiges = backup.stats.prestigeCount
                 this.droneTakedowns = backup.stats.droneTakedowns
                 this.eliteDroneTakedowns = backup.stats.droneTakedownsElite
+                this.hasBackupBug = false
                 this.lastUpdated = DateTime.now()
             }
 

@@ -34,6 +34,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var prestiges by Farmers.prestiges
     var droneTakedowns by Farmers.droneTakedowns
     var eliteDroneTakedowns by Farmers.eliteDroneTakedowns
+    var hasBackupBug by Farmers.hasBackupBug
     var lastUpdated by Farmers.lastUpdated
     var coops by Coop via CoopFarmers
 
@@ -89,14 +90,18 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     fun update(backup: EggInc.Backup) {
         if (!backup.hasData()) return
-        soulEggs = backup.data.soulEggs
-        prophecyEggs = backup.data.prophecyEggs
-        soulBonus = backup.data.soulBonus
-        prophecyBonus = backup.data.prophecyBonus
-        prestiges = backup.stats.prestigeCount
-        droneTakedowns = backup.stats.droneTakedowns
-        eliteDroneTakedowns = backup.stats.droneTakedownsElite
-        lastUpdated = backup.approxTime.toDateTime()
+        if (backup.data.soulEggs < soulEggs) hasBackupBug = true
+        else {
+            soulEggs = backup.data.soulEggs
+            prophecyEggs = backup.data.prophecyEggs
+            soulBonus = backup.data.soulBonus
+            prophecyBonus = backup.data.prophecyBonus
+            prestiges = backup.stats.prestigeCount
+            droneTakedowns = backup.stats.droneTakedowns
+            eliteDroneTakedowns = backup.stats.droneTakedownsElite
+            hasBackupBug = false
+            lastUpdated = backup.approxTime.toDateTime()
+        }
     }
 
     data class Role(
