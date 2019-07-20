@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import net.dv8tion.jda.core.entities.ChannelType
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -31,8 +32,8 @@ object CoopsInfo : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        if (!hasPermission(event.author, Config.adminRole))
-            "You must have at least a role called `${Config.adminRole}` to use that!".let {
+        if (!hasPermission(event.author, Config.adminRole) && event.channelType == ChannelType.PRIVATE)
+            "This command cannot be used in DMs. Please try again in a public channel.".let {
                 event.replyError(it)
                 log.debug { it }
                 return
