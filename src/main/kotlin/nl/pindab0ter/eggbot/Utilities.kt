@@ -17,16 +17,18 @@ import org.joda.time.PeriodType
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
-import java.math.BigDecimal
+import org.nevec.rjm.BigDecimalMath.*
 import java.math.BigDecimal.*
 import java.math.MathContext.DECIMAL128
 import java.math.MathContext.UNLIMITED
+import java.math.RoundingMode
 import java.math.RoundingMode.FLOOR
 import java.math.RoundingMode.HALF_UP
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.*
 import kotlin.math.roundToLong
+import java.math.BigDecimal as BD
 
 
 // Formatting
@@ -82,7 +84,6 @@ private val hoursMinutesAndSecondsFormatter = PeriodFormatterBuilder()
     .appendSuffix("s")
     .toFormatter()
 
-// TODO: Add compact option
 fun Period.asHoursMinutesAndSeconds(): String = hoursMinutesAndSecondsFormatter
     .withLocale(Locale.UK)
     .print(this.normalizedStandard(PeriodType.time()))
@@ -118,8 +119,8 @@ val integerFormat = DecimalFormat(",##0", DecimalFormatSymbols.getInstance(Local
 fun Int.formatInteger(): String = integerFormat.format(this)
 fun Long.formatDecimal(): String = decimalFormat.format(this)
 fun Long.formatInteger(): String = integerFormat.format(this)
-fun BigDecimal.formatDecimal(): String = decimalFormat.format(this.round(UNLIMITED))
-fun BigDecimal.formatInteger(): String = integerFormat.format(this)
+fun BD.formatDecimal(): String = decimalFormat.format(this.round(UNLIMITED))
+fun BD.formatInteger(): String = integerFormat.format(this)
 
 fun Double.formatIllions(rounded: Boolean = false): String {
     val f = if (rounded) integerFormat else decimalFormat
@@ -168,7 +169,7 @@ fun Double.formatIllions(rounded: Boolean = false): String {
     }
 }
 
-fun BigDecimal.formatIllions(rounded: Boolean = false): String {
+fun BD.formatIllions(rounded: Boolean = false): String {
     val f = if (rounded) integerFormat else decimalFormat
     return when (this) {
         in (TEN.pow(3)..TEN.pow(6) - ONE) -> f.format(this / TEN.pow(3)) + "k"
@@ -271,27 +272,27 @@ fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
 
 // Maths
 
-inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigDecimal): BigDecimal {
-    var sum: BigDecimal = ZERO
+inline fun <T> Iterable<T>.sumBy(selector: (T) -> BD): BD {
+    var sum: BD = ZERO
     for (element in this) {
         sum += selector(element)
     }
     return sum
 }
 
-fun Iterable<BigDecimal>.product(): BigDecimal = reduce { acc, bonus -> acc * bonus }
-fun Double.round(places: Int = 0) = BigDecimal(this).setScale(places, HALF_UP).toDouble()
-fun List<BigDecimal>.sum(): BigDecimal = this.reduce { acc, duration -> acc + duration }
+fun Iterable<BD>.product(): BD = reduce { acc, bonus -> acc * bonus }
+fun Double.round(places: Int = 0) = BD(this).setScale(places, HALF_UP).toDouble()
+fun List<BD>.sum(): BD = this.reduce { acc, duration -> acc + duration }
 fun List<Duration>.sum(): Duration = this.reduce { acc, duration -> acc + duration }
-operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * other
-operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBigDecimal())
-operator fun BigDecimal.times(other: Long): BigDecimal = this.multiply(other.toBigDecimal())
-operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())
-operator fun BigDecimal.div(other: BigDecimal): BigDecimal = this.divide(other, DECIMAL128)
+operator fun Int.times(other: BD): BD = this.toBigDecimal() * other
+operator fun BD.times(other: Int): BD = this.multiply(other.toBigDecimal())
+operator fun BD.times(other: Long): BD = this.multiply(other.toBigDecimal())
+operator fun BD.times(other: Duration): BD = this.multiply(other.standardSeconds.toBigDecimal())
+operator fun BD.div(other: BD): BD = this.divide(other, DECIMAL128)
 
 // Taken from https://stackoverflow.com/a/13831245/3021748
-fun sqrt(value: BigDecimal, scale: Int = 32): BigDecimal {
-    var sqrt = BigDecimal(1)
+fun sqrt(value: BD, scale: Int = 32): BD {
+    var sqrt = BD(1)
     sqrt.setScale(scale + 3, FLOOR)
     var store = value
     var first = true
@@ -301,7 +302,7 @@ fun sqrt(value: BigDecimal, scale: Int = 32): BigDecimal {
         sqrt = value
             .divide(store, scale + 3, FLOOR)
             .add(store)
-            .divide(BigDecimal(2), scale + 3, FLOOR)
+            .divide(BD(2), scale + 3, FLOOR)
     } while (store != sqrt)
     return sqrt.setScale(scale, FLOOR)
 }
@@ -342,18 +343,17 @@ fun Command.hasPermission(author: User, role: String?): Boolean = role != null &
 
 val EggInc.Game.soulBonus: Int get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
 val EggInc.Game.prophecyBonus: Int get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
-val EggInc.Simulation.habPopulation: List<BigDecimal> get() = habPopulationList.map { it.toBigDecimal() }
-val EggInc.Game.bonusPerSoulEgg: BigDecimal
+val EggInc.Simulation.habPopulation: List<BD> get() = habPopulationList.map { it.toBigDecimal() }
+val EggInc.Game.bonusPerSoulEgg: BD
     get() {
-        val soulEggBonus = BigDecimal(10 + soulBonus)
-        val prophecyEggBonus = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyBonus)
+        val soulEggBonus = BD(10 + soulBonus)
+        val prophecyEggBonus = BD(1.05) + BD(0.01) * BD(prophecyBonus)
         return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
     }
-val EggInc.Game.earningsBonus: BigDecimal get() = BigDecimal(soulEggs) * bonusPerSoulEgg
-val EggInc.Contract.finalGoal: BigDecimal get() = BigDecimal(goalsList.maxBy { it.targetAmount }!!.targetAmount)
-val EggInc.LocalContract.finalGoal: BigDecimal get() = contract.finalGoal
-val EggInc.LocalContract.finished: Boolean get() = BigDecimal(lastAmountWhenRewardGiven) > contract.finalGoal
-val EggInc.CoopStatusResponse.eggsLaid: BigDecimal get() = BigDecimal(totalAmount)
+val EggInc.Contract.finalGoal: BD get() = BD(goalsList.maxBy { it.targetAmount }!!.targetAmount)
+val EggInc.LocalContract.finalGoal: BD get() = contract.finalGoal
+val EggInc.LocalContract.finished: Boolean get() = BD(lastAmountWhenRewardGiven) > contract.finalGoal
+val EggInc.CoopStatusResponse.eggsLaid: BD get() = BD(totalAmount)
 fun List<EggInc.Backup>.findContract(contractId: String): EggInc.LocalContract? = filter { backup ->
     backup.contracts.contractsList.plus(backup.contracts.archiveList).any { contract ->
         contract.contract.identifier == contractId
@@ -365,44 +365,63 @@ fun List<EggInc.Backup>.findContract(contractId: String): EggInc.LocalContract? 
 }
 
 // @formatter:off
-val EggInc.HabLevel.capacity: BigDecimal get() = when(this) {
-    EggInc.HabLevel.NO_HAB ->                            ZERO
-    EggInc.HabLevel.COOP ->                   BigDecimal(250)
-    EggInc.HabLevel.SHACK ->                  BigDecimal(500)
-    EggInc.HabLevel.SUPER_SHACK ->           BigDecimal(1000)
-    EggInc.HabLevel.SHORT_HOUSE ->           BigDecimal(2000)
-    EggInc.HabLevel.THE_STANDARD ->          BigDecimal(5000)
-    EggInc.HabLevel.LONG_HOUSE ->           BigDecimal(10000)
-    EggInc.HabLevel.DOUBLE_DECKER ->        BigDecimal(20000)
-    EggInc.HabLevel.WAREHOUSE ->            BigDecimal(50000)
-    EggInc.HabLevel.CENTER ->              BigDecimal(100000)
-    EggInc.HabLevel.BUNKER ->              BigDecimal(200000)
-    EggInc.HabLevel.EGGKEA ->              BigDecimal(500000)
-    EggInc.HabLevel.HAB_1000 ->           BigDecimal(1000000)
-    EggInc.HabLevel.HANGAR ->             BigDecimal(2000000)
-    EggInc.HabLevel.TOWER ->              BigDecimal(5000000)
-    EggInc.HabLevel.HAB_10_000 ->        BigDecimal(10000000)
-    EggInc.HabLevel.EGGTOPIA ->          BigDecimal(25000000)
-    EggInc.HabLevel.MONOLITH ->          BigDecimal(50000000)
-    EggInc.HabLevel.PLANET_PORTAL ->    BigDecimal(100000000)
-    EggInc.HabLevel.CHICKEN_UNIVERSE -> BigDecimal(600000000)
-    EggInc.HabLevel.UNRECOGNIZED ->                      ZERO
+val EggInc.HabLevel.capacity: BD get() = when(this) {
+    EggInc.HabLevel.NO_HAB ->                      ZERO
+    EggInc.HabLevel.COOP ->                     BD(250)
+    EggInc.HabLevel.SHACK ->                    BD(500)
+    EggInc.HabLevel.SUPER_SHACK ->            BD(1_000)
+    EggInc.HabLevel.SHORT_HOUSE ->            BD(2_000)
+    EggInc.HabLevel.THE_STANDARD ->           BD(5_000)
+    EggInc.HabLevel.LONG_HOUSE ->            BD(10_000)
+    EggInc.HabLevel.DOUBLE_DECKER ->         BD(20_000)
+    EggInc.HabLevel.WAREHOUSE ->             BD(50_000)
+    EggInc.HabLevel.CENTER ->               BD(100_000)
+    EggInc.HabLevel.BUNKER ->               BD(200_000)
+    EggInc.HabLevel.EGGKEA ->               BD(500_000)
+    EggInc.HabLevel.HAB_1000 ->           BD(1_000_000)
+    EggInc.HabLevel.HANGAR ->             BD(2_000_000)
+    EggInc.HabLevel.TOWER ->              BD(5_000_000)
+    EggInc.HabLevel.HAB_10_000 ->        BD(10_000_000)
+    EggInc.HabLevel.EGGTOPIA ->          BD(25_000_000)
+    EggInc.HabLevel.MONOLITH ->          BD(50_000_000)
+    EggInc.HabLevel.PLANET_PORTAL ->    BD(100_000_000)
+    EggInc.HabLevel.CHICKEN_UNIVERSE -> BD(600_000_000)
+    EggInc.HabLevel.UNRECOGNIZED ->                ZERO
 }
 
-val EggInc.VehicleType.capacity: BigDecimal get() = when (this) {
-    EggInc.VehicleType.UNRECOGNIZED -> BigDecimal.ZERO
-    EggInc.VehicleType.TRIKE -> BigDecimal(5000)
-    EggInc.VehicleType.TRANSIT -> BigDecimal(15000)
-    EggInc.VehicleType.PICKUP -> BigDecimal(50000)
-    EggInc.VehicleType.VEHICLE_10_FOOT -> BigDecimal(100000)
-    EggInc.VehicleType.VEHICLE_24_FOOT -> BigDecimal(250000)
-    EggInc.VehicleType.SEMI -> BigDecimal(500000)
-    EggInc.VehicleType.DOUBLE_SEMI -> BigDecimal(1000000)
-    EggInc.VehicleType.FUTURE_SEMI -> BigDecimal(5000000)
-    EggInc.VehicleType.MEGA_SEMI -> BigDecimal(15000000)
-    EggInc.VehicleType.HOVER_SEMI -> BigDecimal(30000000)
-    EggInc.VehicleType.QUANTUM_TRANSPORTER -> BigDecimal(50000000)
-    EggInc.VehicleType.HYPERLOOP_TRAIN -> BigDecimal(50000000)
+val EggInc.VehicleType.capacity: BD get() = when (this) {
+    EggInc.VehicleType.UNRECOGNIZED ->                  ZERO
+    EggInc.VehicleType.TRIKE ->                    BD(5_000)
+    EggInc.VehicleType.TRANSIT ->                 BD(15_000)
+    EggInc.VehicleType.PICKUP ->                  BD(50_000)
+    EggInc.VehicleType.VEHICLE_10_FOOT ->        BD(100_000)
+    EggInc.VehicleType.VEHICLE_24_FOOT ->        BD(250_000)
+    EggInc.VehicleType.SEMI ->                   BD(500_000)
+    EggInc.VehicleType.DOUBLE_SEMI ->          BD(1_000_000)
+    EggInc.VehicleType.FUTURE_SEMI ->          BD(5_000_000)
+    EggInc.VehicleType.MEGA_SEMI ->           BD(15_000_000)
+    EggInc.VehicleType.HOVER_SEMI ->          BD(30_000_000)
+    EggInc.VehicleType.QUANTUM_TRANSPORTER -> BD(50_000_000)
+    EggInc.VehicleType.HYPERLOOP_TRAIN ->     BD(50_000_000)
+}
+
+fun calculatePrestigesFor(soulEggs: Double): Int = calculatePrestigesFor(BD(soulEggs))
+fun calculatePrestigesFor(soulEggs: BD): Int = when {
+    soulEggs < BD(    400_000_000_000L) ->     (soulEggs / BD(4)  - BD(40_000_000_000L)) / BD(4_138_552_198L)
+    soulEggs < BD(  2_300_000_000_000L) -> log((soulEggs / BD(4)) / BD(27_000_000_000L)) / BD(0.0877)
+    soulEggs < BD(  8_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(13_000_000_000L)) / BD(0.0760)
+    soulEggs < BD(100_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(14_600_000_000L)) / BD(0.0744)
+    soulEggs < BD(930_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(19_000_000_000L)) / BD(0.0716)
+    else -> (soulEggs / BD(4) - BD(40_000_000_000L)) / BD(1_758_889_813_535L)
+}.setScale(0, RoundingMode.CEILING).intValueExact()
+
+fun calculateSoulEggsFor(prestiges: Int): BD = 4 * when {
+    prestiges < 15  -> BD(40_000_000_000L) + BD(4_138_552_198L) * prestiges
+    prestiges < 50  -> BD(27_000_000_000L) * pow(exp(DECIMAL128), BD(0.0877) * prestiges)
+    prestiges < 70  -> BD(13_000_000_000L) * pow(exp(DECIMAL128), BD(0.0760) * prestiges)
+    prestiges < 100 -> BD(14_600_000_000L) * pow(exp(DECIMAL128), BD(0.0744) * prestiges)
+    prestiges < 132 -> BD(19_000_000_000L) * pow(exp(DECIMAL128), BD(0.0716) * prestiges)
+    else            -> BD(40_000_000_000L) + BD(1_758_889_813_535L) * prestiges
 }
 // @formatter:on
 
@@ -412,11 +431,6 @@ val EggInc.VehicleType.capacity: BigDecimal get() = when (this) {
 val Command.missingArguments get() = "Missing argument(s). Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
 val Command.tooManyArguments get() = "Too many arguments. Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
 
-// Joda Time
-
-// TODO: Update when available as language feature
-// val Duration.Companion.INFINITE get() = Duration(Long.MAX_VALUE)
-val Duration.INFINITE get() = Duration(Long.MAX_VALUE)
 
 // Coroutines
 

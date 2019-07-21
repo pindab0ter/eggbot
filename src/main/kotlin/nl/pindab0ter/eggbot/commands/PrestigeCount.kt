@@ -3,14 +3,9 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.arguments
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
-import nl.pindab0ter.eggbot.formatIllions
-import nl.pindab0ter.eggbot.missingArguments
-import nl.pindab0ter.eggbot.tooManyArguments
-import kotlin.math.E
-import kotlin.math.ceil
-import kotlin.math.log
+import java.math.BigDecimal
 
 object PrestigeCount : Command() {
 
@@ -52,13 +47,7 @@ object PrestigeCount : Command() {
                 return
             }
 
-        val requiredPrestiges = ceil(
-            when {
-                soulEggs < 100000000000000 -> log((soulEggs / 4) / 14600000000, E) / 0.0744
-                soulEggs < 930000000000000 -> log((soulEggs / 4) / 19000000000, E) / 0.0716
-                else -> (soulEggs / 4 - 40000000000) / 1758889813535
-            }
-        ).toInt()
+        val requiredPrestiges = calculatePrestigesFor(soulEggs)
 
         event.reply("You need **$requiredPrestiges prestiges** to be in the clear for `${soulEggs.formatIllions()} SE`.")
     }
