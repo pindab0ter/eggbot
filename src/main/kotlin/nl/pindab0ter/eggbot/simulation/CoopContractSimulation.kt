@@ -7,7 +7,6 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
-import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
@@ -48,21 +47,15 @@ class CoopContractSimulation private constructor(
     //
 
     val eggsLaid: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaid } }
-    val eggLayingRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerSecond } }
     val population: BigDecimal by lazy { farms.sumBy { farm -> farm.population } }
-    val populationIncreaseRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerSecond } }
     val populationIncreaseRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerMinute } }
     val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerHour } }
-    val eggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerMinute } }
-    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerHour } }
-    val currentEggLayingRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerSecond } }
-    val currentEggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerMinute } }
+    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerMinute } }
 
     //
     // Contract details
     //
 
-    val elapsedTime: Duration by lazy { Duration(localContract.timeAccepted.toDateTime(), DateTime.now()) }
     val timeRemaining: Duration by lazy { coopStatus.secondsRemaining.toDuration() }
     val goals: SortedMap<Int, BigDecimal> by lazy {
         localContract.contract.goalsList

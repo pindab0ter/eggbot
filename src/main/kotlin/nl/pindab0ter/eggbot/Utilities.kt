@@ -299,22 +299,6 @@ operator fun BD.times(other: Long): BD = this.multiply(other.toBigDecimal())
 operator fun BD.times(other: Duration): BD = this.multiply(other.standardSeconds.toBigDecimal())
 operator fun BD.div(other: BD): BD = this.divide(other, DECIMAL128)
 
-// Taken from https://stackoverflow.com/a/13831245/3021748
-fun sqrt(value: BD, scale: Int = 32): BD {
-    var sqrt = BD(1)
-    sqrt.setScale(scale + 3, FLOOR)
-    var store = value
-    var first = true
-    do {
-        if (!first) store = sqrt else first = false
-        store.setScale(scale + 3, FLOOR)
-        sqrt = value
-            .divide(store, scale + 3, FLOOR)
-            .add(store)
-            .divide(BD(2), scale + 3, FLOOR)
-    } while (store != sqrt)
-    return sqrt.setScale(scale, FLOOR)
-}
 
 // Exceptions
 
