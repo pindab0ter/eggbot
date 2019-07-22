@@ -62,54 +62,107 @@ object Messages {
 
 
     fun earningsBonus(farmer: Farmer, compact: Boolean = false): String = StringBuilder().apply {
-        val earningsBonus = farmer.earningsBonus.let { (if (compact) it.formatIllions() else it.formatInteger()) }
-        val soulEggs = BigDecimal(farmer.soulEggs).let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val role = farmer.role?.name ?: "Unknown"
+        val earningsBonus = farmer.earningsBonus
+            .let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val soulEggs = BigDecimal(farmer.soulEggs)
+            .let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val prophecyEggs = farmer.prophecyEggs.formatInteger()
         val soulBonus = "${farmer.soulBonus.formatInteger()}/140"
         val prophecyBonus = "${farmer.prophecyBonus.formatInteger()}/5"
-        val soulEggsToNext =
-            farmer.nextRole
-                ?.lowerBound
-                ?.minus(farmer.earningsBonus)
-                ?.divide(farmer.bonusPerSoulEgg, HALF_UP)
-                ?.let { (if (compact) it.formatIllions() else it.formatInteger()) }
-                ?.let { "+ $it" } ?: "Unknown"
-        val role = farmer.role?.name ?: "Unknown"
-        val strings = listOf(
-            earningsBonus, soulEggs, soulEggsToNext, role
+        val prestiges = farmer.prestiges.formatInteger()
+        val soulEggsToNext = farmer.nextRole
+            ?.lowerBound
+            ?.minus(farmer.earningsBonus)
+            ?.divide(farmer.bonusPerSoulEgg, HALF_UP)
+            ?.let { (if (compact) it.formatIllions() else it.formatInteger()) }
+            ?.let { "+ $it" } ?: "Unknown"
+        val threshold = "~ ${calculateSoulEggsFor(farmer.prestiges)
+            .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
+        val soulEggsToThreshold = "⨦ ${(calculateSoulEggsFor(farmer.prestiges) - BigDecimal(farmer.soulEggs))
+            .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
+        val regularStrings = listOf(
+            earningsBonus,
+            soulEggs,
+            soulEggsToNext,
+            soulBonus,
+            prophecyBonus,
+            prophecyEggs,
+            prestiges,
+            role,
+            threshold,
+            soulEggsToThreshold
+        )
+        val backupBugStrings = listOf(
+            soulEggs, prestiges, threshold
         )
 
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
-        append("Role:            ")
-        append(" ".repeat(strings.maxBy { it.length }?.length?.minus(role.length) ?: 0))
-        appendln(farmer.role?.name ?: "Unknown")
-        append("Earnings bonus:  ")
-        appendPaddingCharacters(earningsBonus, strings)
-        appendln("$earningsBonus %")
-        append("Soul Eggs:       ")
-        appendPaddingCharacters(soulEggs, strings)
-        appendln("$soulEggs SE")
 
-        if (farmer.soulBonus < 140) {
-            append("Soul Food:       ")
-            appendPaddingCharacters(soulBonus, strings)
-            appendln(soulBonus)
+        if (!farmer.hasBackupBug) {
+            // TODO: Use less space if role is longest in compact mode
+            // label pad + value pad - length of smallest pad
+            append("Role:                ")
+            appendPaddingCharacters(role, regularStrings)
+            appendln(role)
+            append("Earnings bonus:      ")
+            appendPaddingCharacters(earningsBonus, regularStrings)
+            appendln("$earningsBonus %")
+            append("Soul Eggs:           ")
+            appendPaddingCharacters(soulEggs, regularStrings)
+            appendln("$soulEggs SE")
+
+            if (farmer.soulBonus < 140) {
+                append("Soul Food:           ")
+                appendPaddingCharacters(soulBonus, regularStrings)
+                appendln(soulBonus)
+            }
+
+            append("Prophecy Eggs:       ")
+            appendPaddingCharacters(prophecyEggs, regularStrings)
+            appendln("$prophecyEggs PE")
+
+            if (farmer.prophecyBonus < 5) {
+                append("Prophecy Bonus:      ")
+                appendPaddingCharacters(prophecyBonus, regularStrings)
+                appendln(prophecyBonus)
+            }
+
+            append("SE to next rank:     ")
+            appendPaddingCharacters(soulEggsToNext, regularStrings)
+            appendln("$soulEggsToNext SE")
+            appendln()
+
+            append("Current prestiges:   ")
+            appendPaddingCharacters(prestiges, regularStrings)
+            appendln(prestiges)
+
+            append("Bug threshold:       ")
+            appendPaddingCharacters(threshold, regularStrings)
+            appendln("$threshold SE")
+
+            append("SE till bug:         ")
+            appendPaddingCharacters(soulEggsToThreshold, regularStrings)
+            appendln("$soulEggsToThreshold SE")
+        } else {
+            appendln(" ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+            appendln(" ┃ ‼︎ Backup bug detected ‼︎ ┃")
+            appendln(" ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛")
+            appendln()
+
+            append("Last known Soul Eggs: ")
+            appendPaddingCharacters(soulEggs, backupBugStrings)
+            appendln("$soulEggs SE")
+
+            append("Current prestiges:    ")
+            appendPaddingCharacters(prestiges, backupBugStrings)
+            appendln(prestiges)
+
+            append("Bug threshold:        ")
+            appendPaddingCharacters(threshold, backupBugStrings)
+            appendln("$threshold SE")
         }
-
-        append("Prophecy Eggs:   ")
-        appendPaddingCharacters(prophecyEggs, strings)
-        appendln("$prophecyEggs PE")
-
-        if (farmer.prophecyBonus < 5) {
-            append("Prophecy Bonus:  ")
-            appendPaddingCharacters(prophecyBonus, strings)
-            appendln(prophecyBonus)
-        }
-
-        append("SE to next rank: ")
-        appendPaddingCharacters(soulEggsToNext, strings)
-        append("$soulEggsToNext SE")
-        append("```")
+        appendln("```")
     }.toString()
 
     fun soloStatus(

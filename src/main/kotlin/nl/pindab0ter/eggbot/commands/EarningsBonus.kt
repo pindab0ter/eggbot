@@ -28,9 +28,11 @@ object EarningsBonus : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        // TODO: If called with arguments, calculate scenario
+        // TODO: If called with arguments, whether you'd hit backup bug or how many prestiges you need to get out
 
-        val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList() }
+        val farmers = transaction {
+            DiscordUser.findById(event.author.id)?.farmers?.toList()?.sortedBy { it.inGameName }
+        }
 
         @Suppress("FoldInitializerAndIfToElvis")
         if (farmers.isNullOrEmpty()) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {

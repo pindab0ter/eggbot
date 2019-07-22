@@ -90,13 +90,13 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     fun update(backup: EggInc.Backup) {
         if (!backup.hasData()) return
+        prestiges = backup.stats.prestigeCount
         if (backup.data.soulEggs < soulEggs) hasBackupBug = true
         else {
             soulEggs = backup.data.soulEggs
             prophecyEggs = backup.data.prophecyEggs
             soulBonus = backup.data.soulBonus
             prophecyBonus = backup.data.prophecyBonus
-            prestiges = backup.stats.prestigeCount
             droneTakedowns = backup.stats.droneTakedowns
             eliteDroneTakedowns = backup.stats.droneTakedownsElite
             hasBackupBug = false
