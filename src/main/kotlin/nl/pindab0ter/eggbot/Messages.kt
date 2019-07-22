@@ -68,18 +68,28 @@ object Messages {
         target: BigDecimal? = null,
         compact: Boolean = false
     ): String = StringBuilder().apply {
+        data class Line(
+            val label: String,
+            val value: String,
+            var padding: String = "",
+            val suffix: String? = null
+        )
+
         val roleLabel = "Role:  "
         val role = farmer.role?.name ?: "Unknown"
         val earningsBonusLabel = "Earnings bonus:  "
         val earningsBonusBuggedLabel = "Last known EB:  "
         val earningsBonus = farmer.earningsBonus
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val earningsBonusSuffix = " %"
         val soulEggsLabel = "Soul Eggs:  "
         val soulEggsBuggedLabel = "Last known SE count:  "
         val soulEggs = BigDecimal(farmer.soulEggs)
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val soulEggsSuffix = " SE"
         val prophecyEggsLabel = "Prophecy Eggs:  "
         val prophecyEggs = farmer.prophecyEggs.formatInteger()
+        val prophecyEggsSuffix = " PE"
         val soulBonusLabel = "Soul Food:  "
         val soulBonus = "${farmer.soulBonus.formatInteger()}/140"
         val prophecyBonusLabel = "Prophecy Bonus:  "
@@ -93,6 +103,7 @@ object Messages {
             ?.let { "+ $it" } ?: "Unknown"
         val prestigesLabel = "Current prestiges:  "
         val prestiges = farmer.prestiges.formatInteger()
+        val prestigesSuffix = " \uD83E\uDD68"
         val thresholdLabel = "Bug threshold:  "
         val threshold = "~ ${calculateSoulEggsFor(farmer.prestiges)
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
@@ -106,18 +117,18 @@ object Messages {
 
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
 
-        val labelsToValues: List<Pair<String, String>> = when {
+        val labelsToValues: List<Line> = when {
             // Backup bug entries
             farmer.hasBackupBug -> {
                 listOf(
-                    earningsBonusBuggedLabel to earningsBonus,
-                    soulEggsBuggedLabel to soulEggs,
-                    prestigesLabel to prestiges,
-                    thresholdLabel to threshold
+                    Line(earningsBonusBuggedLabel, earningsBonus, suffix = earningsBonusSuffix),
+                    Line(soulEggsBuggedLabel, soulEggs, suffix = soulEggsSuffix),
+                    Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
+                    Line(thresholdLabel, threshold, suffix = soulEggsSuffix)
                 ).run {
                     if (target != null) {
-                        this.plus(yourTargetLabel to yourTarget!!)
-                            .plus(requiredPrestigesLabel to requiredPrestiges!!)
+                        this.plus(Line(yourTargetLabel, yourTarget!!, suffix = soulEggsSuffix))
+                            .plus(Line(requiredPrestigesLabel, requiredPrestiges!!, suffix = prestigesSuffix))
                     } else this
                 }
             }
@@ -125,35 +136,35 @@ object Messages {
             // Non-backup bug entries
             else -> {
                 listOf(
-                    roleLabel to role,
-                    earningsBonusLabel to earningsBonus,
-                    soulEggsLabel to soulEggs,
-                    prophecyEggsLabel to prophecyEggs
+                    Line(roleLabel, role),
+                    Line(earningsBonusLabel, earningsBonus, suffix = earningsBonusSuffix),
+                    Line(soulEggsLabel, soulEggs, suffix = soulEggsSuffix),
+                    Line(prophecyEggsLabel, prophecyEggs, suffix = prophecyEggsSuffix)
                 ).run {
-                    if (farmer.soulBonus < 140) this.plus(soulBonusLabel to soulBonus)
+                    if (farmer.soulBonus < 140) this.plus(Line(soulBonusLabel, soulBonus))
                     else this
                 }.run {
-                    if (farmer.prophecyBonus < 5) this.plus(prophecyBonusLabel to prophecyBonus)
+                    if (farmer.prophecyBonus < 5) this.plus(Line(prophecyBonusLabel, prophecyBonus))
                     else this
                 }.plus(
                     listOf(
-                        soulEggsToNextLabel to soulEggsToNext,
-                        prestigesLabel to prestiges,
-                        thresholdLabel to threshold,
-                        soulEggsToThresholdLabel to soulEggsToThreshold
+                        Line(soulEggsToNextLabel, soulEggsToNext, suffix = soulEggsSuffix),
+                        Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
+                        Line(thresholdLabel, threshold, suffix = soulEggsSuffix),
+                        Line(soulEggsToThresholdLabel, soulEggsToThreshold, suffix = soulEggsSuffix)
                     )
                 )
             }
         }
 
-        val lines = labelsToValues.map { (label, value) ->
-            val padding = paddingCharacters(label, labelsToValues.map { it.first }) +
-                    paddingCharacters(value, labelsToValues.map { it.second })
-            Triple(label, value, padding)
+        val lines = labelsToValues.map { (label, value, _, suffix) ->
+            val padding = paddingCharacters(label, labelsToValues.map { it.label }) +
+                    paddingCharacters(value, labelsToValues.map { it.value })
+            Line(label, value, padding, suffix)
         }.let { lines ->
-            val shortestPadding = lines.map { it.third }.minBy { it.length }?.length ?: 0
-            lines.map { (label, value, padding) ->
-                Triple(label, value, padding.drop(shortestPadding))
+            val shortestPadding = lines.map { it.padding }.minBy { it.length }?.length ?: 0
+            lines.map { (label, value, padding, suffix) ->
+                Line(label, value, padding.drop(shortestPadding), suffix)
             }
         }
 
@@ -169,9 +180,9 @@ object Messages {
             appendln()
         }
 
-        lines.forEach { (label, value, padding) ->
+        lines.forEach { (label, value, padding, suffix) ->
             if (label == prestigesLabel) appendln()
-            appendln(label + padding + value)
+            appendln(label + padding + value + (suffix ?: ""))
         }
 
         appendln("```")
