@@ -119,42 +119,38 @@ object Messages {
 
         val labelsToValues: List<Line> = when {
             // Backup bug entries
-            farmer.hasBackupBug -> {
-                listOf(
-                    Line(earningsBonusBuggedLabel, earningsBonus, suffix = earningsBonusSuffix),
-                    Line(soulEggsBuggedLabel, soulEggs, suffix = soulEggsSuffix),
-                    Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
-                    Line(thresholdLabel, threshold, suffix = soulEggsSuffix)
-                ).run {
-                    if (target != null) {
-                        this.plus(Line(yourTargetLabel, yourTarget!!, suffix = soulEggsSuffix))
-                            .plus(Line(requiredPrestigesLabel, requiredPrestiges!!, suffix = prestigesSuffix))
-                    } else this
-                }
+            farmer.hasBackupBug -> listOf(
+                Line(earningsBonusBuggedLabel, earningsBonus, suffix = earningsBonusSuffix),
+                Line(soulEggsBuggedLabel, soulEggs, suffix = soulEggsSuffix),
+                Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
+                Line(thresholdLabel, threshold, suffix = soulEggsSuffix)
+            ).run {
+                if (target != null) {
+                    this.plus(Line(yourTargetLabel, yourTarget!!, suffix = soulEggsSuffix))
+                        .plus(Line(requiredPrestigesLabel, requiredPrestiges!!, suffix = prestigesSuffix))
+                } else this
             }
 
             // Non-backup bug entries
-            else -> {
+            else -> listOf(
+                Line(roleLabel, role),
+                Line(earningsBonusLabel, earningsBonus, suffix = earningsBonusSuffix),
+                Line(soulEggsLabel, soulEggs, suffix = soulEggsSuffix),
+                Line(prophecyEggsLabel, prophecyEggs, suffix = prophecyEggsSuffix)
+            ).run {
+                if (farmer.soulBonus < 140) this.plus(Line(soulBonusLabel, soulBonus))
+                else this
+            }.run {
+                if (farmer.prophecyBonus < 5) this.plus(Line(prophecyBonusLabel, prophecyBonus))
+                else this
+            }.plus(
                 listOf(
-                    Line(roleLabel, role),
-                    Line(earningsBonusLabel, earningsBonus, suffix = earningsBonusSuffix),
-                    Line(soulEggsLabel, soulEggs, suffix = soulEggsSuffix),
-                    Line(prophecyEggsLabel, prophecyEggs, suffix = prophecyEggsSuffix)
-                ).run {
-                    if (farmer.soulBonus < 140) this.plus(Line(soulBonusLabel, soulBonus))
-                    else this
-                }.run {
-                    if (farmer.prophecyBonus < 5) this.plus(Line(prophecyBonusLabel, prophecyBonus))
-                    else this
-                }.plus(
-                    listOf(
-                        Line(soulEggsToNextLabel, soulEggsToNext, suffix = soulEggsSuffix),
-                        Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
-                        Line(thresholdLabel, threshold, suffix = soulEggsSuffix),
-                        Line(soulEggsToThresholdLabel, soulEggsToThreshold, suffix = soulEggsSuffix)
-                    )
+                    Line(soulEggsToNextLabel, soulEggsToNext, suffix = soulEggsSuffix),
+                    Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
+                    Line(thresholdLabel, threshold, suffix = soulEggsSuffix),
+                    Line(soulEggsToThresholdLabel, soulEggsToThreshold, suffix = soulEggsSuffix)
                 )
-            }
+            )
         }
 
         val lines = labelsToValues.map { (label, value, _, suffix) ->
