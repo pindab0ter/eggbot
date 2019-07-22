@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot
 
+import nl.pindab0ter.eggbot.commands.EarningsBonus
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
@@ -61,7 +63,11 @@ object Messages {
     )
 
 
-    fun earningsBonus(farmer: Farmer, compact: Boolean = false): String = StringBuilder().apply {
+    fun earningsBonus(
+        farmer: Farmer,
+        target: BigDecimal? = null,
+        compact: Boolean = false
+    ): String = StringBuilder().apply {
         val roleLabel = "Role:  "
         val role = farmer.role?.name ?: "Unknown"
         val earningsBonusLabel = "Earnings bonus:  "
@@ -91,25 +97,52 @@ object Messages {
         val soulEggsToThresholdLabel = "SE till bug:  "
         val soulEggsToThreshold = "⨦ ${(calculateSoulEggsFor(farmer.prestiges) - BigDecimal(farmer.soulEggs))
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
+        val yourTargetLabel = "Your target:  "
+        val yourTarget = target?.let { if (compact) it.formatIllions() else it.formatInteger() }
+        val requiredPrestigesLabel = "Prestiges required:  "
+        val requiredPrestiges = target?.let { "${calculatePrestigesFor(it) - farmer.prestiges}" }
 
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
 
-        val labelsToValues = if (farmer.hasBackupBug) listOf(
-            soulEggsLabel to soulEggs,
-            prestigesLabel to prestiges,
-            thresholdLabel to threshold
-        ) else listOf(
-            roleLabel to role,
-            earningsBonusLabel to earningsBonus,
-            soulEggsLabel to soulEggs,
-            prophecyEggsLabel to prophecyEggs,
-            soulBonusLabel to soulBonus,
-            prophecyBonusLabel to prophecyBonus,
-            soulEggsToNextLabel to soulEggsToNext,
-            prestigesLabel to prestiges,
-            thresholdLabel to threshold,
-            soulEggsToThresholdLabel to soulEggsToThreshold
-        )
+        val labelsToValues: List<Pair<String, String>> = when {
+            // Backup bug entries
+            farmer.hasBackupBug -> {
+                listOf(
+                    soulEggsLabel to soulEggs,
+                    prestigesLabel to prestiges,
+                    thresholdLabel to threshold
+                ).run {
+                    if (target != null) {
+                        this.plus(yourTargetLabel to yourTarget!!)
+                            .plus(requiredPrestigesLabel to requiredPrestiges!!)
+                    } else this
+                }
+            }
+
+            // Non-backup bug entries
+            else -> {
+                listOf(
+                    roleLabel to role,
+                    earningsBonusLabel to earningsBonus,
+                    soulEggsLabel to soulEggs,
+                    prophecyEggsLabel to prophecyEggs
+                ).run {
+                    if (farmer.soulBonus < 140) this.plus(soulBonusLabel to soulBonus)
+                    else this
+                }.run {
+                    if (farmer.prophecyBonus < 5) this.plus(prophecyBonusLabel to prophecyBonus)
+                    else this
+                }.plus(
+                    listOf(
+                        soulEggsToNextLabel to soulEggsToNext,
+                        prestigesLabel to prestiges,
+                        thresholdLabel to threshold,
+                        soulEggsToThresholdLabel to soulEggsToThreshold
+                    )
+                )
+            }
+        }
+
         val lines = labelsToValues.map { (label, value) ->
             val padding = paddingCharacters(label, labelsToValues.map { it.first }) +
                     paddingCharacters(value, labelsToValues.map { it.second })
@@ -139,6 +172,13 @@ object Messages {
         }
 
         appendln("```")
+
+        if (farmer.hasBackupBug) {
+            append("To see how many prestiges you need to ")
+            if (compact) appendln()
+            appendln("get out of the backup bug, add your target:")
+            appendln("`${commandClient.textualPrefix}${EarningsBonus.name} ${EarningsBonus.arguments}`")
+        }
     }.toString()
 
     fun soloStatus(

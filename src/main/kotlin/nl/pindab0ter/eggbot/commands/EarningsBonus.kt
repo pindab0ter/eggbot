@@ -10,7 +10,10 @@ import nl.pindab0ter.eggbot.arguments
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.math.BigDecimal
+import java.text.DecimalFormat
 
 object EarningsBonus : Command() {
 
@@ -19,16 +22,14 @@ object EarningsBonus : Command() {
     init {
         name = "earnings-bonus"
         aliases = arrayOf("eb", "earningsbonus", "earning-bonus", "earningbonus")
-        help = "Shows your EB, EB rank and how much SE till your next rank"
-        arguments = "[compact]"
+        help = "Shows your EB, EB rank and how much SE till your next rank or how much to get out of backup bug territory"
+        arguments = "[target SE] [compact]"
         category = FarmersCategory
         guildOnly = false
     }
 
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
-
-        // TODO: If called with arguments, whether you'd hit backup bug or how many prestiges you need to get out
 
         val farmers = transaction {
             DiscordUser.findById(event.author.id)?.farmers?.toList()?.sortedBy { it.inGameName }
@@ -41,6 +42,21 @@ object EarningsBonus : Command() {
             return
         }
 
+        if (event.arguments.size > 2) tooManyArguments.let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
+        }
+
+        val compact = event.arguments.any { it.startsWith("c") }
+        val target: BigDecimal? = try {
+            DecimalFormat().apply {
+                isParseBigDecimal = true
+            }.parse(event.arguments.firstOrNull()) as BigDecimal
+        } catch (exception: Exception) {
+            null
+        }
+
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
                 if (backup == null) "Could not get information on ${farmer.inGameName}".let {
@@ -51,7 +67,7 @@ object EarningsBonus : Command() {
 
                 transaction { farmer.update(backup) }
 
-                Messages.earningsBonus(farmer, event.arguments.isNotEmpty()).let {
+                Messages.earningsBonus(farmer, target, compact).let {
                     if (event.channel.id == Config.botCommandsChannel) {
                         event.reply(it)
                     } else event.replyInDm(it) {
