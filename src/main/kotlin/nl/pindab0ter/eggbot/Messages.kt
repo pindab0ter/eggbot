@@ -62,106 +62,77 @@ object Messages {
 
 
     fun earningsBonus(farmer: Farmer, compact: Boolean = false): String = StringBuilder().apply {
+        val roleLabel = "Role:  "
         val role = farmer.role?.name ?: "Unknown"
+        val earningsBonusLabel = "Earnings bonus:  "
         val earningsBonus = farmer.earningsBonus
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val soulEggsLabel = "Soul Eggs:  "
         val soulEggs = BigDecimal(farmer.soulEggs)
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
+        val prophecyEggsLabel = "Prophecy Eggs:  "
         val prophecyEggs = farmer.prophecyEggs.formatInteger()
+        val soulBonusLabel = "Soul Food:  "
         val soulBonus = "${farmer.soulBonus.formatInteger()}/140"
+        val prophecyBonusLabel = "Prophecy Bonus:  "
         val prophecyBonus = "${farmer.prophecyBonus.formatInteger()}/5"
-        val prestiges = farmer.prestiges.formatInteger()
+        val soulEggsToNextLabel = "SE to next rank:  "
         val soulEggsToNext = farmer.nextRole
             ?.lowerBound
             ?.minus(farmer.earningsBonus)
             ?.divide(farmer.bonusPerSoulEgg, HALF_UP)
             ?.let { (if (compact) it.formatIllions() else it.formatInteger()) }
             ?.let { "+ $it" } ?: "Unknown"
+        val prestigesLabel = "Current prestiges:  "
+        val prestiges = farmer.prestiges.formatInteger()
+        val thresholdLabel = "Bug threshold:  "
         val threshold = "~ ${calculateSoulEggsFor(farmer.prestiges)
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
+        val soulEggsToThresholdLabel = "SE till bug:  "
         val soulEggsToThreshold = "⨦ ${(calculateSoulEggsFor(farmer.prestiges) - BigDecimal(farmer.soulEggs))
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
-        val regularStrings = listOf(
-            earningsBonus,
-            soulEggs,
-            soulEggsToNext,
-            soulBonus,
-            prophecyBonus,
-            prophecyEggs,
-            prestiges,
-            role,
-            threshold,
-            soulEggsToThreshold
-        )
-        val backupBugStrings = listOf(
-            soulEggs, prestiges, threshold
-        )
 
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
 
-        if (!farmer.hasBackupBug) {
-            // TODO: Use less space if role is longest in compact mode
-            // label pad + value pad - length of smallest pad
-            append("Role:                ")
-            appendPaddingCharacters(role, regularStrings)
-            appendln(role)
-            append("Earnings bonus:      ")
-            appendPaddingCharacters(earningsBonus, regularStrings)
-            appendln("$earningsBonus %")
-            append("Soul Eggs:           ")
-            appendPaddingCharacters(soulEggs, regularStrings)
-            appendln("$soulEggs SE")
-
-            if (farmer.soulBonus < 140) {
-                append("Soul Food:           ")
-                appendPaddingCharacters(soulBonus, regularStrings)
-                appendln(soulBonus)
+        val labelsToValues = if (farmer.hasBackupBug) listOf(
+            soulEggsLabel to soulEggs,
+            prestigesLabel to prestiges,
+            thresholdLabel to threshold
+        ) else listOf(
+            roleLabel to role,
+            earningsBonusLabel to earningsBonus,
+            soulEggsLabel to soulEggs,
+            prophecyEggsLabel to prophecyEggs,
+            soulBonusLabel to soulBonus,
+            prophecyBonusLabel to prophecyBonus,
+            soulEggsToNextLabel to soulEggsToNext,
+            prestigesLabel to prestiges,
+            thresholdLabel to threshold,
+            soulEggsToThresholdLabel to soulEggsToThreshold
+        )
+        val lines = labelsToValues.map { (label, value) ->
+            val padding = paddingCharacters(label, labelsToValues.map { it.first }) +
+                    paddingCharacters(value, labelsToValues.map { it.second })
+            Triple(label, value, padding)
+        }.let { lines ->
+            val shortestPadding = lines.map { it.third }.minBy { it.length }?.length ?: 0
+            lines.map { (label, value, padding) ->
+                Triple(label, value, padding.drop(shortestPadding))
             }
+        }
 
-            append("Prophecy Eggs:       ")
-            appendPaddingCharacters(prophecyEggs, regularStrings)
-            appendln("$prophecyEggs PE")
-
-            if (farmer.prophecyBonus < 5) {
-                append("Prophecy Bonus:      ")
-                appendPaddingCharacters(prophecyBonus, regularStrings)
-                appendln(prophecyBonus)
-            }
-
-            append("SE to next rank:     ")
-            appendPaddingCharacters(soulEggsToNext, regularStrings)
-            appendln("$soulEggsToNext SE")
-            appendln()
-
-            append("Current prestiges:   ")
-            appendPaddingCharacters(prestiges, regularStrings)
-            appendln(prestiges)
-
-            append("Bug threshold:       ")
-            appendPaddingCharacters(threshold, regularStrings)
-            appendln("$threshold SE")
-
-            append("SE till bug:         ")
-            appendPaddingCharacters(soulEggsToThreshold, regularStrings)
-            appendln("$soulEggsToThreshold SE")
-        } else {
+        if (farmer.hasBackupBug) {
             appendln(" ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓")
             appendln(" ┃ ‼︎ Backup bug detected ‼︎ ┃")
             appendln(" ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛")
             appendln()
-
-            append("Last known Soul Eggs: ")
-            appendPaddingCharacters(soulEggs, backupBugStrings)
-            appendln("$soulEggs SE")
-
-            append("Current prestiges:    ")
-            appendPaddingCharacters(prestiges, backupBugStrings)
-            appendln(prestiges)
-
-            append("Bug threshold:        ")
-            appendPaddingCharacters(threshold, backupBugStrings)
-            appendln("$threshold SE")
         }
+
+        lines.forEach { (label, value, padding) ->
+            if (label == prestigesLabel) appendln()
+            appendln(label + padding + value)
+        }
+
         appendln("```")
     }.toString()
 
