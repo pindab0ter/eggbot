@@ -187,7 +187,7 @@ object Messages {
 
         appendln("```")
 
-        if (farmer.hasBackupBug) {
+        if (farmer.hasBackupBug && target == null) {
             append("To see how many prestiges you need to ")
             if (compact) appendln()
             appendln("get out of the backup bug, add your target:")
