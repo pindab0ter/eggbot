@@ -122,9 +122,14 @@ object Messages {
         }
 
         if (farmer.hasBackupBug) {
-            appendln(" ┏━━━━━━━━━━━━━━━━━━━━━━━━━┓")
-            appendln(" ┃ ‼︎ Backup bug detected ‼︎ ┃")
-            appendln(" ┗━━━━━━━━━━━━━━━━━━━━━━━━━┛")
+            val spacing = if (compact) "" else String(CharArray(lines
+                .first()
+                .let { (x, y, z) -> x.length + y.length + z.length }
+                .minus(27)
+                .div(2)) { ' ' })
+            appendln("$spacing┏━━━━━━━━━━━━━━━━━━━━━━━━━┓")
+            appendln("$spacing┃ ‼︎ Backup bug detected ‼︎ ┃")
+            appendln("$spacing┗━━━━━━━━━━━━━━━━━━━━━━━━━┛")
             appendln()
         }
 
