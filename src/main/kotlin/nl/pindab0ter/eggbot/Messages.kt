@@ -71,9 +71,11 @@ object Messages {
         val roleLabel = "Role:  "
         val role = farmer.role?.name ?: "Unknown"
         val earningsBonusLabel = "Earnings bonus:  "
+        val earningsBonusBuggedLabel = "Last known EB:  "
         val earningsBonus = farmer.earningsBonus
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val soulEggsLabel = "Soul Eggs:  "
+        val soulEggsBuggedLabel = "Last known SE count:  "
         val soulEggs = BigDecimal(farmer.soulEggs)
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val prophecyEggsLabel = "Prophecy Eggs:  "
@@ -108,7 +110,8 @@ object Messages {
             // Backup bug entries
             farmer.hasBackupBug -> {
                 listOf(
-                    soulEggsLabel to soulEggs,
+                    earningsBonusBuggedLabel to earningsBonus,
+                    soulEggsBuggedLabel to soulEggs,
                     prestigesLabel to prestiges,
                     thresholdLabel to threshold
                 ).run {
