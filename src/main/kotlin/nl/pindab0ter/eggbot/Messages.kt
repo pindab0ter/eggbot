@@ -165,9 +165,13 @@ object Messages {
         }
 
         if (farmer.hasBackupBug) {
-            val spacing = if (compact) "" else String(CharArray(lines
-                .first()
-                .let { (x, y, z) -> x.length + y.length + z.length }
+            val spacing = String(CharArray(lines
+                .maxBy { (label, value, padding, suffix) ->
+                    (label + value + padding + (suffix ?: "")).length
+                }!!
+                .let { (label, value, padding, suffix) ->
+                    (label + value + padding + (suffix ?: "")).length
+                }
                 .minus(27)
                 .div(2)) { ' ' })
             appendln("$spacing┏━━━━━━━━━━━━━━━━━━━━━━━━━┓")
