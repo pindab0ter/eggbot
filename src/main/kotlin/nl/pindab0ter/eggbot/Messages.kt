@@ -166,14 +166,14 @@ object Messages {
 
         if (farmer.hasBackupBug) {
             val spacing = String(CharArray(lines
-                .maxBy { (label, value, padding, suffix) ->
-                    (label + value + padding + (suffix ?: "")).length
-                }!!
-                .let { (label, value, padding, suffix) ->
+                .map { (label, value, padding, suffix) ->
                     (label + value + padding + (suffix ?: "")).length
                 }
+                .max()!!
                 .minus(27)
+                .coerceAtLeast(0)
                 .div(2)) { ' ' })
+
             appendln("$spacing┏━━━━━━━━━━━━━━━━━━━━━━━━━┓")
             appendln("$spacing┃ ‼︎ Backup bug detected ‼︎ ┃")
             appendln("$spacing┗━━━━━━━━━━━━━━━━━━━━━━━━━┛")
