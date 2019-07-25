@@ -52,7 +52,7 @@ object EarningsBonus : Command() {
         val target: BigDecimal? = try {
             DecimalFormat().apply {
                 isParseBigDecimal = true
-            }.parse(event.arguments.firstOrNull()) as BigDecimal
+            }.parse(event.arguments.firstOrNull()?.toUpperCase()) as BigDecimal
         } catch (exception: Exception) {
             null
         }
