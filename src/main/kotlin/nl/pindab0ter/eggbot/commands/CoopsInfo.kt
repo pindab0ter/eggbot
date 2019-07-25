@@ -70,8 +70,7 @@ object CoopsInfo : Command() {
         event.reply("Registered co-ops for `$contractId`:\n${coops.joinToString("\n") { result ->
             when (result) {
                 is NotFound -> StringBuilder().apply {
-                    append("`${result.coopId}`: ✗ No active co-op found, remove using ")
-                    append("`${commandClient.prefix}${CoopRemove.name} ${result.contractId} ${result.coopId}`?")
+                    append("`${result.coopId}`: ✗ Waiting for starter")
                 }.toString()
                 is Empty -> StringBuilder().apply {
                     append("`${result.coopStatus.coopIdentifier}`: ✗ Empty co-op, remove using ")
