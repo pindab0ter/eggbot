@@ -103,6 +103,7 @@ object Messages {
             ?.let { "+ $it" } ?: "Unknown"
         val prestigesLabel = "Current prestiges:  "
         val prestiges = farmer.prestiges.formatInteger()
+        val prestigesOutOfRequired = "$prestiges/${target?.let { calculatePrestigesFor(it) }}"
         val prestigesSuffix = " \uD83E\uDD68"
         val thresholdLabel = "Bug threshold:  "
         val threshold = "~ ${calculateSoulEggsFor(farmer.prestiges)
@@ -112,8 +113,9 @@ object Messages {
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
         val yourTargetLabel = "Your target:  "
         val yourTarget = target?.let { if (compact) it.formatIllions() else it.formatInteger() }
-        val requiredPrestigesLabel = "Prestiges required:  "
-        val requiredPrestiges = target?.let { "${calculatePrestigesFor(it) - farmer.prestiges}" }
+        val remainingPrestigesLabel = "Prestiges to go: "
+        val remainingPrestiges = target?.let { "${calculatePrestigesFor(it) - farmer.prestiges}" }
+        val targetSet = target != null
 
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
 
@@ -122,13 +124,13 @@ object Messages {
             farmer.hasBackupBug -> listOf(
                 Line(earningsBonusBuggedLabel, earningsBonus, suffix = earningsBonusSuffix),
                 Line(soulEggsBuggedLabel, soulEggs, suffix = soulEggsSuffix),
-                Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
+                Line(prestigesLabel, if (!targetSet) prestiges else prestigesOutOfRequired, suffix = prestigesSuffix),
                 Line(thresholdLabel, threshold, suffix = soulEggsSuffix)
             ).run {
-                if (target != null) {
-                    this.plus(Line(yourTargetLabel, yourTarget!!, suffix = soulEggsSuffix))
-                        .plus(Line(requiredPrestigesLabel, requiredPrestiges!!, suffix = prestigesSuffix))
-                } else this
+                if (targetSet) this
+                    .plus(Line(yourTargetLabel, yourTarget!!, suffix = soulEggsSuffix))
+                    .plus(Line(remainingPrestigesLabel, remainingPrestiges!!, suffix = prestigesSuffix))
+                else this
             }
 
             // Non-backup bug entries
