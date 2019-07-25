@@ -76,16 +76,18 @@ object CoopsInfo : Command() {
                     append("`${result.coopStatus.coopIdentifier}`: ✗ Empty co-op, remove using ")
                     append("`${commandClient.prefix}${CoopRemove.name} ${result.coopStatus.contractIdentifier} ${result.coopStatus.coopIdentifier}`?")
                 }.toString()
-                is InProgress -> when {
-                    result.simulation.projectedToFinish() -> StringBuilder().apply {
-                        append("`${result.simulation.coopId}`: ✓ Will finish ")
-                        append("(${result.simulation.projectedTimeToFinalGoal()?.asDayHoursAndMinutes(true)}/")
-                        append("${result.simulation.timeRemaining.asDayHoursAndMinutes(true)})")
-                    }
-                    else -> StringBuilder().apply {
-                        append("`${result.simulation.coopId}`: ✗ Won't finish ")
-                        append("(${result.simulation.projectedTimeToFinalGoal()?.asDayHoursAndMinutes(true)}/")
-                        append("${result.simulation.timeRemaining.asDayHoursAndMinutes(true)})")
+                is InProgress -> {
+                    val progress = (result.simulation.timeRemaining / result.simulation.projectedTimeToFinalGoal()!!)
+                        ?.asPercentage() ?: "error"
+                    when {
+                        result.simulation.projectedToFinish() -> StringBuilder().apply {
+                            append("`${result.simulation.coopId}`: ✓ Will finish")
+                            append("($progress)")
+                        }
+                        else -> StringBuilder().apply {
+                            append("`${result.simulation.coopId}`: ✗ Won't finish")
+                            append("($progress)")
+                        }
                     }
                 }
                 is Finished -> "`${result.coopStatus.coopIdentifier}`: ✓ Finished"

@@ -26,6 +26,7 @@ import java.math.RoundingMode.FLOOR
 import java.math.RoundingMode.HALF_UP
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
+import java.text.NumberFormat
 import java.util.*
 import kotlin.math.roundToLong
 import java.math.BigDecimal as BD
@@ -42,6 +43,7 @@ val EggInc.Egg.formattedName: String
 fun Long.toDuration(): Duration = Duration((this * 1000))
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
+fun Double.asPercentage(): String = NumberFormat.getPercentInstance().format(this)
 
 private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
@@ -280,8 +282,14 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BD): BD {
     return sum
 }
 
-fun Iterable<BD>.product(): BD = reduce { acc, bonus -> acc * bonus }
 fun Double.round(places: Int = 0) = BD(this).setScale(places, HALF_UP).toDouble()
+operator fun Duration.div(other: Duration): Double? = try {
+    this.millis.toDouble() / other.millis.toDouble()
+} catch (e: Exception) {
+    null
+}
+
+fun Iterable<BD>.product(): BD = reduce { acc, bonus -> acc * bonus }
 fun List<BD>.sum(): BD = this.reduce { acc, duration -> acc + duration }
 fun List<Duration>.sum(): Duration = this.reduce { acc, duration -> acc + duration }
 operator fun Int.times(other: BD): BD = this.toBigDecimal() * other
