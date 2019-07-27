@@ -1,5 +1,7 @@
 package nl.pindab0ter.eggbot
 
+import ch.obermuhlner.math.big.BigDecimalMath.exp
+import ch.obermuhlner.math.big.BigDecimalMath.log
 import com.auxbrain.ei.EggInc
 import com.github.kittinunf.fuel.core.Body
 import com.jagrosh.jdautilities.command.Command
@@ -17,7 +19,6 @@ import org.joda.time.PeriodType
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
-import org.nevec.rjm.BigDecimalMath.*
 import java.math.BigDecimal.*
 import java.math.MathContext.DECIMAL128
 import java.math.MathContext.UNLIMITED
@@ -416,19 +417,19 @@ val EggInc.VehicleType.capacity: BD get() = when (this) {
 fun calculatePrestigesFor(soulEggs: Double): Int = calculatePrestigesFor(BD(soulEggs))
 fun calculatePrestigesFor(soulEggs: BD): Int = when {
     soulEggs < BD(    400_000_000_000L) ->     (soulEggs / BD(4)  - BD(40_000_000_000L)) / BD(4_138_552_198L)
-    soulEggs < BD(  2_300_000_000_000L) -> log((soulEggs / BD(4)) / BD(27_000_000_000L)) / BD(0.0877)
-    soulEggs < BD(  8_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(13_000_000_000L)) / BD(0.0760)
-    soulEggs < BD(100_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(14_600_000_000L)) / BD(0.0744)
-    soulEggs < BD(930_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(19_000_000_000L)) / BD(0.0716)
+    soulEggs < BD(  2_300_000_000_000L) -> log((soulEggs / BD(4)) / BD(27_000_000_000L), DECIMAL128) / BD(0.0877)
+    soulEggs < BD(  8_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(13_000_000_000L), DECIMAL128) / BD(0.0760)
+    soulEggs < BD(100_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(14_600_000_000L), DECIMAL128) / BD(0.0744)
+    soulEggs < BD(930_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(19_000_000_000L), DECIMAL128) / BD(0.0716)
     else -> (soulEggs / BD(4) - BD(40_000_000_000L)) / BD(1_758_889_813_535L)
 }.setScale(0, RoundingMode.CEILING).intValueExact()
 
 fun calculateSoulEggsFor(prestiges: Int): BD = 4 * when {
     prestiges < 15  -> BD(40_000_000_000L) + BD(4_138_552_198L) * prestiges
-    prestiges < 50  -> BD(27_000_000_000L) * pow(exp(DECIMAL128), BD(0.0877) * prestiges)
-    prestiges < 70  -> BD(13_000_000_000L) * pow(exp(DECIMAL128), BD(0.0760) * prestiges)
-    prestiges < 100 -> BD(14_600_000_000L) * pow(exp(DECIMAL128), BD(0.0744) * prestiges)
-    prestiges < 132 -> BD(19_000_000_000L) * pow(exp(DECIMAL128), BD(0.0716) * prestiges)
+    prestiges < 50  -> BD(27_000_000_000L) * exp(BD(0.0877) * prestiges, DECIMAL128)
+    prestiges < 70  -> BD(13_000_000_000L) * exp(BD(0.0760) * prestiges, DECIMAL128)
+    prestiges < 100 -> BD(14_600_000_000L) * exp(BD(0.0744) * prestiges, DECIMAL128)
+    prestiges < 132 -> BD(19_000_000_000L) * exp(BD(0.0716) * prestiges, DECIMAL128)
     else            -> BD(40_000_000_000L) + BD(1_758_889_813_535L) * prestiges
 }
 // @formatter:on

@@ -36,7 +36,7 @@ dependencies {
     implementation("com.google.protobuf", "protobuf-java", "3.9.0")
     implementation("io.github.microutils", "kotlin-logging", "1.6.26")
     implementation("org.quartz-scheduler", "quartz", "2.3.1")
-    implementation(files("libs/BigDecimalMath.jar"))
+    implementation("ch.obermuhlner", "big-math", "2.1.0")
 
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.12.0")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.28.0")
