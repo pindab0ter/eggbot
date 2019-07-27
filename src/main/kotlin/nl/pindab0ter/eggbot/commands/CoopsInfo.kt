@@ -10,7 +10,6 @@ import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -69,25 +68,14 @@ object CoopsInfo : Command() {
 
         event.reply("Registered co-ops for `$contractId`:\n${coops.joinToString("\n") { result ->
             when (result) {
-                is NotFound -> StringBuilder().apply {
-                    append("`${result.coopId}`: ✗ Waiting for starter")
-                }.toString()
-                is Empty -> StringBuilder().apply {
-                    append("`${result.coopStatus.coopIdentifier}`: ✗ Empty co-op, remove using ")
-                    append("`${commandClient.prefix}${CoopRemove.name} ${result.coopStatus.contractIdentifier} ${result.coopStatus.coopIdentifier}`?")
-                }.toString()
+                is NotFound ->"`${result.coopId}`: ✗ Waiting for starter" // TODO: Tag starter and/or leader
+                is Empty -> "`${result.coopStatus.coopIdentifier}`: ✗ Abandoned"
                 is InProgress -> {
                     val progress = (result.simulation.timeRemaining / result.simulation.projectedTimeToFinalGoal()!!)
                         ?.asPercentage() ?: "error"
                     when {
-                        result.simulation.projectedToFinish() -> StringBuilder().apply {
-                            append("`${result.simulation.coopId}`: ✓ Will finish")
-                            append("($progress)")
-                        }
-                        else -> StringBuilder().apply {
-                            append("`${result.simulation.coopId}`: ✗ Won't finish")
-                            append("($progress)")
-                        }
+                        result.simulation.projectedToFinish() -> "`${result.simulation.coopId}`: ✓ Will finish ($progress)"
+                        else -> "`${result.simulation.coopId}`: ✗ Won't finish ($progress)"
                     }
                 }
                 is Finished -> "`${result.coopStatus.coopIdentifier}`: ✓ Finished"
