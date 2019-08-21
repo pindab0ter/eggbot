@@ -50,7 +50,10 @@ class CoopContractSimulation private constructor(
     val population: BigDecimal by lazy { farms.sumBy { farm -> farm.population } }
     val populationIncreaseRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerMinute } }
     val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerHour } }
-    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerMinute } }
+    val eggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerMinute } }
+    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerHour } }
+    val currentEggLayingRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerSecond } }
+    val currentEggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerMinute } }
 
     //
     // Contract details
