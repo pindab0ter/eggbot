@@ -177,16 +177,14 @@ object RollCall : Command() {
                 activeFarmers.drop(coops.size).forEach { activeFarmer ->
                     coops.filter { coop -> coop.farmers.count() <= preferredCoopSize }
                         .filter { coop -> coop.farmers.count() == coops.map { it.farmers.count() }.min() }
-                        .sortedBy { coop -> coop.farmers.sumBy { it.earningsBonus } }
-                        .first()
+                        .minBy { coop -> coop.farmers.sumBy { it.earningsBonus } }!!
                         .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(activeFarmer)) }
                 }
 
                 // Finally spread inactive farmers over the coops
                 inactiveFarmers.forEach { inactiveFarmer ->
                     coops.sortedBy { coop -> coop.farmers.count() }
-                        .sortedBy { coop -> coop.farmers.count { farmer -> !farmer.isActive } }
-                        .first()
+                        .minBy { coop -> coop.farmers.count { farmer -> !farmer.isActive } }!!
                         .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(inactiveFarmer)) }
                 }
             }

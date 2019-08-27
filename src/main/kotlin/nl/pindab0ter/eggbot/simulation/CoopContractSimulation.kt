@@ -139,16 +139,14 @@ class CoopContractSimulation private constructor(
             // or
             // There is no active farm with this contract
             // and the contract archive contains this contract
-            // and that contract has reached it's final goal
+            // and that contract has reached its final goal
             // for any of the contributors
             if (coopStatus.eggsLaid >= contract?.finalGoal ?: ZERO || backups.any { contributor ->
                     contributor.farmsList.none { farm ->
                         farm.contractId == coopStatus.contractIdentifier
                     } && contributor.contracts.archiveList.find { contract ->
                         contract.contract.identifier == coopStatus.contractIdentifier
-                    }?.let { contract ->
-                        contract.finished
-                    } == true
+                    }?.finished == true
                 }
             ) return Finished(coopStatus, contractName!!)
 

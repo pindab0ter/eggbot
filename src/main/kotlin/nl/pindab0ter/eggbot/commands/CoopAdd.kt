@@ -31,7 +31,7 @@ object CoopAdd : Command() {
         if (!hasPermission(event.author, Config.adminRole))
             "You must have at least a role called `${Config.adminRole}` to use that!".let {
                 event.replyError(it)
-                CoopAdd.log.debug { it }
+                log.debug { it }
                 return
             }
 

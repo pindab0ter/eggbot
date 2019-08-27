@@ -5,7 +5,6 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
-import java.math.BigDecimal
 
 object PrestigeCount : Command() {
 

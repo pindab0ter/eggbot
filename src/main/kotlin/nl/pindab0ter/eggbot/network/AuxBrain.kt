@@ -87,7 +87,7 @@ object AuxBrain {
     /**
      * Retrieve the [EggInc.Backup] synchronously
      *
-     * @note this is a synchronous execution and can not be cancelled
+     * @note this is a synchronous execution and cannot be cancelled
      *
      * @return [EggInc.Backup] the backup
      */

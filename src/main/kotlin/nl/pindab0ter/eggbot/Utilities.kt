@@ -223,7 +223,7 @@ fun paddingCharacters(current: Any, longest: Any, character: String = " "): Stri
     val currentLength = current.toString().length
     val longestLength = longest.toString().length
 
-    if (longestLength < currentLength) throw IllegalArgumentException("Longest's length ($longestLength) must be longer than current's length ($currentLength)")
+    require(longestLength >= currentLength) { "Longest's length ($longestLength) must be longer than current's length ($currentLength)" }
 
     return character.repeat(longestLength - currentLength)
 }
