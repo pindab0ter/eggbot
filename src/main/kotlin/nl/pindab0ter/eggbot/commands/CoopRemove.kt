@@ -18,7 +18,7 @@ object CoopRemove : Command() {
     init {
         name = "coop-remove"
         aliases = arrayOf("co-op-remove", "cr")
-        arguments = "<contract-id> <co-op id>"
+        arguments = "<contract id> <co-op id>"
         help = "Unregisters a co-op so it no longer shows up in the co-ops listing."
         category = AdminCategory
         guildOnly = false
