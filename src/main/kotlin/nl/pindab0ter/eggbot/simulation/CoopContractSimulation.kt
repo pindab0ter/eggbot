@@ -92,6 +92,7 @@ class CoopContractSimulation private constructor(
         else (eggLayingRatePerSecond * (population + populationIncreaseRatePerSecond)
             .divide(population, DECIMAL64) - eggLayingRatePerSecond)
             .divide(ONE, DECIMAL64)
+            .coerceAtLeast(ONE)
     }
 
     // TODO: Take bottlenecks into account
