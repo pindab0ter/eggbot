@@ -3,7 +3,7 @@ package nl.pindab0ter.eggbot.database
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.dao.IntIdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
-import org.jetbrains.exposed.sql.ReferenceOption.NO_ACTION
+import org.jetbrains.exposed.sql.ReferenceOption.SET_NULL
 import org.jetbrains.exposed.sql.Table
 import org.joda.time.DateTime
 
@@ -15,7 +15,7 @@ object DiscordUsers : IdTable<String>() {
 
 object Farmers : IdTable<String>() {
     override val id = text("in_game_id").uniqueIndex().entityId()
-    val discordId = reference("discord_id", DiscordUsers, CASCADE, NO_ACTION)
+    val discordId = reference("discord_id", DiscordUsers, CASCADE, CASCADE)
     val inGameName = text("in_game_name").uniqueIndex()
     val soulEggs = long("soul_eggs")
     val prophecyEggs = long("prophecy_eggs")
@@ -38,8 +38,8 @@ object Coops : IntIdTable() {
 }
 
 object CoopFarmers : Table() {
-    val farmer = reference("farmer", Farmers, CASCADE, NO_ACTION)
-    val coop = reference("coop", Coops, CASCADE, NO_ACTION)
+    val farmer = reference("farmer", Farmers, SET_NULL, CASCADE)
+    val coop = reference("coop", Coops, SET_NULL, CASCADE)
 
     init {
         this.index(true, farmer, coop)
