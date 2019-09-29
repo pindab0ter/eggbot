@@ -149,7 +149,7 @@ message Tutorial {
 
 message Stats {
     uint32 egg_totals_OLD = 1;
-    uint32 unused = 2;
+    uint32 refill_uses = 2;
     uint32 video_multiplier_videos_watched = 3;
     uint32 warp_1_uses = 4;
     uint32 warp_8_uses = 5;
@@ -183,7 +183,7 @@ message Game {
     repeated uint32 max_farm_size_reached = 18;
     repeated TrophyLevel egg_medal_level = 19;
     uint32 daily_gift_sequence = 20; // Days since 1-1-2000, controlled by server
-    uint32 unknown22 = 22;
+    uint32 current_farm = 22;
     uint64 prophecy_eggs = 23;
     uint32 unknown24 = 24;
     uint32 long_idle_notification_set = 25;
@@ -191,6 +191,8 @@ message Game {
     double long_idle_reward = 27;
     uint32 daily_gift_index = 28;
     uint32 hyperloop_station = 29;
+    repeated Boost boosts = 30;
+    // uint64/double unknown = 34;
 }
 
 message Missions {
@@ -358,22 +360,30 @@ enum VehicleType {
 
 message MissionInfo {
     string id = 1;
-    uint32 completed = 2;
+    bool completed = 2;
 }
 
 message ResearchItem {
     string id = 1;
     uint32 level = 2;
 }
+
 message NewsHeadline {
     string id = 1;
-    uint32 read = 2;
+    bool read = 2;
 
 }
+
 message AchievementInfo {
     string name = 1;
-    uint32 achieved = 2;
+    bool achieved = 2;
 }
+
+message Boost {
+    string name = 1;
+    uint32 amount = 2;
+}
+
 enum FarmType {
     NONE = 0;
     EMPTY = 1;
@@ -432,4 +442,5 @@ enum TrophyLevel {
     SILVER = 2;
     GOLD = 3;
     PLATINUM = 4;
+    DIAMOND = 5;
 }
