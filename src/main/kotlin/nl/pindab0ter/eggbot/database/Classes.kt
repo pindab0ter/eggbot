@@ -20,6 +20,8 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     }
 
     companion object : EntityClass<String, DiscordUser>(DiscordUsers)
+
+    override fun toString(): String = "$discordTag ($discordId)"
 }
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
@@ -117,6 +119,8 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     }
 
     companion object : EntityClass<String, Farmer>(Farmers)
+
+    override fun toString(): String = "$inGameName ($inGameId)"
 }
 
 class Coop(id: EntityID<Int>) : IntEntity(id) {
@@ -129,4 +133,6 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     val activeEarningsBonus: BigDecimal get() = farmers.sumBy { it.activeEarningsBonus }
 
     companion object : IntEntityClass<Coop>(Coops)
+
+    override fun toString(): String = "$name ($name)"
 }
