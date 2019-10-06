@@ -100,7 +100,8 @@ object Register : Command() {
             Farmer.new(registrant.inGameId) {
                 this.discordUser = discordUser
                 this.inGameName = backup.userName.replace('`', '\'')
-                this.soulEggs = backup.game.soulEggs
+                this.soulEggsLong = backup.game.soulEggsLong
+                this.soulEggsDouble = backup.game.soulEggsDouble
                 this.prophecyEggs = backup.game.prophecyEggs
                 this.soulBonus = backup.game.soulBonus
                 this.prophecyBonus = backup.game.prophecyBonus

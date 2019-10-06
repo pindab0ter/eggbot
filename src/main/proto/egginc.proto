@@ -191,7 +191,7 @@ message Game {
     Egg max_egg_reached = 1;
     int64 golden_eggs_earned = 2;
     int64 golden_eggs_spent = 3;
-    int64 soul_eggs = 4;
+    int64 soul_eggs_long = 4;
     double prestige_earnings = 5;
     double lifetime_earnings = 6;
     int32 piggy_bank = 7;
@@ -204,7 +204,7 @@ message Game {
     double current_multiplier_expiration = 14;
     repeated AchievementInfo achievement = 15;
     int32 unclaimed_golden_eggs = 16;
-    int64 unclaimed_soul_eggs = 17;
+    int64 unclaimed_soul_eggs_long = 17;
     repeated int64 max_farm_size_reached = 18;
     repeated TrophyLevel egg_medal_level = 19;
     int32 last_daily_gift_collected_day = 20; // Days since 1-1-2000, controlled by server
@@ -220,8 +220,8 @@ message Game {
     bool piggy_full_alert_shown = 31;
     int32 total_time_cheats_detected = 32;
     double prestige_soul_boost_cash = 33;
-    double soul_eggs_d = 34;
-    double unclaimed_soul_eggs_d = 35;
+    double soul_eggs_double = 34;
+    double unclaimed_soul_eggs_double = 35;
 }
 
 message Missions {

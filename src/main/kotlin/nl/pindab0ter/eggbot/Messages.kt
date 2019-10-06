@@ -84,7 +84,7 @@ object Messages {
         val earningsBonusSuffix = " %"
         val soulEggsLabel = "Soul Eggs:  "
         val soulEggsBuggedLabel = "Last known SE count:  "
-        val soulEggs = BigDecimal(farmer.soulEggs)
+        val soulEggs = farmer.soulEggs
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val soulEggsSuffix = " SE"
         val prophecyEggsLabel = "Prophecy Eggs:  "
@@ -109,7 +109,7 @@ object Messages {
         val threshold = "~ ${calculateSoulEggsFor(farmer.prestiges)
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
         val soulEggsToThresholdLabel = "SE till bug:  "
-        val soulEggsToThreshold = "⨦ ${(calculateSoulEggsFor(farmer.prestiges) - BigDecimal(farmer.soulEggs))
+        val soulEggsToThreshold = "⨦ ${(calculateSoulEggsFor(farmer.prestiges) - farmer.soulEggs)
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
         val yourTargetLabel = "Your target:  "
         val yourTarget = target?.let { if (compact) it.formatIllions() else it.formatInteger() }

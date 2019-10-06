@@ -27,7 +27,10 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
 
-    var soulEggs by Farmers.soulEggs
+    internal var soulEggsLong by Farmers.soulEggsLong
+    internal var soulEggsDouble by Farmers.soulEggsDouble
+    val soulEggs: BigDecimal
+        get() = if (soulEggsLong > 0) BigDecimal(soulEggsLong) else BigDecimal(soulEggsDouble)
     var prophecyEggs by Farmers.prophecyEggs
     var soulBonus by Farmers.soulBonus
     var prophecyBonus by Farmers.prophecyBonus
@@ -80,7 +83,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             val prophecyEggBonus = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyBonus)
             return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
         }
-    val earningsBonus: BigDecimal get() = BigDecimal(soulEggs) * bonusPerSoulEgg
+    val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
     val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
@@ -91,9 +94,10 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     fun update(backup: EggInc.Backup) {
         if (!backup.hasGame()) return
         prestiges = backup.stats.prestigeCount
-        if (backup.game.soulEggs < soulEggs) hasBackupBug = true
+        if (backup.game.soulEggsDouble < soulEggsDouble) hasBackupBug = true
         else {
-            soulEggs = backup.game.soulEggs
+            soulEggsLong = backup.game.soulEggsLong
+            soulEggsDouble = backup.game.soulEggsDouble
             prophecyEggs = backup.game.prophecyEggs
             soulBonus = backup.game.soulBonus
             prophecyBonus = backup.game.prophecyBonus
