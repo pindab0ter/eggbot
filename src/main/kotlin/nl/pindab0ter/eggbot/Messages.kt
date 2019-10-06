@@ -62,10 +62,8 @@ object Messages {
         farmers.map { NameToValue(it.inGameName, it.eliteDroneTakedowns.formatInteger()) }
     )
 
-
     fun earningsBonus(
         farmer: Farmer,
-        target: BigDecimal? = null,
         compact: Boolean = false
     ): String = StringBuilder().apply {
         data class Line(
@@ -78,12 +76,10 @@ object Messages {
         val roleLabel = "Role:  "
         val role = farmer.role?.name ?: "Unknown"
         val earningsBonusLabel = "Earnings bonus:  "
-        val earningsBonusBuggedLabel = "Last known EB:  "
         val earningsBonus = farmer.earningsBonus
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val earningsBonusSuffix = " %"
         val soulEggsLabel = "Soul Eggs:  "
-        val soulEggsBuggedLabel = "Last known SE count:  "
         val soulEggs = farmer.soulEggs
             .let { (if (compact) it.formatIllions() else it.formatInteger()) }
         val soulEggsSuffix = " SE"
@@ -101,59 +97,21 @@ object Messages {
             ?.divide(farmer.bonusPerSoulEgg, HALF_UP)
             ?.let { (if (compact) it.formatIllions() else it.formatInteger()) }
             ?.let { "+ $it" } ?: "Unknown"
-        val prestigesLabel = "Current prestiges:  "
-        val prestiges = farmer.prestiges.formatInteger()
-        val prestigesOutOfRequired = "$prestiges/${target?.let { calculatePrestigesFor(it) }}"
-        val prestigesSuffix = " \uD83E\uDD68"
-        val thresholdLabel = "Bug threshold:  "
-        val threshold = "~ ${calculateSoulEggsFor(farmer.prestiges)
-            .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
-        val soulEggsToThresholdLabel = "SE till bug:  "
-        val soulEggsToThreshold = "⨦ ${(calculateSoulEggsFor(farmer.prestiges) - farmer.soulEggs)
-            .let { (if (compact) it.formatIllions() else it.formatInteger()) }}"
-        val yourTargetLabel = "Your target:  "
-        val yourTarget = target?.let { if (compact) it.formatIllions() else it.formatInteger() }
-        val remainingPrestigesLabel = "Prestiges to go: "
-        val remainingPrestiges = target?.let { "${calculatePrestigesFor(it) - farmer.prestiges}" }
-        val targetSet = target != null
 
         append("Earnings bonus for **${farmer.inGameName}**:```\n")
 
-        val labelsToValues: List<Line> = when {
-            // Backup bug entries
-            farmer.hasBackupBug -> listOf(
-                Line(earningsBonusBuggedLabel, earningsBonus, suffix = earningsBonusSuffix),
-                Line(soulEggsBuggedLabel, soulEggs, suffix = soulEggsSuffix),
-                Line(prestigesLabel, if (!targetSet) prestiges else prestigesOutOfRequired, suffix = prestigesSuffix),
-                Line(thresholdLabel, threshold, suffix = soulEggsSuffix)
-            ).run {
-                if (targetSet) this
-                    .plus(Line(yourTargetLabel, yourTarget!!, suffix = soulEggsSuffix))
-                    .plus(Line(remainingPrestigesLabel, remainingPrestiges!!, suffix = prestigesSuffix))
-                else this
-            }
-
-            // Non-backup bug entries
-            else -> listOf(
-                Line(roleLabel, role),
-                Line(earningsBonusLabel, earningsBonus, suffix = earningsBonusSuffix),
-                Line(soulEggsLabel, soulEggs, suffix = soulEggsSuffix),
-                Line(prophecyEggsLabel, prophecyEggs, suffix = prophecyEggsSuffix)
-            ).run {
-                if (farmer.soulBonus < 140) this.plus(Line(soulBonusLabel, soulBonus))
-                else this
-            }.run {
-                if (farmer.prophecyBonus < 5) this.plus(Line(prophecyBonusLabel, prophecyBonus))
-                else this
-            }.plus(
-                listOf(
-                    Line(soulEggsToNextLabel, soulEggsToNext, suffix = soulEggsSuffix),
-                    Line(prestigesLabel, prestiges, suffix = prestigesSuffix),
-                    Line(thresholdLabel, threshold, suffix = soulEggsSuffix),
-                    Line(soulEggsToThresholdLabel, soulEggsToThreshold, suffix = soulEggsSuffix)
-                )
-            )
-        }
+        val labelsToValues: List<Line> = listOf(
+            Line(roleLabel, role),
+            Line(earningsBonusLabel, earningsBonus, suffix = earningsBonusSuffix),
+            Line(soulEggsLabel, soulEggs, suffix = soulEggsSuffix),
+            Line(prophecyEggsLabel, prophecyEggs, suffix = prophecyEggsSuffix)
+        ).run {
+            if (farmer.soulBonus < 140) this.plus(Line(soulBonusLabel, soulBonus))
+            else this
+        }.run {
+            if (farmer.prophecyBonus < 5) this.plus(Line(prophecyBonusLabel, prophecyBonus))
+            else this
+        }.plus(Line(soulEggsToNextLabel, soulEggsToNext, suffix = soulEggsSuffix))
 
         val lines = labelsToValues.map { (label, value, _, suffix) ->
             val padding = paddingCharacters(label, labelsToValues.map { it.label }) +
@@ -166,35 +124,12 @@ object Messages {
             }
         }
 
-        if (farmer.hasBackupBug) {
-            val spacing = String(CharArray(lines
-                .map { (label, value, padding, suffix) ->
-                    (label + value + padding + (suffix ?: "")).length
-                }
-                .max()!!
-                .minus(27)
-                .coerceAtLeast(0)
-                .div(2)) { ' ' })
-
-            appendln("$spacing┏━━━━━━━━━━━━━━━━━━━━━━━━━┓")
-            appendln("$spacing┃ ‼︎ Backup bug detected ‼︎ ┃")
-            appendln("$spacing┗━━━━━━━━━━━━━━━━━━━━━━━━━┛")
-            appendln()
-        }
-
         lines.forEach { (label, value, padding, suffix) ->
-            if (label == prestigesLabel) appendln()
             appendln(label + padding + value + (suffix ?: ""))
         }
 
         appendln("```")
 
-        if (farmer.hasBackupBug && target == null) {
-            append("To see how many prestiges you need to ")
-            if (compact) appendln()
-            appendln("get out of the backup bug, add your target:")
-            appendln("`${commandClient.textualPrefix}${EarningsBonus.name} ${EarningsBonus.arguments}`")
-        }
     }.toString()
 
     // TODO: Display which bottlenecks will be reached when

@@ -25,7 +25,6 @@ object Farmers : IdTable<String>() {
     val prestiges = integer("prestiges")
     val droneTakedowns = integer("drone_takedowns")
     val eliteDroneTakedowns = integer("elite_drone_takedowns")
-    val hasBackupBug = bool("has_backup_bug")
     val lastUpdated = datetime("last_updated").default(DateTime.now())
 }
 

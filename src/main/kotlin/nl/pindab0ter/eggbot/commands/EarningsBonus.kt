@@ -22,8 +22,8 @@ object EarningsBonus : Command() {
     init {
         name = "earnings-bonus"
         aliases = arrayOf("eb", "earningsbonus", "earning-bonus", "earningbonus")
-        help = "Shows your EB, EB rank and how much SE till your next rank or how much to get out of backup bug territory"
-        arguments = "[target SE] [compact]"
+        help = "Shows your EB, EB rank and how much SE till your next rank"
+        arguments = "[compact]"
         category = FarmersCategory
         guildOnly = false
     }
@@ -42,20 +42,13 @@ object EarningsBonus : Command() {
             return
         }
 
-        if (event.arguments.size > 2) tooManyArguments.let {
+        if (event.arguments.size > 1) tooManyArguments.let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
         val compact = event.arguments.any { it.startsWith("c") }
-        val target: BigDecimal? = try {
-            DecimalFormat().apply {
-                isParseBigDecimal = true
-            }.parse(event.arguments.firstOrNull()?.toUpperCase()) as BigDecimal
-        } catch (exception: Exception) {
-            null
-        }
 
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
@@ -67,7 +60,7 @@ object EarningsBonus : Command() {
 
                 transaction { farmer.update(backup) }
 
-                Messages.earningsBonus(farmer, target, compact).let {
+                Messages.earningsBonus(farmer, compact).let {
                     if (event.channel.id == Config.botCommandsChannel) {
                         event.reply(it)
                     } else event.replyInDm(it) {
