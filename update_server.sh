@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-cd build/install/EggBot
+cd build/install/EggBot || exit
 rsync \
     --recursive \
     --checksum \
