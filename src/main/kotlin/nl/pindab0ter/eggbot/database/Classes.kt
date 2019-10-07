@@ -84,19 +84,19 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
-        if (backup == null || !backup.hasData()) return@let
+        if (backup == null || !backup.hasGame()) return@let
         update(backup)
     }
 
     fun update(backup: EggInc.Backup) {
-        if (!backup.hasData()) return
+        if (!backup.hasGame()) return
         prestiges = backup.stats.prestigeCount
-        if (backup.data.soulEggs < soulEggs) hasBackupBug = true
+        if (backup.game.soulEggs < soulEggs) hasBackupBug = true
         else {
-            soulEggs = backup.data.soulEggs
-            prophecyEggs = backup.data.prophecyEggs
-            soulBonus = backup.data.soulBonus
-            prophecyBonus = backup.data.prophecyBonus
+            soulEggs = backup.game.soulEggs
+            prophecyEggs = backup.game.prophecyEggs
+            soulBonus = backup.game.soulBonus
+            prophecyBonus = backup.game.prophecyBonus
             droneTakedowns = backup.stats.droneTakedowns
             eliteDroneTakedowns = backup.stats.droneTakedownsElite
             hasBackupBug = false

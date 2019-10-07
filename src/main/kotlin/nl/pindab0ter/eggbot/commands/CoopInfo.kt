@@ -51,7 +51,7 @@ object CoopInfo : Command() {
             }
 
             Messages.coopStatus(
-                CoopContractSimulation.Factory(status.contractIdentifier, status.coopIdentifier),
+                CoopContractSimulation.Factory(status.contractId, status.coopId),
                 compact
             ).let { messages ->
                 if (event.channel.id == Config.botCommandsChannel) {

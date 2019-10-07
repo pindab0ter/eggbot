@@ -12,6 +12,7 @@ import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
 import com.github.kittinunf.result.Result
 import nl.pindab0ter.eggbot.decodeBase64
+import java.io.File
 
 
 object AuxBrain {
@@ -36,20 +37,20 @@ object AuxBrain {
         .body(
             "data=${EggInc.FirstContactRequest
                 .newBuilder()
-                .setIdentifier(userId)
+                .setUserId(userId)
                 .build()
                 .toByteString()
                 .toStringUtf8()
                 .encodeBase64ToString()}"
         )
 
-    private fun getCoopStatusPostRequest(contractId: String, coopName: String) = COOP_STATUS_URL.httpPost()
+    private fun getCoopStatusPostRequest(contractId: String, coopId: String) = COOP_STATUS_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(
             "data=${EggInc.CoopStatusRequest
                 .newBuilder()
                 .setContractId(contractId)
-                .setCoopName(coopName)
+                .setCoopId(coopId)
                 .build()
                 .toByteString()
                 .toStringUtf8()
@@ -64,10 +65,10 @@ object AuxBrain {
 
     fun getCoopStatus(
         contractId: String,
-        coopName: String,
+        coopId: String,
         handler: ResultHandler<EggInc.CoopStatusResponse>
     ): CancellableRequest =
-        getCoopStatusPostRequest(contractId, coopName).responseObject(ContractDeserializer, handler)
+        getCoopStatusPostRequest(contractId, coopId).responseObject(ContractDeserializer, handler)
 
     object ContractDeserializer : ResponseDeserializable<EggInc.CoopStatusResponse> {
         override fun deserialize(content: String): EggInc.CoopStatusResponse? {

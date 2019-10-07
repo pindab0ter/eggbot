@@ -349,11 +349,11 @@ val EggInc.LocalContract.finished: Boolean get() = BD(lastAmountWhenRewardGiven)
 val EggInc.CoopStatusResponse.eggsLaid: BD get() = BD(totalAmount)
 fun List<EggInc.Backup>.findContract(contractId: String): EggInc.LocalContract? = filter { backup ->
     backup.contracts.contractsList.plus(backup.contracts.archiveList).any { contract ->
-        contract.contract.identifier == contractId
+        contract.contract.id == contractId
     }
 }.maxBy { backup -> backup.approxTime }?.let { backup ->
     backup.contracts.contractsList.plus(backup.contracts.archiveList).find { contract ->
-        contract.contract.identifier == contractId
+        contract.contract.id == contractId
     }
 }
 

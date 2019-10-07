@@ -69,7 +69,7 @@ object CoopsInfo : Command() {
         event.reply("Registered co-ops for `$contractId`:\n${coops.joinToString("\n") { result ->
             when (result) {
                 is NotFound ->"`${result.coopId}`: ✗ Waiting for starter" // TODO: Tag starter and/or leader
-                is Empty -> "`${result.coopStatus.coopIdentifier}`: ✗ Abandoned"
+                is Empty -> "`${result.coopStatus.coopId}`: ✗ Abandoned"
                 is InProgress -> {
                     val progress = (result.simulation.timeRemaining / result.simulation.projectedTimeToFinalGoal()!!)
                         ?.asPercentage() ?: "error"
@@ -78,7 +78,7 @@ object CoopsInfo : Command() {
                         else -> "`${result.simulation.coopId}`: ✗ Won't finish ($progress)"
                     }
                 }
-                is Finished -> "`${result.coopStatus.coopIdentifier}`: ✓ Finished"
+                is Finished -> "`${result.coopStatus.coopId}`: ✓ Finished"
             }
         }}")
     }

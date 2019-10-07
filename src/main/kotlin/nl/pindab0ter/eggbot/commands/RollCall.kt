@@ -62,7 +62,7 @@ object RollCall : Command() {
         }
 
         val contractInfo: EggInc.Contract? = AuxBrain.getContracts().contractsList.find {
-            it.identifier == event.arguments.first()
+            it.id == event.arguments.first()
         }
 
         val force: Boolean = event.arguments.getOrNull(1)?.equals("overwrite") == true
@@ -73,19 +73,19 @@ object RollCall : Command() {
             return
         }
 
-        if (contractInfo.coopAllowed != 1) "Co-op is not allowed for this contract".let {
+        if (!contractInfo.coopAllowed) "Co-op is not allowed for this contract".let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
         transaction {
-            if (!Coops.select { Coops.contract eq contractInfo.identifier }.empty()) {
+            if (!Coops.select { Coops.contract eq contractInfo.id }.empty()) {
                 if (force) {
                     transaction {
-                        Coops.deleteWhere { Coops.contract eq contractInfo.identifier }
+                        Coops.deleteWhere { Coops.contract eq contractInfo.id }
                     }
-                } else "Co-ops are already generated for contract `${contractInfo.identifier}`. Add `overwrite` to override.".let {
+                } else "Co-ops are already generated for contract `${contractInfo.id}`. Add `overwrite` to override.".let {
                     event.replyWarning(it)
                     log.debug { it }
                     return@transaction
@@ -99,7 +99,7 @@ object RollCall : Command() {
                 .maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
 
 
-            event.reply(StringBuilder("Co-ops generated for `${contractInfo.identifier}`:").appendln().apply {
+            event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
@@ -149,7 +149,7 @@ object RollCall : Command() {
         private fun createCoops(farmers: List<Farmer>, contract: EggInc.Contract): List<Coop> = transaction {
             List(((farmers.count() * 1.2) / contract.maxCoopSize).toInt() + 1) { index ->
                 Coop.new {
-                    this.contract = contract.identifier
+                    this.contract = contract.id
                     this.name = Config.coopIncrementChar.plus(index).toString() +
                             Config.coopName +
                             contract.maxCoopSize

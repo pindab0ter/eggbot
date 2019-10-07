@@ -31,7 +31,7 @@ object ContractIDs : Command() {
             val (soloContracts, coopContracts) = getContractsResponse.contractsList
                 .sortedBy { it.expirationTime }
                 .groupBy { it.coopAllowed }
-                .let { it[0].orEmpty() to it[1].orEmpty() }
+                .let { it[false].orEmpty() to it[true].orEmpty() }
 
             if (soloContracts.plus(coopContracts).isNotEmpty()) {
                 event.reply(StringBuilder("IDs for currently active contracts:").apply {
@@ -51,7 +51,7 @@ object ContractIDs : Command() {
 
     private fun List<EggInc.Contract>.printContracts(): String = StringBuilder().let { sb ->
         forEach { contract ->
-            sb.append("**`${contract.identifier}`**: ")
+            sb.append("**`${contract.id}`**: ")
             sb.append("${contract.name} (${contract.egg.formattedName})")
             sb.append(", valid for ")
             sb.append(

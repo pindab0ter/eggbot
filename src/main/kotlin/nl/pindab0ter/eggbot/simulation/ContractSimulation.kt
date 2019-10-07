@@ -18,13 +18,13 @@ class ContractSimulation constructor(
     val log = KotlinLogging.logger { }
 
     override val farm: EggInc.Simulation =
-        backup.farmsList.find { it.contractId == localContract.contract.identifier }!!
+        backup.farmsList.find { it.contractId == localContract.contract.id }!!
 
     //
     // Basic info
     //
 
-    val contractId: String = localContract.contract.identifier
+    val contractId: String = localContract.contract.id
     val contractName: String = localContract.contract.name
     val egg: EggInc.Egg = localContract.contract.egg
     var isActive: Boolean = true
@@ -82,7 +82,7 @@ class ContractSimulation constructor(
             backup: EggInc.Backup,
             contractId: String
         ): ContractSimulation? = backup.contracts.contractsList.find { localContract ->
-            localContract.contract.identifier == contractId
+            localContract.contract.id == contractId
         }?.let { contract ->
             ContractSimulation(backup, contract)
         }

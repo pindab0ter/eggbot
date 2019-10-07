@@ -119,7 +119,7 @@ object Config {
 
             // @formatter:off
             eggEmojiIds = mapOf (
-                EggInc.Egg.DEFAULT        to getOptional(EMOTE_DEFAULT),
+                EggInc.Egg.UNKNOWN_EGG    to getOptional(EMOTE_DEFAULT),
                 EggInc.Egg.EDIBLE         to getOptional(EMOTE_EDIBLE),
                 EggInc.Egg.SUPERFOOD      to getOptional(EMOTE_SUPERFOOD),
                 EggInc.Egg.MEDICAL        to getOptional(EMOTE_MEDICAL),

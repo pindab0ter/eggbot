@@ -18,17 +18,17 @@ class CoopContractSimulation private constructor(
 ) {
     val log = KotlinLogging.logger { }
 
-    val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractIdentifier)!!
+    val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractId)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
         backup.farmsList.any { farm ->
-            farm.contractId == coopStatus.contractIdentifier
+            farm.contractId == coopStatus.contractId
         }
     }.map { backup ->
         ContractSimulation(backup, localContract).also {
             it.isActive = coopStatus.contributorsList.find { contributor ->
-                contributor.userId == backup.userid
-            }?.active == 1
+                contributor.userId == backup.userId
+            }?.active == true
         }
     }
 
@@ -36,9 +36,9 @@ class CoopContractSimulation private constructor(
     // Basic info
     //
 
-    val contractId: String by lazy { localContract.contract.identifier }
+    val contractId: String by lazy { localContract.contract.id }
     val contractName: String by lazy { localContract.contract.name }
-    val coopId: String by lazy { localContract.coopIdentifier }
+    val coopId: String by lazy { localContract.coopId }
     val egg: EggInc.Egg by lazy { localContract.contract.egg }
     val maxCoopSize by lazy { localContract.contract.maxCoopSize }
 
@@ -102,7 +102,7 @@ class CoopContractSimulation private constructor(
         operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
             val (coopStatus, error) = AuxBrain.getCoopStatus(contractId, coopId)
             val contractName: String? = AuxBrain.getContracts().contractsList.find { contract ->
-                contract.identifier == contractId
+                contract.id == contractId
             }!!.name
 
             // Co-op not found?
@@ -117,7 +117,7 @@ class CoopContractSimulation private constructor(
             // Co-op not empty?
             if (backups.none { backup ->
                     backup.farmsList.any { farm ->
-                        farm.contractId == coopStatus.contractIdentifier
+                        farm.contractId == coopStatus.contractId
                     }
                 }
             ) return Empty(coopStatus, contractName!!)
@@ -135,9 +135,9 @@ class CoopContractSimulation private constructor(
             // for any of the contributors
             if (coopStatus.eggsLaid >= contract?.finalGoal ?: ZERO || backups.any { contributor ->
                     contributor.farmsList.none { farm ->
-                        farm.contractId == coopStatus.contractIdentifier
+                        farm.contractId == coopStatus.contractId
                     } && contributor.contracts.archiveList.find { contract ->
-                        contract.contract.identifier == coopStatus.contractIdentifier
+                        contract.contract.id == coopStatus.contractId
                     }?.finished == true
                 }
             ) return Finished(coopStatus, contractName!!)

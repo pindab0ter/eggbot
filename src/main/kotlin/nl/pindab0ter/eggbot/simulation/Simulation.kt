@@ -17,7 +17,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     // Basic info
     //
 
-    val farmerName: String = backup.name
+    val farmerName: String = backup.userName
 
     //
     // Research
@@ -42,7 +42,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
         )
 
     private val internalHatcheryMultiplier: BigDecimal
-        get() = BigDecimal(1 + .05 * backup.data.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level)
+        get() = BigDecimal(1 + .05 * backup.game.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level)
 
     private val eggLayingMultipliers: List<BigDecimal>
         get() = listOf(
@@ -52,7 +52,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
             BigDecimal(1 + .10 * farm.commonResearchList[CommonResearch.TIME_COMPRESSION.ordinal].level),
             BigDecimal(1 + .02 * farm.commonResearchList[CommonResearch.TIMELINE_DIVERSION.ordinal].level),
             BigDecimal(1 + .10 * farm.commonResearchList[CommonResearch.RELATIVITY_OPTIMIZATION.ordinal].level),
-            BigDecimal(1 + .05 * backup.data.epicResearchList[EpicResearch.EPIC_COMFY_NESTS.ordinal].level)
+            BigDecimal(1 + .05 * backup.game.epicResearchList[EpicResearch.EPIC_COMFY_NESTS.ordinal].level)
         )
 
     private val shippingRatePercentageIncreases: List<BigDecimal>
@@ -65,11 +65,11 @@ abstract class Simulation(val backup: EggInc.Backup) {
             BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.HOVER_UPGRADES.ordinal].level), // Assumes at least Hover Semi
             BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.DARK_CONTAINMENT.ordinal].level),
             BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level),
-            BigDecimal(1 + .05 * backup.data.epicResearchList[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level)
+            BigDecimal(1 + .05 * backup.game.epicResearchList[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level)
         )
 
     private val internalHatcheryCalm: BigDecimal
-        get() = BigDecimal(1 + .10 * backup.data.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
+        get() = BigDecimal(1 + .10 * backup.game.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
 
     //
     // Habitats (chicken cap)

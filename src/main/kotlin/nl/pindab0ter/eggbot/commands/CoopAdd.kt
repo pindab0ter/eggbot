@@ -69,12 +69,12 @@ object CoopAdd : Command() {
 
             transaction {
                 Coop.new {
-                    this.name = status.coopIdentifier
-                    this.contract = status.contractIdentifier
+                    this.name = status.coopId
+                    this.contract = status.contractId
                 }
             }
 
-            "Successfully registered co-op `${status.coopIdentifier}` for contract `${status.contractIdentifier}`.".let {
+            "Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.".let {
                 event.replySuccess(it)
                 log.debug { it }
                 return

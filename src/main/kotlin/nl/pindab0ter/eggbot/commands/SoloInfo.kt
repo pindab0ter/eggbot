@@ -55,12 +55,12 @@ object SoloInfo : Command() {
 
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
-                val contract = if (backup == null || !backup.hasData())
+                val contract = if (backup == null || !backup.hasGame())
                     "No data found for `${farmer.inGameName}`.".let {
                         log.warn { it }
                         event.reply(it)
                         return@getFarmerBackup
-                    } else backup.contracts.contractsList.find { it.contract.identifier == contractId }
+                    } else backup.contracts.contractsList.find { it.contract.id == contractId }
 
                 if (contract == null)
                     "No contract found with ID `$contractId`. Try using `${event.client.textualPrefix}${ContractIDs.name}`".let {
@@ -68,7 +68,7 @@ object SoloInfo : Command() {
                         event.reply(it)
                         return@getFarmerBackup
                     }
-                if (contract.contract.coopAllowed == 1 && contract.coopIdentifier.isNotBlank())
+                if (contract.contract.coopAllowed && contract.coopId.isNotBlank())
                     "The contract with ID `$contractId` is not a solo contract.".let {
                         log.debug { it }
                         event.reply(it)

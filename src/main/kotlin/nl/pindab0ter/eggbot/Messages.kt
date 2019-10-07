@@ -264,12 +264,12 @@ object Messages {
             "No co-op found for contract `${result.contractId}` with name `${result.coopId}"
         )
         is CoopContractSimulationResult.Empty -> listOf(
-            """ `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
+            """ `${result.coopStatus.coopId}` vs. __${result.contractName}__:
                 
                 This co-op has no members.""".trimIndent()
         )
         is CoopContractSimulationResult.Finished -> listOf(
-            """ `${result.coopStatus.coopIdentifier}` vs. __${result.contractName}__:
+            """ `${result.coopStatus.coopId}` vs. __${result.contractName}__:
                 
                 This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent()
         )

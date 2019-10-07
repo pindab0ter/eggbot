@@ -79,7 +79,7 @@ object Register : Command() {
                 }
 
             // Check if any back-up was found with the in-game ID
-            if (backup == null || !backup.hasData())
+            if (backup == null || !backup.hasGame())
                 ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID (not name!) correctly?\n" +
                         "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
                     event.replyError(it)
@@ -88,9 +88,9 @@ object Register : Command() {
                 }
 
             // Check if the in-game name matches with the in-game name belonging to the in-game ID's account
-            if (registrant.inGameId != backup.userid || registrant.inGameName.toLowerCase() != backup.name.toLowerCase())
-                ("The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.name}`)\n" +
-                        "If this is you, please register with `${event.client.textualPrefix}$name ${backup.userid} ${backup.name}`").let {
+            if (registrant.inGameId != backup.userId || registrant.inGameName.toLowerCase() != backup.userName.toLowerCase())
+                ("The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.userName}`)\n" +
+                        "If this is you, please register with `${event.client.textualPrefix}$name ${backup.userId} ${backup.userName}`").let {
                     event.replyError(it)
                     log.debug { it }
                     return@transaction
@@ -99,11 +99,11 @@ object Register : Command() {
             // Add the new in-game name
             Farmer.new(registrant.inGameId) {
                 this.discordUser = discordUser
-                this.inGameName = backup.name.replace('`', '\'')
-                this.soulEggs = backup.data.soulEggs
-                this.prophecyEggs = backup.data.prophecyEggs
-                this.soulBonus = backup.data.soulBonus
-                this.prophecyBonus = backup.data.prophecyBonus
+                this.inGameName = backup.userName.replace('`', '\'')
+                this.soulEggs = backup.game.soulEggs
+                this.prophecyEggs = backup.game.prophecyEggs
+                this.soulBonus = backup.game.soulBonus
+                this.prophecyBonus = backup.game.prophecyBonus
                 this.prestiges = backup.stats.prestigeCount
                 this.droneTakedowns = backup.stats.droneTakedowns
                 this.eliteDroneTakedowns = backup.stats.droneTakedownsElite
@@ -113,11 +113,11 @@ object Register : Command() {
 
             // Finally confirm the registration
             if (discordUser.farmers.filterNot { it.inGameId == registrant.inGameId }.none())
-                "You have been registered with the in-game name `${backup.name}`, welcome!".let {
+                "You have been registered with the in-game name `${backup.userName}`, welcome!".let {
                     event.replySuccess(it)
                     log.debug { it }
                 }
-            else "You are now registered with the in-game name `${backup.name}`, as well as `${discordUser.farmers
+            else "You are now registered with the in-game name `${backup.userName}`, as well as `${discordUser.farmers
                 .filterNot { it.inGameId == registrant.inGameId }
                 .joinToString(" `, ` ") { it.inGameName }
             }`!".let {
