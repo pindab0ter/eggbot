@@ -27,8 +27,8 @@ object ContractIDs : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        AuxBrain.getContracts { getContractsResponse ->
-            val (soloContracts, coopContracts) = getContractsResponse.contractsList
+        AuxBrain.getPeriodicals { periodicalsResponse ->
+            val (soloContracts, coopContracts) = periodicalsResponse.contracts.contractsList
                 .sortedBy { it.expirationTime }
                 .groupBy { it.coopAllowed }
                 .let { it[false].orEmpty() to it[true].orEmpty() }
@@ -45,7 +45,6 @@ object ContractIDs : Command() {
                     }
                 }.toString())
             } else event.replyWarning("There are currently no active contracts")
-
         }
     }
 

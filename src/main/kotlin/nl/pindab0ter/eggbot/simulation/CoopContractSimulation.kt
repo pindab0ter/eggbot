@@ -101,9 +101,9 @@ class CoopContractSimulation private constructor(
     companion object Factory {
         operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
             val (coopStatus, error) = AuxBrain.getCoopStatus(contractId, coopId)
-            val contractName: String? = AuxBrain.getContracts().contractsList.find { contract ->
+            val contractName: String? = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { contract ->
                 contract.id == contractId
-            }!!.name
+            }?.name
 
             // Co-op not found?
             if (coopStatus == null || error != null) return NotFound(contractId, coopId)

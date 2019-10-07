@@ -11,7 +11,7 @@ import java.math.MathContext.DECIMAL64
 
 abstract class Simulation(val backup: EggInc.Backup) {
 
-    internal abstract val farm: EggInc.Simulation
+    internal abstract val farm: EggInc.Backup.Simulation
 
     //
     // Basic info

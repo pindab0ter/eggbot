@@ -17,7 +17,7 @@ class ContractSimulation constructor(
 
     val log = KotlinLogging.logger { }
 
-    override val farm: EggInc.Simulation =
+    override val farm: EggInc.Backup.Simulation =
         backup.farmsList.find { it.contractId == localContract.contract.id }!!
 
     //

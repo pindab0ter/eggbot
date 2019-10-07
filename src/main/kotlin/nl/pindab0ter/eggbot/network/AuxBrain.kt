@@ -6,33 +6,49 @@ import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.core.ResultHandler
 import com.github.kittinunf.fuel.core.requests.CancellableRequest
-import com.github.kittinunf.fuel.httpGet
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
 import com.github.kittinunf.result.Result
 import nl.pindab0ter.eggbot.decodeBase64
-import java.io.File
 
 
 object AuxBrain {
-    private const val GET_SALES_URL = "http://www.auxbrain.com/ei/get_sales"
-    private const val GET_EVENTS_URL = "http://www.auxbrain.com/ei/get_events"
-    private const val GET_CONTRACTS_URL = "http://www.auxbrain.com/ei/get_contracts"
+    private const val SALES_URL = "http://www.auxbrain.com/ei/get_sales"
+    private const val EVENTS_URL = "http://www.auxbrain.com/ei/get_events"
+    private const val CONTRACTS_URL = "http://www.auxbrain.com/ei/get_contracts" // Deprecated
+    private const val PERIODICALS_URL = "http://www.auxbrain.com/ei/get_periodicals"
     private const val COOP_STATUS_URL = "http://www.auxbrain.com/ei/coop_status"
     private const val FIRST_CONTACT_URL = "http://www.auxbrain.com/ei/first_contact"
     private const val DAILY_GIFT_URL = "http://www.auxbrain.com/ei/daily_gift_info"
 
-    fun getContracts(handler: (EggInc.GetContractsResponse) -> Unit) = GET_CONTRACTS_URL.httpGet()
+    private fun periodicalsRequest(): Request = PERIODICALS_URL.httpPost()
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body(
+            "data=${EggInc.PeriodicalsRequest
+                .newBuilder()
+                .setClientVersion(20)
+                .build()
+                .toByteString()
+                .toStringUtf8()
+                .encodeBase64ToString()}"
+        )
+
+    fun getPeriodicals(handler: (EggInc.PeriodicalsResponse) -> Unit) = periodicalsRequest()
         .response { _, response, _ ->
-            handler(EggInc.GetContractsResponse.parseFrom(response.body().decodeBase64()))
+            handler(EggInc.PeriodicalsResponse.parseFrom(response.body().decodeBase64()))
         }
 
-    fun getContracts(): EggInc.GetContractsResponse = EggInc.GetContractsResponse.parseFrom(
-        GET_CONTRACTS_URL.httpGet().response().second.body().decodeBase64()
-    )
+    fun getPeriodicals(): EggInc.PeriodicalsResponse? =
+        periodicalsRequest().responseObject(ContractsDeserializer).third.component1()
 
-    private fun firstContactPostRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
+    object ContractsDeserializer : ResponseDeserializable<EggInc.PeriodicalsResponse> {
+        override fun deserialize(content: String): EggInc.PeriodicalsResponse? {
+            return EggInc.PeriodicalsResponse.parseFrom(content.decodeBase64())
+        }
+    }
+
+    private fun firstContactRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(
             "data=${EggInc.FirstContactRequest
@@ -44,7 +60,7 @@ object AuxBrain {
                 .encodeBase64ToString()}"
         )
 
-    private fun getCoopStatusPostRequest(contractId: String, coopId: String) = COOP_STATUS_URL.httpPost()
+    private fun coopStatusRequest(contractId: String, coopId: String) = COOP_STATUS_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body(
             "data=${EggInc.CoopStatusRequest
@@ -61,16 +77,9 @@ object AuxBrain {
         contractId: String,
         coopId: String
     ): Result<EggInc.CoopStatusResponse, FuelError> =
-        getCoopStatusPostRequest(contractId, coopId).responseObject(ContractDeserializer).third
+        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third
 
-    fun getCoopStatus(
-        contractId: String,
-        coopId: String,
-        handler: ResultHandler<EggInc.CoopStatusResponse>
-    ): CancellableRequest =
-        getCoopStatusPostRequest(contractId, coopId).responseObject(ContractDeserializer, handler)
-
-    object ContractDeserializer : ResponseDeserializable<EggInc.CoopStatusResponse> {
+    object CoopStatusDeserializer : ResponseDeserializable<EggInc.CoopStatusResponse> {
         override fun deserialize(content: String): EggInc.CoopStatusResponse? {
             return EggInc.CoopStatusResponse.parseFrom(content.decodeBase64())
         }
@@ -83,7 +92,7 @@ object AuxBrain {
      * @return [CancellableRequest] the request in flight
      */
     fun getFarmerBackup(inGameId: String, handler: ResultHandler<EggInc.Backup>): CancellableRequest =
-        firstContactPostRequest(inGameId).responseObject(BackupDeserializer, handler)
+        firstContactRequest(inGameId).responseObject(BackupDeserializer, handler)
 
     /**
      * Retrieve the [EggInc.Backup] synchronously
@@ -93,7 +102,7 @@ object AuxBrain {
      * @return [EggInc.Backup] the backup
      */
     fun getFarmerBackup(inGameId: String): Result<EggInc.Backup, FuelError> =
-        firstContactPostRequest(inGameId).responseObject(BackupDeserializer).third
+        firstContactRequest(inGameId).responseObject(BackupDeserializer).third
 
     object BackupDeserializer : ResponseDeserializable<EggInc.Backup> {
         override fun deserialize(content: String): EggInc.Backup? {

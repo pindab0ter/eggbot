@@ -334,10 +334,10 @@ fun Command.hasPermission(author: User, role: String?): Boolean = role != null &
 
 // AuxBrain
 
-val EggInc.Game.soulBonus: Int get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
-val EggInc.Game.prophecyBonus: Int get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
-val EggInc.Simulation.habPopulation: List<BD> get() = habPopulationList.map { it.toBigDecimal() }
-val EggInc.Game.bonusPerSoulEgg: BD
+val EggInc.Backup.Game.soulBonus: Int get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
+val EggInc.Backup.Game.prophecyBonus: Int get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
+val EggInc.Backup.Simulation.habPopulation: List<BD> get() = habPopulationList.map { it.toBigDecimal() }
+val EggInc.Backup.Game.bonusPerSoulEgg: BD
     get() {
         val soulEggBonus = BD(10 + soulBonus)
         val prophecyEggBonus = BD(1.05) + BD(0.01) * BD(prophecyBonus)

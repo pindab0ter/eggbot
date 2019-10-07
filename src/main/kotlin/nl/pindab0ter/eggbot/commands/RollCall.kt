@@ -61,7 +61,7 @@ object RollCall : Command() {
             CoopFarmers.deleteAll()
         }
 
-        val contractInfo: EggInc.Contract? = AuxBrain.getContracts().contractsList.find {
+        val contractInfo: EggInc.Contract? = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find {
             it.id == event.arguments.first()
         }
 
