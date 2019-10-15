@@ -28,28 +28,17 @@ object SoloInfo : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList() }
-
-        @Suppress("FoldInitializerAndIfToElvis")
-        if (farmers.isNullOrEmpty()) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
+        (checkPrerequisites(
+            event,
+            minArguments = 1,
+            maxArguments = 2
+        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
-        when {
-            event.arguments.size < 1 -> missingArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-            event.arguments.size > 2 -> tooManyArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-        }
-
+        val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList()!! }
         val contractId = event.arguments.first()
         val compact: Boolean = event.arguments.getOrNull(1)?.startsWith("c") == true
 

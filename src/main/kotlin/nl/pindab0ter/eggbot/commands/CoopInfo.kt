@@ -26,17 +26,14 @@ object CoopInfo : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        when {
-            event.arguments.size < 2 -> missingArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-            event.arguments.size > 3 -> tooManyArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
+        (checkPrerequisites(
+            event,
+            minArguments = 2,
+            maxArguments = 3
+        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
         }
 
         val contractId: String = event.arguments[0]

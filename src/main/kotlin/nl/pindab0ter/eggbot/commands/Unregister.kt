@@ -22,23 +22,15 @@ object Unregister : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        when {
-            !hasPermission(event.author, Config.adminRole) ->
-                "You must have at least a role called `${Config.adminRole}` to use that!".let {
-                    event.replyError(it)
-                    log.debug { it }
-                    return
-                }
-            event.arguments.isEmpty() -> missingArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-            event.arguments.size > 1 -> tooManyArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
+        (checkPrerequisites(
+            event,
+            adminRequired = true,
+            minArguments = 1,
+            maxArguments = 2
+        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
         }
 
         val id = event.arguments.first()

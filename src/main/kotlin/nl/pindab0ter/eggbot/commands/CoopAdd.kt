@@ -28,24 +28,15 @@ object CoopAdd : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        if (!hasPermission(event.author, Config.adminRole))
-            "You must have at least a role called `${Config.adminRole}` to use that!".let {
-                event.replyError(it)
-                log.debug { it }
-                return
-            }
-
-        when {
-            event.arguments.size < 2 -> missingArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-            event.arguments.size > 2 -> tooManyArguments.let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
+        (checkPrerequisites(
+            event,
+            adminRequired = true,
+            minArguments = 1,
+            maxArguments = 2
+        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
         }
 
         val contractId: String = event.arguments[0]

@@ -3,6 +3,8 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.PrerequisitesCheckResult
+import nl.pindab0ter.eggbot.checkPrerequisites
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -22,13 +24,15 @@ object Active : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        val discordUser = transaction { DiscordUser.findById(event.author.id) }
-
-        if (discordUser == null) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
+        (checkPrerequisites(
+            event
+        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
+
+        val discordUser = transaction { DiscordUser.findById(event.author.id)!! }
 
         when {
             discordUser.isActive -> {

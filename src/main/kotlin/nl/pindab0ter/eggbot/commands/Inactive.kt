@@ -3,11 +3,9 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.arguments
-import nl.pindab0ter.eggbot.asMonthAndDay
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.tooManyArguments
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 
@@ -26,20 +24,16 @@ object Inactive : Command() {
     override fun execute(event: CommandEvent) {
         event.channel.sendTyping().queue()
 
-        if (event.arguments.size > 1) tooManyArguments.let {
+        (checkPrerequisites(
+            event,
+            maxArguments = 1
+        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
-        val discordUser = transaction { DiscordUser.findById(event.author.id) }
-
-        @Suppress("FoldInitializerAndIfToElvis")
-        if (discordUser == null) "You are not yet registered. Please register using `${event.client.textualPrefix}${Register.name}`.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        val discordUser = transaction { DiscordUser.findById(event.author.id)!! }
 
         when (val argument = event.arguments.firstOrNull()) {
             // If no arguments are given
