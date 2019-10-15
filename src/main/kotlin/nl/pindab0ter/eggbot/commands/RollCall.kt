@@ -46,8 +46,7 @@ object RollCall : Command() {
             return
         }
 
-        // if (Config.devMode) transaction {
-        transaction {
+        if (Config.devMode) transaction {
             Coops.deleteAll()
             CoopFarmers.deleteAll()
         }
@@ -137,8 +136,12 @@ object RollCall : Command() {
     object PaddingDistribution {
         private const val FILL_PERCENTAGE = 0.8
 
-        private fun createCoops(farmers: List<Farmer>, contract: EggInc.Contract): List<Coop> = transaction {
-            List(((farmers.count() * 1.2) / contract.maxCoopSize).toInt() + 1) { index ->
+        private fun createCoops(
+            farmers: List<Farmer>,
+            contract: EggInc.Contract,
+            preferredCoopSize: Int
+        ): List<Coop> = transaction {
+            List((farmers.count() / preferredCoopSize) + 1) { index ->
                 Coop.new {
                     this.contract = contract.id
                     this.name = Config.coopIncrementChar.plus(index).toString() +
@@ -149,14 +152,12 @@ object RollCall : Command() {
         }
 
         fun createRollCall(farmers: List<Farmer>, contract: EggInc.Contract): List<Coop> {
-            val coops = createCoops(farmers, contract)
             val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
             val inactiveFarmers = farmers.filter { !it.isActive }
-            val preferredCoopSize = {
-                val inactiveToActiveFarmerRatio = inactiveFarmers.size.toFloat() / farmers.size.toFloat()
-                val activeFarmerFillRatio = FILL_PERCENTAGE - inactiveToActiveFarmerRatio * FILL_PERCENTAGE
-                (contract.maxCoopSize * activeFarmerFillRatio).roundToInt()
-            }()
+            val preferredCoopSize: Int =
+                if (contract.maxCoopSize <= 10) contract.maxCoopSize
+                else (12 * FILL_PERCENTAGE).roundToInt()
+            val coops = createCoops(farmers, contract, preferredCoopSize)
 
             transaction {
                 // Fill each co-op with the next strongest player so that all co-ops have one
