@@ -3,18 +3,13 @@ package nl.pindab0ter.eggbot.commands
 import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import mu.KotlinLogging
-import nl.pindab0ter.eggbot.asDayHoursAndMinutes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
-import nl.pindab0ter.eggbot.formattedName
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.toDateTime
+import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
 object ContractIDs : Command() {
-
-    private val log = KotlinLogging.logger { }
 
     init {
         name = "contract-ids"

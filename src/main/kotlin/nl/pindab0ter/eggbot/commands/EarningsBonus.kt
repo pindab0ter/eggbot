@@ -4,13 +4,15 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.core.entities.ChannelType
-import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
+import nl.pindab0ter.eggbot.utilities.arguments
+import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.math.BigDecimal
-import java.text.DecimalFormat
 
 object EarningsBonus : Command() {
 

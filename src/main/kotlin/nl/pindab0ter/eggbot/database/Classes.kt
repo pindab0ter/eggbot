@@ -1,7 +1,8 @@
 package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
-import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal

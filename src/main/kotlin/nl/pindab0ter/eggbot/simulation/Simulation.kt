@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.simulation
 
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
-import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE

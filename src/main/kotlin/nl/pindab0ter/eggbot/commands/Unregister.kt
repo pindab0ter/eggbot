@@ -3,7 +3,9 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction

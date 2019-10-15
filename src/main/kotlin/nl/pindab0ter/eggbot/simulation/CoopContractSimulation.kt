@@ -4,7 +4,7 @@ import com.auxbrain.ei.EggInc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import org.joda.time.Duration

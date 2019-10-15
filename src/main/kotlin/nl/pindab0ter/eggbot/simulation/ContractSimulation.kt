@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.simulation
 
 import com.auxbrain.ei.EggInc
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.*
+import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal

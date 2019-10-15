@@ -202,4 +202,6 @@ object Config {
             else -> default
         }
     }
+
+    class PropertyNotFoundException(override val message: String?) : Exception(message)
 }

@@ -10,7 +10,7 @@ import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
 import com.github.kittinunf.result.Result
-import nl.pindab0ter.eggbot.decodeBase64
+import nl.pindab0ter.eggbot.utilities.decodeBase64
 
 
 object AuxBrain {

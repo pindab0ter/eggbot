@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.jobs
 
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.asDayHoursAndMinutes
+import nl.pindab0ter.eggbot.utilities.asDayHoursAndMinutes
 import org.joda.time.DateTime
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
