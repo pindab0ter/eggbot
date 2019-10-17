@@ -27,9 +27,9 @@ fun Command.checkPrerequisites(
     minArguments: Int = 0,
     maxArguments: Int = Int.MAX_VALUE
 ): PrerequisitesCheckResult = when {
-    commandEvent.author.isRegistered < !registrationRequired ->
+    commandEvent.author.isRegistered < registrationRequired ->
         PrerequisitesCheckResult.Failure("You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.")
-    commandEvent.author.isAdmin < !adminRequired ->
+    commandEvent.author.isAdmin < adminRequired ->
         PrerequisitesCheckResult.Failure("You must have at least a role called `${Config.adminRole}` to use that!")
     channelType == TEXT && channelType != commandEvent.channelType ->
         PrerequisitesCheckResult.Failure("This command cannot be used in DMs. Please try again in a public channel.")
