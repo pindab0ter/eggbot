@@ -48,9 +48,9 @@ class CoopContractSimulation private constructor(
 
     val eggsLaid: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaid } }
     val population: BigDecimal by lazy { farms.sumBy { farm -> farm.population } }
-    val populationIncreaseRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerMinute } }
-    val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerHour } }
-    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerHour } }
+    val populationIncreaseRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreasePerMinute } }
+    val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreasePerHour } }
+    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaidPerHour } }
 
     //
     // Contract details
@@ -77,11 +77,11 @@ class CoopContractSimulation private constructor(
 
         do {
             // TODO: Move 'step' method to ContractSimulation
-            farms.forEach { farm ->
-                projectedEggsLaid += farm.projectedEggLayingRatePerMinute
-                if (farm.projectedPopulation < farm.habsMaxCapacity) farm.projectedPopulation =
-                    (farm.projectedPopulation + populationIncreaseRatePerMinute).coerceAtMost(farm.habsMaxCapacity)
-            }
+            // farms.forEach { farm ->
+            //     projectedEggsLaid += farm.projectedEggLayingRatePerMinute
+            //     if (farm.projectedPopulation < farm.habsMaxCapacity) farm.projectedPopulation =
+            //         (farm.projectedPopulation + populationIncreaseRatePerMinute).coerceAtMost(farm.habsMaxCapacity)
+            // }
             duration += Duration.standardSeconds(60)
         } while (projectedEggsLaid < goal)
 

@@ -147,10 +147,10 @@ object Messages {
         appendln("`${simulation.farmerName}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
         append("**Total eggs**: ${simulation.eggsLaid.formatIllions()} ")
-        append("(${simulation.eggLayingRatePerHour.formatIllions()}/hr)")
+        append("(${simulation.eggsLaidPerHour.formatIllions()}/hr)")
         appendln()
         append("**Total chickens**: ${simulation.population.formatIllions()} ")
-        append("(${simulation.populationIncreaseRatePerHour.formatIllions()}/hr)")
+        append("(${simulation.populationIncreasePerHour.formatIllions()}/hr)")
         appendln()
         appendln()
 
@@ -165,29 +165,54 @@ object Messages {
             if (!compact) append("  _(Includes new chickens and takes bottlenecks into account)_")
             append("```")
             appendln()
-            simulation.goals
-                .filter { (_, goal) -> simulation.eggsLaid < goal }
-                .forEach { (index, goal: BigDecimal) ->
-                    val finishedIn = simulation.projectedTimeTo(goal)
-                    val success = finishedIn != null && finishedIn < simulation.timeRemaining
-                    val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
-                    append("${index + 1}: ")
-                    appendPaddingCharacters(
-                        goal.formatIllions(true),
-                        simulation.goals
-                            .filter { simulation.eggsLaid < it.value }
-                            .map { it.value.formatIllions(true) }
-                    )
-                    append(goal.formatIllions(true))
-                    append(if (success) " ✓ " else " ✗ ")
-                    when {
-                        finishedIn == null -> append("∞")
-                        finishedIn > oneYear -> append("More than a year")
-                        else -> append(finishedIn.asDayHoursAndMinutes(compact))
+            simulation.runSimulation().apply {
+                goalsReached.toSortedMap()
+                    .filter { (_, goal) -> goal != Duration.ZERO }
+                    .forEach { (index, duration) ->
+                        val success = duration != null && duration < simulation.timeRemaining
+                        val goal = simulation.goals[index]!!
+
+                        append("${index + 1}: ")
+                        appendPaddingCharacters(
+                            goal.formatIllions(true),
+                            simulation.goals
+                                .filter { simulation.eggsLaid < it.value }
+                                .map { it.value.formatIllions(true) }
+                        )
+                        append(goal.formatIllions(true))
+                        append(if (success) " ✓ " else " ✗ ")
+                        when (duration) {
+                            null -> append("More than a year")
+                            else -> append(duration.asDayHoursAndMinutes(compact))
+                        }
+                        if (index + 1 < simulation.goals.count()) appendln()
                     }
-                    if (index + 1 < simulation.goals.count()) appendln()
-                }
+            }
+
+            // simulation.goals
+            //     .filter { (_, goal) -> simulation.eggsLaid < goal }
+            //     .forEach { (index, goal: BigDecimal) ->
+            //         val finishedIn = simulation.projectedTimeTo(goal)
+            //         val success = finishedIn != null && finishedIn < simulation.timeRemaining
+            //         val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
+            //
+            //         append("${index + 1}: ")
+            //         appendPaddingCharacters(
+            //             goal.formatIllions(true),
+            //             simulation.goals
+            //                 .filter { simulation.eggsLaid < it.value }
+            //                 .map { it.value.formatIllions(true) }
+            //         )
+            //         append(goal.formatIllions(true))
+            //         append(if (success) " ✓ " else " ✗ ")
+            //         when {
+            //             finishedIn == null -> append("∞")
+            //             finishedIn > oneYear -> append("More than a year")
+            //             else -> append(finishedIn.asDayHoursAndMinutes(compact))
+            //         }
+            //         if (index + 1 < simulation.goals.count()) appendln()
+            //     }
             appendln("```")
         }
     }.toString()
@@ -291,7 +316,7 @@ object Messages {
             append(eggRate)
             appendPaddingCharacters(
                 eggRate,
-                farms.map { it.eggLayingRatePerHour.formatIllions() + "/hr" }.plus(eggRate)
+                farms.map { it.eggsLaidPerHour.formatIllions() + "/hr" }.plus(eggRate)
             )
             append("│")
             appendPaddingCharacters(
@@ -309,7 +334,7 @@ object Messages {
             append("╪")
             appendPaddingCharacters(
                 "",
-                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus(eggRate),
+                farms.map { "${it.eggsLaidPerHour.formatIllions()}/hr" }.plus(eggRate),
                 "═"
             )
             append("╪")
@@ -321,7 +346,7 @@ object Messages {
             append("╪")
             appendPaddingCharacters(
                 "",
-                farms.map { "${it.populationIncreaseRatePerHour.formatIllions()}/hr" }.plus(chickenRate),
+                farms.map { "${it.populationIncreasePerHour.formatIllions()}/hr" }.plus(chickenRate),
                 "═"
             )
             appendln()
@@ -355,10 +380,10 @@ object Messages {
             )
             append(farm.eggsLaid.formatIllions())
             append("│")
-            append("${farm.eggLayingRatePerHour.formatIllions()}/hr")
+            append("${farm.eggsLaidPerHour.formatIllions()}/hr")
             if (!compact) appendPaddingCharacters(
-                "${farm.eggLayingRatePerHour.formatIllions()}/hr",
-                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus(eggRate)
+                "${farm.eggsLaidPerHour.formatIllions()}/hr",
+                farms.map { "${it.eggsLaidPerHour.formatIllions()}/hr" }.plus(eggRate)
             )
             if (!compact) {
                 append("│")
@@ -368,7 +393,7 @@ object Messages {
                 )
                 append(farm.population.formatIllions())
                 append("│")
-                append("${farm.populationIncreaseRatePerHour.formatIllions()}/hr")
+                append("${farm.populationIncreasePerHour.formatIllions()}/hr")
             }
             appendln()
         }
