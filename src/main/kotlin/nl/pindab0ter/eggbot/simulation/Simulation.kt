@@ -165,19 +165,4 @@ abstract class Simulation(val backup: EggInc.Backup) {
     val shippingRatePerSecond: BigDecimal by lazy {
         shippingRatePerMinute.divide(BigDecimal(60), DECIMAL64)
     }
-
-    val timeToMaxShippingRate: Duration by lazy {
-        if (internalHatcheriesAreActive) {
-            val shippingRateRemaining = shippingRatePerSecond - currentEggLayingRatePerSecond
-            val chickensRequired = shippingRateRemaining.divide(eggLayingRatePerChickenPerSecond, DECIMAL64)
-            val secondsToMaxShipping = chickensRequired.divide(populationIncreaseRatePerSecond, DECIMAL64)
-            secondsToMaxShipping.toLong().toDuration()
-        } else Duration(Long.MAX_VALUE)
-    }
-
-    val currentEggLayingRatePerSecond by lazy { minOf(eggLayingRatePerSecond, shippingRatePerSecond) }
-
-    val currentEggLayingRatePerMinute by lazy { minOf(eggLayingRatePerMinute, shippingRatePerMinute) }
-
-    val currentEggLayingRatePerHour by lazy { currentEggLayingRatePerMinute * 60 }
 }
