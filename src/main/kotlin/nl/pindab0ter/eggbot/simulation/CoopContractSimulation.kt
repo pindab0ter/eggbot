@@ -4,9 +4,9 @@ import com.auxbrain.ei.EggInc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
+import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
@@ -50,10 +50,7 @@ class CoopContractSimulation private constructor(
     val population: BigDecimal by lazy { farms.sumBy { farm -> farm.population } }
     val populationIncreaseRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerMinute } }
     val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreaseRatePerHour } }
-    val eggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerMinute } }
     val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggLayingRatePerHour } }
-    val currentEggLayingRatePerSecond: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerSecond } }
-    val currentEggLayingRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggLayingRatePerMinute } }
 
     //
     // Contract details
@@ -81,7 +78,7 @@ class CoopContractSimulation private constructor(
         do {
             // TODO: Move 'step' method to ContractSimulation
             farms.forEach { farm ->
-                projectedEggsLaid += farm.currentEggLayingRatePerMinute
+                projectedEggsLaid += farm.projectedEggLayingRatePerMinute
                 if (farm.projectedPopulation < farm.habsMaxCapacity) farm.projectedPopulation =
                     (farm.projectedPopulation + populationIncreaseRatePerMinute).coerceAtMost(farm.habsMaxCapacity)
             }

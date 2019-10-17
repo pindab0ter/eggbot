@@ -8,7 +8,6 @@ import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.util.*
-import kotlin.system.measureTimeMillis
 
 class ContractSimulation constructor(
     backup: EggInc.Backup,
@@ -33,6 +32,7 @@ class ContractSimulation constructor(
     var projectedPopulation: BigDecimal = population
     override val eggsLaid: BigDecimal = farm.eggsLaid.toBigDecimal()
     var projectedEggsLaid: BigDecimal = eggsLaid
+    val projectedEggLayingRatePerMinute: BigDecimal = eggLayingRatePerChickenPerSecond * projectedPopulation * 60
 
     //
     // Contract details
@@ -58,16 +58,12 @@ class ContractSimulation constructor(
     fun projectedTimeTo(goal: BigDecimal): Duration? = if (population == ZERO) null else {
         var duration = Duration.ZERO
 
-        measureTimeMillis {
-            do {
-                projectedEggsLaid += currentEggLayingRatePerMinute
-                if (population < habsMaxCapacity) projectedPopulation =
-                    (population + populationIncreaseRatePerMinute).coerceAtMost(habsMaxCapacity)
-                duration += Duration.standardSeconds(60)
-            } while (projectedEggsLaid < goal)
-        }.let {
-            log.debug { "Simulation took ${it}ms" }
-        }
+        do {
+            projectedEggsLaid += projectedEggLayingRatePerMinute
+            if (population < habsMaxCapacity) projectedPopulation =
+                (population + populationIncreaseRatePerMinute).coerceAtMost(habsMaxCapacity)
+            duration += Duration.standardSeconds(60)
+        } while (projectedEggsLaid < goal)
 
         duration
     }

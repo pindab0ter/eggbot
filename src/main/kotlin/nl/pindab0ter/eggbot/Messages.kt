@@ -355,10 +355,10 @@ object Messages {
             )
             append(farm.eggsLaid.formatIllions())
             append("│")
-            append("${farm.currentEggLayingRatePerHour.formatIllions()}/hr")
+            append("${farm.eggLayingRatePerHour.formatIllions()}/hr")
             if (!compact) appendPaddingCharacters(
-                "${farm.currentEggLayingRatePerHour.formatIllions()}/hr",
-                farms.map { "${it.currentEggLayingRatePerHour.formatIllions()}/hr" }.plus(eggRate)
+                "${farm.eggLayingRatePerHour.formatIllions()}/hr",
+                farms.map { "${it.eggLayingRatePerHour.formatIllions()}/hr" }.plus(eggRate)
             )
             if (!compact) {
                 append("│")
