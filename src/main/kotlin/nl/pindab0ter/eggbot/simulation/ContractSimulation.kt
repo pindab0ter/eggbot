@@ -29,11 +29,10 @@ class ContractSimulation constructor(
     val egg: EggInc.Egg = localContract.contract.egg
     var isActive: Boolean = true
     val finished: Boolean = localContract.finished
-
-    init {
-        eggsLaid = farm.eggsLaid.toBigDecimal()
-        population = farm.habPopulation.sum()
-    }
+    override val population: BigDecimal = farm.habPopulation.sum()
+    var projectedPopulation: BigDecimal = population
+    override val eggsLaid: BigDecimal = farm.eggsLaid.toBigDecimal()
+    var projectedEggsLaid: BigDecimal = eggsLaid
 
     //
     // Contract details
@@ -61,11 +60,11 @@ class ContractSimulation constructor(
 
         measureTimeMillis {
             do {
-                eggsLaid += minOf(eggLayingRatePerSecond, shippingRatePerSecond)
-                if (population < habsMaxCapacity) population =
-                    (population + populationIncreaseRatePerSecond).coerceAtMost(habsMaxCapacity)
-                duration += Duration.standardSeconds(1)
-            } while (eggsLaid < goal)
+                projectedEggsLaid += currentEggLayingRatePerMinute
+                if (population < habsMaxCapacity) projectedPopulation =
+                    (population + populationIncreaseRatePerMinute).coerceAtMost(habsMaxCapacity)
+                duration += Duration.standardSeconds(60)
+            } while (projectedEggsLaid < goal)
         }.let {
             log.debug { "Simulation took ${it}ms" }
         }

@@ -75,17 +75,18 @@ class CoopContractSimulation private constructor(
 
     // TODO: Calculate time to multiple goals in one go
     fun projectedTimeTo(goal: BigDecimal): Duration? = if (population == ZERO) null else {
-        var eggsLaid = eggsLaid
+        var projectedEggsLaid = eggsLaid
         var duration = Duration.ZERO
 
         do {
+            // TODO: Move 'step' method to ContractSimulation
             farms.forEach { farm ->
-                eggsLaid += farm.currentEggLayingRatePerMinute
-                if (farm.population < farm.habsMaxCapacity) farm.population =
-                    (farm.population + populationIncreaseRatePerMinute).coerceAtMost(farm.habsMaxCapacity)
+                projectedEggsLaid += farm.currentEggLayingRatePerMinute
+                if (farm.projectedPopulation < farm.habsMaxCapacity) farm.projectedPopulation =
+                    (farm.projectedPopulation + populationIncreaseRatePerMinute).coerceAtMost(farm.habsMaxCapacity)
             }
             duration += Duration.standardSeconds(60)
-        } while (eggsLaid < goal)
+        } while (projectedEggsLaid < goal)
 
         duration
     }

@@ -127,7 +127,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     // Chickens
     //
 
-    lateinit var population: BigDecimal
+    abstract val population: BigDecimal
 
     //
     // Eggs
@@ -135,7 +135,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     private val eggLayingBonus: BigDecimal by lazy { eggLayingMultipliers.product() }
 
-    lateinit var eggsLaid: BigDecimal
+    abstract val eggsLaid: BigDecimal
 
     val eggLayingBaseRatePerChickenPerSecond: BigDecimal by lazy { ONE / BigDecimal(30) }
 
