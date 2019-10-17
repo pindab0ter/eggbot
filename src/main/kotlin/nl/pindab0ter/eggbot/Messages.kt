@@ -1,8 +1,6 @@
 package nl.pindab0ter.eggbot
 
-import nl.pindab0ter.eggbot.commands.EarningsBonus
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult

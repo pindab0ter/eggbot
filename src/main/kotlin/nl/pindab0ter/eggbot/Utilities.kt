@@ -1,7 +1,5 @@
 package nl.pindab0ter.eggbot
 
-import ch.obermuhlner.math.big.BigDecimalMath.exp
-import ch.obermuhlner.math.big.BigDecimalMath.log
 import com.auxbrain.ei.EggInc
 import com.github.kittinunf.fuel.core.Body
 import com.jagrosh.jdautilities.command.Command
@@ -25,9 +23,6 @@ import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 import java.math.BigDecimal.*
 import java.math.MathContext.DECIMAL128
-import java.math.MathContext.UNLIMITED
-import java.math.RoundingMode
-import java.math.RoundingMode.HALF_UP
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
@@ -78,24 +73,7 @@ fun Period.asDayHoursAndMinutes(compact: Boolean = false): String =
         .withLocale(Locale.UK)
         .print(this.normalizedStandard(PeriodType.dayTime()))
 
-private val hoursMinutesAndSecondsFormatter = PeriodFormatterBuilder()
-    .printZeroNever()
-    .appendHours()
-    .appendSuffix("h")
-    .appendSeparator(" ")
-    .appendMinutes()
-    .appendSuffix("m")
-    .appendSeparator(" ")
-    .appendSeconds()
-    .appendSuffix("s")
-    .toFormatter()
-
-fun Period.asHoursMinutesAndSeconds(): String = hoursMinutesAndSecondsFormatter
-    .withLocale(Locale.UK)
-    .print(this.normalizedStandard(PeriodType.time()))
-
 fun Duration.asDayHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDayHoursAndMinutes(compact)
-fun Duration.asHoursMinutesAndSeconds(): String = this.toPeriod().asHoursMinutesAndSeconds()
 
 fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
@@ -123,57 +101,8 @@ val decimalFormat = DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(Lo
 val integerFormat = DecimalFormat(",##0", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
 
 fun Int.formatInteger(): String = integerFormat.format(this)
-fun Long.formatDecimal(): String = decimalFormat.format(this)
 fun Long.formatInteger(): String = integerFormat.format(this)
-fun BD.formatDecimal(): String = decimalFormat.format(this.round(UNLIMITED))
 fun BD.formatInteger(): String = integerFormat.format(this)
-
-fun Double.formatIllions(rounded: Boolean = false): String {
-    val f = if (rounded) integerFormat else decimalFormat
-    return when (this) {
-        in (1.0e003..1.0e006 - 1) -> f.format(this / 1e003) + "k"
-        in (1.0e006..1.0e009 - 1) -> f.format(this / 1e006) + "M"
-        in (1.0e009..1.0e012 - 1) -> f.format(this / 1e009) + "B"
-        in (1.0e012..1.0e015 - 1) -> f.format(this / 1e012) + "T"
-        in (1.0e015..1.0e018 - 1) -> f.format(this / 1e015) + "q"
-        in (1.0e018..1.0e021 - 1) -> f.format(this / 1e018) + "Q"
-        in (1.0e021..1.0e024 - 1) -> f.format(this / 1e021) + "s"
-        in (1.0e024..1.0e027 - 1) -> f.format(this / 1e024) + "S"
-        in (1.0e027..1.0e030 - 1) -> f.format(this / 1e027) + "O"
-        in (1.0e030..1.0e033 - 1) -> f.format(this / 1e030) + "N"
-        in (1.0e033..1.0e036 - 1) -> f.format(this / 1e033) + "D"
-        in (1.0e036..1.0e039 - 1) -> f.format(this / 1e036) + "uD"
-        in (1.0e039..1.0e042 - 1) -> f.format(this / 1e039) + "dD"
-        in (1.0e042..1.0e045 - 1) -> f.format(this / 1e042) + "tD"
-        in (1.0e045..1.0e048 - 1) -> f.format(this / 1e045) + "qD"
-        in (1.0e048..1.0e051 - 1) -> f.format(this / 1e048) + "QD"
-        in (1.0e051..1.0e054 - 1) -> f.format(this / 1e051) + "sD"
-        in (1.0e054..1.0e057 - 1) -> f.format(this / 1e054) + "SD"
-        in (1.0e057..1.0e060 - 1) -> f.format(this / 1e057) + "OD"
-        in (1.0e060..1.0e063 - 1) -> f.format(this / 1e060) + "ND"
-        in (1.0e063..1.0e066 - 1) -> f.format(this / 1e063) + "V"
-        in (1.0e066..1.0e069 - 1) -> f.format(this / 1e066) + "uV"
-        in (1.0e069..1.0e072 - 1) -> f.format(this / 1e069) + "dV"
-        in (1.0e072..1.0e075 - 1) -> f.format(this / 1e072) + "tV"
-        in (1.0e075..1.0e078 - 1) -> f.format(this / 1e075) + "qV"
-        in (1.0e078..1.0e081 - 1) -> f.format(this / 1e078) + "QV"
-        in (1.0e081..1.0e084 - 1) -> f.format(this / 1e081) + "sV"
-        in (1.0e084..1.0e087 - 1) -> f.format(this / 1e084) + "SV"
-        in (1.0e087..1.0e090 - 1) -> f.format(this / 1e087) + "OV"
-        in (1.0e090..1.0e093 - 1) -> f.format(this / 1e090) + "NV"
-        in (1.0e093..1.0e096 - 1) -> f.format(this / 1e093) + "Tg"
-        in (1.0e096..1.0e099 - 1) -> f.format(this / 1e096) + "uTG"
-        in (1.0e099..1.0e102 - 1) -> f.format(this / 1e099) + "dTg"
-        in (1.0e102..1.0e105 - 1) -> f.format(this / 1e102) + "tTg"
-        in (1.0e105..1.0e108 - 1) -> f.format(this / 1e105) + "qTg"
-        in (1.0e108..1.0e111 - 1) -> f.format(this / 1e108) + "QTg"
-        in (1.0e111..1.0e114 - 1) -> f.format(this / 1e111) + "sTg"
-        in (1.0e114..1.0e117 - 1) -> f.format(this / 1e114) + "STg"
-        in (1.0e117..1.0e120 - 1) -> f.format(this / 1e117) + "OTg"
-        in (1.0e120..1.0e123 - 1) -> f.format(this / 1e120) + "NTg"
-        else -> f.format(this)
-    }
-}
 
 fun BD.formatIllions(rounded: Boolean = false): String {
     val f = if (rounded) integerFormat else decimalFormat
@@ -221,6 +150,8 @@ fun BD.formatIllions(rounded: Boolean = false): String {
         else -> f.format(this)
     }
 }
+
+// Padding
 
 fun paddingCharacters(current: Any, longest: Any, character: String = " "): String {
     val currentLength = current.toString().length
@@ -286,7 +217,6 @@ inline fun <T> Iterable<T>.sumBy(selector: (T) -> BD): BD {
     return sum
 }
 
-fun Double.round(places: Int = 0) = BD(this).setScale(places, HALF_UP).toDouble()
 operator fun Duration.div(other: Duration): Double? = try {
     this.millis.toDouble() / other.millis.toDouble()
 } catch (e: Exception) {
@@ -323,62 +253,21 @@ fun CommandEvent.replyInDms(messages: List<String>) {
     }
 }
 
-sealed class PrerequisitesCheckResult {
-    class Success : PrerequisitesCheckResult()
-    class Failure(val message: String) : PrerequisitesCheckResult()
-}
-
-fun Command.checkPrerequisites(
-    commandEvent: CommandEvent,
-    registrationRequired: Boolean = true,
-    adminRequired: Boolean = false,
-    channelType: ChannelType? = null,
-    minArguments: Int = 0,
-    maxArguments: Int = Int.MAX_VALUE
-): PrerequisitesCheckResult = when {
-    commandEvent.author.isRegistered < registrationRequired ->
-        PrerequisitesCheckResult.Failure("You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.")
-    commandEvent.author.isAdmin < adminRequired ->
-        PrerequisitesCheckResult.Failure("You must have at least a role called `${Config.adminRole}` to use that!")
-    channelType == TEXT && channelType != commandEvent.channelType ->
-        PrerequisitesCheckResult.Failure("This command cannot be used in DMs. Please try again in a public channel.")
-    channelType == PRIVATE && channelType != commandEvent.channelType ->
-        PrerequisitesCheckResult.Failure("This command can only be used in DMs. Please try again by DMing ${EggBot.jdaClient.selfUser.asTag}.")
-    commandEvent.arguments.size < minArguments ->
-        PrerequisitesCheckResult.Failure("Missing argument(s). Use `${commandClient.textualPrefix}$name $arguments` without the brackets.")
-    commandEvent.arguments.size > maxArguments ->
-        PrerequisitesCheckResult.Failure("Too many arguments. Use `${commandClient.textualPrefix}$name $arguments` without the brackets.")
-    else -> PrerequisitesCheckResult.Success()
-}
-
-val User.isRegistered: Boolean
-    get() = transaction {
-        DiscordUser.findById(id)?.farmers?.toList()?.sortedBy { it.inGameName }?.isNotEmpty() == true
-    }
-
-val User.isAdmin: Boolean
-    get() = mutualGuilds.any { guild ->
-        guild.getMember(this).let { author ->
-            author.isOwner || author.user.id == Config.ownerId || author.roles.any { memberRole ->
-                guild.getRolesByName(Config.adminRole, true).any { guildRole ->
-                    memberRole.position >= guildRole.position
-                }
+fun Command.hasPermission(
+    author: User, role: String?): Boolean = role != null && author.mutualGuilds.any { guild ->
+    guild.getMember(author).let { author ->
+        author.isOwner || author.user.id == Config.ownerId || author.roles.any { memberRole ->
+            guild.getRolesByName(role, true).any { guildRole ->
+                memberRole.position >= guildRole.position
             }
         }
     }
-
 
 // AuxBrain
 
 val EggInc.Backup.Game.soulBonus: Int get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
 val EggInc.Backup.Game.prophecyBonus: Int get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
 val EggInc.Backup.Simulation.habPopulation: List<BD> get() = habPopulationList.map { it.toBigDecimal() }
-val EggInc.Backup.Game.bonusPerSoulEgg: BD
-    get() {
-        val soulEggBonus = BD(10 + soulBonus)
-        val prophecyEggBonus = BD(1.05) + BD(0.01) * BD(prophecyBonus)
-        return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
-    }
 val EggInc.Contract.finalGoal: BD get() = BD(goalsList.maxBy { it.targetAmount }!!.targetAmount)
 val EggInc.LocalContract.finalGoal: BD get() = contract.finalGoal
 val EggInc.LocalContract.finished: Boolean get() = BD(lastAmountWhenRewardGiven) > contract.finalGoal
@@ -434,24 +323,6 @@ val EggInc.VehicleType.capacity: BD get() = when (this) {
     EggInc.VehicleType.HYPERLOOP_TRAIN ->     BD(50_000_000)
 }
 
-fun calculatePrestigesFor(soulEggs: Double): Int = calculatePrestigesFor(BD(soulEggs))
-fun calculatePrestigesFor(soulEggs: BD): Int = when {
-    soulEggs < BD(    400_000_000_000L) ->     (soulEggs / BD(4)  - BD(40_000_000_000L)) / BD(4_138_552_198L)
-    soulEggs < BD(  2_300_000_000_000L) -> log((soulEggs / BD(4)) / BD(27_000_000_000L), DECIMAL128) / BD(0.0877)
-    soulEggs < BD(  8_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(13_000_000_000L), DECIMAL128) / BD(0.0760)
-    soulEggs < BD(100_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(14_600_000_000L), DECIMAL128) / BD(0.0744)
-    soulEggs < BD(930_000_000_000_000L) -> log((soulEggs / BD(4)) / BD(19_000_000_000L), DECIMAL128) / BD(0.0716)
-    else -> (soulEggs / BD(4) - BD(40_000_000_000L)) / BD(1_758_889_813_535L)
-}.setScale(0, RoundingMode.CEILING).intValueExact()
-
-fun calculateSoulEggsFor(prestiges: Int): BD = 4 * when {
-    prestiges < 15  -> BD(40_000_000_000L) + BD(4_138_552_198L) * prestiges
-    prestiges < 50  -> BD(27_000_000_000L) * exp(BD(0.0877) * prestiges, DECIMAL128)
-    prestiges < 70  -> BD(13_000_000_000L) * exp(BD(0.0760) * prestiges, DECIMAL128)
-    prestiges < 100 -> BD(14_600_000_000L) * exp(BD(0.0744) * prestiges, DECIMAL128)
-    prestiges < 132 -> BD(19_000_000_000L) * exp(BD(0.0716) * prestiges, DECIMAL128)
-    else            -> BD(40_000_000_000L) + BD(1_758_889_813_535L) * prestiges
-}
 // @formatter:on
 
 
