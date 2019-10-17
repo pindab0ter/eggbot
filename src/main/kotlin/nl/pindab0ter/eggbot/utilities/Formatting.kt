@@ -129,7 +129,7 @@ fun BigDecimal.formatIllions(rounded: Boolean = false): String {
         in (BigDecimal.TEN.pow(114)..BigDecimal.TEN.pow(117) - BigDecimal.ONE) -> f.format(this / BigDecimal.TEN.pow(114)) + "STg"
         in (BigDecimal.TEN.pow(117)..BigDecimal.TEN.pow(120) - BigDecimal.ONE) -> f.format(this / BigDecimal.TEN.pow(117)) + "OTg"
         in (BigDecimal.TEN.pow(120)..BigDecimal.TEN.pow(123) - BigDecimal.ONE) -> f.format(this / BigDecimal.TEN.pow(120)) + "NTg"
-        else -> f.format(this)
+        else -> integerFormat.format(this)
     }
 }
 
