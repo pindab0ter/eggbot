@@ -10,10 +10,7 @@ import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
-import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
-import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.asyncMap
-import nl.pindab0ter.eggbot.utilities.checkPrerequisites
+import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object CoopsInfo : Command() {
@@ -60,16 +57,16 @@ object CoopsInfo : Command() {
 
         event.reply("Registered co-ops for `$contractId`:\n${coops.joinToString("\n") { result ->
             when (result) {
-                is NotFound ->"`${result.coopId}`: ✗ Waiting for starter" // TODO: Tag starter and/or leader
+                is NotFound -> "`${result.coopId}`: ✗ Waiting for starter" // TODO: Tag starter and/or leader
                 is Empty -> "`${result.coopStatus.coopId}`: ✗ Abandoned"
-                is InProgress -> ""/*{
-                    val progress = (result.simulation.timeRemaining / result.simulation.projectedTimeToFinalGoal()!!)
+                is InProgress -> {
+                    val progress = (result.simulation.timeRemaining / result.simulation.timeToFinalGoal())
                         ?.asPercentage() ?: "error"
                     when {
-                        result.simulation.projectedToFinish() -> "`${result.simulation.coopId}`: ✓ Will finish ($progress)"
+                        result.simulation.willFinish() -> "`${result.simulation.coopId}`: ✓ Will finish ($progress)"
                         else -> "`${result.simulation.coopId}`: ✗ Won't finish ($progress)"
                     }
-                }*/
+                }
                 is Finished -> "`${result.coopStatus.coopId}`: ✓ Finished"
             }
         }}")

@@ -67,19 +67,24 @@ class CoopContractSimulation private constructor(
             .toMap()
             .toSortedMap()
     }
-    val finalGoal: BigDecimal by lazy { goals[goals.lastKey()]!! }
+
+    private val completedSimulation by lazy { runSimulation() }
+
+    fun willFinish(): Boolean = completedSimulation.goalsReached.none { (_, duration) -> duration == null }
+
+    fun timeToFinalGoal(): Duration = completedSimulation.goalsReached.maxBy { it.key }?.value ?: oneYear
 
     // endregion
 
-    // region Simulation state
+    // region Simulation
 
     inner class State(
-        val states: List<ContractSimulation.State> = farms.map { farm -> farm.State() },
+        private val states: List<ContractSimulation.State> = farms.map { farm -> farm.State() },
         var duration: Duration = Duration.ZERO,
         val goalsReached: MutableMap<Int, Duration?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
         var currentGoal: Int = 0
     ) {
-        val eggsLaid get() = states.sumBy { it.eggsLaid }
+        private val eggsLaid get() = states.sumBy { it.eggsLaid }
 
         fun step(): Unit = if (eggsLaid >= goals[currentGoal]) {
             goalsReached[currentGoal] = duration
@@ -89,10 +94,6 @@ class CoopContractSimulation private constructor(
             states.forEach { it.step() }
         }
     }
-
-    // endregion
-
-    // region Simulation execution
 
     private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
 

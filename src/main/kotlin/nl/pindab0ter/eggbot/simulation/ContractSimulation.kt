@@ -57,7 +57,7 @@ class ContractSimulation constructor(
         var population: BigDecimal = this.population,
         var eggsLaid: BigDecimal = this.eggsLaid
     ) {
-        open fun step(): Unit {
+        open fun step() {
             population = (population + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
             eggsLaid += (eggsLaidPerChickenPerMinute * population).coerceAtMost(shippingRatePerMinute)
         }
@@ -67,7 +67,7 @@ class ContractSimulation constructor(
         var duration: Duration = Duration.ZERO,
         population: BigDecimal = this.population,
         eggsLaid: BigDecimal = this.eggsLaid,
-        val goalsReached: MutableMap<Int, Duration?> = goals.map { (i, amount) -> i to null }.toMap().toMutableMap(),
+        val goalsReached: MutableMap<Int, Duration?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
         var currentGoal: Int = 0
     ) : State(population, eggsLaid) {
         override fun step(): Unit = if (eggsLaid >= goals[currentGoal]) {
@@ -80,10 +80,6 @@ class ContractSimulation constructor(
         }
     }
 
-    // endregion
-
-    // region Simulation execution
-
     private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
     fun runSimulation(): SoloState {
@@ -93,6 +89,8 @@ class ContractSimulation constructor(
         } while (state.goalsReached.any { it.value == null } && state.duration < oneYear)
         return state
     }
+
+    // endregion
 
     companion object {
         operator fun invoke(
