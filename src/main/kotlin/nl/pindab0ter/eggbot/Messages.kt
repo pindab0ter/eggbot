@@ -5,9 +5,7 @@ import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
-import org.joda.time.DateTime
 import org.joda.time.Duration
-import java.math.BigDecimal
 import java.math.RoundingMode.HALF_UP
 
 object Messages {
@@ -140,9 +138,7 @@ object Messages {
             EggBot.jdaClient.getEmoteById(id)?.asMention
         } ?: ""
 
-        //
-        // Basic info and totals
-        //
+        // region Basic info and totals
 
         appendln("`${simulation.farmerName}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
@@ -154,9 +150,9 @@ object Messages {
         appendln()
         appendln()
 
-        //
-        // Goals
-        //
+        // endregion
+
+        // region Goals
 
         if (simulation.finished) {
             appendln("**You have successfully finished this contract! ${Config.emojiSuccess}**")
@@ -191,6 +187,9 @@ object Messages {
             }
             appendln("```")
         }
+
+        // endregion
+
     }.toString()
 
     fun coopStatus(result: CoopContractSimulationResult, compact: Boolean = false): List<String> = when (result) {
@@ -220,9 +219,8 @@ object Messages {
 
         val farms = simulation.farms
 
-        //
-        // Basic info and totals
-        //
+
+        // region Basic info and totals
 
         appendln("`${simulation.coopId}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
@@ -234,43 +232,43 @@ object Messages {
         appendln()
         appendln()
 
-        //
-        // Goals
-        //
+        // endregion
+
+        // region Goals
 
         append("Goals (${simulation.goals.count { simulation.eggsLaid >= it.value }}/${simulation.goals.count()}):")
         if (!compact) append("  _(Includes new chickens and takes bottlenecks into account)_")
         append("```")
         appendln()
-        simulation.goals
-            .filter { (_, goal) -> simulation.eggsLaid < goal }
-            .forEach { (index, goal: BigDecimal) ->
-                val finishedIn = simulation.projectedTimeTo(goal)
-                val success = finishedIn != null && finishedIn < simulation.timeRemaining
-                val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
-                appendPaddingCharacters(index + 1, farms.count())
-                append("${index + 1}: ")
-                appendPaddingCharacters(
-                    goal.formatIllions(true),
-                    simulation.goals
-                        .filter { simulation.eggsLaid < it.value }
-                        .map { it.value.formatIllions(true) }
-                )
-                append(goal.formatIllions(true))
-                append(if (success) " ✓ " else " ✗ ")
-                when {
-                    finishedIn == null -> append("∞")
-                    finishedIn > oneYear -> append("More than a year")
-                    else -> append(finishedIn.asDayHoursAndMinutes(compact))
+        simulation.runSimulation().apply {
+            goalsReached.toSortedMap()
+                .filter { (_, goal) -> goal != Duration.ZERO }
+                .forEach { (index, duration) ->
+                    val success = duration != null && duration < simulation.timeRemaining
+                    val goal = simulation.goals[index]!!
+
+                    append("${index + 1}: ")
+                    appendPaddingCharacters(
+                        goal.formatIllions(true),
+                        simulation.goals
+                            .filter { simulation.eggsLaid < it.value }
+                            .map { it.value.formatIllions(true) }
+                    )
+                    append(goal.formatIllions(true))
+                    append(if (success) " ✓ " else " ✗ ")
+                    when (duration) {
+                        null -> append("More than a year")
+                        else -> append(duration.asDayHoursAndMinutes(compact))
+                    }
+                    if (index + 1 < simulation.goals.count()) appendln()
                 }
-                if (index + 1 < simulation.goals.count()) appendln()
-            }
+        }
         appendln("```")
 
-        //
-        // Members
-        //
+        // endregion
+
+        // region Members
 
         appendln("Members (${farms.count()}/${simulation.maxCoopSize}):")
         appendln("```")
@@ -281,7 +279,8 @@ object Messages {
         val chickens = "Chickens"
         val chickenRate = "Chicken Rate"
 
-        // Table header
+        // region Table header
+
         if (!compact) {
             appendPaddingCharacters("", farms.count(), "#")
             append(": $name ")
@@ -328,7 +327,10 @@ object Messages {
             appendln()
         }
 
-        // Table body
+        // endregion
+
+        // region Table body
+
         farms.forEachIndexed { index, farm ->
             appendPaddingCharacters(index + 1, farms.count())
             append("${index + 1}: ")
@@ -373,5 +375,10 @@ object Messages {
             }
             appendln()
         }
+
+        // endregion
+
+        // endregion
+
     }.toString().splitMessage(prefix = "```", postfix = "```")
 }

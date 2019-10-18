@@ -7,6 +7,7 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.utilities.*
+import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
@@ -70,24 +71,37 @@ class CoopContractSimulation private constructor(
 
     // endregion
 
+    // region Simulation state
+
+    inner class State(
+        val states: List<ContractSimulation.State> = farms.map { farm -> farm.State() },
+        var duration: Duration = Duration.ZERO,
+        val goalsReached: MutableMap<Int, Duration?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
+        var currentGoal: Int = 0
+    ) {
+        val eggsLaid get() = states.sumBy { it.eggsLaid }
+
+        fun step(): Unit = if (eggsLaid >= goals[currentGoal]) {
+            goalsReached[currentGoal] = duration
+            currentGoal += 1
+        } else {
+            duration += Duration.standardMinutes(1)
+            states.forEach { it.step() }
+        }
+    }
+
+    // endregion
+
     // region Simulation execution
 
-    // TODO: Calculate time to multiple goals in one go
-    fun projectedTimeTo(goal: BigDecimal): Duration? = if (population == ZERO) null else {
-        var projectedEggsLaid = eggsLaid
-        var duration = Duration.ZERO
+    private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
+    fun runSimulation(): State {
+        val state = State()
         do {
-            // TODO: Move 'step' method to ContractSimulation
-            // farms.forEach { farm ->
-            //     projectedEggsLaid += farm.projectedEggLayingRatePerMinute
-            //     if (farm.projectedPopulation < farm.habsMaxCapacity) farm.projectedPopulation =
-            //         (farm.projectedPopulation + populationIncreaseRatePerMinute).coerceAtMost(farm.habsMaxCapacity)
-            // }
-            duration += Duration.standardSeconds(60)
-        } while (projectedEggsLaid < goal)
-
-        duration
+            state.step()
+        } while (state.goalsReached.any { it.value == null } && state.duration < oneYear)
+        return state
     }
 
     // endregion
@@ -95,9 +109,10 @@ class CoopContractSimulation private constructor(
     companion object Factory {
         operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
             val (coopStatus, error) = AuxBrain.getCoopStatus(contractId, coopId)
-            val contractName: String? = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { contract ->
-                contract.id == contractId
-            }?.name
+            val contractName: String? =
+                AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { contract ->
+                    contract.id == contractId
+                }?.name
 
             // Co-op not found?
             if (coopStatus == null || error != null) return NotFound(contractId, coopId)

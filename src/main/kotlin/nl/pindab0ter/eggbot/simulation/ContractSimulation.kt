@@ -53,59 +53,46 @@ class ContractSimulation constructor(
 
     // region  Simulation State
 
-
-    private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
-
-    data class State(
-        var duration: Duration,
-        var population: BigDecimal,
-        var eggsLaid: BigDecimal,
-        val goalsReached: Map<Int, Duration?>,
-        val currentGoal: Int
+    open inner class State(
+        var population: BigDecimal = this.population,
+        var eggsLaid: BigDecimal = this.eggsLaid
     ) {
-        override fun toString(): String =
-            "SimulationState(duration=${duration.asDayHoursAndMinutes()}, projectedPopulation=${population.formatIllions()}, projectedEggsLaid=${eggsLaid.formatIllions()}, goalsReached=${goalsReached}, currentGoal=$currentGoal)"
+        open fun step(): Unit {
+            population = (population + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
+            eggsLaid += (eggsLaidPerChickenPerMinute * population).coerceAtMost(shippingRatePerMinute)
+        }
+    }
+
+    inner class SoloState(
+        var duration: Duration = Duration.ZERO,
+        population: BigDecimal = this.population,
+        eggsLaid: BigDecimal = this.eggsLaid,
+        val goalsReached: MutableMap<Int, Duration?> = goals.map { (i, amount) -> i to null }.toMap().toMutableMap(),
+        var currentGoal: Int = 0
+    ) : State(population, eggsLaid) {
+        override fun step(): Unit = if (eggsLaid >= goals[currentGoal]) {
+            goalsReached[currentGoal] = duration
+            currentGoal += 1
+        } else {
+            duration += Duration.standardMinutes(1)
+            population = (population + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
+            eggsLaid += (eggsLaidPerChickenPerMinute * population).coerceAtMost(shippingRatePerMinute)
+        }
     }
 
     // endregion
 
     // region Simulation execution
 
-    fun runSimulation(): State {
-        var state = State(
-            duration = Duration.ZERO,
-            population = population,
-            eggsLaid = eggsLaid,
-            goalsReached = goals.map { (i, amount) ->
-                Pair(i, if (amount < eggsLaid) Duration.ZERO else null)
-            }.toMap().toSortedMap(),
-            currentGoal = 0
-        )
+    private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
+
+    fun runSimulation(): SoloState {
+        val state = SoloState()
         do {
-            state = simulationStep(state)
-            log.debug { state }
+            state.step()
         } while (state.goalsReached.any { it.value == null } && state.duration < oneYear)
         return state
     }
-
-    // TODO: Determine when bottlenecks have been reached
-    private fun simulationStep(state: State): State = State(
-        state.duration + Duration.standardMinutes(1),
-        state.population + minOf(
-            habsMaxCapacity,
-            (state.population + populationIncreasePerMinute)
-        ),
-        state.eggsLaid + minOf(
-            eggsLaidPerChickenPerMinute * state.population,
-            shippingRatePerMinute
-        ),
-        if (state.eggsLaid > goals[state.currentGoal]) {
-            state.goalsReached.minus(state.currentGoal).plus(Pair(state.currentGoal, state.duration))
-        } else state.goalsReached,
-        if (state.eggsLaid > goals[state.currentGoal]) (state.currentGoal + 1)
-        else state.currentGoal
-    )
-
 
     companion object {
         operator fun invoke(

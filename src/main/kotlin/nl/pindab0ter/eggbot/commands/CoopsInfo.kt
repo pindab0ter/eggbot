@@ -10,7 +10,10 @@ import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
+import nl.pindab0ter.eggbot.utilities.arguments
+import nl.pindab0ter.eggbot.utilities.asyncMap
+import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object CoopsInfo : Command() {
@@ -59,14 +62,14 @@ object CoopsInfo : Command() {
             when (result) {
                 is NotFound ->"`${result.coopId}`: ✗ Waiting for starter" // TODO: Tag starter and/or leader
                 is Empty -> "`${result.coopStatus.coopId}`: ✗ Abandoned"
-                is InProgress -> {
+                is InProgress -> ""/*{
                     val progress = (result.simulation.timeRemaining / result.simulation.projectedTimeToFinalGoal()!!)
                         ?.asPercentage() ?: "error"
                     when {
                         result.simulation.projectedToFinish() -> "`${result.simulation.coopId}`: ✓ Will finish ($progress)"
                         else -> "`${result.simulation.coopId}`: ✗ Won't finish ($progress)"
                     }
-                }
+                }*/
                 is Finished -> "`${result.coopStatus.coopId}`: ✓ Finished"
             }
         }}")
