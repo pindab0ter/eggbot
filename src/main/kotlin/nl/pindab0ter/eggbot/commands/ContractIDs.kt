@@ -5,7 +5,9 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.asDayHoursAndMinutes
+import nl.pindab0ter.eggbot.utilities.formattedName
+import nl.pindab0ter.eggbot.utilities.toDateTime
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
@@ -43,6 +45,7 @@ object ContractIDs : Command() {
         }
     }
 
+    // TODO: Add info about requirements
     private fun List<EggInc.Contract>.printContracts(): String = StringBuilder().let { sb ->
         forEach { contract ->
             sb.append("**`${contract.id}`**: ")

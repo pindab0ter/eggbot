@@ -16,6 +16,9 @@ class CoopContractSimulation private constructor(
     backups: List<EggInc.Backup>,
     val coopStatus: EggInc.CoopStatusResponse
 ) {
+
+    // region Initialisation
+
     val log = KotlinLogging.logger { }
 
     val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractId)!!
@@ -32,9 +35,9 @@ class CoopContractSimulation private constructor(
         }
     }
 
-    //
-    // Basic info
-    //
+    // endregion
+
+    // region Basic info
 
     val contractId: String by lazy { localContract.contract.id }
     val contractName: String by lazy { localContract.contract.name }
@@ -42,9 +45,9 @@ class CoopContractSimulation private constructor(
     val egg: EggInc.Egg by lazy { localContract.contract.egg }
     val maxCoopSize by lazy { localContract.contract.maxCoopSize }
 
-    //
-    // Totals
-    //
+    // endregion
+
+    // region Totals
 
     val eggsLaid: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaid } }
     val population: BigDecimal by lazy { farms.sumBy { farm -> farm.population } }
@@ -52,9 +55,9 @@ class CoopContractSimulation private constructor(
     val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreasePerHour } }
     val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaidPerHour } }
 
-    //
-    // Contract details
-    //
+    // endregion
+
+    // region Contract details
 
     val timeRemaining: Duration by lazy { coopStatus.secondsRemaining.toDuration() }
     val goals: SortedMap<Int, BigDecimal> by lazy {
@@ -65,10 +68,9 @@ class CoopContractSimulation private constructor(
     }
     val finalGoal: BigDecimal by lazy { goals[goals.lastKey()]!! }
 
+    // endregion
 
-    //
-    //  Projection
-    //
+    // region Simulation execution
 
     // TODO: Calculate time to multiple goals in one go
     fun projectedTimeTo(goal: BigDecimal): Duration? = if (population == ZERO) null else {
@@ -88,13 +90,7 @@ class CoopContractSimulation private constructor(
         duration
     }
 
-    fun projectedTimeToFinalGoal(): Duration? = projectedTimeTo(finalGoal)
-
-    fun projectedToFinish(): Boolean = projectedTimeToFinalGoal()?.let { it < timeRemaining } == true
-
-    //
-    // Object Factory
-    //
+    // endregion
 
     companion object Factory {
         operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {

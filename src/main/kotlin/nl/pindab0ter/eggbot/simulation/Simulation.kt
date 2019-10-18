@@ -13,15 +13,13 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     internal abstract val farm: EggInc.Backup.Simulation
 
-    //
-    // Basic info
-    //
+    // region Basic info
 
     val farmerName: String = backup.userName
 
-    //
-    // Research
-    //
+    // endregion
+
+    // region Research
 
     private val internalHatcheryFlatIncreases: List<BigDecimal>
         get() = listOf(
@@ -71,9 +69,9 @@ abstract class Simulation(val backup: EggInc.Backup) {
     private val internalHatcheryCalm: BigDecimal
         get() = BigDecimal(1 + .10 * backup.game.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
 
-    //
-    // Habitats (chicken cap)
-    //
+    // endregion
+
+    // region Habitats (chicken cap)
 
     private val habsMaxCapacityBonus: BigDecimal by lazy { habCapacityMultipliers.product() }
 
@@ -89,9 +87,9 @@ abstract class Simulation(val backup: EggInc.Backup) {
         } else Duration(Long.MAX_VALUE)
     }
 
-    //
-    // Internal hatchery (chicken increase)
-    //
+    // endregion
+
+    // region Internal hatchery (chicken increase)
 
     private val internalHatcheryRatePerMinute: BigDecimal by lazy {
         (internalHatcheryFlatIncreases.sum() * internalHatcheryMultiplier)
@@ -119,15 +117,15 @@ abstract class Simulation(val backup: EggInc.Backup) {
         populationIncreasePerMinute * BigDecimal(60)
     }
 
-    //
-    // Chickens
-    //
+    // endregion
+
+    // region Chickens
 
     abstract val population: BigDecimal
 
-    //
-    // Eggs
-    //
+    // endregion
+
+    // region Egg laying rates
 
     private val eggLayingBonus: BigDecimal by lazy { eggLayingMultipliers.product() }
 
@@ -145,9 +143,9 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     val eggsLaidPerHour: BigDecimal by lazy { eggsLaidPerSecond * 60 * 60 }
 
-    //
-    // Shipping rate (max egg laying rate)
-    //
+    // endregion
+
+    // region Shipping rate (max egg laying rate)
 
     private val shippingRateBonus: BigDecimal by lazy { shippingRatePercentageIncreases.product() }
 
@@ -163,4 +161,6 @@ abstract class Simulation(val backup: EggInc.Backup) {
     val shippingRatePerSecond: BigDecimal by lazy {
         shippingRatePerMinute.divide(BigDecimal(60), DECIMAL64)
     }
+
+    // endregion
 }

@@ -13,13 +13,15 @@ class ContractSimulation constructor(
     private val localContract: EggInc.LocalContract
 ) : Simulation(backup) {
 
+    // region Initialisation
+
     val log = KotlinLogging.logger { }
 
     override val farm: EggInc.Backup.Simulation = backup.farmsList.find { it.contractId == localContract.contract.id }!!
 
-    //
-    // Basic info
-    //
+    // endregion
+
+    // region Basic info
 
     val contractId: String = localContract.contract.id
     val contractName: String = localContract.contract.name
@@ -27,16 +29,16 @@ class ContractSimulation constructor(
     var isActive: Boolean = true
     val finished: Boolean = localContract.finished
 
-    //
-    // Farm details
-    //
+    // endregion
+
+    // region Farm details
 
     override val population: BigDecimal = farm.habPopulation.sum()
     override val eggsLaid: BigDecimal = farm.eggsLaid.toBigDecimal()
 
-    //
-    // Contract details
-    //
+    // endregion
+
+    // region Contract details
 
     val elapsedTime: Duration = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
 
@@ -47,34 +49,10 @@ class ContractSimulation constructor(
         .toMap()
         .toSortedMap()
 
-    val finalGoal: BigDecimal = goals[goals.lastKey()]!!
+    // endregion
 
-    //
-    //  Projection
-    //
+    // region  Simulation State
 
-    // // TODO: Determine which bottlenecks have been reached
-    // fun projectedTimeToGoals(): SortedMap<Int, Duration?>? = if (population == ZERO) null else {
-    //     var duration = Duration.ZERO
-    //     var projectedPopulation: BigDecimal = population
-    //     var projectedEggsLaid: BigDecimal = eggsLaid
-    //     val projectedEggLayingRatePerMinute: BigDecimal =
-    //         minOf(eggLayingRatePerChickenPerSecond, shippingRatePerMinute) * projectedPopulation * 60
-    //     var momentShippingRateReached: Duration? =
-    //         if (shippingRatePerMinute <= eggLayingRatePerMinute) Duration.ZERO else null
-    //     val goalsReached = sortedMapOf<Int, Duration?>()
-    //     var goal = goals[0]
-    //
-    //     do {
-    //         projectedEggsLaid += projectedEggLayingRatePerMinute
-    //         if (projectedPopulation < habsMaxCapacity) projectedPopulation =
-    //             (projectedPopulation + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
-    //         if (shippingRatePerMinute <= eggLayingRatePerMinute) momentShippingRateReached = duration
-    //         duration += Duration.standardMinutes(1)
-    //     } while (projectedEggsLaid < goal)
-    //
-    //     duration
-    // }
 
     private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
@@ -89,9 +67,9 @@ class ContractSimulation constructor(
             "SimulationState(duration=${duration.asDayHoursAndMinutes()}, projectedPopulation=${population.formatIllions()}, projectedEggsLaid=${eggsLaid.formatIllions()}, goalsReached=${goalsReached}, currentGoal=$currentGoal)"
     }
 
-    // fun runSimulation(): SortedMap<Int, Pair<BigDecimal, Duration?>> = simulationStep().map { (i, duration) ->
-    //     Pair(i, Pair(goals[i]!!, duration))
-    // }.toMap().toSortedMap()
+    // endregion
+
+    // region Simulation execution
 
     fun runSimulation(): State {
         var state = State(
@@ -107,7 +85,6 @@ class ContractSimulation constructor(
             state = simulationStep(state)
             log.debug { state }
         } while (state.goalsReached.any { it.value == null } && state.duration < oneYear)
-        log.debug { "We're done…" }
         return state
     }
 
@@ -129,84 +106,6 @@ class ContractSimulation constructor(
         else state.currentGoal
     )
 
-// // TODO: Determine when bottlenecks have been reached
-// private fun simulationStep(): SortedMap<Int, Duration?> {
-//     var duration: Duration = Duration.ZERO
-//     var projectedPopulation: BigDecimal = population
-//     var projectedEggsLaid: BigDecimal = eggsLaid
-//     val goalsReached: MutableMap<Int, Duration?> = goals
-//         .map { (i, amount) -> Pair(i, if (amount < eggsLaid) Duration.ZERO else null) }
-//         .toMap().toMutableMap()
-//     var currentGoalNumber = goalsReached.count { (_, duration) -> duration != null }
-//
-//     while (true) {
-//         if ((currentGoalNumber >= goals.size) || (duration > oneYear)) {
-//             log.debug { "All goals reached!" }
-//             return goalsReached.toSortedMap()
-//         }
-//
-//         duration += Duration.standardMinutes(1)
-//         projectedPopulation += minOf(habsMaxCapacity, (projectedPopulation + populationIncreasePerMinute))
-//         projectedEggsLaid += minOf(eggsLaidPerChickenPerMinute * projectedPopulation, shippingRatePerMinute)
-//         if (projectedEggsLaid > goals[currentGoalNumber]) {
-//             goalsReached[currentGoalNumber] = duration
-//             currentGoalNumber++
-//         }
-//     }
-// }
-
-// // TODO: Determine when bottlenecks have been reached
-// private fun simulationStep(
-//     duration: Duration = Duration.ZERO,
-//     projectedPopulation: BigDecimal = population,
-//     projectedEggsLaid: BigDecimal = eggsLaid,
-//     goalsReached: Map<Int, Duration?> = goals
-//         .map { (i, amount) -> Pair(i, if (amount < eggsLaid) Duration.ZERO else null) }
-//         .toMap()
-// ): SortedMap<Int, Duration?> {
-//     if (goalsReached.filter { (_, duration) -> duration == null }.size == goals.size
-//         || duration > oneYear
-//     ) return goalsReached.toSortedMap()
-//
-//     val projectedEggLayingRatePerMinute: BigDecimal =
-//         minOf(eggsLaidPerChickenPerMinute * projectedPopulation, shippingRatePerMinute)
-//     val currentGoalNumber: Int =
-//         goalsReached.map { it.key }.max() ?: 0
-//     val nextGoalsReached =
-//         if (projectedEggsLaid > goals[currentGoalNumber]) goalsReached.plus(Pair(currentGoalNumber, duration))
-//         else goalsReached
-//
-//     return simulationStep(
-//         duration.plus(Duration.standardMinutes(1)),
-//         projectedPopulation.plus(minOf(habsMaxCapacity, (projectedPopulation + populationIncreasePerMinute))),
-//         projectedEggsLaid.plus(projectedEggLayingRatePerMinute),
-//         nextGoalsReached
-//     )
-// }
-
-// fun projectedTimeTo(goal: BigDecimal): Duration? = if (population == ZERO) null else {
-//     var duration = Duration.ZERO
-//     var projectedPopulation: BigDecimal = population
-//     var projectedEggsLaid: BigDecimal = eggsLaid
-//     val projectedEggLayingRatePerMinute: BigDecimal =
-//         minOf(eggLayingRatePerChickenPerSecond, shippingRatePerMinute) * projectedPopulation * 60
-//     var momentShippingRateReached: Duration? =
-//         if (shippingRatePerMinute <= eggLayingRatePerMinute) Duration.ZERO else null
-//
-//     do {
-//         projectedEggsLaid += projectedEggLayingRatePerMinute
-//         if (projectedPopulation < habsMaxCapacity) projectedPopulation =
-//             (population + populationIncreaseRatePerMinute).coerceAtMost(habsMaxCapacity)
-//         if (shippingRatePerMinute <= eggLayingRatePerMinute) momentShippingRateReached = duration
-//         duration += Duration.standardMinutes(1)
-//     } while (projectedEggsLaid < goal)
-//
-//     duration
-// }
-
-// fun projectedTimeToFinalGoal(): Duration? = projectedTimeTo(finalGoal)
-
-// fun projectedToFinish(): Boolean = projectedTimeToFinalGoal()?.let { it < timeRemaining } == true
 
     companion object {
         operator fun invoke(

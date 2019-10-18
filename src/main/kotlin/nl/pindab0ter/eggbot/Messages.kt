@@ -189,30 +189,6 @@ object Messages {
                         if (index + 1 < simulation.goals.count()) appendln()
                     }
             }
-
-            // simulation.goals
-            //     .filter { (_, goal) -> simulation.eggsLaid < goal }
-            //     .forEach { (index, goal: BigDecimal) ->
-            //         val finishedIn = simulation.projectedTimeTo(goal)
-            //         val success = finishedIn != null && finishedIn < simulation.timeRemaining
-            //         val oneYear = Duration(DateTime.now(), DateTime.now().plusYears(1))
-            //
-            //         append("${index + 1}: ")
-            //         appendPaddingCharacters(
-            //             goal.formatIllions(true),
-            //             simulation.goals
-            //                 .filter { simulation.eggsLaid < it.value }
-            //                 .map { it.value.formatIllions(true) }
-            //         )
-            //         append(goal.formatIllions(true))
-            //         append(if (success) " ✓ " else " ✗ ")
-            //         when {
-            //             finishedIn == null -> append("∞")
-            //             finishedIn > oneYear -> append("More than a year")
-            //             else -> append(finishedIn.asDayHoursAndMinutes(compact))
-            //         }
-            //         if (index + 1 < simulation.goals.count()) appendln()
-            //     }
             appendln("```")
         }
     }.toString()
