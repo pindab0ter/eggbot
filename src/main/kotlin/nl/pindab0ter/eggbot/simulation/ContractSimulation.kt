@@ -67,11 +67,11 @@ class ContractSimulation constructor(
         var duration: Duration = Duration.ZERO,
         population: BigDecimal = this.population,
         eggsLaid: BigDecimal = this.eggsLaid,
-        val goalsReached: MutableMap<Int, Duration?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
-        var currentGoal: Int = 0
+        val reachedGoals: MutableMap<Int, Duration?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
+        private var currentGoal: Int = 0
     ) : State(population, eggsLaid) {
         override fun step(): Unit = if (eggsLaid >= goals[currentGoal]) {
-            goalsReached[currentGoal] = duration
+            reachedGoals[currentGoal] = duration
             currentGoal += 1
         } else {
             duration += Duration.standardMinutes(1)
@@ -86,7 +86,7 @@ class ContractSimulation constructor(
         val state = SoloState()
         do {
             state.step()
-        } while (state.goalsReached.any { it.value == null } && state.duration < oneYear)
+        } while (state.reachedGoals.any { (_, momentReached) -> momentReached == null } && state.duration < oneYear)
         return state
     }
 

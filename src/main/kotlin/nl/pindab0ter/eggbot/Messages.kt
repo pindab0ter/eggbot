@@ -163,7 +163,7 @@ object Messages {
             appendln()
 
             simulation.runSimulation().apply {
-                goalsReached.toSortedMap()
+                reachedGoals.toSortedMap()
                     .filter { (_, goal) -> goal != Duration.ZERO }
                     .forEach { (index, duration) ->
                         val success = duration != null && duration < simulation.timeRemaining
