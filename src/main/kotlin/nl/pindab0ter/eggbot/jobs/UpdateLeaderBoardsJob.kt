@@ -64,7 +64,7 @@ class UpdateLeaderBoardsJob : Job {
         channel: String,
         sortedFarmers: List<Farmer>,
         messageFunction: (List<Farmer>) -> List<String>
-    ) = EggBot.jdaClient.getTextChannelById(channel).apply {
+    ) = EggBot.jdaClient.getTextChannelById(channel)?.apply {
         log.info { "Updating $title leader board…" }
 
         history.retrievePast(100).complete().let {

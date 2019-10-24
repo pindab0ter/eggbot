@@ -3,8 +3,8 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
-import net.dv8tion.jda.core.entities.ChannelType.TEXT
+import net.dv8tion.jda.api.Permission.MESSAGE_MANAGE
+import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser

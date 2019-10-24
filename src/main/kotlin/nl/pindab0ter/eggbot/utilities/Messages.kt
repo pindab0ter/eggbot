@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.utilities
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.core.entities.ChannelType
+import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.jda.commandClient
 
 fun String.splitMessage(

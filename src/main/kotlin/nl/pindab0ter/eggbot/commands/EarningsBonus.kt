@@ -3,7 +3,7 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import net.dv8tion.jda.core.entities.ChannelType
+import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory

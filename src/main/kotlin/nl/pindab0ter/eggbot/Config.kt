@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.EggInc
 import mu.KotlinLogging
-import net.dv8tion.jda.core.entities.Game
+import net.dv8tion.jda.api.entities.Activity
 import java.io.FileInputStream
 import java.util.*
 
@@ -66,7 +66,7 @@ object Config {
     val ownerId: String
     val prefix: String?
     val helpWord: String
-    val game: Game?
+    val activity: Activity?
     private val statusType: String
     private val statusText: String?
     val emojiSuccess: String
@@ -153,12 +153,12 @@ object Config {
 
             devMode = getOptional(DEVELOPMENT, "false") == "true"
 
-            game = if (statusText != null) Game.of(
+            activity = if (statusText != null) Activity.of(
                 when (statusType) {
-                    "STREAMING" -> Game.GameType.STREAMING
-                    "LISTENING" -> Game.GameType.LISTENING
-                    "WATCHING" -> Game.GameType.WATCHING
-                    else -> Game.GameType.DEFAULT
+                    "STREAMING" -> Activity.ActivityType.STREAMING
+                    "LISTENING" -> Activity.ActivityType.LISTENING
+                    "WATCHING" -> Activity.ActivityType.WATCHING
+                    else -> Activity.ActivityType.DEFAULT
                 }, statusText
             ) else null
 

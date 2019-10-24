@@ -2,10 +2,10 @@ package nl.pindab0ter.eggbot.utilities
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.core.entities.ChannelType
-import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
-import net.dv8tion.jda.core.entities.ChannelType.TEXT
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.api.entities.ChannelType
+import net.dv8tion.jda.api.entities.ChannelType.PRIVATE
+import net.dv8tion.jda.api.entities.ChannelType.TEXT
+import net.dv8tion.jda.api.entities.User
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.Register
@@ -49,13 +49,13 @@ val User.isRegistered: Boolean
 
 val User.isAdmin: Boolean
     get() = mutualGuilds.any { guild ->
-        guild.getMember(this).let { author ->
+        guild.getMember(this)?.let { author ->
             author.isOwner || author.user.id == Config.ownerId || author.roles.any { memberRole ->
-                guild.getRolesByName(Config.adminRole, true).any { guildRole ->
+                Config.adminRole != null && guild.getRolesByName(Config.adminRole, true).any { guildRole ->
                     memberRole.position >= guildRole.position
                 }
             }
-        }
+        } == true
     }
 
 val CommandEvent.arguments: List<String> get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s"""))

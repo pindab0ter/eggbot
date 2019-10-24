@@ -1,9 +1,9 @@
 package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
-import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.JDABuilder
-import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.api.JDA
+import net.dv8tion.jda.api.JDABuilder
+import net.dv8tion.jda.api.entities.Guild
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
@@ -34,10 +34,12 @@ object EggBot {
     val eventWaiter: EventWaiter = EventWaiter()
 
     val jdaClient: JDA = JDABuilder(Config.botToken)
-        .addEventListener(CommandLogger)
-        .addEventListener(EyeReaction)
-        .addEventListener(eventWaiter)
-        .addEventListener(commandClient)
+        .addEventListeners(
+            CommandLogger,
+            EyeReaction,
+            eventWaiter,
+            commandClient
+        )
         .build()
 
     @JvmStatic

@@ -11,7 +11,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
     setHelpWord(Config.helpWord)
     useHelpBuilder(true)
     setHelpConsumer(HelpConsumer)
-    if (Config.game != null) setGame(Config.game)
+    if (Config.activity != null) setActivity(Config.activity)
     addCommands(
         Active,
         ContractIDs,

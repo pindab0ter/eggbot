@@ -3,7 +3,7 @@ package nl.pindab0ter.eggbot.jda
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import net.dv8tion.jda.core.entities.ChannelType
+import net.dv8tion.jda.api.entities.ChannelType
 import java.util.function.Consumer
 
 
