@@ -9,7 +9,6 @@ import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.jda.CommandLogger
-import nl.pindab0ter.eggbot.jda.EyeReaction
 import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.jobs.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
@@ -36,7 +35,6 @@ object EggBot {
     val jdaClient: JDA = JDABuilder(Config.botToken)
         .addEventListeners(
             CommandLogger,
-            EyeReaction,
             eventWaiter,
             commandClient
         )
