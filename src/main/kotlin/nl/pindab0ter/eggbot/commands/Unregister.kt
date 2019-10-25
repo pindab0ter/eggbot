@@ -3,11 +3,12 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot
-import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.database.DiscordUsers
+import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
+import nl.pindab0ter.eggbot.utilities.arguments
+import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Unregister : Command() {
@@ -15,7 +16,7 @@ object Unregister : Command() {
 
     init {
         name = "unregister"
-        arguments = "<discord id>"
+        arguments = "<discord tag>"
         help = "Unregister a user. This cannot be undone!"
         category = AdminCategory
         guildOnly = false
@@ -35,29 +36,18 @@ object Unregister : Command() {
             return
         }
 
-        val id = event.arguments.first()
-        val member = try {
-            EggBot.guild.getMemberById(id)
-        } catch (exception: NumberFormatException) {
-            null
-        } ?: "No user with Discord ID `$id` found.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        val tag = event.arguments.first()
 
         transaction {
-            val discordUser = DiscordUser.findById(member.user.id)
-                ?: "`${member.user.name}` ${if (member.nickname != null) "(a.k.a. `${member.nickname}`) " else ""} is not registered.".let {
+            val discordUser = DiscordUser.find { DiscordUsers.discordTag like tag }.firstOrNull()
+                ?: "No registered users found with Discord tag `${tag}`.".let {
                     event.replyWarning(it)
                     log.debug { it }
                     return@transaction
                 }
 
             StringBuilder()
-                .append("`${member.user.name}` ")
-                .append(if (member.nickname != null) "(a.k.a. `${member.nickname}`) " else "")
-                .append("has been unregistered, along with the ")
+                .append("`${discordUser.discordTag}` has been unregistered, along with the ")
                 .append(
                     when {
                         discordUser.farmers.count() > 1 ->
