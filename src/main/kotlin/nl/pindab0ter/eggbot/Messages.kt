@@ -197,7 +197,7 @@ object Messages {
         is CoopContractSimulationResult.NotFound -> listOf(
             "No co-op found for contract `${result.contractId}` with name `${result.coopId}"
         )
-        is CoopContractSimulationResult.Empty -> listOf(
+        is CoopContractSimulationResult.Abandoned -> listOf(
             """ `${result.coopStatus.coopId}` vs. __${result.contractName}__:
                 
                 This co-op has no members.""".trimIndent()

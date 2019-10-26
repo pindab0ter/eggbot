@@ -118,19 +118,14 @@ class CoopContractSimulation private constructor(
             // Co-op not found?
             if (coopStatus == null || error != null) return NotFound(contractId, coopId)
 
+            // Is co-op abandoned?
+            if (coopStatus.contributorsList.isEmpty()) return Abandoned(coopStatus, contractName!!)
+
             val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
                 coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
             }.mapNotNull {
                 it.component1()
             }
-
-            // Co-op not empty?
-            if (backups.none { backup ->
-                    backup.farmsList.any { farm ->
-                        farm.contractId == coopStatus.contractId
-                    }
-                }
-            ) return Empty(coopStatus, contractName!!)
 
             val contract = backups.findContract(contractId)
 
