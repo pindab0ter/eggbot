@@ -43,7 +43,7 @@ object CoopsInfo : Command() {
         val contractId = event.arguments.first()
         val coops = runBlocking(Dispatchers.IO) {
             transaction {
-                Coop.find { Coops.contract eq contractId }.toList()
+                Coop.find { Coops.contract eq contractId }.toList().sortedBy { it.name }
             }.asyncMap { coop ->
                 CoopContractSimulation.Factory(coop.contract, coop.name)
             }
