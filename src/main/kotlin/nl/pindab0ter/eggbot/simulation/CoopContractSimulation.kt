@@ -116,10 +116,12 @@ class CoopContractSimulation private constructor(
                 }?.name
 
             // Co-op not found?
-            if (coopStatus == null || error != null) return NotFound(contractId, coopId)
+            if (coopStatus == null || error != null || contractName == null)
+                return NotFound(contractId, coopId)
 
             // Is co-op abandoned?
-            if (coopStatus.contributorsList.isEmpty()) return Abandoned(coopStatus, contractName!!)
+            if (coopStatus.contributorsList.isEmpty())
+                return Abandoned(coopStatus, contractName!!)
 
             val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
                 coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
@@ -127,7 +129,11 @@ class CoopContractSimulation private constructor(
                 it.component1()
             }
 
-            val contract = backups.findContract(contractId)
+            val contract = backups.findContract(contractId)!!
+
+            // Has the co-op failed?
+            if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal)
+                return Failed(coopStatus, contractName)
 
             //
             // Co-op finished?
@@ -138,14 +144,14 @@ class CoopContractSimulation private constructor(
             // and the contract archive contains this contract
             // and that contract has reached its final goal
             // for any of the contributors
-            if (coopStatus.eggsLaid >= contract?.finalGoal ?: ZERO || backups.any { contributor ->
+            if (coopStatus.eggsLaid >= contract.finalGoal || backups.any { contributor ->
                     contributor.farmsList.none { farm ->
                         farm.contractId == coopStatus.contractId
                     } && contributor.contracts.archiveList.find { contract ->
                         contract.contract.id == coopStatus.contractId
                     }?.finished == true
                 }
-            ) return Finished(coopStatus, contractName!!)
+            ) return Finished(coopStatus, contractName)
 
             // Co-op in progress
             return InProgress(CoopContractSimulation(backups, coopStatus))

@@ -67,6 +67,7 @@ object CoopsInfo : Command() {
                         else -> "`${result.simulation.coopId}`: ✗ Won't finish ($progress)"
                     }
                 }
+                is Failed -> "`${result.coopStatus.coopId}`: ✗ Hasn't finished"
                 is Finished -> "`${result.coopStatus.coopId}`: ✓ Finished"
             }
         }}")

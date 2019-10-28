@@ -4,6 +4,7 @@ import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
+import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.Duration
 import java.math.RoundingMode.HALF_UP
@@ -193,16 +194,21 @@ object Messages {
     }.toString()
 
     fun coopStatus(result: CoopContractSimulationResult, compact: Boolean = false): List<String> = when (result) {
-        is CoopContractSimulationResult.InProgress -> coopInProgress(result.simulation, compact)
-        is CoopContractSimulationResult.NotFound -> listOf(
+        is InProgress -> coopInProgress(result.simulation, compact)
+        is NotFound -> listOf(
             "No co-op found for contract `${result.contractId}` with name `${result.coopId}"
         )
-        is CoopContractSimulationResult.Abandoned -> listOf(
+        is Abandoned -> listOf(
             """ `${result.coopStatus.coopId}` vs. __${result.contractName}__:
                 
                 This co-op has no members.""".trimIndent()
         )
-        is CoopContractSimulationResult.Finished -> listOf(
+        is Failed -> listOf(
+            """ `${result.coopStatus.coopId}` vs. __${result.contractName}__:
+                
+                This co-op has not reached their final goal.""".trimIndent()
+        )
+        is Finished -> listOf(
             """ `${result.coopStatus.coopId}` vs. __${result.contractName}__:
                 
                 This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent()
