@@ -141,7 +141,7 @@ object Messages {
         // region Basic info and totals
 
         appendln("`${simulation.farmerName}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
-        appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
+        appendln("**Time remaining**: ${simulation.timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("**Total eggs**: ${simulation.eggsLaid.formatIllions()} ")
         append("(${simulation.eggsLaidPerHour.formatIllions()}/hr)")
         appendln()
@@ -180,7 +180,7 @@ object Messages {
                         append(if (success) " ✓ " else " ✗ ")
                         when (duration) {
                             null -> append("More than a year")
-                            else -> append(duration.asDayHoursAndMinutes(compact))
+                            else -> append(duration.asDaysHoursAndMinutes(compact))
                         }
                         if (index + 1 < simulation.goals.count()) appendln()
                     }
@@ -223,7 +223,7 @@ object Messages {
         // region Basic info and totals
 
         appendln("`${simulation.coopId}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
-        appendln("**Time remaining**: ${simulation.timeRemaining.asDayHoursAndMinutes(compact)}")
+        appendln("**Time remaining**: ${simulation.timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("**Total eggs**: ${simulation.eggsLaid.formatIllions()} ")
         append("(${simulation.eggLayingRatePerHour.formatIllions()}/hr)")
         appendln()
@@ -259,7 +259,7 @@ object Messages {
                     append(if (success) " ✓ " else " ✗ ")
                     when (duration) {
                         null -> append("More than a year")
-                        else -> append(duration.asDayHoursAndMinutes(compact))
+                        else -> append(duration.asDaysHoursAndMinutes(compact))
                     }
                     if (index + 1 < simulation.goals.count()) appendln()
                 }

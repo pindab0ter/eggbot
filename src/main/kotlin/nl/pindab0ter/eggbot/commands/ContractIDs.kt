@@ -7,7 +7,7 @@ import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.asDayHoursAndMinutes
+import nl.pindab0ter.eggbot.utilities.asDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.utilities.formattedName
 import nl.pindab0ter.eggbot.utilities.toDateTime
 import org.joda.time.DateTime
@@ -61,7 +61,7 @@ object ContractIDs : Command() {
                 Duration(DateTime.now(), contract.expirationTime.toDateTime())
                     .toPeriod()
                     .normalizedStandard()
-                    .asDayHoursAndMinutes()
+                    .asDaysHoursAndMinutes()
             )
             sb.appendln()
         }

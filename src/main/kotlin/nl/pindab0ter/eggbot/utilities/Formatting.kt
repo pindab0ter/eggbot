@@ -52,12 +52,12 @@ private val shortDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatter
     .appendSuffix("m")
     .toFormatter()
 
-fun Period.asDayHoursAndMinutes(compact: Boolean = false): String =
+fun Period.asDaysHoursAndMinutes(compact: Boolean = false): String =
     (if (compact) shortDaysHoursAndMinutesFormatter else longDaysHoursAndMinutesFormatter)
         .withLocale(Locale.UK)
         .print(this.normalizedStandard(PeriodType.dayTime()))
 
-fun Duration.asDayHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDayHoursAndMinutes(compact)
+fun Duration.asDaysHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDaysHoursAndMinutes(compact)
 
 fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
@@ -67,7 +67,7 @@ fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this)
 
-fun DateTime.asDayHoursAndMinutes(): String = DateTimeFormatterBuilder()
+fun DateTime.asDaysHoursAndMinutes(): String = DateTimeFormatterBuilder()
     .appendDayOfWeekText()
     .appendLiteral(" ")
     .appendDayOfMonth(1)

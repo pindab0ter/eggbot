@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.jobs
 
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.utilities.asDayHoursAndMinutes
+import nl.pindab0ter.eggbot.utilities.asDaysHoursAndMinutes
 import org.joda.time.DateTime
 import org.quartz.JobExecutionContext
 import org.quartz.JobExecutionException
@@ -21,6 +21,6 @@ object JobLogger : JobListener {
     override fun jobWasExecuted(context: JobExecutionContext?, jobException: JobExecutionException?) =
         log.info {
             "Finished job ${context?.jobDetail?.key?.name} in ${context?.jobRunTime}ms. " +
-                    "Next run: ${context?.nextFireTime?.let { DateTime(it.time).asDayHoursAndMinutes() }}"
+                    "Next run: ${context?.nextFireTime?.let { DateTime(it.time).asDaysHoursAndMinutes() }}"
         }
 }
