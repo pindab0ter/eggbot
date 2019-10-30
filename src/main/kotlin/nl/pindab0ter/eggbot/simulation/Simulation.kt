@@ -32,41 +32,41 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     private val habCapacityMultipliers: List<BigDecimal>
         get() = listOf(
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.HEN_HOUSE_REMODEL.ordinal].level),
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.MICROLUX_CHICKEN_SUITES.ordinal].level),
-            BigDecimal(1 + .02 * farm.commonResearchList[CommonResearch.GRAV_PLATING.ordinal].level),
-            BigDecimal(1 + .02 * farm.commonResearchList[CommonResearch.WORMHOLE_DAMPENING.ordinal].level)
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.HEN_HOUSE_REMODEL.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.MICROLUX_CHICKEN_SUITES.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[CommonResearch.GRAV_PLATING.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[CommonResearch.WORMHOLE_DAMPENING.ordinal].level
         )
 
     private val internalHatcheryMultiplier: BigDecimal
-        get() = BigDecimal(1 + .05 * backup.game.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level)
+        get() = ONE + BigDecimal(".05") * backup.game.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
 
     private val eggLayingMultipliers: List<BigDecimal>
         get() = listOf(
-            BigDecimal(1 + .10 * farm.commonResearchList[CommonResearch.COMFORTABLE_NESTS.ordinal].level),
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.HEN_HOUSE_AC.ordinal].level),
-            BigDecimal(1 + .15 * farm.commonResearchList[CommonResearch.IMPROVED_GENETICS.ordinal].level),
-            BigDecimal(1 + .10 * farm.commonResearchList[CommonResearch.TIME_COMPRESSION.ordinal].level),
-            BigDecimal(1 + .02 * farm.commonResearchList[CommonResearch.TIMELINE_DIVERSION.ordinal].level),
-            BigDecimal(1 + .10 * farm.commonResearchList[CommonResearch.RELATIVITY_OPTIMIZATION.ordinal].level),
-            BigDecimal(1 + .05 * backup.game.epicResearchList[EpicResearch.EPIC_COMFY_NESTS.ordinal].level)
+            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.COMFORTABLE_NESTS.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.HEN_HOUSE_AC.ordinal].level,
+            ONE + BigDecimal(".15") * farm.commonResearchList[CommonResearch.IMPROVED_GENETICS.ordinal].level,
+            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.TIME_COMPRESSION.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[CommonResearch.TIMELINE_DIVERSION.ordinal].level,
+            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.RELATIVITY_OPTIMIZATION.ordinal].level,
+            ONE + BigDecimal(".05") * backup.game.epicResearchList[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
         )
 
     private val shippingRatePercentageIncreases: List<BigDecimal>
         get() = listOf(
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level),
-            BigDecimal(1 + .10 * farm.commonResearchList[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level),
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.DRIVER_TRAINING.ordinal].level),
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level),
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.QUANTUM_STORAGE.ordinal].level),
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.HOVER_UPGRADES.ordinal].level), // Assumes at least Hover Semi
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.DARK_CONTAINMENT.ordinal].level),
-            BigDecimal(1 + .05 * farm.commonResearchList[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level),
-            BigDecimal(1 + .05 * backup.game.epicResearchList[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level)
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
+            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.DRIVER_TRAINING.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.QUANTUM_STORAGE.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.HOVER_UPGRADES.ordinal].level, // Assumes at least Hover Semi
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.DARK_CONTAINMENT.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level,
+            ONE + BigDecimal(".05") * backup.game.epicResearchList[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
         )
 
     private val internalHatcheryCalm: BigDecimal
-        get() = BigDecimal(1 + .10 * backup.game.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level)
+        get() = ONE + BigDecimal(".10") * backup.game.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level
 
     // endregion
 
@@ -124,7 +124,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     private val eggLayingBaseRate: BigDecimal by lazy { ONE / BigDecimal(30) }
 
-    val eggsLaidPerChickenPerSecond: BigDecimal by lazy { eggLayingBaseRate * eggLayingBonus }
+    val eggsLaidPerChickenPerSecond: BigDecimal by lazy { (eggLayingBaseRate * eggLayingBonus).round(4) }
 
     val eggsLaidPerChickenPerMinute: BigDecimal by lazy { eggsLaidPerChickenPerSecond * 60 }
 
