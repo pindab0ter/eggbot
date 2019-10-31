@@ -72,16 +72,13 @@ class ContractSimulation constructor(
         val reachedGoals: MutableMap<GoalNumber, TimeUntilReached?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
         private var currentGoal: Int = 0
     ) : State(population, eggsLaid) {
-        override fun step(): Unit = when {
-            eggsLaid >= goals[currentGoal] -> {
-                reachedGoals[currentGoal] = elapsed
-                currentGoal += 1
-            }
-            else -> {
-                elapsed += Duration.standardMinutes(1)
-                population = (population + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
-                eggsLaid += (eggsLaidPerChickenPerMinute * population).coerceAtMost(shippingRatePerMinute)
-            }
+        override fun step() = if (goals[currentGoal]?.let { goal -> eggsLaid >= goal } == true) {
+            reachedGoals[currentGoal] = elapsed
+            currentGoal += 1
+        } else {
+            elapsed += Duration.standardMinutes(1)
+            population = population.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
+            eggsLaid += population.times(eggsLaidPerChickenPerMinute).coerceAtMost(shippingRatePerMinute)
         }
     }
 
