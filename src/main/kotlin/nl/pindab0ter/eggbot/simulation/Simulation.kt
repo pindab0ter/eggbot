@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.simulation
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
 import nl.pindab0ter.eggbot.utilities.*
-import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
@@ -78,14 +77,6 @@ abstract class Simulation(val backup: EggInc.Backup) {
     private val EggInc.HabLevel.maxCapacity: BigDecimal get() = capacity.multiply(habsMaxCapacityBonus)
 
     val habsMaxCapacity: BigDecimal by lazy { farm.habsList.sumBy { hab -> hab.maxCapacity } }
-
-    val timeToFullHabs: Duration by lazy {
-        if (internalHatcheriesAreActive) {
-            val remainingCapacity = habsMaxCapacity - population
-            val secondsToFullHabs = remainingCapacity / populationIncreasePerSecond
-            secondsToFullHabs.toLong().toDuration()
-        } else Duration(Long.MAX_VALUE)
-    }
 
     // endregion
 

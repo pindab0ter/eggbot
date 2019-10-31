@@ -10,7 +10,6 @@ import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
-import java.math.BigDecimal.ZERO
 import java.util.*
 
 class CoopContractSimulation private constructor(
@@ -68,40 +67,43 @@ class CoopContractSimulation private constructor(
             .toSortedMap()
     }
 
-    private val completedSimulation by lazy { runSimulation() }
+    public val finalState by lazy { runSimulation() }
 
-    fun willFinish(): Boolean = completedSimulation.goalsReached.none { (_, duration) -> duration == null }
+    fun willFinish(): Boolean = finalState.goalsReached.none { (_, duration) -> duration == null }
 
-    fun timeToFinalGoal(): Duration = completedSimulation.goalsReached.maxBy { it.key }?.value ?: oneYear
+    fun timeToFinalGoal(): Duration = finalState.goalsReached.maxBy { it.key }?.value ?: oneYear
 
     // endregion
 
     // region Simulation
 
     inner class State(
-        private val states: List<ContractSimulation.State> = farms.map { farm -> farm.State() },
-        var duration: Duration = Duration.ZERO,
-        val goalsReached: MutableMap<Int, Duration?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
+        val farmStates: Map<ContractSimulation, ContractSimulation.State> = this@CoopContractSimulation.farms.map { farm -> farm to farm.State() }.toMap(),
+        var elapsed: Duration = Duration.ZERO,
+        val goalsReached: MutableMap<GoalNumber, TimeUntilReached?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
         var currentGoal: Int = 0
     ) {
-        private val eggsLaid get() = states.sumBy { it.eggsLaid }
+        private val eggsLaid get() = farmStates.values.sumBy { it.eggsLaid }
 
-        fun step(): Unit = if (eggsLaid >= goals[currentGoal]) {
-            goalsReached[currentGoal] = duration
+        fun step(): Unit = if (goals[currentGoal]?.let { goal -> eggsLaid >= goal } == true) {
+            goalsReached[currentGoal] = elapsed
             currentGoal += 1
         } else {
-            duration += Duration.standardMinutes(1)
-            states.forEach { it.step() }
+            elapsed += Duration.standardMinutes(1)
+            farmStates.forEach { it.value.step() }
         }
     }
 
     private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
-    fun runSimulation(): State {
+    private fun runSimulation(): State {
         val state = State()
         do {
             state.step()
-        } while (state.goalsReached.any { it.value == null } && state.duration < oneYear)
+        } while (
+            (state.goalsReached.any { it.value == null } && state.elapsed < timeRemaining) // Not all goals have been reached in time
+            || state.elapsed < oneYear // Or one year hasn't yet passed
+        )
         return state
     }
 
@@ -121,7 +123,7 @@ class CoopContractSimulation private constructor(
 
             // Is co-op abandoned?
             if (coopStatus.contributorsList.isEmpty())
-                return Abandoned(coopStatus, contractName!!)
+                return Abandoned(coopStatus, contractName)
 
             val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
                 coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }

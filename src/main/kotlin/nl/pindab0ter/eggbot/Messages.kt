@@ -151,7 +151,7 @@ object Messages {
         appendln()
         appendln()
 
-        // endregion
+        // endregion Basic info and totals
 
         // region Goals
 
@@ -163,7 +163,7 @@ object Messages {
             append("```")
             appendln()
 
-            simulation.runSimulation().apply {
+            simulation.finalState.apply {
                 reachedGoals.toSortedMap()
                     .filter { (_, goal) -> goal != Duration.ZERO }
                     .forEach { (index, duration) ->
@@ -189,7 +189,7 @@ object Messages {
             appendln("```")
         }
 
-        // endregion
+        // endregion Goals
 
     }.toString()
 
@@ -238,7 +238,7 @@ object Messages {
         appendln()
         appendln()
 
-        // endregion
+        // endregion Basic info and totals
 
         // region Goals
 
@@ -247,7 +247,7 @@ object Messages {
         append("```")
         appendln()
 
-        simulation.runSimulation().apply {
+        simulation.finalState.apply {
             goalsReached.toSortedMap()
                 .filter { (_, goal) -> goal != Duration.ZERO }
                 .forEach { (index, duration) ->
@@ -272,7 +272,7 @@ object Messages {
         }
         appendln("```")
 
-        // endregion
+        // endregion Goals
 
         // region Members
 
@@ -333,7 +333,7 @@ object Messages {
             appendln()
         }
 
-        // endregion
+        // endregion Table header
 
         // region Table body
 
@@ -382,9 +382,9 @@ object Messages {
             appendln()
         }
 
-        // endregion
+        // endregion Table body
 
-        // endregion
+        // endregion Members
 
     }.toString().splitMessage(prefix = "```", postfix = "```")
 }

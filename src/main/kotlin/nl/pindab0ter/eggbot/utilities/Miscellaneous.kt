@@ -4,7 +4,11 @@ import com.github.kittinunf.fuel.core.Body
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.joda.time.Duration
 import java.util.*
+
+typealias GoalNumber = Int
+typealias TimeUntilReached = Duration
 
 fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 

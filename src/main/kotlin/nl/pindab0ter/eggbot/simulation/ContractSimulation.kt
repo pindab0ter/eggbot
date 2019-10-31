@@ -19,7 +19,7 @@ class ContractSimulation constructor(
 
     override val farm: EggInc.Backup.Simulation = backup.farmsList.find { it.contractId == localContract.contract.id }!!
 
-    // endregion
+    // endregion Initialisation
 
     // region Basic info
 
@@ -29,29 +29,31 @@ class ContractSimulation constructor(
     var isActive: Boolean = true
     val finished: Boolean = localContract.finished
 
-    // endregion
+    // endregion Basic info
 
     // region Farm details
 
     override val population: BigDecimal = farm.habPopulation.sum()
     override val eggsLaid: BigDecimal = farm.eggsLaid.toBigDecimal()
 
-    // endregion
+    // endregion Farm details
 
     // region Contract details
 
-    val elapsedTime: Duration = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
+    val elapsed: Duration = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
 
-    val timeRemaining: Duration = localContract.contract.lengthSeconds.toDuration().minus(elapsedTime)
+    val timeRemaining: Duration = localContract.contract.lengthSeconds.toDuration().minus(elapsed)
 
     val goals: SortedMap<Int, BigDecimal> = localContract.contract.goalsList
         .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
         .toMap()
         .toSortedMap()
 
-    // endregion
+    // endregion Contract details
 
-    // region  Simulation State
+    // region Simulation
+
+    val finalState: SoloState by lazy { runSimulation() }
 
     open inner class State(
         var population: BigDecimal = this.population,
@@ -64,33 +66,41 @@ class ContractSimulation constructor(
     }
 
     inner class SoloState(
-        var duration: Duration = Duration.ZERO,
+        var elapsed: Duration = Duration.ZERO,
         population: BigDecimal = this.population,
         eggsLaid: BigDecimal = this.eggsLaid,
-        val reachedGoals: MutableMap<Int, Duration?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
+        val reachedGoals: MutableMap<GoalNumber, TimeUntilReached?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
         private var currentGoal: Int = 0
     ) : State(population, eggsLaid) {
-        override fun step(): Unit = if (eggsLaid >= goals[currentGoal]) {
-            reachedGoals[currentGoal] = duration
-            currentGoal += 1
-        } else {
-            duration += Duration.standardMinutes(1)
-            population = (population + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
-            eggsLaid += (eggsLaidPerChickenPerMinute * population).coerceAtMost(shippingRatePerMinute)
+        override fun step(): Unit = when {
+            eggsLaid >= goals[currentGoal] -> {
+                reachedGoals[currentGoal] = elapsed
+                currentGoal += 1
+            }
+            else -> {
+                elapsed += Duration.standardMinutes(1)
+                population = (population + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
+                eggsLaid += (eggsLaidPerChickenPerMinute * population).coerceAtMost(shippingRatePerMinute)
+            }
         }
     }
 
     private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
-    fun runSimulation(): SoloState {
+    private fun runSimulation(): SoloState {
         val state = SoloState()
         do {
             state.step()
-        } while (state.reachedGoals.any { (_, momentReached) -> momentReached == null } && state.duration < oneYear)
+        } while (
+        // Not all goals have been reached in time
+            (state.reachedGoals.any { it.value == null } && state.elapsed < timeRemaining)
+            // Or one year hasn't yet passed
+            || state.elapsed < oneYear
+        )
         return state
     }
 
-    // endregion
+    // endregion Simulation
 
     companion object {
         operator fun invoke(
