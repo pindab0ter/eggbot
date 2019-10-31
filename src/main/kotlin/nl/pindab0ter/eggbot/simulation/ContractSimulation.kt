@@ -1,25 +1,21 @@
 package nl.pindab0ter.eggbot.simulation
 
 import com.auxbrain.ei.EggInc
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
+import org.joda.time.Duration.ZERO
+import org.joda.time.Duration.standardMinutes
 import java.math.BigDecimal
 import java.util.*
 
 class ContractSimulation constructor(
     backup: EggInc.Backup,
-    private val localContract: EggInc.LocalContract
+    override val farm: EggInc.Backup.Simulation,
+    localContract: EggInc.LocalContract
 ) : Simulation(backup) {
 
-    // region Initialisation
-
-    val log = KotlinLogging.logger { }
-
-    override val farm: EggInc.Backup.Simulation = backup.farmsList.find { it.contractId == localContract.contract.id }!!
-
-    // endregion Initialisation
+    // override val farm: EggInc.Backup.Simulation = backup.farmsList.find { it.contractId == localContract.contract.id }!!
 
     // region Basic info
 
@@ -28,73 +24,47 @@ class ContractSimulation constructor(
     val egg: EggInc.Egg = localContract.contract.egg
     var isActive: Boolean = true
     val finished: Boolean = localContract.finished
+    val timeRemaining: Duration = localContract.contract.lengthSeconds.toDuration()
+        .minus(Duration(localContract.timeAccepted.toDateTime(), DateTime.now()))
+    val goals: SortedSet<BigDecimal> = localContract.contract.goalsList.map { goal ->
+        goal.targetAmount.toBigDecimal()
+    }.toSortedSet()
 
     // endregion Basic info
 
-    // region Farm details
-
-    override val population: BigDecimal = farm.habPopulation.sum()
-    override val eggsLaid: BigDecimal = farm.eggsLaid.toBigDecimal()
-
-    // endregion Farm details
-
-    // region Contract details
-
-    val elapsed: Duration = Duration(localContract.timeAccepted.toDateTime(), DateTime.now())
-
-    val timeRemaining: Duration = localContract.contract.lengthSeconds.toDuration().minus(elapsed)
-
-    val goals: SortedMap<Int, BigDecimal> = localContract.contract.goalsList
-        .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
-        .toMap()
-        .toSortedMap()
-
-    // endregion Contract details
-
     // region Simulation
 
-    val finalState: SoloState by lazy { runSimulation() }
+    override var elapsed: Duration = ZERO
+    override val currentEggs: BigDecimal = farm.eggsLaid.toBigDecimal()
+    override var projectedEggs: BigDecimal = currentEggs
+    override val currentPopulation: BigDecimal = farm.habPopulation.sum()
+    override var projectedPopulation: BigDecimal = currentPopulation
+    var habBottleneckReached: Duration? = null
+        get() = if (field != null && field!! < timeRemaining) field else null
+    var transportBottleneckReached: Duration? = null
+        get() = if (field != null && field!! < timeRemaining) field else null
+    val goalReachedMoments: SortedSet<GoalReachedMoment> = goals.map { goal ->
+        GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
+    }.toSortedSet()
+    private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.maxBy { it.target }
 
-    open inner class State(
-        var population: BigDecimal = this.population,
-        var eggsLaid: BigDecimal = this.eggsLaid
-    ) {
-        open fun step() {
-            population = (population + populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
-            eggsLaid += (eggsLaidPerChickenPerMinute * population).coerceAtMost(shippingRatePerMinute)
-        }
+    fun step() {
+        if (currentGoal != null && projectedEggs >= currentGoal!!.target)
+            currentGoal!!.moment = elapsed
+        if (habBottleneckReached == null && projectedPopulation >= habsMaxCapacity)
+            habBottleneckReached = elapsed
+        if (transportBottleneckReached == null && projectedPopulation >= shippingRatePerMinute)
+            transportBottleneckReached = elapsed
+        elapsed += standardMinutes(1)
+        projectedEggs += projectedPopulation.times(eggsPerChickenPerMinute).coerceAtMost(shippingRatePerMinute)
+        projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
     }
 
-    inner class SoloState(
-        var elapsed: Duration = Duration.ZERO,
-        population: BigDecimal = this.population,
-        eggsLaid: BigDecimal = this.eggsLaid,
-        val reachedGoals: MutableMap<GoalNumber, TimeUntilReached?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
-        private var currentGoal: Int = 0
-    ) : State(population, eggsLaid) {
-        override fun step() = if (goals[currentGoal]?.let { goal -> eggsLaid >= goal } == true) {
-            reachedGoals[currentGoal] = elapsed
-            currentGoal += 1
-        } else {
-            elapsed += Duration.standardMinutes(1)
-            population = population.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
-            eggsLaid += population.times(eggsLaidPerChickenPerMinute).coerceAtMost(shippingRatePerMinute)
-        }
-    }
-
-    private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
-
-    private fun runSimulation(): SoloState {
-        val state = SoloState()
-        do {
-            state.step()
-        } while (
-        // Not all goals have been reached in time
-            (state.reachedGoals.any { it.value == null } && state.elapsed < timeRemaining)
-            // Or one year hasn't yet passed
-            || state.elapsed < oneYear
+    fun run() {
+        do step() while (
+            (goalReachedMoments.any { it.moment == null } && elapsed < timeRemaining) // Not all goals have been reached in time
+            || elapsed < ONE_YEAR                                                     // Or one year hasn't yet passed
         )
-        return state
     }
 
     // endregion Simulation
@@ -103,10 +73,13 @@ class ContractSimulation constructor(
         operator fun invoke(
             backup: EggInc.Backup,
             contractId: String
-        ): ContractSimulation? = backup.contracts.contractsList.find { localContract ->
-            localContract.contract.id == contractId
-        }?.let { contract ->
-            ContractSimulation(backup, contract)
+        ): ContractSimulation? {
+            val contract = backup.contracts.contractsList.find { localContract ->
+                localContract.contract.id == contractId
+            }
+            val farm = backup.farmsList.find { it.contractId == contract?.contract?.id }
+            return if (contract != null && farm != null) ContractSimulation(backup, farm, contract)
+            else null
         }
     }
 }

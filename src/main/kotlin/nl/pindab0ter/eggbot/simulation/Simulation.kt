@@ -3,20 +3,16 @@ package nl.pindab0ter.eggbot.simulation
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
 import nl.pindab0ter.eggbot.utilities.*
+import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
-import java.math.MathContext.DECIMAL64
 
 abstract class Simulation(val backup: EggInc.Backup) {
 
     internal abstract val farm: EggInc.Backup.Simulation
 
-    // region Basic info
-
-    val farmerName: String = backup.userName
-
-    // endregion
+    val farmerName: String get() = backup.userName
 
     // region Research
 
@@ -86,10 +82,6 @@ abstract class Simulation(val backup: EggInc.Backup) {
         (internalHatcheryFlatIncreases.sum() * internalHatcheryMultiplier)
     }
 
-    private val internalHatcheriesAreActive: Boolean by lazy {
-        internalHatcheryRatePerMinute > ZERO
-    }
-
     // TODO: Include Internal Hatchery Sharing for full habs
     val populationIncreasePerMinute: BigDecimal by lazy {
         farm.habsList
@@ -100,19 +92,9 @@ abstract class Simulation(val backup: EggInc.Backup) {
             .times(internalHatcheryCalm)
     }
 
-    val populationIncreasePerSecond: BigDecimal by lazy {
-        populationIncreasePerMinute / BigDecimal(60)
-    }
-
     val populationIncreasePerHour: BigDecimal by lazy {
         populationIncreasePerMinute * BigDecimal(60)
     }
-
-    // endregion
-
-    // region Chickens
-
-    abstract val population: BigDecimal
 
     // endregion
 
@@ -120,19 +102,9 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     private val eggLayingBonus: BigDecimal by lazy { eggLayingMultipliers.product() }
 
-    abstract val eggsLaid: BigDecimal
+    private val eggLayingBaseRate: BigDecimal = ONE / BigDecimal(30)
 
-    private val eggLayingBaseRate: BigDecimal by lazy { ONE / BigDecimal(30) }
-
-    val eggsLaidPerChickenPerSecond: BigDecimal by lazy { (eggLayingBaseRate * eggLayingBonus).round(4) }
-
-    val eggsLaidPerChickenPerMinute: BigDecimal by lazy { eggsLaidPerChickenPerSecond * 60 }
-
-    val eggsLaidPerSecond: BigDecimal by lazy { eggsLaidPerChickenPerSecond * population }
-
-    val eggsLaidPerMinute: BigDecimal by lazy { eggsLaidPerSecond * 60 }
-
-    val eggsLaidPerHour: BigDecimal by lazy { eggsLaidPerSecond * 60 * 60 }
+    val eggsPerChickenPerMinute: BigDecimal by lazy { (eggLayingBaseRate * eggLayingBonus * 60).round(4) }
 
     // endregion
 
@@ -149,9 +121,13 @@ abstract class Simulation(val backup: EggInc.Backup) {
         }.multiply(shippingRateBonus)
     }
 
-    val shippingRatePerSecond: BigDecimal by lazy {
-        shippingRatePerMinute.divide(BigDecimal(60), DECIMAL64)
-    }
-
     // endregion
+
+    abstract var elapsed: Duration
+    abstract val currentEggs: BigDecimal
+    abstract var projectedEggs: BigDecimal
+    abstract val currentPopulation: BigDecimal
+    abstract var projectedPopulation: BigDecimal
+    val currentEggsPerHour: BigDecimal get() = currentPopulation * eggsPerChickenPerMinute * 60
+
 }

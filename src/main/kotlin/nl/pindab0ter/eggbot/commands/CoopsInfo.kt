@@ -60,10 +60,10 @@ object CoopsInfo : Command() {
                 is NotFound -> "`${result.coopId}`: ✗ Waiting for starter" // TODO: Tag starter and/or leader
                 is Abandoned -> "`${result.coopStatus.coopId}`: ✗ Abandoned"
                 is InProgress -> {
-                    val progress = (result.simulation.timeRemaining / result.simulation.timeToFinalGoal())
+                    val progress = (result.simulation.timeRemaining / result.simulation.goalReachedMoments.last().moment!!)
                         ?.asPercentage() ?: "error"
                     when {
-                        result.simulation.willFinish() -> "`${result.simulation.coopId}`: ✓ Will finish ($progress)"
+                        result.simulation.willFinish -> "`${result.simulation.coopId}`: ✓ Will finish ($progress)"
                         else -> "`${result.simulation.coopId}`: ✗ Won't finish ($progress)"
                     }
                 }

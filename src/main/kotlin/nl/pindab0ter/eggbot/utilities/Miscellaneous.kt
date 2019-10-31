@@ -4,11 +4,11 @@ import com.github.kittinunf.fuel.core.Body
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.util.*
 
-typealias GoalNumber = Int
-typealias TimeUntilReached = Duration
+val ONE_YEAR get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
 fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 

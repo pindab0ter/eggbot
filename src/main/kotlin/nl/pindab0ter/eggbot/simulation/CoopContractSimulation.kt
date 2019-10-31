@@ -7,8 +7,8 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.utilities.*
-import org.joda.time.DateTime
 import org.joda.time.Duration
+import org.joda.time.Duration.ZERO
 import java.math.BigDecimal
 import java.util.*
 
@@ -17,94 +17,60 @@ class CoopContractSimulation private constructor(
     val coopStatus: EggInc.CoopStatusResponse
 ) {
 
-    // region Initialisation
-
     val log = KotlinLogging.logger { }
+
+    // region Basic info
 
     val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractId)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
-        backup.farmsList.any { farm ->
-            farm.contractId == coopStatus.contractId
-        }
-    }.map { backup ->
-        ContractSimulation(backup, localContract).also {
-            it.isActive = coopStatus.contributorsList.find { contributor ->
+        backup.farmsList.any { farm -> farm.contractId == coopStatus.contractId }
+    }.mapNotNull { backup ->
+        ContractSimulation(backup, localContract.contract.id).also {
+            // TODO: Save this information somewhere else
+            it?.isActive = coopStatus.contributorsList.find { contributor ->
                 contributor.userId == backup.userId
             }?.active == true
         }
     }
+    val contractId: String get() = localContract.contract.id
+    val contractName: String get() = localContract.contract.name
+    val coopId: String get() = localContract.coopId
+    val egg: EggInc.Egg get() = localContract.contract.egg
+    val maxCoopSize: Int get() = localContract.contract.maxCoopSize
+    val timeRemaining: Duration get() = coopStatus.secondsRemaining.toDuration()
+    val goals: SortedSet<BigDecimal> = localContract.contract.goalsList.map { goal ->
+        goal.targetAmount.toBigDecimal()
+    }.toSortedSet()
+    val populationIncreaseRatePerHour: BigDecimal get() = farms.sumBy { farm -> farm.populationIncreasePerHour }
 
-    // endregion
-
-    // region Basic info
-
-    val contractId: String by lazy { localContract.contract.id }
-    val contractName: String by lazy { localContract.contract.name }
-    val coopId: String by lazy { localContract.coopId }
-    val egg: EggInc.Egg by lazy { localContract.contract.egg }
-    val maxCoopSize by lazy { localContract.contract.maxCoopSize }
-
-    // endregion
-
-    // region Totals
-
-    val eggsLaid: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaid } }
-    val population: BigDecimal by lazy { farms.sumBy { farm -> farm.population } }
-    val populationIncreaseRatePerMinute: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreasePerMinute } }
-    val populationIncreaseRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.populationIncreasePerHour } }
-    val eggLayingRatePerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.eggsLaidPerHour } }
-
-    // endregion
-
-    // region Contract details
-
-    val timeRemaining: Duration by lazy { coopStatus.secondsRemaining.toDuration() }
-    val goals: SortedMap<Int, BigDecimal> by lazy {
-        localContract.contract.goalsList
-            .mapIndexed { index, goal -> index to goal.targetAmount.toBigDecimal() }
-            .toMap()
-            .toSortedMap()
-    }
-
-    public val finalState by lazy { runSimulation() }
-
-    fun willFinish(): Boolean = finalState.goalsReached.none { (_, duration) -> duration == null }
-
-    fun timeToFinalGoal(): Duration = finalState.goalsReached.maxBy { it.key }?.value ?: oneYear
-
-    // endregion
+    // endregion Basic info
 
     // region Simulation
+    val currentEggsPerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggsPerHour } }
 
-    inner class State(
-        val farmStates: Map<ContractSimulation, ContractSimulation.State> = this@CoopContractSimulation.farms.map { farm -> farm to farm.State() }.toMap(),
-        var elapsed: Duration = Duration.ZERO,
-        val goalsReached: MutableMap<GoalNumber, TimeUntilReached?> = goals.map { (i, _) -> i to null }.toMap().toMutableMap(),
-        var currentGoal: Int = 0
-    ) {
-        private val eggsLaid get() = farmStates.values.sumBy { it.eggsLaid }
+    var elapsed: Duration = ZERO
+    val currentEggs: BigDecimal = farms.sumBy { farm -> farm.currentEggs }
+    val projectedEggs: BigDecimal get() = farms.sumBy { farm -> farm.projectedEggs }
+    val currentPopulation: BigDecimal = farms.sumBy { farm -> farm.currentPopulation }
+    val goalReachedMoments: SortedSet<GoalReachedMoment> = goals.map { goal ->
+        GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
+    }.toSortedSet()
+    private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.maxBy { it.target }
+    val willFinish: Boolean get() = goalReachedMoments.maxBy { it.target }?.moment?.let { it < timeRemaining } == true
 
-        fun step(): Unit = if (goals[currentGoal]?.let { goal -> eggsLaid >= goal } == true) {
-            goalsReached[currentGoal] = elapsed
-            currentGoal += 1
-        } else {
-            elapsed += Duration.standardMinutes(1)
-            farmStates.forEach { it.value.step() }
-        }
+
+    private fun step() {
+        if (currentGoal != null && projectedEggs >= currentGoal!!.target) currentGoal!!.moment = elapsed
+        farms.forEach { it.step() }
+        elapsed += Duration.standardMinutes(1)
     }
 
-    private val oneYear: Duration = Duration(DateTime.now(), DateTime.now().plusYears(1))
-
-    private fun runSimulation(): State {
-        val state = State()
-        do {
-            state.step()
-        } while (
-            (state.goalsReached.any { it.value == null } && state.elapsed < timeRemaining) // Not all goals have been reached in time
-            || state.elapsed < oneYear // Or one year hasn't yet passed
+    fun run() {
+        do step() while (
+            (goalReachedMoments.any { it.moment == null } && elapsed < timeRemaining) // Not all goals have been reached in time
+            || elapsed < ONE_YEAR                                                     // Or one year hasn't yet passed
         )
-        return state
     }
 
     // endregion
@@ -156,7 +122,7 @@ class CoopContractSimulation private constructor(
             ) return Finished(coopStatus, contractName)
 
             // Co-op in progress
-            return InProgress(CoopContractSimulation(backups, coopStatus))
+            return InProgress(CoopContractSimulation(backups, coopStatus)).also { it.simulation.run() }
         }
     }
 }
