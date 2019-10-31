@@ -130,7 +130,6 @@ object Messages {
 
     }.toString()
 
-    // TODO: Display which bottlenecks will be reached when
     fun soloStatus(
         simulation: ContractSimulation,
         compact: Boolean = false
@@ -141,16 +140,34 @@ object Messages {
 
         // region Basic info and totals
 
-        appendln("`${simulation.farmerName}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
-        appendln("**Time remaining**: ${simulation.timeRemaining.asDaysHoursAndMinutes(compact)}")
-        append("**Current chickens**: ${simulation.currentPopulation.formatIllions()} ")
-        append("(${simulation.populationIncreasePerHour.formatIllions()}/hr)")
-        appendln()
-        append("**Current eggs**: ${simulation.currentEggs.formatIllions()} ")
-        append("(${(simulation.eggsPerChickenPerMinute * simulation.currentPopulation * 60).formatIllions()}/hr)")
-        appendln()
-        appendln("**Eggspected**: ${simulation.eggspected.formatIllions()}")
-        appendln()
+        simulation.apply {
+            appendln("`${farmerName}` vs. __${contractName}__:")
+            appendln("**Time remaining**: ${timeRemaining.asDaysHoursAndMinutes(compact)} ⏲")
+            append("**Current chickens**: ${currentPopulation.formatIllions()} ")
+            append("(${populationIncreasePerHour.formatIllions()}/hr) 🐔")
+            appendln()
+            append("**Current eggs**: ${currentEggs.formatIllions()} ")
+            append("(${(eggsPerChickenPerMinute * currentPopulation * 60).formatIllions()}/hr) ")
+            append(if (eggEmote.isNotBlank()) eggEmote else "🥚")
+            appendln()
+            append("**Eggspected**: ${eggspected.formatIllions()} ")
+            append(if (eggEmote.isNotBlank()) eggEmote else "🥚")
+            appendln()
+            appendln()
+
+            if (habBottleneckReached != null || transportBottleneckReached != null) {
+                appendln("⚠ Bottlenecks ⚠: ```")
+                habBottleneckReached?.let {
+                    if (it == Duration.ZERO) appendln("Hab bottleneck reached! 🏠")
+                    else appendln("Hab bottleneck reached in ${it.asDaysHoursAndMinutes(compact)}! 🏠")
+                }
+                transportBottleneckReached?.let {
+                    if (it == Duration.ZERO) appendln("Transport bottleneck reached! 🚛")
+                    else appendln("Transport bottleneck reached in ${it.asDaysHoursAndMinutes(compact)}! 🚛")
+                }
+                appendln("```")
+            }
+        }
 
         // endregion Basic info and totals
 
