@@ -143,12 +143,13 @@ object Messages {
 
         appendln("`${simulation.farmerName}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Time remaining**: ${simulation.timeRemaining.asDaysHoursAndMinutes(compact)}")
-        append("**Total eggs**: ${simulation.currentEggs.formatIllions()} ")
-        append("(${(simulation.eggsPerChickenPerMinute * simulation.currentPopulation * 60).formatIllions()}/hr)")
-        appendln()
-        append("**Total chickens**: ${simulation.currentPopulation.formatIllions()} ")
+        append("**Current chickens**: ${simulation.currentPopulation.formatIllions()} ")
         append("(${simulation.populationIncreasePerHour.formatIllions()}/hr)")
         appendln()
+        append("**Current eggs**: ${simulation.currentEggs.formatIllions()} ")
+        append("(${(simulation.eggsPerChickenPerMinute * simulation.currentPopulation * 60).formatIllions()}/hr)")
+        appendln()
+        appendln("**Eggspected**: ${simulation.eggspected.formatIllions()}")
         appendln()
 
         // endregion Basic info and totals
@@ -227,12 +228,13 @@ object Messages {
 
         appendln("`${simulation.coopId}` vs. __${simulation.contractName}__: ${if (eggEmote.isBlank()) "" else " $eggEmote"}")
         appendln("**Time remaining**: ${simulation.timeRemaining.asDaysHoursAndMinutes(compact)}")
-        append("**Current eggs**: ${simulation.currentEggs.formatIllions()} ")
-        append("(${simulation.currentEggsPerHour.formatIllions()}/hr)")
-        appendln()
         append("**Current chickens**: ${simulation.currentPopulation.formatIllions()} ")
         append("(${simulation.populationIncreaseRatePerHour.formatIllions()}/hr)")
         appendln()
+        append("**Current eggs**: ${simulation.currentEggs.formatIllions()} ")
+        append("(${simulation.currentEggsPerHour.formatIllions()}/hr)")
+        appendln()
+        appendln("**Eggspected**: ${simulation.eggspected.formatIllions()}")
         appendln()
 
         // endregion Basic info and totals

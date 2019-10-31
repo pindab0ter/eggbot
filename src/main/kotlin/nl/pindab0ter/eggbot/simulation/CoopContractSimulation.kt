@@ -53,6 +53,7 @@ class CoopContractSimulation private constructor(
     val currentEggs: BigDecimal = farms.sumBy { farm -> farm.currentEggs }
     val projectedEggs: BigDecimal get() = farms.sumBy { farm -> farm.projectedEggs }
     val currentPopulation: BigDecimal = farms.sumBy { farm -> farm.currentPopulation }
+    lateinit var eggspected: BigDecimal
     val goalReachedMoments: SortedSet<GoalReachedMoment> = goals.map { goal ->
         GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
     }.toSortedSet()
@@ -61,7 +62,10 @@ class CoopContractSimulation private constructor(
 
 
     private fun step() {
-        if (currentGoal != null && projectedEggs >= currentGoal!!.target) currentGoal!!.moment = elapsed
+        if (currentGoal != null && projectedEggs >= currentGoal!!.target)
+            currentGoal!!.moment = elapsed
+        if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
+            eggspected = projectedEggs
         farms.forEach { it.step() }
         elapsed += Duration.standardMinutes(1)
     }

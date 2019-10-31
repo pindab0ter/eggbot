@@ -39,6 +39,7 @@ class ContractSimulation constructor(
     override var projectedEggs: BigDecimal = currentEggs
     override val currentPopulation: BigDecimal = farm.habPopulation.sum()
     override var projectedPopulation: BigDecimal = currentPopulation
+    override lateinit var eggspected: BigDecimal
     var habBottleneckReached: Duration? = null
         get() = if (field != null && field!! < timeRemaining) field else null
     var transportBottleneckReached: Duration? = null
@@ -55,6 +56,8 @@ class ContractSimulation constructor(
             habBottleneckReached = elapsed
         if (transportBottleneckReached == null && projectedPopulation >= shippingRatePerMinute)
             transportBottleneckReached = elapsed
+        if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
+            eggspected = projectedEggs
         elapsed += standardMinutes(1)
         projectedEggs += projectedPopulation.times(eggsPerChickenPerMinute).coerceAtMost(shippingRatePerMinute)
         projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)

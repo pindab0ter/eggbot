@@ -128,6 +128,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     abstract var projectedEggs: BigDecimal
     abstract val currentPopulation: BigDecimal
     abstract var projectedPopulation: BigDecimal
+    abstract var eggspected: BigDecimal
     val currentEggsPerHour: BigDecimal get() = currentPopulation * eggsPerChickenPerMinute * 60
 
 }
