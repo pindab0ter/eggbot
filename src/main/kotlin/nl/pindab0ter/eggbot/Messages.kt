@@ -154,19 +154,6 @@ object Messages {
             append(if (eggEmote.isNotBlank()) eggEmote else "🥚")
             appendln()
             appendln()
-
-            if (habBottleneckReached != null || transportBottleneckReached != null) {
-                appendln("⚠ Bottlenecks ⚠: ```")
-                habBottleneckReached?.let {
-                    if (it == Duration.ZERO) appendln("Hab bottleneck reached! 🏠")
-                    else appendln("Hab bottleneck reached in ${it.asDaysHoursAndMinutes(compact)}! 🏠")
-                }
-                transportBottleneckReached?.let {
-                    if (it == Duration.ZERO) appendln("Transport bottleneck reached! 🚛")
-                    else appendln("Transport bottleneck reached in ${it.asDaysHoursAndMinutes(compact)}! 🚛")
-                }
-                appendln("```")
-            }
         }
 
         // endregion Basic info and totals
@@ -182,7 +169,6 @@ object Messages {
             appendln()
 
             simulation.goalReachedMoments
-                .filter { it.moment != Duration.ZERO }
                 .forEachIndexed { index, (goal, moment) ->
                     val success = moment != null && moment < simulation.timeRemaining
 
@@ -197,6 +183,7 @@ object Messages {
                     append(if (success) " ✓ " else " ✗ ")
                     when (moment) {
                         null -> append("More than a year")
+                        Duration.ZERO -> append("Goal reached!")
                         else -> append(moment.asDaysHoursAndMinutes(compact))
                     }
                     if (index + 1 < simulation.goals.count()) appendln()
@@ -205,6 +192,25 @@ object Messages {
         }
 
         // endregion Goals
+
+        // region Bottlenecks
+
+        simulation.apply {
+            if (habBottleneckReached != null || transportBottleneckReached != null) {
+                appendln("⚠ Bottlenecks: ```")
+                habBottleneckReached?.let {
+                    if (it == Duration.ZERO) appendln("Hab bottleneck reached! 🏠")
+                    else appendln("Hab bottleneck reached in ${it.asDaysHoursAndMinutes(compact)}! 🏠")
+                }
+                transportBottleneckReached?.let {
+                    if (it == Duration.ZERO) appendln("Transport bottleneck reached! 🚛")
+                    else appendln("Transport bottleneck reached in ${it.asDaysHoursAndMinutes(compact)}! 🚛")
+                }
+                appendln("```")
+            }
+        }
+
+        // endregion Bottlenecks
 
     }.toString()
 
@@ -264,15 +270,10 @@ object Messages {
         appendln()
 
         simulation.goalReachedMoments.forEachIndexed { index, (target, moment) ->
-            // .filter { it.moment != Duration.ZERO }
-            if (moment == Duration.ZERO) return@forEachIndexed
-
             append("${index + 1}: ")
             appendPaddingCharacters(
                 target.formatIllions(true),
-                simulation.goals
-                    .filter { simulation.currentEggs < target }
-                    .map { target.formatIllions(true) }
+                simulation.goals.map { target.formatIllions(true) }
             )
             append(target.formatIllions(true))
             appendPaddingCharacters(
@@ -281,8 +282,11 @@ object Messages {
                 " "
             )
             append(if (moment != null && moment < simulation.timeRemaining) " ✓ " else " ✗ ")
-            if (moment == null) append("More than a year")
-            else append(moment.asDaysHoursAndMinutes(compact))
+            when (moment) {
+                null -> append("More than a year")
+                Duration.ZERO -> append("Goal reached!")
+                else -> append(moment.asDaysHoursAndMinutes(compact))
+            }
             if (index + 1 < simulation.goals.count()) appendln()
         }
         appendln("```")
