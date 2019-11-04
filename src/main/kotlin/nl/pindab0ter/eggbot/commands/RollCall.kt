@@ -157,7 +157,7 @@ object RollCall : Command() {
             val inactiveFarmers = farmers.filter { !it.isActive }
             val preferredCoopSize: Int =
                 if (contract.maxCoopSize <= 10) contract.maxCoopSize
-                else (12 * FILL_PERCENTAGE).roundToInt()
+                else (contract.maxCoopSize * FILL_PERCENTAGE).roundToInt()
             val coops = createCoops(farmers, contract, preferredCoopSize)
 
             transaction {
