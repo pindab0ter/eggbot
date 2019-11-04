@@ -6,16 +6,15 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.Messages
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.ContractSimulation
-import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
-import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.checkPrerequisites
+import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.Duration
 
 object SoloInfo : Command() {
 
@@ -78,7 +77,7 @@ object SoloInfo : Command() {
 
             simulation.run()
 
-            Messages.soloStatus(simulation, compact).let { message ->
+            message(simulation, compact).let { message ->
                 if (event.channel.id == Config.botCommandsChannel) {
                     event.reply(message)
                 } else {
@@ -88,4 +87,84 @@ object SoloInfo : Command() {
             }
         }
     }
+
+    fun message(
+        simulation: ContractSimulation,
+        compact: Boolean = false
+    ): String = StringBuilder().apply {
+        val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
+            EggBot.jdaClient.getEmoteById(id)?.asMention
+        } ?: "🥚"
+
+        appendln("`${simulation.farmerName}` vs. _${simulation.contractName}_:")
+        appendln()
+
+        if (simulation.finished) {
+            appendln("**You have successfully finished this contract! ${Config.emojiSuccess}**")
+            return@apply
+        }
+
+        // region Goals
+
+        appendln("__$eggEmote **Goals** (${simulation.goalReachedMoments.count { it.moment != null }}/${simulation.goals.count()}):__ ```")
+        simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
+            val success = moment != null && moment < simulation.timeRemaining
+
+            append("${index + 1}. ")
+            append(if (success) "✓︎ " else "✗ ")
+            appendPaddingCharacters(
+                goal.formatIllions(true),
+                simulation.goalReachedMoments.map { it.target.formatIllions(rounded = true) }
+            )
+            append(goal.formatIllions(true))
+            append(" │ ")
+            when (moment) {
+                null -> append("More than a year")
+                Duration.ZERO -> append("Goal reached!")
+                else -> append(moment.asDaysHoursAndMinutes(compact))
+            }
+            if (index + 1 < simulation.goals.count()) appendln()
+        }
+        appendln("```")
+
+        // endregion Goals
+
+        // region Basic info and totals
+
+        appendln("__🗒️ **Basic info**__: ```")
+        simulation.apply {
+            appendln("Eggspected:       ${eggspected.formatIllions()}")
+            appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
+            append("Current chickens: ${currentPopulation.formatIllions()} ")
+            append("(${populationIncreasePerHour.formatIllions()}/hr)")
+            appendln()
+            append("Current eggs:     ${currentEggs.formatIllions()} ")
+            append("(${(eggsPerChickenPerMinute * currentPopulation * 60).formatIllions()}/hr) ")
+            appendln()
+            appendln("Last update:      ${timeSinceLastUpdate.asDaysHoursAndMinutes(compact)} ago")
+            appendln("```")
+        }
+
+        // endregion Basic info and totals
+
+        // region Bottlenecks
+
+        simulation.apply {
+            if (habBottleneckReached != null || transportBottleneckReached != null) {
+                appendln("__⚠ **Bottlenecks**__: ```")
+                habBottleneckReached?.let {
+                    if (it == Duration.ZERO) appendln("Hab bottleneck reached!")
+                    else appendln("Max habs in ${it.asDaysHoursAndMinutes(compact)}!")
+                }
+                transportBottleneckReached?.let {
+                    if (it == Duration.ZERO) appendln("Transport bottleneck reached!")
+                    else appendln("Max transport in ${it.asDaysHoursAndMinutes(compact)}!")
+                }
+                appendln("```")
+            }
+        }
+
+        // endregion Bottlenecks
+
+    }.toString()
 }

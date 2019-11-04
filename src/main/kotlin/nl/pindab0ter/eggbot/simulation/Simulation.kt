@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.simulation
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
 import nl.pindab0ter.eggbot.utilities.*
+import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
@@ -13,6 +14,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     internal abstract val farm: EggInc.Backup.Simulation
 
     val farmerName: String get() = backup.userName
+    val timeSinceLastUpdate: Duration get() = Duration(backup.approxTime.toDateTime(), DateTime.now())
 
     // region Research
 

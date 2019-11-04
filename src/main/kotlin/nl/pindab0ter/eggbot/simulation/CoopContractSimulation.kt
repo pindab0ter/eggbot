@@ -47,19 +47,20 @@ class CoopContractSimulation private constructor(
     // endregion Basic info
 
     // region Simulation
-    val currentEggsPerHour: BigDecimal by lazy { farms.sumBy { farm -> farm.currentEggsPerHour } }
+    val currentEggsPerHour: BigDecimal by lazy { farms.sumBy { it.currentEggsPerHour } }
 
     var elapsed: Duration = ZERO
-    val currentEggs: BigDecimal = farms.sumBy { farm -> farm.currentEggs }
-    val projectedEggs: BigDecimal get() = farms.sumBy { farm -> farm.projectedEggs }
-    val currentPopulation: BigDecimal = farms.sumBy { farm -> farm.currentPopulation }
+    val currentEggs: BigDecimal = farms.sumBy { it.currentEggs }
+    private val projectedEggs: BigDecimal get() = farms.sumBy { it.projectedEggs }
+    val currentPopulation: BigDecimal = farms.sumBy { it.currentPopulation }
     lateinit var eggspected: BigDecimal
     val goalReachedMoments: SortedSet<GoalReachedMoment> = goals.map { goal ->
         GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
     }.toSortedSet()
     private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
     val willFinish: Boolean get() = goalReachedMoments.maxBy { it.target }?.moment?.let { it < timeRemaining } == true
-
+    val populationIncreasePerHour: BigDecimal get() = farms.sumBy { it.populationIncreasePerHour }
+    val eggsPerHour: BigDecimal get() = farms.sumBy { it.eggsPerChickenPerMinute * currentPopulation * 60 }
 
     private fun step() {
         if (currentGoal != null && projectedEggs >= currentGoal!!.target)
