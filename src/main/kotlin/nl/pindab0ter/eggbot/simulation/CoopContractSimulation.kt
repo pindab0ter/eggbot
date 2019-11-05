@@ -59,6 +59,7 @@ class CoopContractSimulation private constructor(
     }.toSortedSet()
     private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
     val willFinish: Boolean get() = goalReachedMoments.maxBy { it.target }?.moment?.let { it < timeRemaining } == true
+    val goalsReached: Int get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
     val populationIncreasePerHour: BigDecimal get() = farms.sumBy { it.populationIncreasePerHour }
     val eggsPerHour: BigDecimal get() = farms.sumBy { it.eggsPerChickenPerMinute * currentPopulation * 60 }
 

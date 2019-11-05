@@ -49,6 +49,7 @@ class ContractSimulation constructor(
     }.toSortedSet()
     private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
     private val projectedEggIncrease: BigDecimal get() = projectedPopulation * eggsPerChickenPerMinute
+    val goalsReached: Int get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
 
     fun step() {
         if (currentGoal != null && projectedEggs >= currentGoal!!.target)

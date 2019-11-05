@@ -96,7 +96,7 @@ object CoopInfo : Command() {
 
                 // region Goals
 
-                appendln("__$eggEmote **Goals** (${simulation.goalReachedMoments.count { it.moment != null }}/${simulation.goals.count()}):__ ```")
+                appendln("__$eggEmote **Goals** (${simulation.goalsReached}/${simulation.goals.count()}):__ ```")
 
                 simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
                     val success = moment != null && moment < simulation.timeRemaining
