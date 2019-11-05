@@ -14,7 +14,8 @@ import java.math.BigDecimal.TEN
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
-import java.util.*
+import java.util.Locale.ENGLISH
+import java.util.Locale.UK
 import kotlin.math.roundToLong
 
 val EggInc.Egg.formattedName: String
@@ -39,6 +40,7 @@ private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterB
     .appendMinutes()
     .appendSuffix(" minute", " minutes")
     .toFormatter()
+    .withLocale(ENGLISH)
 
 private val shortDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
@@ -51,11 +53,16 @@ private val shortDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatter
     .appendMinutes()
     .appendSuffix("m")
     .toFormatter()
+    .withLocale(ENGLISH)
 
-fun Period.asDaysHoursAndMinutes(compact: Boolean = false): String =
-    (if (compact) shortDaysHoursAndMinutesFormatter else longDaysHoursAndMinutesFormatter)
-        .withLocale(Locale.UK)
-        .print(this.normalizedStandard(PeriodType.dayTime()))
+fun Period.asDaysHoursAndMinutes(compact: Boolean = false): String = when (compact) {
+    true ->
+        if (toStandardDuration().standardSeconds < 60L) "< 1m"
+        else shortDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
+    false ->
+        if (toStandardDuration().standardSeconds < 60L) "< 1 minute"
+        else longDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
+}
 
 fun Duration.asDaysHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDaysHoursAndMinutes(compact)
 
@@ -64,7 +71,7 @@ fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendLiteral(" ")
     .appendDayOfMonth(1)
     .toFormatter()
-    .withLocale(Locale.UK)
+    .withLocale(UK)
     .print(this)
 
 fun DateTime.asDaysHoursAndMinutes(): String = DateTimeFormatterBuilder()
@@ -78,11 +85,11 @@ fun DateTime.asDaysHoursAndMinutes(): String = DateTimeFormatterBuilder()
     .appendLiteral(":")
     .appendMinuteOfHour(2)
     .toFormatter()
-    .withLocale(Locale.UK)
+    .withLocale(UK)
     .print(this)
 
-val decimalFormat = DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
-val integerFormat = DecimalFormat(",##0", DecimalFormatSymbols.getInstance(Locale.ENGLISH))
+val decimalFormat = DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(ENGLISH))
+val integerFormat = DecimalFormat(",##0", DecimalFormatSymbols.getInstance(ENGLISH))
 
 fun Int.formatInteger(): String = integerFormat.format(this)
 fun Long.formatInteger(): String = integerFormat.format(this)
