@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.simulation
 
 import com.auxbrain.ei.EggInc
 import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
+import nl.pindab0ter.eggbot.simulation.CommonResearch.*
+import nl.pindab0ter.eggbot.simulation.EpicResearch.*
 import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -20,53 +22,54 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     private val internalHatcheryFlatIncreases: List<BigDecimal>
         get() = listOf(
-            BigDecimal(2 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY1.ordinal].level),
-            BigDecimal(5 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY2.ordinal].level),
-            BigDecimal(10 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY3.ordinal].level),
-            BigDecimal(25 * farm.commonResearchList[CommonResearch.INTERNAL_HATCHERY4.ordinal].level),
-            BigDecimal(5 * farm.commonResearchList[CommonResearch.MACHINE_LEARNING_INCUBATORS.ordinal].level),
-            BigDecimal(50 * farm.commonResearchList[CommonResearch.NEURAL_LINKING.ordinal].level)
+            BigDecimal(2 * farm.commonResearchList[INTERNAL_HATCHERY1.ordinal].level),
+            BigDecimal(5 * farm.commonResearchList[INTERNAL_HATCHERY2.ordinal].level),
+            BigDecimal(10 * farm.commonResearchList[INTERNAL_HATCHERY3.ordinal].level),
+            BigDecimal(25 * farm.commonResearchList[INTERNAL_HATCHERY4.ordinal].level),
+            BigDecimal(5 * farm.commonResearchList[MACHINE_LEARNING_INCUBATORS.ordinal].level),
+            BigDecimal(50 * farm.commonResearchList[NEURAL_LINKING.ordinal].level)
         )
 
     private val habCapacityMultipliers: List<BigDecimal>
         get() = listOf(
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.HEN_HOUSE_REMODEL.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.MICROLUX_CHICKEN_SUITES.ordinal].level,
-            ONE + BigDecimal(".02") * farm.commonResearchList[CommonResearch.GRAV_PLATING.ordinal].level,
-            ONE + BigDecimal(".02") * farm.commonResearchList[CommonResearch.WORMHOLE_DAMPENING.ordinal].level
+            ONE + BigDecimal(".05") * farm.commonResearchList[HEN_HOUSE_REMODEL.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[MICROLUX_CHICKEN_SUITES.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[GRAV_PLATING.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[WORMHOLE_DAMPENING.ordinal].level
         )
 
     private val internalHatcheryMultiplier: BigDecimal
-        get() = ONE + BigDecimal(".05") * backup.game.epicResearchList[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
+        get() = ONE + BigDecimal(".05") * backup.game.epicResearchList[EPIC_INT_HATCHERIES.ordinal].level
 
     private val eggLayingMultipliers: List<BigDecimal>
         get() = listOf(
-            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.COMFORTABLE_NESTS.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.HEN_HOUSE_AC.ordinal].level,
-            ONE + BigDecimal(".15") * farm.commonResearchList[CommonResearch.IMPROVED_GENETICS.ordinal].level,
-            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.TIME_COMPRESSION.ordinal].level,
-            ONE + BigDecimal(".02") * farm.commonResearchList[CommonResearch.TIMELINE_DIVERSION.ordinal].level,
-            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.RELATIVITY_OPTIMIZATION.ordinal].level,
-            ONE + BigDecimal(".05") * backup.game.epicResearchList[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
+            ONE + BigDecimal(".10") * farm.commonResearchList[COMFORTABLE_NESTS.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[HEN_HOUSE_AC.ordinal].level,
+            ONE + BigDecimal(".15") * farm.commonResearchList[IMPROVED_GENETICS.ordinal].level,
+            ONE + BigDecimal(".10") * farm.commonResearchList[TIME_COMPRESSION.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[TIMELINE_DIVERSION.ordinal].level,
+            ONE + BigDecimal(".10") * farm.commonResearchList[RELATIVITY_OPTIMIZATION.ordinal].level,
+            ONE + BigDecimal(".05") * backup.game.epicResearchList[EPIC_COMFY_NESTS.ordinal].level
         )
 
     private val shippingRatePercentageIncreases: List<BigDecimal>
         get() = listOf(
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
-            ONE + BigDecimal(".10") * farm.commonResearchList[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.DRIVER_TRAINING.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.QUANTUM_STORAGE.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.HOVER_UPGRADES.ordinal].level, // Assumes at least Hover Semi
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.DARK_CONTAINMENT.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level,
-            ONE + BigDecimal(".05") * backup.game.epicResearchList[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
+            ONE + BigDecimal(".05") * farm.commonResearchList[IMPROVED_LEAFSPRINGS.ordinal].level,
+            ONE + BigDecimal(".10") * farm.commonResearchList[LIGHTWEIGHT_BOXES.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[DRIVER_TRAINING.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[SUPER_ALLOY_FRAMES.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[QUANTUM_STORAGE.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[HOVER_UPGRADES.ordinal].level, // Assumes at least Hover Semi
+            ONE + BigDecimal(".05") * farm.commonResearchList[DARK_CONTAINMENT.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[NEURAL_NET_REFINEMENT.ordinal].level,
+            ONE + BigDecimal(".05") * backup.game.epicResearchList[TRANSPORTATION_LOBBYISTS.ordinal].level
         )
 
     private val internalHatcheryCalm: BigDecimal
-        get() = ONE + BigDecimal(".10") * backup.game.epicResearchList[EpicResearch.INTERNAL_HATCH_CALM.ordinal].level
+        get() = ONE + BigDecimal(".10") * backup.game.epicResearchList[INTERNAL_HATCH_CALM.ordinal].level
 
-    // endregion
+
+    // endregion Research
 
     // region Habitats (chicken cap)
 
