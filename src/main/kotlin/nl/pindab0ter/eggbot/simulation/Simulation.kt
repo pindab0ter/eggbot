@@ -20,6 +20,14 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     // region Research
 
+    private val habCapacityMultipliers: List<BigDecimal>
+        get() = listOf(
+            ONE + BigDecimal(".05") * farm.commonResearchList[HEN_HOUSE_REMODEL.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[MICROLUX_CHICKEN_SUITES.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[GRAV_PLATING.ordinal].level,
+            ONE + BigDecimal(".02") * farm.commonResearchList[WORMHOLE_DAMPENING.ordinal].level
+        )
+
     private val internalHatcheryFlatIncreases: List<BigDecimal>
         get() = listOf(
             BigDecimal(2 * farm.commonResearchList[INTERNAL_HATCHERY1.ordinal].level),
@@ -28,14 +36,6 @@ abstract class Simulation(val backup: EggInc.Backup) {
             BigDecimal(25 * farm.commonResearchList[INTERNAL_HATCHERY4.ordinal].level),
             BigDecimal(5 * farm.commonResearchList[MACHINE_LEARNING_INCUBATORS.ordinal].level),
             BigDecimal(50 * farm.commonResearchList[NEURAL_LINKING.ordinal].level)
-        )
-
-    private val habCapacityMultipliers: List<BigDecimal>
-        get() = listOf(
-            ONE + BigDecimal(".05") * farm.commonResearchList[HEN_HOUSE_REMODEL.ordinal].level,
-            ONE + BigDecimal(".05") * farm.commonResearchList[MICROLUX_CHICKEN_SUITES.ordinal].level,
-            ONE + BigDecimal(".02") * farm.commonResearchList[GRAV_PLATING.ordinal].level,
-            ONE + BigDecimal(".02") * farm.commonResearchList[WORMHOLE_DAMPENING.ordinal].level
         )
 
     private val internalHatcheryMultiplier: BigDecimal

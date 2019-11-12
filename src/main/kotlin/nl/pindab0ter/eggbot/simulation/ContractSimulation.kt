@@ -15,8 +15,6 @@ class ContractSimulation constructor(
     localContract: EggInc.LocalContract
 ) : Simulation(backup) {
 
-    // override val farm: EggInc.Backup.Simulation = backup.farmsList.find { it.contractId == localContract.contract.id }!!
-
     // region Basic info
 
     val contractId: String = localContract.contract.id

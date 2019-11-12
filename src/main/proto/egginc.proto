@@ -113,7 +113,7 @@ message Backup {
         double long_idle_reward = 27;
         int32 daily_gift_index = 28;
         bool hyperloop_station = 29;
-        repeated Boost boosts = 30;
+        repeated OwnedBoost boosts = 30;
         bool piggy_full_alert_shown = 31;
         int32 total_time_cheats_detected = 32;
         double prestige_soul_boost_cash = 33;
@@ -146,6 +146,10 @@ message Backup {
         repeated ActiveBoost active_boosts = 22;
         int32 time_cheats_detected = 23;
         double time_cheat_debt = 24;
+        int32 boost_tokens_received = 25;
+        int32 boost_tokens_spent = 26;
+        int32 boost_tokens_to_give = 27;
+        int32 boost_tokens_given = 28;
     }
 
     message Missions {
@@ -189,14 +193,14 @@ message Backup {
     }
 
     message OwnedBoost {
-        int32 boost_id = 1;
+        string id = 1;
         int32 count = 2;
     }
 
     message ActiveBoost {
-        int32 boost_id = 1;
+        string id = 1;
         double time_remaining = 2;
-        int32 reference_value = 3;
+        double reference_value = 3;
     }
 
     message MissionInfo {
@@ -560,12 +564,6 @@ enum VehicleType {
     QUANTUM_TRANSPORTER = 10;
     HYPERLOOP_TRAIN = 11;
 }
-
-message Boost {
-    string name = 1;
-    int32 amount = 2;
-}
-
 
 enum FarmType {
     NONE = 0;
