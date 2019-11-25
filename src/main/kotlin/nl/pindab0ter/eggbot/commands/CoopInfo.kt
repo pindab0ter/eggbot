@@ -97,18 +97,20 @@ object CoopInfo : Command() {
                 // region Goals
 
                 appendln("__$eggEmote **Goals** (${simulation.goalsReached}/${simulation.goals.count()}):__ ```")
-
                 simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
-                    val success = moment != null && moment < simulation.timeRemaining
-
                     append("${index + 1}. ")
-                    append(if (success) "✓︎ " else "✗ ")
                     appendPaddingCharacters(
                         goal.formatIllions(true),
                         simulation.goalReachedMoments.map { it.target.formatIllions(rounded = true) }
                     )
                     append(goal.formatIllions(true))
-                    append(" │ ")
+                    append(
+                        when {
+                            moment == null || moment > simulation.timeRemaining -> " 🔴 "
+                            moment == Duration.ZERO -> " 🟢 "
+                            else -> " 🟠 "
+                        }
+                    )
                     when (moment) {
                         null -> append("More than a year")
                         Duration.ZERO -> append("Goal reached!")
@@ -127,10 +129,10 @@ object CoopInfo : Command() {
                     appendln("Eggspected:       ${eggspected.formatIllions()}")
                     appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
                     append("Current chickens: ${currentPopulation.formatIllions()} ")
-                    append("(${populationIncreasePerHour.formatIllions()}/hr)")
+                    if (!compact) append("(${populationIncreasePerHour.formatIllions()}/hr)")
                     appendln()
                     append("Current eggs:     ${currentEggs.formatIllions()} ")
-                    append("(${eggsPerHour.formatIllions()}/hr) ")
+                    if (!compact) append("(${eggsPerHour.formatIllions()}/hr) ")
                     appendln()
                     appendln("```")
                 }
@@ -200,15 +202,22 @@ object CoopInfo : Command() {
 
                 // region Table body
 
+                val shortenedNames = farms.map { farm ->
+                    farm.farmerName.let { name ->
+                        if (name.length <= 9) name
+                        else "${name.substring(0 until 9)}…"
+                    }
+                }
+
                 farms.forEachIndexed { index, farm ->
                     appendPaddingCharacters(index + 1, farms.count())
                     append("${index + 1}: ")
                     when (compact) {
                         true -> {
-                            append("${farm.farmerName.substring(0..4)}… ")
+                            append("${shortenedNames[index]} ")
                             appendPaddingCharacters(
-                                "${farm.farmerName.substring(0..4)}… ${if (!farm.isActive) "  zZ" else " "}",
-                                farms.map { "${farm.farmerName.substring(0..4)}… ${if (!farm.isActive) "  zZ" else " "}" }
+                                "${shortenedNames[index]} ${if (!farm.isActive) "  zZ" else " "}",
+                                farms.mapIndexed { i, f -> "${shortenedNames[i]} ${if (!f.isActive) "  zZ" else " "}" }
                             )
                         }
                         false -> {
@@ -257,9 +266,14 @@ object CoopInfo : Command() {
                         if (bottleneckedFarms.isEmpty()) return@BottleneckedFarms
                         appendln("```")
                         appendln("__⚠ **Bottlenecks**__: ```")
-                        bottleneckedFarms.forEach { farm ->
-                            append("${farm.farmerName}: ")
-                            appendPaddingCharacters(farm.farmerName, bottleneckedFarms.map { it.farmerName })
+                        bottleneckedFarms.forEachIndexed { i, farm ->
+                            if (compact) {
+                                append("${shortenedNames[i]}: ")
+                                appendPaddingCharacters(shortenedNames[i], shortenedNames)
+                            } else {
+                                append("${farm.farmerName}: ")
+                                appendPaddingCharacters(farm.farmerName, bottleneckedFarms.map { it.farmerName })
+                            }
 
                             farm.habBottleneckReached?.let {
                                 if (it == Duration.ZERO) append("🏠Full! ")

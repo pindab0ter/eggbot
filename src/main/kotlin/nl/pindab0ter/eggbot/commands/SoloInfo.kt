@@ -108,16 +108,19 @@ object SoloInfo : Command() {
 
         appendln("__$eggEmote **Goals** (${simulation.goalsReached}/${simulation.goals.count()}):__ ```")
         simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
-            val success = moment != null && moment < simulation.timeRemaining
-
             append("${index + 1}. ")
-            append(if (success) "✓︎ " else "✗ ")
             appendPaddingCharacters(
                 goal.formatIllions(true),
                 simulation.goalReachedMoments.map { it.target.formatIllions(rounded = true) }
             )
             append(goal.formatIllions(true))
-            append(" │ ")
+            append(
+                when {
+                    moment == null || moment > simulation.timeRemaining -> " 🔴 "
+                    moment == Duration.ZERO -> " 🟢 "
+                    else -> " 🟠 "
+                }
+            )
             when (moment) {
                 null -> append("More than a year")
                 Duration.ZERO -> append("Goal reached!")
@@ -136,10 +139,10 @@ object SoloInfo : Command() {
             appendln("Eggspected:       ${eggspected.formatIllions()}")
             appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
             append("Current chickens: ${currentPopulation.formatIllions()} ")
-            append("(${populationIncreasePerHour.formatIllions()}/hr)")
+            if (!compact) append("(${populationIncreasePerHour.formatIllions()}/hr)")
             appendln()
             append("Current eggs:     ${currentEggs.formatIllions()} ")
-            append("(${(eggsPerChickenPerMinute * currentPopulation * 60).formatIllions()}/hr) ")
+            if (!compact) append("(${(eggsPerChickenPerMinute * currentPopulation * 60).formatIllions()}/hr) ")
             appendln()
             appendln("Last update:      ${timeSinceLastUpdate.asDaysHoursAndMinutes(compact)} ago")
             appendln("```")
@@ -154,11 +157,11 @@ object SoloInfo : Command() {
                 appendln("__⚠ **Bottlenecks**__: ```")
                 habBottleneckReached?.let {
                     if (it == Duration.ZERO) appendln("Hab bottleneck reached!")
-                    else appendln("Max habs in ${it.asDaysHoursAndMinutes(compact)}!")
+                    else appendln("Max habs in ${it.asDaysHoursAndMinutes(true)}!")
                 }
                 transportBottleneckReached?.let {
                     if (it == Duration.ZERO) appendln("Transport bottleneck reached!")
-                    else appendln("Max transport in ${it.asDaysHoursAndMinutes(compact)}!")
+                    else appendln("Max transport in ${it.asDaysHoursAndMinutes(true)}!")
                 }
                 appendln("```")
             }

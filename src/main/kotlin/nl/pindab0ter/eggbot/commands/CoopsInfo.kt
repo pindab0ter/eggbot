@@ -111,7 +111,9 @@ object CoopsInfo : Command() {
                         appendPaddingCharacters(result.simulation.coopId, longestCoopName)
                         when {
                             result.simulation.willFinish -> {
-                                append("🟢 On track     (")
+                                append("🟠 On track ")
+                                if (results.filterIsInstance<InProgress>().any { !it.simulation.willFinish }) append("    ")
+                                append("(")
                             }
                             else -> {
                                 append("🔴 Not on track (")
