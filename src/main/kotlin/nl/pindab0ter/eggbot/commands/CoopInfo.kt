@@ -142,13 +142,13 @@ object CoopInfo : Command() {
                 appendln("__🚜 **Members** (${farms.count()}/${simulation.maxCoopSize}):__")
                 appendln("```")
 
+                // region Table header
+
                 val name = "Name"
                 val eggs = "Eggs"
                 val eggRate = "Egg Rate"
                 val chickens = "Chickens"
                 val chickenRate = "Chicken Rate"
-
-                // region Table header
 
                 if (!compact) {
                     appendPaddingCharacters("", farms.count(), "#")

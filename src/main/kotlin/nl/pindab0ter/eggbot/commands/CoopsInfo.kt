@@ -5,7 +5,6 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -63,63 +62,77 @@ object CoopsInfo : Command() {
             .map { it.simulation.eggspected.formatIllions() }
 
         val contract = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { it.id == contractId }!!
-        val eggEmote = Config.eggEmojiIds[contract.egg]?.let { id ->
-            EggBot.jdaClient.getEmoteById(id)?.asMention
-        } ?: "🥚"
+        val longestCoopName = coops.map { it.name }.plus("Time to complete").maxBy { it.length }!!
+
+        log.debug { longestCoopName }
 
         StringBuilder("`${EggBot.guild.name}` vs _${contractId}_:\n").apply {
             appendln()
             appendln("__🗒️ **Basic info**:__ ```")
-            append("Max size: ")
-            appendPaddingCharacters("Max size", coops.map { it.name })
-            append(contract.maxCoopSize)
-            appendln()
-            append("Final goal: ")
-            appendPaddingCharacters("Final goal", coops.map { it.name })
-            append("${contract.finalGoal.formatIllions(true)} $eggEmote")
-            appendln()
-            appendln("```")
 
-            // TODO: Make into table with extra x/x participants column
+            append("Contract: ")
+            appendPaddingCharacters("Contract", longestCoopName)
+            append(contract.name)
+            appendln()
+
+            append("Final goal: ")
+            appendPaddingCharacters("Final goal", longestCoopName)
+            append(contract.finalGoal.formatIllions(true))
+            appendln()
+
+            append("Time to complete: ")
+            appendPaddingCharacters("Time to complete", longestCoopName)
+            append(contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true))
+            appendln()
+
+            append("Max size: ")
+            appendPaddingCharacters("Max size", longestCoopName)
+            append("${contract.maxCoopSize} farmers")
+            appendln()
+
+            appendln("```")
 
             appendln("__**🤝 Co-ops:**__```")
             results.forEach { result ->
                 when (result) {
                     is NotFound -> {
                         append("${result.coopId}: ")
-                        appendPaddingCharacters(result.coopId, coops.map { it.name })
+                        appendPaddingCharacters(result.coopId, longestCoopName)
                         // TODO: Tag starter and/or leader
                         append("🟠 Waiting for starter")
                     }
                     is Abandoned -> {
                         append("${result.coopStatus.coopId}: ")
-                        appendPaddingCharacters(result.coopStatus.coopId, coops.map { it.name })
+                        appendPaddingCharacters(result.coopStatus.coopId, longestCoopName)
                         append("🔴 Abandoned")
                     }
                     is InProgress -> {
                         append("${result.simulation.coopId}: ")
-                        appendPaddingCharacters(result.simulation.coopId, coops.map { it.name })
+                        appendPaddingCharacters(result.simulation.coopId, longestCoopName)
                         when {
                             result.simulation.willFinish -> {
-                                append("🟢 On track    (")
-                                appendPaddingCharacters(result.simulation.eggspected.formatIllions(), eggspecteds)
-                                append("${result.simulation.eggspected.formatIllions()})")
+                                append("🟢 On track     (")
                             }
                             else -> {
                                 append("🔴 Not on track (")
-                                appendPaddingCharacters(result.simulation.eggspected.formatIllions(), eggspecteds)
-                                append("${result.simulation.eggspected.formatIllions()})")
                             }
                         }
+                        appendPaddingCharacters(result.simulation.eggspected.formatIllions(), eggspecteds)
+                        append("${result.simulation.eggspected.formatIllions()}, ")
+                        appendPaddingCharacters(
+                            result.simulation.farms.size,
+                            results.filterIsInstance<InProgress>().map { it.simulation.farms.size }
+                        )
+                        append("${result.simulation.farms.size}/${result.simulation.maxCoopSize} farmers)")
                     }
                     is Failed -> {
                         append("${result.coopStatus.coopId}: ")
-                        appendPaddingCharacters(result.coopStatus.coopId, coops.map { it.name })
-                        append("🔴 Hasn't finished")
+                        appendPaddingCharacters(result.coopStatus.coopId, longestCoopName)
+                        append("🔴 Failed")
                     }
                     is Finished -> {
                         append("${result.coopStatus.coopId}: ")
-                        appendPaddingCharacters(result.coopStatus.coopId, coops.map { it.name })
+                        appendPaddingCharacters(result.coopStatus.coopId, longestCoopName)
                         append("🟢 Finished")
                     }
                 }

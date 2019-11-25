@@ -2,8 +2,11 @@ package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.EggBot
-import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.utilities.prophecyBonus
+import nl.pindab0ter.eggbot.utilities.soulBonus
+import nl.pindab0ter.eggbot.utilities.sumBy
+import nl.pindab0ter.eggbot.utilities.toDateTime
 import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal
 import java.math.BigDecimal.*
@@ -21,8 +24,6 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     }
 
     companion object : EntityClass<String, DiscordUser>(DiscordUsers)
-
-    override fun toString(): String = "$discordTag ($discordId)"
 }
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
@@ -115,8 +116,6 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     }
 
     companion object : EntityClass<String, Farmer>(Farmers)
-
-    override fun toString(): String = "$inGameName ($inGameId)"
 }
 
 class Coop(id: EntityID<Int>) : IntEntity(id) {
@@ -129,6 +128,4 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     val activeEarningsBonus: BigDecimal get() = farmers.sumBy { it.activeEarningsBonus }
 
     companion object : IntEntityClass<Coop>(Coops)
-
-    override fun toString(): String = "$name ($name)"
 }
