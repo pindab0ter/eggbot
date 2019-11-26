@@ -30,7 +30,7 @@ fun Command.checkPrerequisites(
     commandEvent.author.isRegistered < registrationRequired ->
         PrerequisitesCheckResult.Failure("You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.")
     commandEvent.author.isAdmin < adminRequired ->
-        PrerequisitesCheckResult.Failure("You must have at least a role called `${Config.adminRole}` to use that!")
+        PrerequisitesCheckResult.Failure("You must have a role called `${Config.adminRole}` or higher to use that!")
     channelType == TEXT && channelType != commandEvent.channelType ->
         PrerequisitesCheckResult.Failure("This command cannot be used in DMs. Please try again in a public channel.")
     channelType == PRIVATE && channelType != commandEvent.channelType ->
