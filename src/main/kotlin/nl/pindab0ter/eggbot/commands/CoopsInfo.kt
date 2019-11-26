@@ -6,7 +6,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
-import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
@@ -58,92 +57,117 @@ object CoopsInfo : Command() {
             return
         }
 
-        val eggspecteds = results
-            .filterIsInstance<InProgress>()
-            .map { it.simulation.eggspected.formatIllions() }
-
         val contract = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { it.id == contractId }!!
-        val longestCoopName = coops.map { it.name }.plus("Time to complete").maxBy { it.length }!!
 
-        log.debug { longestCoopName }
+        val resultRows = results.map { result ->
+            when (result) {
+                is NotFound -> ResultRow(result.coopId, "🟡", "Waiting for starter")
+                is Abandoned -> ResultRow(result.coopStatus.coopId, "🔴", "Abandoned")
+                is InProgress -> when {
+                    result.simulation.willFinish -> ResultRow(
+                        result.simulation.coopId,
+                        "🟢",
+                        "On track",
+                        result.simulation.eggspected.formatIllions(),
+                        result.simulation.coopStatus.contributorsCount.toString()
+                    )
+                    else -> ResultRow(
+                        result.simulation.coopId,
+                        "🔴",
+                        "Not on track",
+                        result.simulation.eggspected.formatIllions(),
+                        result.simulation.coopStatus.contributorsCount.toString()
+                    )
+                }
+                is Failed -> ResultRow(result.coopStatus.coopId, "🔴", "Failed")
+                is Finished -> ResultRow(result.coopStatus.coopId, "🏁", "Finished")
+            }
+        }
+        val longestName = resultRows.map { it.name }.plus("Name").maxBy { it.length }!!
+        val longestStatusMessage = resultRows.map { it.statusMessage }.plus("Status").maxBy { it.length }!!
+        val longestEggspected = resultRows.map { it.eggspected }.plus("Eggspected").maxBy { it.length }!!
+        val longestMembers = resultRows.map { it.members }.maxBy { it.length }!!
 
         StringBuilder("`${EggBot.guild.name}` vs _${contractId}_:\n").apply {
+
+            // region Basic info
+
             appendln()
             appendln("__🗒️ **Basic info**:__ ```")
-
-            append("Contract: ")
-            appendPaddingCharacters("Contract", longestCoopName)
-            append(contract.name)
-            appendln()
-
-            append("Final goal: ")
-            appendPaddingCharacters("Final goal", longestCoopName)
-            append(contract.finalGoal.formatIllions(true))
-            appendln()
-
-            append("Time to complete: ")
-            appendPaddingCharacters("Time to complete", longestCoopName)
-            append(contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true))
-            appendln()
-
-            append("Max size: ")
-            appendPaddingCharacters("Max size", longestCoopName)
-            append("${contract.maxCoopSize} farmers")
-            appendln()
+            appendln("Contract:         ${contract.name}")
+            appendln("Final goal:       ${contract.finalGoal.formatIllions(true)}")
+            appendln("Time to complete: ${contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true)}")
+            appendln("Max size:         ${contract.maxCoopSize} farmers")
 
             appendln("```")
 
+            // endregion Basic info
+
+            // region Table
+
             appendln("__**🤝 Co-ops:**__```")
-            results.forEach { result ->
-                when (result) {
-                    is NotFound -> {
-                        append("${result.coopId}: ")
-                        appendPaddingCharacters(result.coopId, longestCoopName)
-                        // TODO: Tag starter and/or leader
-                        append("🟠 Waiting for starter")
-                    }
-                    is Abandoned -> {
-                        append("${result.coopStatus.coopId}: ")
-                        appendPaddingCharacters(result.coopStatus.coopId, longestCoopName)
-                        append("🔴 Abandoned")
-                    }
-                    is InProgress -> {
-                        append("${result.simulation.coopId}: ")
-                        appendPaddingCharacters(result.simulation.coopId, longestCoopName)
-                        when {
-                            result.simulation.willFinish -> {
-                                append("🟠 On track ")
-                                if (results.filterIsInstance<InProgress>().any { !it.simulation.willFinish }) append("    ")
-                                append("(")
-                            }
-                            else -> {
-                                append("🔴 Not on track (")
-                            }
-                        }
-                        appendPaddingCharacters(result.simulation.eggspected.formatIllions(), eggspecteds)
-                        append("${result.simulation.eggspected.formatIllions()}, ")
-                        appendPaddingCharacters(
-                            result.simulation.farms.size,
-                            results.filterIsInstance<InProgress>().map { it.simulation.farms.size }
-                        )
-                        append("${result.simulation.farms.size}/${result.simulation.maxCoopSize} farmers)")
-                    }
-                    is Failed -> {
-                        append("${result.coopStatus.coopId}: ")
-                        appendPaddingCharacters(result.coopStatus.coopId, longestCoopName)
-                        append("🔴 Failed")
-                    }
-                    is Finished -> {
-                        append("${result.coopStatus.coopId}: ")
-                        appendPaddingCharacters(result.coopStatus.coopId, longestCoopName)
-                        append("🟢 Finished")
-                    }
+
+            // region Table header
+
+            append("Name ")
+            appendPaddingCharacters("Name", longestName)
+            append("│ 🚥 │ Status ")
+            appendPaddingCharacters("Status", longestStatusMessage)
+            append("| Eggspected ")
+            appendPaddingCharacters("Eggspected", longestEggspected)
+            append("| ")
+            appendPaddingCharacters("", longestMembers, "#")
+            append("/${contract.maxCoopSize}")
+            appendln()
+
+            appendPaddingCharacters("", longestName, "═")
+            append("═╪═➖═╪═")
+            appendPaddingCharacters("", longestStatusMessage, "═")
+            append("═╪═")
+            appendPaddingCharacters("", longestEggspected, "═")
+            append("═╪══")
+            appendPaddingCharacters("", longestMembers, "═")
+            appendPaddingCharacters("", contract.maxCoopSize, "═")
+            appendln()
+
+            // endregion Table header
+
+            // region Table body
+
+            resultRows.forEach { row ->
+                append(row.name)
+                appendPaddingCharacters(row.name, longestName)
+                append(" │ ${row.statusEmoji} │ ${row.statusMessage}")
+                appendPaddingCharacters(row.statusMessage, longestStatusMessage)
+                append(" │ ")
+                appendPaddingCharacters(row.eggspected, longestEggspected)
+                append(row.eggspected)
+                append(" │ ")
+                appendPaddingCharacters(row.members, longestMembers)
+                if (row.members.isNotBlank()) append("${row.members}/${contract.maxCoopSize}")
+                else {
+                    appendPaddingCharacters("", longestMembers)
+                    append(" ")
+                    appendPaddingCharacters("", contract.maxCoopSize)
                 }
                 appendln()
             }
+
+            // endregion Table body
+
             appendln("```")
+
+            // endregion Table
         }.toString().let { string ->
             event.reply(string)
         }
     }
+
+    class ResultRow(
+        val name: String,
+        val statusEmoji: String,
+        val statusMessage: String,
+        val eggspected: String = "",
+        val members: String = ""
+    )
 }

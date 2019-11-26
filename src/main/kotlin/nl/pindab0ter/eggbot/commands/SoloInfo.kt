@@ -117,8 +117,8 @@ object SoloInfo : Command() {
             append(
                 when {
                     moment == null || moment > simulation.timeRemaining -> " 🔴 "
-                    moment == Duration.ZERO -> " 🟢 "
-                    else -> " 🟠 "
+                    moment == Duration.ZERO -> " 🏁 "
+                    else -> " 🟢 "
                 }
             )
             when (moment) {
