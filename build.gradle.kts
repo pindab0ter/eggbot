@@ -10,7 +10,7 @@ application {
 plugins {
     idea
     application
-    kotlin("jvm") version "1.3.60"
+    kotlin("jvm") version "1.3.61"
     id("com.google.protobuf") version "0.8.10"
     id("com.github.ben-manes.versions") version "0.27.0"
 }
