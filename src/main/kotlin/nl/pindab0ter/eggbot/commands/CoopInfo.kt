@@ -67,7 +67,7 @@ object CoopInfo : Command() {
 
     fun message(result: CoopContractSimulationResult, compact: Boolean = false): List<String> = when (result) {
         is CoopContractSimulationResult.NotFound -> listOf(
-            "No co-op found for contract `${result.contractId}` with name `${result.coopId}"
+            "No co-op found for contract `${result.contractId}` with name `${result.coopId}`"
         )
         is CoopContractSimulationResult.Abandoned -> listOf(
             """ `${result.coopStatus.coopId}` vs. __${result.contractName}__:
