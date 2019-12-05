@@ -96,6 +96,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     fun update(backup: EggInc.Backup) {
         if (!backup.hasGame()) return
+        inGameName = backup.userName
         prestiges = backup.stats.prestigeCount
         soulEggsLong = backup.game.soulEggsLong
         soulEggsDouble = backup.game.soulEggsDouble
