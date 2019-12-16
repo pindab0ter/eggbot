@@ -27,13 +27,13 @@ dependencies {
 
     implementation("com.jagrosh", "jda-utilities-commons", "3.0.2")
     implementation("com.jagrosh", "jda-utilities-command", "3.0.2")
-    implementation("net.dv8tion", "JDA", "4.0.0_64") {
+    implementation("net.dv8tion", "JDA", "4.0.0_73") {
         exclude("club.minnced", "opus-java")
     }
     implementation("org.jetbrains.exposed", "exposed", "0.17.7")
     implementation("joda-time", "joda-time", "2.10.5")
     implementation("com.github.kittinunf.fuel", "fuel", "2.2.1")
-    implementation("com.google.protobuf", "protobuf-java", "3.11.0")
+    implementation("com.google.protobuf", "protobuf-java", "3.11.1")
     implementation("io.github.microutils", "kotlin-logging", "1.7.8")
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
