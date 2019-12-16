@@ -40,6 +40,8 @@ object EggBot {
         )
         .build()
 
+    var clientVersion = Config.clientVersion
+
     @JvmStatic
     fun main(args: Array<String>) {
         connectToDatabase()

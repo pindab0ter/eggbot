@@ -30,7 +30,7 @@ message Backup {
     bool user_ads_enabled = 14;
     bool user_cloud_enabled = 15;
     int32 force_offer_backup = 20;
-    int32 version = 21;
+    int32 client_version = 21;
     int32 force_backup = 22;
     int64 checksum = 100;
 

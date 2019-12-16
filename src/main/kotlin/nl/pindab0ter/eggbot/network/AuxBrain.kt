@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.utilities.decodeBase64
 
 
@@ -25,7 +26,7 @@ object AuxBrain {
         .body(
             "data=${EggInc.PeriodicalsRequest
                 .newBuilder()
-                .setClientVersion(20)
+                .setClientVersion(EggBot.clientVersion)
                 .build()
                 .toByteString()
                 .toStringUtf8()

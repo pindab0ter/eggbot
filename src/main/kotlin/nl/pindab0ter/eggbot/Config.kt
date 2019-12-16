@@ -11,6 +11,7 @@ object Config {
 
     private const val FILE_NAME = "eggbot.properties"
     private const val BOT_TOKEN = "bot_token"
+    private const val CLIENT_VERSION = "client_version"
     private const val OWNER_ID = "owner_id"
     private const val PREFIX = "prefix"
     private const val HELP_WORD = "help_word"
@@ -63,6 +64,7 @@ object Config {
     private const val DEVELOPMENT = "dev_mode"
 
     val botToken: String
+    val clientVersion: Int
     val ownerId: String
     val prefix: String?
     val helpWord: String
@@ -97,6 +99,7 @@ object Config {
             load(FileInputStream(FILE_NAME))
 
             botToken = getRequired(BOT_TOKEN)
+            clientVersion = getOptional(CLIENT_VERSION, "0").toInt()
             ownerId = getOptional(OWNER_ID, "0")
             prefix = getOptional(PREFIX, "!")
             helpWord = getOptional(HELP_WORD, "help")

@@ -95,6 +95,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     }
 
     fun update(backup: EggInc.Backup) {
+        if (backup.clientVersion > EggBot.clientVersion) EggBot.clientVersion = backup.clientVersion
         if (!backup.hasGame()) return
         inGameName = backup.userName
         prestiges = backup.stats.prestigeCount
