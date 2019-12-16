@@ -44,7 +44,7 @@ object CoopInfo : Command() {
         val coopId: String = event.arguments[1]
         val compact: Boolean = event.arguments.getOrNull(2)?.startsWith("c") == true
 
-        getCoopStatus(contractId, coopId).let getCoopStatus@{ (status, _) ->
+        getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
             if (status == null || !status.isInitialized) "Could not get co-op status. Are the `contract id` and `co-op id` correct?.".let {
                 event.replyWarning(it)
                 log.debug { it }

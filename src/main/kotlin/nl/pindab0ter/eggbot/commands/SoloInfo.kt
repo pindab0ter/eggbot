@@ -1,6 +1,5 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.github.kittinunf.result.success
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
@@ -47,32 +46,32 @@ object SoloInfo : Command() {
         val contractId = event.arguments.first()
         val compact: Boolean = event.arguments.getOrNull(1)?.startsWith("c") == true
 
-        for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId).success { backup ->
+        for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
             val contract = if (backup.hasGame()) backup.contracts.contractsList.find {
                 it.contract.id == contractId
             } else "No data found for `${farmer.inGameName}`.".let {
                 log.warn { it }
                 event.reply(it)
-                return@success
+                return
             }
 
             if (contract == null)
                 "No contract found with ID `$contractId` for `${farmer.inGameName}`. Try using `${event.client.textualPrefix}${ContractIDs.name}`".let {
                     log.debug { it }
                     event.reply(it)
-                    return@success
+                    return
                 }
             if (contract.contract.coopAllowed && contract.coopId.isNotBlank())
                 "The contract with ID `$contractId` is not a solo contract.".let {
                     log.debug { it }
                     event.reply(it)
-                    return@success
+                    return
                 }
             val simulation = ContractSimulation(backup, contractId)
                 ?: "You haven't started this contract yet.".let {
                     log.debug { it }
                     event.reply(it)
-                    return@success
+                    return
                 }
 
             simulation.run()

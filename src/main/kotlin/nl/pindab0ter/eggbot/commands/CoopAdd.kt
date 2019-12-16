@@ -7,7 +7,9 @@ import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
+import nl.pindab0ter.eggbot.utilities.arguments
+import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -51,7 +53,7 @@ object CoopAdd : Command() {
             return
         }
 
-        getCoopStatus(contractId, coopId).let getCoopStatus@{ (status, _) ->
+        getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
             if (status == null || !status.isInitialized) "Could not find an active co-op with that `contract id` and `co-op id`.".let {
                 event.replyWarning(it)
                 log.debug { it }

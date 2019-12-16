@@ -83,14 +83,14 @@ class CoopContractSimulation private constructor(
 
     companion object Factory {
         operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
-            val (coopStatus, error) = AuxBrain.getCoopStatus(contractId, coopId)
+            val coopStatus = AuxBrain.getCoopStatus(contractId, coopId)
             val contractName: String? =
                 AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { contract ->
                     contract.id == contractId
                 }?.name
 
             // Co-op not found?
-            if (coopStatus == null || error != null || contractName == null)
+            if (coopStatus == null || contractName == null)
                 return NotFound(contractId, coopId)
 
             // Is co-op abandoned?
@@ -99,9 +99,7 @@ class CoopContractSimulation private constructor(
 
             val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
                 coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
-            }.mapNotNull {
-                it.component1()
-            }
+            }.filterNotNull()
 
             val contract = backups.findContract(contractId)!!
 

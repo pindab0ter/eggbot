@@ -5,11 +5,11 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.api.entities.ChannelType.TEXT
-import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
+import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 
@@ -54,7 +54,7 @@ object Register : Command() {
 
         transaction {
             val farmers = Farmer.all().toList()
-            val (backup, _) = AuxBrain.getFarmerBackup(registrant.inGameId)
+            val backup = AuxBrain.getFarmerBackup(registrant.inGameId)
 
             // Check if the Discord user is already known, otherwise create a new user
             val discordUser: DiscordUser = DiscordUser.findById(registrant.discordId)

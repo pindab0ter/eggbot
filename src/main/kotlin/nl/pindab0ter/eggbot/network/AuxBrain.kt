@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.network
 
 import com.auxbrain.ei.EggInc
-import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.core.ResultHandler
@@ -9,7 +8,6 @@ import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
-import com.github.kittinunf.result.Result
 import nl.pindab0ter.eggbot.utilities.decodeBase64
 
 
@@ -76,8 +74,8 @@ object AuxBrain {
     fun getCoopStatus(
         contractId: String,
         coopId: String
-    ): Result<EggInc.CoopStatusResponse, FuelError> =
-        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third
+    ): EggInc.CoopStatusResponse? =
+        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third.component1()
 
     object CoopStatusDeserializer : ResponseDeserializable<EggInc.CoopStatusResponse> {
         override fun deserialize(content: String): EggInc.CoopStatusResponse? {
@@ -101,8 +99,8 @@ object AuxBrain {
      *
      * @return [EggInc.Backup] the backup
      */
-    fun getFarmerBackup(inGameId: String): Result<EggInc.Backup, FuelError> =
-        firstContactRequest(inGameId).responseObject(BackupDeserializer).third
+    fun getFarmerBackup(inGameId: String): EggInc.Backup? =
+        firstContactRequest(inGameId).responseObject(BackupDeserializer).third.component1()
 
     object BackupDeserializer : ResponseDeserializable<EggInc.Backup> {
         override fun deserialize(content: String): EggInc.Backup? {

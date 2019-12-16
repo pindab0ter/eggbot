@@ -89,7 +89,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
     val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
 
-    fun update() = AuxBrain.getFarmerBackup(inGameId).let { (backup, _) ->
+    fun update() = AuxBrain.getFarmerBackup(inGameId).let { backup ->
         if (backup == null || !backup.hasGame()) return@let
         update(backup)
     }
