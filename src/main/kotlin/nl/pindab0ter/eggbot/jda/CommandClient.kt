@@ -21,6 +21,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         CoopRemove,
         EarningsBonus,
         Inactive,
+        Inactives,
         LeaderBoard,
         Register,
         RollCall,

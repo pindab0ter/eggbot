@@ -14,6 +14,7 @@ import java.math.BigDecimal.*
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val discordId: String get() = id.value
     var discordTag by DiscordUsers.discordTag
+    val discordName: String get() = discordTag.substring(0, discordTag.length - 5)
     var inactiveUntil by DiscordUsers.inactiveUntil
     val farmers by Farmer referrersOn Farmers.discordId
 
