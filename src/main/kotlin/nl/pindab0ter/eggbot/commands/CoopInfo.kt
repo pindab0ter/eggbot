@@ -134,6 +134,7 @@ object CoopInfo : Command() {
                     append("Current eggs:     ${currentEggs.formatIllions()} ")
                     if (!compact) append("(${eggsPerHour.formatIllions()}/hr) ")
                     appendln()
+                    if (simulation.coopStatus.public) appendln("Access:           This co-op is PUBLIC")
                     appendln("```")
                 }
 
