@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
+import mu.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Guild
@@ -30,6 +31,7 @@ import java.util.*
 
 
 object EggBot {
+    val logger = KotlinLogging.logger {}
     val eventWaiter: EventWaiter = EventWaiter()
 
     val jdaClient: JDA = JDABuilder(Config.botToken)
@@ -41,6 +43,10 @@ object EggBot {
         .build()
 
     var clientVersion = Config.clientVersion
+        set(value) {
+            field = value
+            logger.info { "Client version upgraded to $value" }
+        }
 
     @JvmStatic
     fun main(args: Array<String>) {
