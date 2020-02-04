@@ -155,12 +155,12 @@ object SoloInfo : Command() {
             if (habBottleneckReached != null || transportBottleneckReached != null) {
                 appendln("__⚠ **Bottlenecks**__: ```")
                 habBottleneckReached?.let {
-                    if (it == Duration.ZERO) appendln("Hab bottleneck reached!")
-                    else appendln("Max habs in ${it.asDaysHoursAndMinutes(true)}!")
+                    if (it == Duration.ZERO) append("🏠Full! ")
+                    else append("🏠${it.asDaysHoursAndMinutes(true)} ")
                 }
                 transportBottleneckReached?.let {
-                    if (it == Duration.ZERO) appendln("Transport bottleneck reached!")
-                    else appendln("Max transport in ${it.asDaysHoursAndMinutes(true)}!")
+                    if (it == Duration.ZERO) append("🚛Full! ")
+                    else append("🚛${it.asDaysHoursAndMinutes(true)} ")
                 }
                 appendln("```")
             }
