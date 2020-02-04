@@ -46,7 +46,7 @@ class ContractSimulation constructor(
         GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
     }.toSortedSet()
     private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
-    private val projectedEggIncrease: BigDecimal get() = projectedPopulation * eggsPerChickenPerMinute
+    private val projectedEggsPerMinute: BigDecimal get() = projectedPopulation * eggsPerChickenPerMinute
     val goalsReached: Int get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
 
     fun step() {
@@ -54,12 +54,12 @@ class ContractSimulation constructor(
             currentGoal!!.moment = elapsed
         if (habBottleneckReached == null && projectedPopulation >= habsMaxCapacity)
             habBottleneckReached = elapsed
-        if (transportBottleneckReached == null && projectedEggIncrease >= shippingRatePerMinute)
+        if (transportBottleneckReached == null && projectedEggsPerMinute >= shippingRatePerMinute)
             transportBottleneckReached = elapsed
         if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
             eggspected = projectedEggs
         elapsed += standardMinutes(1)
-        projectedEggs += projectedEggIncrease.coerceAtMost(shippingRatePerMinute)
+        projectedEggs += projectedEggsPerMinute.coerceAtMost(shippingRatePerMinute)
         projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
     }
 

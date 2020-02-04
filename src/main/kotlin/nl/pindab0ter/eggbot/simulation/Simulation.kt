@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.simulation
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.EggInc.*
 import com.auxbrain.ei.EggInc.HabLevel.NO_HAB
 import nl.pindab0ter.eggbot.simulation.CommonResearch.*
 import nl.pindab0ter.eggbot.simulation.EpicResearch.*
@@ -11,9 +11,9 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 
-abstract class Simulation(val backup: EggInc.Backup) {
+abstract class Simulation(val backup: Backup) {
 
-    internal abstract val farm: EggInc.Backup.Simulation
+    internal abstract val farm: Backup.Simulation
 
     val farmerName: String get() = backup.userName
     val timeSinceLastUpdate: Duration get() = Duration(backup.approxTime.toDateTime(), DateTime.now())
@@ -62,6 +62,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
             ONE + BigDecimal(".05") * farm.commonResearchList[HOVER_UPGRADES.ordinal].level, // Assumes at least Hover Semi
             ONE + BigDecimal(".05") * farm.commonResearchList[DARK_CONTAINMENT.ordinal].level,
             ONE + BigDecimal(".05") * farm.commonResearchList[NEURAL_NET_REFINEMENT.ordinal].level,
+            ONE + BigDecimal(".05") * farm.commonResearchList[HYPER_PORTALLING.ordinal].level,
             ONE + BigDecimal(".05") * backup.game.epicResearchList[TRANSPORTATION_LOBBYISTS.ordinal].level
         )
 
@@ -75,7 +76,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
 
     private val habsMaxCapacityBonus: BigDecimal by lazy { habCapacityMultipliers.product() }
 
-    private val EggInc.HabLevel.maxCapacity: BigDecimal get() = capacity.multiply(habsMaxCapacityBonus)
+    private val HabLevel.maxCapacity: BigDecimal get() = capacity.multiply(habsMaxCapacityBonus)
 
     val habsMaxCapacity: BigDecimal by lazy { farm.habsList.sumBy { hab -> hab.maxCapacity } }
 
@@ -120,7 +121,7 @@ abstract class Simulation(val backup: EggInc.Backup) {
     val shippingRatePerMinute: BigDecimal by lazy {
         farm.vehiclesList.foldIndexed(ZERO) { index, acc, vehicleType ->
             when (vehicleType) {
-                EggInc.VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * farm.hyperloopCarsList[index]
+                VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * farm.hyperloopCarsList[index]
                 else -> acc + vehicleType.capacity
             }
         }.multiply(shippingRateBonus)
