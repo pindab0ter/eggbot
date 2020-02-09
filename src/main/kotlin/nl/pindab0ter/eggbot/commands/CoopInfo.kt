@@ -134,6 +134,8 @@ object CoopInfo : Command() {
                     append("Current eggs:     ${currentEggs.formatIllions()} ")
                     if (!compact) append("(${eggsPerHour.formatIllions()}/hr) ")
                     appendln()
+                    appendln("Tokens available: $tokensAvailable")
+                    appendln("Tokens spent:     $tokensSpent")
                     if (simulation.coopStatus.public) appendln("Access:           This co-op is PUBLIC")
                     appendln("```")
                 }
@@ -152,6 +154,8 @@ object CoopInfo : Command() {
                 val eggRate = "Egg/hr"
                 val chickens = "Chickens"
                 val chickenRate = "Chicken/hr"
+                val tokensAvailable = "Tkns"
+                val tokensSpent = "Spent"
                 val shortenedNames = farms.map { farm ->
                     farm.farmerName.let { name ->
                         if (name.length <= 9) name
@@ -197,6 +201,10 @@ object CoopInfo : Command() {
                     append(chickens)
                     append("|")
                     append(chickenRate)
+                    append(" ")
+                    append(tokensAvailable)
+                    append("│")
+                    append(tokensSpent)
                 }
                 appendln()
 
@@ -234,6 +242,18 @@ object CoopInfo : Command() {
                     appendPaddingCharacters(
                         "",
                         farms.map { "${it.populationIncreasePerHour.formatIllions()}/hr" }.plus(chickenRate),
+                        "═"
+                    )
+                    append("═")
+                    appendPaddingCharacters(
+                        "",
+                        farms.map { it.boostTokensCurrent }.plus(tokensAvailable),
+                        "═"
+                    )
+                    append("╪")
+                    appendPaddingCharacters(
+                        "",
+                        farms.map { it.farm.boostTokensSpent }.plus(tokensSpent),
                         "═"
                     )
                 }
@@ -281,6 +301,18 @@ object CoopInfo : Command() {
                         append(farm.currentPopulation.formatIllions())
                         append("│")
                         append("${farm.populationIncreasePerHour.formatIllions()}/hr")
+                        appendPaddingCharacters(
+                            "${farm.populationIncreasePerHour.formatIllions()}/hr",
+                            farms.map { "${it.populationIncreasePerHour.formatIllions()}/hr" }.plus(chickenRate)
+                        )
+                        append(" ")
+                        appendPaddingCharacters(
+                            farm.boostTokensCurrent,
+                            farms.map { it.boostTokensCurrent }.plus(tokensAvailable)
+                        )
+                        append(if (farm.boostTokensCurrent > 0) farm.boostTokensCurrent else " ")
+                        append("│")
+                        append(if (farm.farm.boostTokensSpent > 0) farm.farm.boostTokensSpent else " ")
                     }
                     appendln()
                 }
@@ -288,6 +320,45 @@ object CoopInfo : Command() {
                 // endregion Table body
 
                 // endregion Members
+
+                // region Tokens
+
+                if (compact) {
+
+                    appendln("```")
+                    appendln("__🎫 **Tokens**__: ```") // TODO: Toucan emote
+
+                    append(name)
+                    appendPaddingCharacters(name, farms.map { it.farmerName })
+                    appendPaddingCharacters("Available", farms.map { it.boostTokensCurrent })
+                    append("Available")
+                    append("│")
+                    append("Spent")
+                    appendln()
+
+                    appendPaddingCharacters("", farms.map { it.farmerName }.plus(name), "═")
+                    appendPaddingCharacters("", farms.map { it.boostTokensCurrent }.plus("Available"), "═")
+                    append("╪")
+                    appendPaddingCharacters("", farms.map { it.farm.boostTokensSpent }.plus("Spent"), "═")
+                    appendln()
+
+                    farms.forEach { farm ->
+                        append(farm.farmerName)
+                        appendPaddingCharacters(farm.farmerName, farms.map { it.farmerName }.plus(name))
+                        appendPaddingCharacters(
+                            farm.boostTokensCurrent,
+                            farms.map { it.boostTokensCurrent }.plus("Available")
+                        )
+                        append(farm.boostTokensCurrent)
+                        append("│")
+                        append(farm.farm.boostTokensToGive)
+                        appendln()
+                    }
+
+                    appendln()
+                }
+
+                // endregion Tokens
 
                 // region Bottlenecks
 

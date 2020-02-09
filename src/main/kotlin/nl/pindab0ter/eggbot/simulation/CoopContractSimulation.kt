@@ -42,6 +42,8 @@ class CoopContractSimulation private constructor(
     val goals: SortedSet<BigDecimal> = localContract.contract.goalsList.map { goal ->
         goal.targetAmount.toBigDecimal()
     }.toSortedSet()
+    val tokensAvailable: Int = farms.sumBy { it.farm.boostTokensReceived - it.farm.boostTokensGiven - it.farm.boostTokensSpent }
+    val tokensSpent: Int = farms.sumBy { it.farm.boostTokensSpent }
 
     // endregion Basic info
 

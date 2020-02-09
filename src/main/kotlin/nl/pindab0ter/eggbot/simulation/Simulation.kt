@@ -129,6 +129,12 @@ abstract class Simulation(val backup: Backup) {
 
     // endregion
 
+    // region Boost tokens
+
+    val boostTokensCurrent: Int by lazy { farm.boostTokensReceived - farm.boostTokensGiven - farm.boostTokensSpent }
+
+    // endregion
+
     abstract var elapsed: Duration
     abstract val currentEggs: BigDecimal
     abstract var projectedEggs: BigDecimal
