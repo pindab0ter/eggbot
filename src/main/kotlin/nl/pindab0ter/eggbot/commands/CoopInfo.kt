@@ -377,13 +377,19 @@ object CoopInfo : Command() {
                             }
 
                             farm.habBottleneckReached?.let {
-                                if (it == Duration.ZERO) append("🏠Full! ")
-                                else append("🏠${it.asDaysHoursAndMinutes(true)} ")
+                                when {
+                                    it == Duration.ZERO -> append("🏠Full! ")
+                                    compact -> append("🏠${it.asHoursAndMinutes()} ")
+                                    else -> append("🏠${it.asDaysHoursAndMinutes(true)} ")
+                                }
                             }
 
                             farm.transportBottleneckReached?.let {
-                                if (it == Duration.ZERO) append("🚛Full! ")
-                                else append("🚛${it.asDaysHoursAndMinutes(true)} ")
+                                when {
+                                    it == Duration.ZERO -> append("🚛Full! ")
+                                    compact -> append("🚛${it.asHoursAndMinutes()} ")
+                                    else -> append("🚛${it.asDaysHoursAndMinutes(true)} ")
+                                }
                             }
 
                             appendln()
