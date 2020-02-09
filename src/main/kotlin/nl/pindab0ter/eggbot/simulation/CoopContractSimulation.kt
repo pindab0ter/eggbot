@@ -42,17 +42,17 @@ class CoopContractSimulation private constructor(
     val goals: SortedSet<BigDecimal> = localContract.contract.goalsList.map { goal ->
         goal.targetAmount.toBigDecimal()
     }.toSortedSet()
-    val populationIncreaseRatePerHour: BigDecimal get() = farms.sumBy { farm -> farm.populationIncreasePerHour }
 
     // endregion Basic info
 
     // region Simulation
-    val currentEggsPerHour: BigDecimal by lazy { farms.sumBy { it.currentEggsPerHour } }
+
+    val currentEggsPerHour: BigDecimal by lazy { farms.sumByBigDecimal { it.currentEggsPerHour } }
 
     var elapsed: Duration = ZERO
-    val currentEggs: BigDecimal = farms.sumBy { it.currentEggs }
-    private val projectedEggs: BigDecimal get() = farms.sumBy { it.projectedEggs }
-    val currentPopulation: BigDecimal = farms.sumBy { it.currentPopulation }
+    val currentEggs: BigDecimal = farms.sumByBigDecimal { it.currentEggs }
+    private val projectedEggs: BigDecimal get() = farms.sumByBigDecimal { it.projectedEggs }
+    val currentPopulation: BigDecimal = farms.sumByBigDecimal { it.currentPopulation }
     lateinit var eggspected: BigDecimal
     val goalReachedMoments: SortedSet<GoalReachedMoment> = goals.map { goal ->
         GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
@@ -60,8 +60,8 @@ class CoopContractSimulation private constructor(
     private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
     val willFinish: Boolean get() = goalReachedMoments.maxBy { it.target }?.moment?.let { it < timeRemaining } == true
     val goalsReached: Int get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
-    val populationIncreasePerHour: BigDecimal get() = farms.sumBy { it.populationIncreasePerHour }
-    val eggsPerHour: BigDecimal get() = farms.sumBy { it.currentEggsPerHour }
+    val populationIncreasePerHour: BigDecimal get() = farms.sumByBigDecimal { it.populationIncreasePerHour }
+    val eggsPerHour: BigDecimal get() = farms.sumByBigDecimal { it.currentEggsPerHour }
 
     private fun step() {
         if (currentGoal != null && projectedEggs >= currentGoal!!.target)

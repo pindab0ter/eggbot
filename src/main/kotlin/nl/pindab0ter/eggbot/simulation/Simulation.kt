@@ -78,7 +78,7 @@ abstract class Simulation(val backup: Backup) {
 
     private val HabLevel.maxCapacity: BigDecimal get() = capacity.multiply(habsMaxCapacityBonus)
 
-    val habsMaxCapacity: BigDecimal by lazy { farm.habsList.sumBy { hab -> hab.maxCapacity } }
+    val habsMaxCapacity: BigDecimal by lazy { farm.habsList.sumByBigDecimal { hab -> hab.maxCapacity } }
 
     // endregion
 

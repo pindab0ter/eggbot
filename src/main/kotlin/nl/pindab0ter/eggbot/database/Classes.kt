@@ -5,7 +5,7 @@ import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.prophecyBonus
 import nl.pindab0ter.eggbot.utilities.soulBonus
-import nl.pindab0ter.eggbot.utilities.sumBy
+import nl.pindab0ter.eggbot.utilities.sumByBigDecimal
 import nl.pindab0ter.eggbot.utilities.toDateTime
 import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal
@@ -127,8 +127,8 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
 
     var farmers by Farmer via CoopFarmers
 
-    val earningsBonus: BigDecimal get() = farmers.sumBy { it.earningsBonus }
-    val activeEarningsBonus: BigDecimal get() = farmers.sumBy { it.activeEarningsBonus }
+    val earningsBonus: BigDecimal get() = farmers.sumByBigDecimal { it.earningsBonus }
+    val activeEarningsBonus: BigDecimal get() = farmers.sumByBigDecimal { it.activeEarningsBonus }
 
     companion object : IntEntityClass<Coop>(Coops)
 }

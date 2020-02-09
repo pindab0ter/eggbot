@@ -4,7 +4,7 @@ import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.RoundingMode.HALF_UP
 
-inline fun <T> Iterable<T>.sumBy(selector: (T) -> BigDecimal): BigDecimal {
+inline fun <T> Iterable<T>.sumByBigDecimal(selector: (T) -> BigDecimal): BigDecimal {
     var sum: BigDecimal = BigDecimal.ZERO
     for (element in this) {
         sum += selector(element)

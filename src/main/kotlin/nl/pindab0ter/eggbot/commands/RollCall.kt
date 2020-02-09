@@ -170,7 +170,7 @@ object RollCall : Command() {
                 activeFarmers.drop(coops.size).forEach { activeFarmer ->
                     coops.filter { coop -> coop.farmers.count() <= preferredCoopSize }
                         .filter { coop -> coop.farmers.count() == coops.map { it.farmers.count() }.min() }
-                        .minBy { coop -> coop.farmers.sumBy { it.earningsBonus } }!!
+                        .minBy { coop -> coop.farmers.sumByBigDecimal { it.earningsBonus } }!!
                         .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(activeFarmer)) }
                 }
 
