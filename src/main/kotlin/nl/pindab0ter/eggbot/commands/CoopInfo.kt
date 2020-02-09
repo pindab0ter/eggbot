@@ -149,42 +149,82 @@ object CoopInfo : Command() {
 
                 val name = "Name"
                 val eggs = "Eggs"
-                val eggRate = "Egg Rate"
+                val eggRate = "Egg/hr"
                 val chickens = "Chickens"
-                val chickenRate = "Chicken Rate"
+                val chickenRate = "Chicken/hr"
+                val shortenedNames = farms.map { farm ->
+                    farm.farmerName.let { name ->
+                        if (name.length <= 9) name
+                        else "${name.substring(0 until 9)}…"
+                    }
+                }
 
                 if (!compact) {
                     appendPaddingCharacters("", farms.count(), "#")
-                    append(": $name ")
-                    appendPaddingCharacters(name, farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " })
-                    appendPaddingCharacters(eggs, farms.map { it.currentEggs.formatIllions() })
-                    append(eggs)
-                    append("│")
-                    append(eggRate)
+                    append(": ")
+                }
+                append("$name ")
+                if (compact) {
                     appendPaddingCharacters(
-                        eggRate,
-                        farms.map { it.currentEggsPerHour.formatIllions() + "/hr" }.plus(eggRate)
+                        name,
+                        farms.mapIndexed { i, f ->
+                            "${shortenedNames[i]}${if (!f.isActive) " zZ" else ""}"
+                        }
                     )
-                    append("│")
+                } else {
                     appendPaddingCharacters(
-                        chickens,
-                        farms.map { it.currentPopulation.formatIllions() }.plus(chickens)
+                        name,
+                        farms.map {
+                            it.farmerName + if (!it.isActive) " zZ" else ""
+                        }
                     )
-                    append(chickens)
-                    append("|$chickenRate")
-                    appendln()
+                }
+                appendPaddingCharacters(eggs, farms.map { it.currentEggs.formatIllions() })
+                append(eggs)
+                append("│")
+                append(eggRate)
+                appendPaddingCharacters(
+                    eggRate,
+                    farms.map { it.currentEggsPerHour.formatIllions() + "/hr" }.plus(eggRate)
+                )
+                append(" ")
+                appendPaddingCharacters(
+                    chickens,
+                    farms.map { it.currentPopulation.formatIllions() }.plus(chickens)
+                )
 
-                    appendPaddingCharacters("", farms.count(), "═")
-                    append("═══")
-                    appendPaddingCharacters("", farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " }, "═")
-                    appendPaddingCharacters("", farms.map { it.currentEggs.formatIllions() }, "═")
-                    append("╪")
+                if (!compact) {
+                    append(chickens)
+                    append("|")
+                    append(chickenRate)
+                }
+                appendln()
+
+                if (!compact) append("══")
+                append("═════")
+                if (compact) {
                     appendPaddingCharacters(
-                        "",
-                        farms.map { "${it.currentEggsPerHour.formatIllions()}/hr" }.plus(eggRate),
+                        name,
+                        farms.mapIndexed { i, f -> "${shortenedNames[i]}${if (!f.isActive) " zZ" else ""}" },
                         "═"
                     )
-                    append("╪")
+                } else {
+                    appendPaddingCharacters("", farms.count(), "═")
+                    appendPaddingCharacters(
+                        name,
+                        farms.map { it.farmerName + if (!it.isActive) " zZ" else "" }.plus(name),
+                        "═"
+                    )
+                }
+                appendPaddingCharacters("", farms.map { it.currentEggs.formatIllions() }, "═")
+                append("╪")
+                appendPaddingCharacters(
+                    "",
+                    farms.map { "${it.currentEggsPerHour.formatIllions()}/hr" }.plus(eggRate),
+                    "═"
+                )
+                if (!compact) {
+                    append("═")
                     appendPaddingCharacters(
                         "",
                         farms.map { it.currentPopulation.formatIllions() }.plus(chickens),
@@ -196,41 +236,31 @@ object CoopInfo : Command() {
                         farms.map { "${it.populationIncreasePerHour.formatIllions()}/hr" }.plus(chickenRate),
                         "═"
                     )
-                    appendln()
                 }
+                appendln()
 
                 // endregion Table header
 
                 // region Table body
 
-                val shortenedNames = farms.map { farm ->
-                    farm.farmerName.let { name ->
-                        if (name.length <= 9) name
-                        else "${name.substring(0 until 9)}…"
-                    }
-                }
-
                 farms.forEachIndexed { index, farm ->
                     appendPaddingCharacters(index + 1, farms.count())
-                    append("${index + 1}: ")
-                    when (compact) {
-                        true -> {
-                            append("${shortenedNames[index]} ")
-                            appendPaddingCharacters(
-                                "${shortenedNames[index]} ${if (!farm.isActive) "  zZ" else " "}",
-                                farms.mapIndexed { i, f -> "${shortenedNames[i]} ${if (!f.isActive) "  zZ" else " "}" }
-                            )
-                        }
-                        false -> {
-                            append(farm.farmerName)
-                            appendPaddingCharacters(
-                                farm.farmerName + if (!farm.isActive) "  zZ" else " ",
-                                farms.map { it.farmerName + if (!it.isActive) "  zZ" else " " }.plus(name)
-                            )
-                            if (!farm.isActive) append("  zZ ")
-                            else append("  ")
-                        }
+                    if (!compact) append("${index + 1}: ")
+                    if (compact) {
+                        append(shortenedNames[index])
+                        appendPaddingCharacters(
+                            "${shortenedNames[index]}${if (!farm.isActive) " zZ" else ""}",
+                            farms.mapIndexed { i, f -> "${shortenedNames[i]}${if (!f.isActive) " zZ" else ""}" }
+                        )
+                    } else {
+                        append(farm.farmerName)
+                        appendPaddingCharacters(
+                            farm.farmerName + if (!farm.isActive) " zZ" else "",
+                            farms.map { it.farmerName + if (!it.isActive) " zZ" else "" }.plus(name)
+                        )
+                        if (!farm.isActive) append(" zZ")
                     }
+                    append(" ")
                     appendPaddingCharacters(
                         farm.currentEggs.formatIllions(),
                         farms.map { it.currentEggs.formatIllions() }.plus(eggs)
@@ -243,7 +273,7 @@ object CoopInfo : Command() {
                         farms.map { "${it.currentEggsPerHour.formatIllions()}/hr" }.plus(eggRate)
                     )
                     if (!compact) {
-                        append("│")
+                        append(" ")
                         appendPaddingCharacters(
                             farm.currentPopulation.formatIllions(),
                             farms.map { it.currentPopulation.formatIllions() }.plus(chickens)
@@ -261,8 +291,7 @@ object CoopInfo : Command() {
 
                 // region Bottlenecks
 
-                simulation.farms
-                    .filter { it.habBottleneckReached != null || it.transportBottleneckReached != null }
+                farms.filter { it.habBottleneckReached != null || it.transportBottleneckReached != null }
                     .let BottleneckedFarms@{ bottleneckedFarms ->
                         if (bottleneckedFarms.isEmpty()) return@BottleneckedFarms
                         appendln("```")
