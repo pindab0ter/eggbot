@@ -324,30 +324,29 @@ object CoopInfo : Command() {
                 // region Tokens
 
                 if (compact) {
-
                     appendln("```")
                     appendln("__🎫 **Tokens**__: ```") // TODO: Toucan emote
 
                     append(name)
-                    appendPaddingCharacters(name, farms.map { it.farmerName })
-                    appendPaddingCharacters("Available", farms.map { it.boostTokensCurrent })
-                    append("Available")
+                    appendPaddingCharacters(name, shortenedNames)
+                    appendPaddingCharacters("Owned", farms.map { it.boostTokensCurrent })
+                    append("Owned")
                     append("│")
                     append("Spent")
-                    appendln()
 
-                    appendPaddingCharacters("", farms.map { it.farmerName }.plus(name), "═")
-                    appendPaddingCharacters("", farms.map { it.boostTokensCurrent }.plus("Available"), "═")
+                    appendln()
+                    appendPaddingCharacters("", shortenedNames, "═")
+                    appendPaddingCharacters("", farms.map { it.boostTokensCurrent }.plus("Owned"), "═")
                     append("╪")
                     appendPaddingCharacters("", farms.map { it.farm.boostTokensSpent }.plus("Spent"), "═")
                     appendln()
 
-                    farms.forEach { farm ->
-                        append(farm.farmerName)
-                        appendPaddingCharacters(farm.farmerName, farms.map { it.farmerName }.plus(name))
+                    farms.forEachIndexed { index, farm ->
+                        append(shortenedNames[index])
+                        appendPaddingCharacters(shortenedNames[index], shortenedNames)
                         appendPaddingCharacters(
                             farm.boostTokensCurrent,
-                            farms.map { it.boostTokensCurrent }.plus("Available")
+                            farms.map { it.boostTokensCurrent }.plus("Owned")
                         )
                         append(farm.boostTokensCurrent)
                         append("│")
