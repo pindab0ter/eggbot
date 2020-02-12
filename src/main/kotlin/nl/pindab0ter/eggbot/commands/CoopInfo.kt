@@ -350,7 +350,7 @@ object CoopInfo : Command() {
                         )
                         append(farm.boostTokensCurrent)
                         append("│")
-                        append(farm.farm.boostTokensToGive)
+                        append(farm.farm.boostTokensSpent)
                         appendln()
                     }
 
