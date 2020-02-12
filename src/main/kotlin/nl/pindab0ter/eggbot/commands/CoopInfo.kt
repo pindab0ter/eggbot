@@ -264,8 +264,6 @@ object CoopInfo : Command() {
                 // region Table body
 
                 farms.forEachIndexed { index, farm ->
-                    appendPaddingCharacters(index + 1, farms.count())
-                    if (!compact) append("${index + 1}: ")
                     if (compact) {
                         append(shortenedNames[index])
                         appendPaddingCharacters(
@@ -273,6 +271,8 @@ object CoopInfo : Command() {
                             farms.mapIndexed { i, f -> "${shortenedNames[i]}${if (!f.isActive) " zZ" else ""}" }
                         )
                     } else {
+                        appendPaddingCharacters(index + 1, farms.count())
+                        append("${index + 1}: ")
                         append(farm.farmerName)
                         appendPaddingCharacters(
                             farm.farmerName + if (!farm.isActive) " zZ" else "",
