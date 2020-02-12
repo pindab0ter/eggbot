@@ -5,15 +5,14 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
-import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.SizedCollection
-import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -26,7 +25,6 @@ object RollCall : Command() {
     init {
         name = "roll-call"
         arguments = "<contract id> [overwrite]"
-        aliases = arrayOf("rc", "rollcall")
         help = "Create a co-op roll call for the specified contract id."
         category = AdminCategory
         guildOnly = false
@@ -45,11 +43,6 @@ object RollCall : Command() {
             event.replyWarning(it)
             log.debug { it }
             return
-        }
-
-        if (Config.devMode) transaction {
-            Coops.deleteAll()
-            CoopFarmers.deleteAll()
         }
 
         val contractInfo: EggInc.Contract? = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find {
@@ -88,7 +81,6 @@ object RollCall : Command() {
             val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName
             val longestEarningsBonus = farmers
                 .maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
-
 
             event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
                 append("```")
@@ -143,11 +135,21 @@ object RollCall : Command() {
             preferredCoopSize: Int
         ): List<Coop> = transaction {
             List((farmers.count() / preferredCoopSize) + 1) { index ->
+
+                val name = Config.coopIncrementChar.plus(index).toString() +
+                        Config.coopName +
+                        contract.maxCoopSize
+
+                val roleId = EggBot.guild.createRole()
+                    .setName(name)
+                    .setMentionable(true)
+                    .complete()
+                    .id
+
                 Coop.new {
                     this.contract = contract.id
-                    this.name = Config.coopIncrementChar.plus(index).toString() +
-                            Config.coopName +
-                            contract.maxCoopSize
+                    this.name = name
+                    this.roleId = roleId
                 }
             }
         }

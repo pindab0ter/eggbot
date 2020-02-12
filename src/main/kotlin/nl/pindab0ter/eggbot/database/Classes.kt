@@ -124,6 +124,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
     var contract by Coops.contract
+    var roleId by Coops.role_id
 
     var farmers by Farmer via CoopFarmers
 

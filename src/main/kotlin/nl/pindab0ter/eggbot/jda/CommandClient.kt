@@ -25,6 +25,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         LeaderBoard,
         Register,
         RollCall,
+        RollClear,
         SoloInfo,
         Unregister,
         WhoIs
