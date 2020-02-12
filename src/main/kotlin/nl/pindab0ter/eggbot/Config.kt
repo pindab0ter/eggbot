@@ -165,23 +165,7 @@ object Config {
                 }, statusText
             ) else null
 
-            log.info(
-                """
-                |Config loaded:
-                |    Bot token      : $botToken
-                |    Owner ID       : $ownerId
-                |    Prefix         : $prefix
-                |    Help word      : $helpWord
-                |    Status type    : $statusType
-                |    Status text    : $statusText
-                |    Success emoji  : $emojiSuccess
-                |    Warning emoji  : $emojiWarning
-                |    Error emoji    : $emojiError
-                |    Co-op increment: $coopIncrementChar
-                |    Co-op name     : $coopName
-                |    Dev mode       : $devMode
-                """.replaceIndentByMargin("")
-            )
+            log.info("Config loaded")
         }
     }
 
