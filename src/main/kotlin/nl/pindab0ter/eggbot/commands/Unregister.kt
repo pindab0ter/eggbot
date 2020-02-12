@@ -46,6 +46,8 @@ object Unregister : Command() {
                     return@transaction
                 }
 
+            discordUser.delete()
+
             StringBuilder()
                 .append("`${discordUser.discordTag}` has been unregistered, along with the ")
                 .append(
@@ -60,8 +62,6 @@ object Unregister : Command() {
                     event.replyWarning(it)
                     log.debug { it }
                 }
-
-            discordUser.delete()
         }
     }
 }
