@@ -66,6 +66,7 @@ object RollCall : Command() {
         transaction {
             if (!Coops.select { Coops.contract eq contractInfo.id }.empty()) {
                 if (force) {
+                    // TODO: Delete associated roles
                     transaction {
                         Coops.deleteWhere { Coops.contract eq contractInfo.id }
                     }
@@ -79,8 +80,23 @@ object RollCall : Command() {
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
             val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName
-            val longestEarningsBonus = farmers
-                .maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
+            val longestEarningsBonus =
+                farmers.maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
+
+            transaction {
+                coops.map { coop -> coop.roleId?.let { EggBot.guild.getRoleById(it) } to coop.farmers }
+                    .forEach { (role, farmers) ->
+                        farmers.map { farmer ->
+                            val discordId = farmer.discordUser.discordId
+                            val discordTag = farmer.discordUser.discordTag
+                            EggBot.guild.addRoleToMember(discordId, role!!).queue({
+                                log.info("Added $discordTag to ${role.name}")
+                            }, { exception ->
+                                log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
+                            })
+                        }
+                    }
+            }
 
             event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
                 append("```")
@@ -99,6 +115,8 @@ object RollCall : Command() {
                 }
                 append("```")
             }.toString())
+
+            // TODO: One message per co-op, @-mentioning the members and displaying leader
 
             coops.joinToString("\u000C") { coop ->
                 StringBuilder("\u200B\nCo-op `${coop.name}`:").appendln().apply {
@@ -135,17 +153,14 @@ object RollCall : Command() {
             preferredCoopSize: Int
         ): List<Coop> = transaction {
             List((farmers.count() / preferredCoopSize) + 1) { index ->
-
                 val name = Config.coopIncrementChar.plus(index).toString() +
                         Config.coopName +
                         contract.maxCoopSize
-
                 val roleId = EggBot.guild.createRole()
                     .setName(name)
                     .setMentionable(true)
                     .complete()
                     .id
-
                 Coop.new {
                     this.contract = contract.id
                     this.name = name

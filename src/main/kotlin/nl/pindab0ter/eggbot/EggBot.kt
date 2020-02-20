@@ -48,10 +48,10 @@ object EggBot {
 
     @JvmStatic
     fun main(args: Array<String>) {
-        connectToDatabase()
-        initializeDatabase()
         startScheduler()
         jdaClient.awaitReady()
+        connectToDatabase()
+        initializeDatabase()
     }
 
     private fun initializeDatabase() = transaction {
@@ -61,9 +61,11 @@ object EggBot {
         SchemaUtils.create(CoopFarmers)
 
         if (Config.devMode) transaction {
-            Coop.all().forEach { coop -> guild.getRoleById(coop.roleId ?: "")?.delete()?.queue() }
+            Coop.all().forEach { coop -> coop.roleId?.let { guild.getRoleById(it)?.delete()?.queue() } }
+            logger.warn { "Removed all roles associated with co-ops" }
             Coops.deleteAll()
             CoopFarmers.deleteAll()
+            logger.warn { "Removed all co-ops" }
         }
     }
 
