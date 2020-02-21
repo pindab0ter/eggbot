@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
@@ -11,7 +10,6 @@ import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
 import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.asyncMap
 import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -55,17 +53,15 @@ object RollClear : Command() {
             return
         }
 
-        val roles = runBlocking {
-            coops.asyncMap { coop ->
-                coop.roleId?.let { EggBot.guild.getRoleById(it) }
-            }
-        }.filterNotNull()
+        val roles = coops.mapNotNull { coop ->
+            coop.roleId?.let { EggBot.guild.getRoleById(it) }
+        }
 
         val roleNames = roles.map { role -> role.name }
 
         if (roles.isEmpty()) "No roles found for `${contract}`".let {
             event.replyWarning(it)
-            log.debug { it }
+            log.warn { it }
             return
         }
 
@@ -77,7 +73,7 @@ object RollClear : Command() {
             Config.ownerId
         )?.asMention ?: "the bot maintainer"}".let {
             event.replyWarning(it)
-            log.debug { it }
+            log.error { it }
             return
         }
 

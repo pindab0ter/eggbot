@@ -14,7 +14,6 @@ import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
-import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.roundToInt
 
@@ -64,12 +63,41 @@ object RollCall : Command() {
         }
 
         transaction {
-            if (!Coops.select { Coops.contract eq contractInfo.id }.empty()) {
+            val existingCoops: List<Coop> = Coop.find { Coops.contract eq contractInfo.id }.toList()
+            if (existingCoops.isNotEmpty()) {
                 if (force) {
-                    // TODO: Delete associated roles
-                    transaction {
-                        Coops.deleteWhere { Coops.contract eq contractInfo.id }
+                    val roles = existingCoops.mapNotNull { coop ->
+                        coop.roleId?.let { EggBot.guild.getRoleById(it) }
                     }
+
+                    val roleNames = roles.map { role -> role.name }
+
+                    if (roles.isEmpty()) "No roles found for `${contractInfo.id}`".let {
+                        event.replyWarning(it)
+                        log.warn { it }
+                    }
+
+                    val roleDeletions = roles.map { role ->
+                        role.delete().submit()
+                    }
+
+                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${EggBot.jdaClient.getUserById(
+                        Config.ownerId
+                    )?.asMention ?: "the bot maintainer"}".let {
+                        event.replyWarning(it)
+                        log.error { it }
+                    }
+
+                    StringBuilder("The following roles associated with `${contractInfo.id}` have been deleted:").apply {
+                        appendln("```")
+                        roleNames.forEach { append("$it\n") }
+                        appendln("```")
+                    }.toString().let {
+                        log.info { it }
+                    }
+
+                    Coops.deleteWhere { Coops.contract eq contractInfo.id }
+                    log.info { "Deleted contracts for ${contractInfo.id}" }
                 } else "Co-ops are already generated for contract `${contractInfo.id}`. Add `overwrite` to override.".let {
                     event.replyWarning(it)
                     log.debug { it }
@@ -97,6 +125,8 @@ object RollCall : Command() {
                         }
                     }
             }
+
+            // TODO: Send message about roles being applied taking a while
 
             event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
                 append("```")
