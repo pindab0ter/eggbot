@@ -24,7 +24,9 @@ class UpdateFarmersJob : Job {
 
         runBlocking(Dispatchers.IO) {
             farmers
-                .asyncMap { farmer -> farmer to AuxBrain.getFarmerBackup(farmer.inGameId) }
+                .asyncMap { farmer ->
+                    farmer to AuxBrain.getFarmerBackup(farmer.inGameId)
+                }
                 .let { farmers ->
                     transaction {
                         farmers.forEach { (farmer, backup) -> backup?.let { farmer.update(it) } }

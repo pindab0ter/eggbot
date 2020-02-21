@@ -14,6 +14,8 @@ class UpdateLeaderBoardsJob : Job {
     private val log = KotlinLogging.logger {}
 
     override fun execute(context: JobExecutionContext?) {
+        UpdateFarmersJob().execute(context)
+
         val farmers = transaction {
             Farmer.all().toList()
         }
