@@ -21,6 +21,8 @@ object RollCall : Command() {
 
     private val log = KotlinLogging.logger { }
 
+    private val guild get() = EggBot.guild
+
     init {
         name = "roll-call"
         arguments = "<contract id> [overwrite]"
@@ -67,7 +69,7 @@ object RollCall : Command() {
             if (existingCoops.isNotEmpty()) {
                 if (force) {
                     val roles = existingCoops.mapNotNull { coop ->
-                        coop.roleId?.let { EggBot.guild.getRoleById(it) }
+                        coop.roleId?.let { guild.getRoleById(it) }
                     }
 
                     val roleNames = roles.map { role -> role.name }
@@ -105,30 +107,38 @@ object RollCall : Command() {
                 }
             }
 
+            val message = event.channel.sendMessage("Generating co-ops and creating roles…").complete()
+
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
             val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName
             val longestEarningsBonus =
                 farmers.maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
 
+            message.editMessage("Assigning roles, this will take a few minutes…").queue()
+            event.channel.sendTyping().queue()
+
             transaction {
-                coops.map { coop -> coop.roleId?.let { EggBot.guild.getRoleById(it) } to coop.farmers }
-                    .forEach { (role, farmers) ->
-                        farmers.map { farmer ->
-                            val discordId = farmer.discordUser.discordId
-                            val discordTag = farmer.discordUser.discordTag
-                            EggBot.guild.addRoleToMember(discordId, role!!).queue({
-                                log.info("Added $discordTag to ${role.name}")
-                            }, { exception ->
-                                log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
-                            })
-                        }
+                coops.map { coop ->
+                    coop.roleId?.let { guild.getRoleById(it) } to coop.farmers
+                }.forEach { (role, farmers) ->
+                    farmers.map { farmer ->
+                        val discordId = farmer.discordUser.discordId
+                        val discordTag = farmer.discordUser.discordTag
+                        guild.addRoleToMember(discordId, role!!).submit().handle { _, exception ->
+                            if (exception == null) log.info("Added $discordTag to ${role.name}")
+                            else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
+                        }.join()
                     }
+                    event.channel.sendTyping().queue()
+                }
             }
 
-            // TODO: Send message about roles being applied taking a while
+            // TODO: Refresh "Typing…" until done
 
-            event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
+            // TODO: Replace with table
+
+            message.editMessage(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
@@ -144,31 +154,27 @@ object RollCall : Command() {
                     appendln()
                 }
                 append("```")
-            }.toString())
+            }.toString()).complete()
 
-            // TODO: One message per co-op, @-mentioning the members and displaying leader
-
-            coops.joinToString("\u000C") { coop ->
-                StringBuilder("\u200B\nCo-op `${coop.name}`:").appendln().apply {
-                    append("```")
+            coops.map { coop ->
+                val role = coop.roleId?.let { guild.getRoleById(it) }
+                StringBuilder().apply {
+                    appendln("Co-op ${role?.asMention ?: coop.name} (`${coop.name}`):")
+                    appendln("```")
+                    appendln("Members:  ${coop.farmers.count()}/${contractInfo.maxCoopSize}")
+                    appendln("Strength: ${coop.activeEarningsBonus.formatIllions(true)} %")
+                    appendln("```")
                     coop.farmers.forEach { farmer ->
-                        append(farmer.inGameName)
-                        append(": ")
-                        appendPaddingCharacters(
-                            farmer.inGameName,
-                            longestFarmerName
+                        append(
+                            guild.getMemberById(farmer.discordUser.discordId)?.asMention
+                                ?: farmer.discordUser.discordName
                         )
-                        appendPaddingCharacters(
-                            farmer.earningsBonus.formatIllions(true),
-                            longestEarningsBonus
-                        )
-                        append(farmer.earningsBonus.formatIllions(true) + " %")
-                        if (!farmer.isActive) append(" (Inactive)")
+                        append(" (`${farmer.inGameName}`)")
+                        if (farmer.isActive.not()) append(" _Inactive_")
                         appendln()
                     }
-                    append("```")
                 }.toString()
-            }.splitMessage(separator = '\u000C').forEach { message ->
+            }.forEach { message ->
                 event.reply(message)
             }
         }
@@ -186,7 +192,7 @@ object RollCall : Command() {
                 val name = Config.coopIncrementChar.plus(index).toString() +
                         Config.coopName +
                         contract.maxCoopSize
-                val roleId = EggBot.guild.createRole()
+                val roleId = guild.createRole()
                     .setName(name)
                     .setMentionable(true)
                     .complete()
