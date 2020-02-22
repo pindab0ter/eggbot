@@ -15,6 +15,7 @@ import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 object RollCall : Command() {
@@ -111,26 +112,27 @@ object RollCall : Command() {
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
-            val longestFarmerName = farmers.maxBy { it.inGameName.length }!!.inGameName
-            val longestEarningsBonus =
-                farmers.maxBy { it.earningsBonus.formatIllions(true).length }!!.earningsBonus.formatIllions(true)
 
             message.editMessage("Assigning roles, this will take a few minutes…").queue()
             event.channel.sendTyping().queue()
 
             transaction {
+                var i = 0
                 coops.map { coop ->
                     coop.roleId?.let { guild.getRoleById(it) } to coop.farmers
-                }.forEach { (role, farmers) ->
-                    farmers.map { farmer ->
+                }.forEach { (role, coopFarmers) ->
+                    coopFarmers.map { farmer ->
                         val discordId = farmer.discordUser.discordId
                         val discordTag = farmer.discordUser.discordTag
                         guild.addRoleToMember(discordId, role!!).submit().handle { _, exception ->
                             if (exception == null) log.info("Added $discordTag to ${role.name}")
                             else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
                         }.join()
+                        val percentage = DecimalFormat("#.#")
+                            .format(i++.toDouble() / farmers.count().toDouble() * 100.0)
+                        message.editMessage("Assigning roles, this will take a few minutes… ($percentage%)").queue()
+                        event.channel.sendTyping().queue()
                     }
-                    event.channel.sendTyping().queue()
                 }
             }
 
