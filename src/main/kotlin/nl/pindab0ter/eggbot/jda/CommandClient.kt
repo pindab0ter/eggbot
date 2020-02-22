@@ -30,6 +30,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         Unregister,
         WhoIs
     )
+    if (Config.devMode) addCommand(Test)
     setEmojis(
         Config.emojiSuccess,
         Config.emojiWarning,

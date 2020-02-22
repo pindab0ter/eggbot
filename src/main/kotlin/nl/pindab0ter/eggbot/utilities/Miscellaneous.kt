@@ -10,6 +10,9 @@ import java.util.*
 
 val ONE_YEAR get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
+val Any?.unit: Unit
+    get() = Unit
+
 fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 
 fun <T> Iterable<T>.init() = take((count() - 1).coerceAtLeast(0))

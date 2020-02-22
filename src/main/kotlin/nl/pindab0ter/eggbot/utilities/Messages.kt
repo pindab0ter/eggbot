@@ -2,12 +2,11 @@ package nl.pindab0ter.eggbot.utilities
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import kotlinx.coroutines.*
 import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot
+import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.jda.commandClient
-import nl.pindab0ter.eggbot.simulation.ContractSimulation
-import org.joda.time.Duration
+import kotlin.coroutines.CoroutineContext
 
 fun String.splitMessage(
     prefix: String = "",
@@ -37,34 +36,33 @@ fun CommandEvent.replyInDms(messages: List<String>) {
 val Command.missingArguments get() = "Missing argument(s). Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
 val Command.tooManyArguments get() = "Too many arguments. Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
 
-fun StringBuilder.appendGoalTable(
-    simulation: ContractSimulation,
-    compact: Boolean
-) {
-    val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
-        EggBot.jdaClient.getEmoteById(id)?.asMention
-    } ?: "🥚"
-    append("__$eggEmote **Goals** (${simulation.goalReachedMoments.count { it.moment != null }}/${simulation.goals.count()}):__ ```")
-    simulation.goalReachedMoments
-        .forEachIndexed { index, (goal, moment) ->
-            val success = moment != null && moment < simulation.timeRemaining
+class ProgressBarUpdater(
+    private val goal: Int,
+    private val message: Message
+) : CoroutineScope {
+    override val coroutineContext: CoroutineContext = Dispatchers.Default
+    private var running: Boolean = true
+    private var value: Int = 0
+    private var dirty: Boolean = true
 
-            append("${index + 1}. ")
-            append(if (success) "✓︎ " else "✗ ")
-            appendPaddingCharacters(
-                goal.formatIllions(true),
-                simulation.goalReachedMoments
-                    .filter { simulation.projectedEggs < it.target }
-                    .map { it.target.formatIllions(rounded = true) }
-            )
-            append(goal.formatIllions(true))
-            append(" │ ")
-            when (moment) {
-                null -> append("More than a year")
-                Duration.ZERO -> append("Goal reached!")
-                else -> append(moment.asDaysHoursAndMinutes(compact))
+    init {
+        loop()
+    }
+
+    private fun loop() = GlobalScope.launch {
+        while (running) {
+            if (dirty) {
+                message.editMessage(drawProgressBar(value, goal)).queue()
+                dirty = false
             }
-            if (index + 1 < simulation.goals.count()) appendln()
+            if (value >= goal) running = false
+            else delay(1000)
         }
-    appendln("```")
+        message.editMessage(drawProgressBar(goal, goal)).queue()
+    }
+
+    fun update(value: Int) {
+        this.value = value
+        dirty = true
+    }
 }

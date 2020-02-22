@@ -15,7 +15,6 @@ import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.text.DecimalFormat
 import kotlin.math.roundToInt
 
 object RollCall : Command() {
@@ -113,7 +112,7 @@ object RollCall : Command() {
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
 
-            message.editMessage("Assigning roles, this will take a few minutes…").queue()
+            val progressBar = ProgressBarUpdater(farmers.count(), message)
             event.channel.sendTyping().queue()
 
             transaction {
@@ -128,15 +127,11 @@ object RollCall : Command() {
                             if (exception == null) log.info("Added $discordTag to ${role.name}")
                             else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
                         }.join()
-                        val percentage = DecimalFormat("#.#")
-                            .format(i++.toDouble() / farmers.count().toDouble() * 100.0)
-                        message.editMessage("Assigning roles, this will take a few minutes… ($percentage%)").queue()
+                        progressBar.update(i++)
                         event.channel.sendTyping().queue()
                     }
                 }
             }
-
-            // TODO: Refresh "Typing…" until done
 
             // TODO: Replace with table
 

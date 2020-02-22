@@ -16,6 +16,7 @@ import java.text.DecimalFormatSymbols
 import java.text.NumberFormat
 import java.util.Locale.ENGLISH
 import java.util.Locale.UK
+import kotlin.math.roundToInt
 import kotlin.math.roundToLong
 
 val EggInc.Egg.formattedName: String
@@ -220,3 +221,24 @@ fun <T : Any> StringBuilder.appendPaddingCharacters(
     containsLongest: Iterable<T>,
     character: String = " "
 ): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
+
+fun drawProgressBar(
+    current: Int,
+    total: Int,
+    width: Int = 30,
+    showSteps: Boolean = true,
+    showPercentage: Boolean = true
+): String {
+    val percentage = (current.toDouble() / total.toDouble() * 100.0).roundToInt()
+    val full = (current.toDouble() / total.toDouble() * width.toDouble()).roundToInt()
+    val empty = width - full
+
+    return StringBuilder().apply {
+        appendln("```")
+        append("▓".repeat(full))
+        append("░".repeat(empty))
+        if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
+        if (showPercentage) append(" (${paddingCharacters(percentage, "100")}$percentage%)")
+        appendln("```")
+    }.toString()
+}
