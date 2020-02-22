@@ -65,8 +65,11 @@ object RollClear : Command() {
             return
         }
 
+        val message = event.channel.sendMessage("Deleting roles…").complete()
+
         val roleDeletions = roles.map { role ->
-            role.delete().submit()
+            event.channel.sendTyping().queue()
+            role.delete().submit().also { it.join() }
         }
 
         if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${EggBot.jdaClient.getUserById(
@@ -82,7 +85,7 @@ object RollClear : Command() {
             roleNames.forEach { append("$it\n") }
             appendln("```")
         }.toString().let {
-            event.replySuccess(it)
+            message.editMessage(it).complete()
         }
     }
 }
