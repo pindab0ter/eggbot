@@ -234,11 +234,11 @@ fun drawProgressBar(
     val empty = width - full
 
     return StringBuilder().apply {
-        appendln("```")
+        append("`")
         append("▓".repeat(full))
         append("░".repeat(empty))
         if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
         if (showPercentage) append(" (${paddingCharacters(percentage, "100")}$percentage%)")
-        appendln("```")
+        append("`")
     }.toString()
 }

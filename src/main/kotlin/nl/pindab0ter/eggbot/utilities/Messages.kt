@@ -38,15 +38,17 @@ val Command.tooManyArguments get() = "Too many arguments. Use `${commandClient.t
 
 class ProgressBarUpdater(
     private val goal: Int,
-    private val message: Message
+    private val message: Message,
+    private val updateAfterGoalReached: Boolean = true
 ) : CoroutineScope {
     override val coroutineContext: CoroutineContext = Dispatchers.Default
     private var running: Boolean = true
     private var value: Int = 0
     private var dirty: Boolean = true
+    private var job: Job
 
     init {
-        loop()
+        job = loop()
     }
 
     private fun loop() = GlobalScope.launch {
@@ -62,7 +64,10 @@ class ProgressBarUpdater(
     }
 
     fun update(value: Int) {
-        this.value = value
-        dirty = true
+        if (value >= goal && !updateAfterGoalReached) job.cancel()
+        else {
+            this.value = value
+            dirty = true
+        }
     }
 }

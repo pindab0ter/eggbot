@@ -112,7 +112,7 @@ object RollCall : Command() {
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
 
-            val progressBar = ProgressBarUpdater(farmers.count(), message)
+            val progressBar = ProgressBarUpdater(farmers.count(), message, true)
             event.channel.sendTyping().queue()
 
             transaction {
@@ -151,16 +151,12 @@ object RollCall : Command() {
                     appendln()
                 }
                 append("```")
-            }.toString()).complete()
+            }.toString()).queue()
 
             coops.map { coop ->
                 val role = coop.roleId?.let { guild.getRoleById(it) }
                 StringBuilder().apply {
-                    appendln("Co-op ${role?.asMention ?: coop.name} (`${coop.name}`):")
-                    appendln("```")
-                    appendln("Members:  ${coop.farmers.count()}/${contractInfo.maxCoopSize}")
-                    appendln("Strength: ${coop.activeEarningsBonus.formatIllions(true)} %")
-                    appendln("```")
+                    appendln("__**Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)**__:")
                     coop.farmers.forEach { farmer ->
                         append(
                             guild.getMemberById(farmer.discordUser.discordId)?.asMention
@@ -171,8 +167,8 @@ object RollCall : Command() {
                         appendln()
                     }
                 }.toString()
-            }.forEach { message ->
-                event.reply(message)
+            }.forEach {
+                event.reply(it)
             }
         }
     }

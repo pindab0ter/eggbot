@@ -26,7 +26,7 @@ object Test : Command(), CoroutineScope {
 
         val message = event.channel.sendMessage("Progress…").complete()
         val total = 250
-        val progressBar = ProgressBarUpdater(total, message)
+        val progressBar = ProgressBarUpdater(total, message, false)
         (1..total).forEach { i ->
             progressBar.update(i)
             delay(20)
