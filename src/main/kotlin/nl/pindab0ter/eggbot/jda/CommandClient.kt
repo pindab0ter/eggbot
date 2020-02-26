@@ -18,6 +18,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         CoopAdd,
         CoopInfo,
         CoopsInfo,
+        CoopRename,
         CoopRemove,
         EarningsBonus,
         Inactive,
