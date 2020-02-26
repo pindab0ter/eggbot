@@ -3,10 +3,13 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
+import nl.pindab0ter.eggbot.utilities.arguments
+import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -40,23 +43,31 @@ object CoopRemove : Command() {
 
         val contractId: String = event.arguments[0]
         val coopId: String = event.arguments[1]
-        transaction {
-            val results = Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.toList()
+        val coop = transaction { Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.firstOrNull() }
 
-            if (results.isEmpty()) "No co-op registered with that `contract id` and `co-op id`.".let {
-                event.replyWarning(it)
+        if (coop == null) "No co-op registered with that `contract id` and `co-op id`.".let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
+        }
+
+        val role = transaction { coop.roleId?.let { EggBot.guild.getRoleById(it) } }
+
+        if (role != null) role.delete().queue({
+            transaction { coop.delete() }
+            "Co-op and role successfully removed.".let {
+                event.replySuccess(it)
                 log.debug { it }
-                return@transaction
             }
-
-            results.first().delete()
-
+        }, { exception ->
+            log.warn { exception.localizedMessage }
+            event.replyWarning("Failed to remove Discord role (${exception.localizedMessage})")
+        }) else {
+            transaction { coop.delete() }
             "Co-op successfully removed.".let {
                 event.replySuccess(it)
                 log.debug { it }
-                return@transaction
             }
         }
     }
 }
-
