@@ -238,7 +238,7 @@ fun drawProgressBar(
         append("▓".repeat(full))
         append("░".repeat(empty))
         if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
-        if (showPercentage) append(" (${paddingCharacters(percentage, "100")}$percentage%)")
+        if (showPercentage) append(" ($percentage%)")
         append("`")
     }.toString()
 }

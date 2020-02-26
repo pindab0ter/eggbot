@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.utilities
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.*
+import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.jda.commandClient
@@ -53,12 +54,14 @@ class ProgressBarUpdater(
 
     private fun loop() = GlobalScope.launch {
         while (running) {
-            if (dirty) {
-                message.editMessage(drawProgressBar(value, goal)).queue()
-                dirty = false
+            when {
+                value >= goal -> running = false
+                dirty -> {
+                    message.editMessage(drawProgressBar(value, goal)).queue()
+                    dirty = false
+                }
+                else -> delay(1000)
             }
-            if (value >= goal) running = false
-            else delay(1000)
         }
         message.editMessage(drawProgressBar(goal, goal)).queue()
     }

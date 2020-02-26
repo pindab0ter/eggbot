@@ -90,14 +90,6 @@ object RollCall : Command() {
                         log.error { it }
                     }
 
-                    StringBuilder("The following roles associated with `${contractInfo.id}` have been deleted:").apply {
-                        appendln("```")
-                        roleNames.forEach { append("$it\n") }
-                        appendln("```")
-                    }.toString().let {
-                        log.info { it }
-                    }
-
                     Coops.deleteWhere { Coops.contract eq contractInfo.id }
                     log.info { "Deleted contracts for ${contractInfo.id}" }
                 } else "Co-ops are already generated for contract `${contractInfo.id}`. Add `overwrite` to override.".let {
@@ -127,7 +119,8 @@ object RollCall : Command() {
                             if (exception == null) log.info("Added $discordTag to ${role.name}")
                             else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
                         }.join()
-                        progressBar.update(i++)
+                        i++
+                        progressBar.update(i)
                         event.channel.sendTyping().queue()
                     }
                 }
