@@ -62,7 +62,7 @@ object CoopRename : Command() {
 
         if (role != null) role.manager.setName(newName).queue({
             transaction { coop.name = newName }
-            "Co-op and role successfully renamed from $coopId to $newName.".let {
+            "Co-op and role successfully renamed from `$coopId` to `$newName`.".let {
                 event.replySuccess(it)
                 log.debug { it }
             }
@@ -71,7 +71,7 @@ object CoopRename : Command() {
             event.replyWarning("Failed to rename Discord role (${exception.localizedMessage})")
         }) else {
             transaction { coop.name = newName }
-            "Co-op successfully renamed.".let {
+            "Co-op successfully renamed from `$coopId` to `$newName`.".let {
                 event.replySuccess(it)
                 log.debug { it }
             }
