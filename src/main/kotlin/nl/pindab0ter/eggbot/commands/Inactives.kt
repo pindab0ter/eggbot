@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
+import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.utilities.*
@@ -19,7 +20,7 @@ object Inactives : Command() {
     init {
         name = "inactives"
         help = "Display a list of who have set themselves as inactive and until when."
-        category = AdminCategory
+        category = FarmersCategory
         guildOnly = false
     }
 
@@ -27,8 +28,7 @@ object Inactives : Command() {
         event.channel.sendTyping().queue()
 
         (checkPrerequisites(
-            event,
-            adminRequired = true
+            event
         ) as? PrerequisitesCheckResult.Failure)?.message?.let {
             event.replyWarning(it)
             log.debug { it }
