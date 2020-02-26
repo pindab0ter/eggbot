@@ -26,7 +26,7 @@ object RollCall : Command() {
     init {
         name = "roll-call"
         arguments = "<contract id> [overwrite]"
-        help = "Create a co-op roll call for the specified contract id."
+        help = "Create a co-op roll call for the specified contract, creating co-ops and server roles and assigns those roles."
         category = AdminCategory
         guildOnly = false
     }
@@ -71,8 +71,6 @@ object RollCall : Command() {
                     val roles = existingCoops.mapNotNull { coop ->
                         coop.roleId?.let { guild.getRoleById(it) }
                     }
-
-                    val roleNames = roles.map { role -> role.name }
 
                     if (roles.isEmpty()) "No roles found for `${contractInfo.id}`".let {
                         event.replyWarning(it)

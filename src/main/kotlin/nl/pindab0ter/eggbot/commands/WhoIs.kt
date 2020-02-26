@@ -18,7 +18,7 @@ object WhoIs : Command() {
 
     init {
         name = "whois"
-        aliases = arrayOf("who-is", "who", "whothefuckis")
+        aliases = arrayOf("who-is", "who", "w", "whothefuckis")
         arguments = "<in-game name OR discord (nick)name>"
         help = "See which Discord user is registered with the given in-game name or vice versa."
         category = FarmersCategory

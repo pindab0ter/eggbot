@@ -16,7 +16,7 @@ object LeaderBoard : Command() {
 
     init {
         name = "leader-board"
-        aliases = arrayOf("lb", "leaderboard")
+        aliases = arrayOf("lb")
         help = "Shows the Earnings Bonus leader board"
         arguments = "[compact]"
         category = FarmersCategory

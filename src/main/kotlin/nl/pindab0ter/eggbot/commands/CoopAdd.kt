@@ -9,7 +9,6 @@ import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.database.DiscordUsers.discordTag
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
@@ -26,9 +25,8 @@ object CoopAdd : Command() {
 
     init {
         name = "coop-add"
-        aliases = arrayOf("co-op-add", "ca")
         arguments = "<contract-id> <co-op id> [norole]"
-        help = "Registers a co-op so it shows up in the co-ops info listing."
+        help = "Registers a co-op so it shows up in the co-ops info listing and creates a new role which it assigns to all it's members unless `norole` is added."
         category = AdminCategory
         guildOnly = false
     }

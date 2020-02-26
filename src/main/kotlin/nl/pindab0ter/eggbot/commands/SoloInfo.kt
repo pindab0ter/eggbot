@@ -21,7 +21,7 @@ object SoloInfo : Command() {
 
     init {
         name = "solo"
-        aliases = arrayOf("soloinfo", "si", "solo-info")
+        aliases = arrayOf("si", "solo-info")
         help = "Shows the progress of one of your own contracts."
         arguments = "<contract id> [compact]"
         category = ContractsCategory

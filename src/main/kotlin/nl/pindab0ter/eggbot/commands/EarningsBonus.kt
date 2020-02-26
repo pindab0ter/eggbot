@@ -21,7 +21,7 @@ object EarningsBonus : Command() {
 
     init {
         name = "earnings-bonus"
-        aliases = arrayOf("eb", "earningsbonus", "earning-bonus", "earningbonus")
+        aliases = arrayOf("eb", "earning-bonus")
         help = "Shows your EB, EB rank and how much SE till your next rank"
         category = FarmersCategory
         arguments = "[extended]"

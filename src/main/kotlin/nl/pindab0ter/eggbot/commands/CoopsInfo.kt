@@ -21,7 +21,7 @@ object CoopsInfo : Command() {
 
     init {
         name = "coops"
-        aliases = arrayOf("coopsinfo", "coops-info", "co-ops", "co-ops-info")
+        aliases = arrayOf("coops-info")
         arguments = "<contract id>"
         help = "Shows info on all known co-ops for the specified contract."
         category = ContractsCategory
