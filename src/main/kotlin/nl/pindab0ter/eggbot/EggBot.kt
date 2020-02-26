@@ -59,14 +59,6 @@ object EggBot {
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
         SchemaUtils.create(CoopFarmers)
-
-        if (Config.devMode) transaction {
-            Coop.all().forEach { coop -> coop.roleId?.let { guild.getRoleById(it)?.delete()?.queue() } }
-            logger.warn { "Removed all roles associated with co-ops" }
-            Coops.deleteAll()
-            CoopFarmers.deleteAll()
-            logger.warn { "Removed all co-ops" }
-        }
     }
 
     private fun connectToDatabase() {
