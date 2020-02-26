@@ -47,45 +47,47 @@ object RollClear : Command() {
             Coop.find { Coops.contract eq contract }.toList()
         }
 
-        if (coops.all { it.roleId == null }) "No roles found for `${contract}`".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val roles = coops.mapNotNull { coop ->
+        val coopsToRoles = coops.zip(coops.map { coop ->
             coop.roleId?.let { EggBot.guild.getRoleById(it) }
-        }
-
-        val roleNames = roles.map { role -> role.name }
-
-        if (roles.isEmpty()) "No roles found for `${contract}`".let {
-            event.replyWarning(it)
-            log.warn { it }
-            return
-        }
+        })
 
         val message = event.channel.sendMessage("Deleting roles…").complete()
 
-        val roleDeletions = roles.map { role ->
-            event.channel.sendTyping().queue()
-            role.delete().submit().also { it.join() }
+        val successes = mutableListOf<Pair<String, String?>>()
+        val failures = mutableListOf<Pair<String, String?>>()
+
+        coopsToRoles.forEach { (coop, role) ->
+            val coopNameToRoleName = coop.name to role?.name
+            if (role != null) role.delete().submit().handle { _, exception ->
+                if (exception != null) {
+                    failures.add(coopNameToRoleName)
+                    log.warn { "Failed to remove Discord role (${exception.localizedMessage})" }
+                    event.replyWarning("Failed to remove Discord role (${exception.localizedMessage})")
+                } else {
+                    transaction { coop.delete() }
+                    successes.add(coopNameToRoleName)
+                    log.debug { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
+                }
+            }.join() else {
+                transaction { coop.delete() }
+                successes.add(coopNameToRoleName)
+                log.debug { "Co-op ${coopNameToRoleName.first} successfully removed." }
+            }
         }
 
-        if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${EggBot.jdaClient.getUserById(
-            Config.ownerId
-        )?.asMention ?: "the bot maintainer"}".let {
-            event.replyWarning(it)
-            log.error { it }
-            return
-        }
-
-        StringBuilder("The following roles associated with `$contract` have been deleted:").apply {
-            appendln("```")
-            roleNames.forEach { append("$it\n") }
-            appendln("```")
-        }.toString().let {
-            message.editMessage(it).complete()
-        }
+        StringBuilder().apply {
+            if (successes.isNotEmpty()) {
+                appendln("${Config.emojiSuccess} The following coops for `$contract` have been deleted:")
+                appendln("```")
+                successes.forEach { appendln("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
+                appendln("```")
+            }
+            if (failures.isNotEmpty()) {
+                appendln("${Config.emojiWarning} The following coops for `$contract` could not be deleted:")
+                appendln("```")
+                successes.forEach { appendln("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
+                appendln("```")
+            }
+        }.toString().let { message.editMessage(it).complete() }
     }
 }
