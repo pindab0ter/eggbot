@@ -48,24 +48,23 @@ object ContractIDs : Command() {
     }
 
     // TODO: Add info about requirements
-    private fun List<EggInc.Contract>.printContracts(): String = StringBuilder().let { sb ->
-        forEach { contract ->
-            sb.append("**`${contract.id}`**: ")
-            sb.append("${contract.name} ")
-            sb.append(Config.eggEmojiIds[contract.egg]
+    private fun List<EggInc.Contract>.printContracts(): String = StringBuilder().apply {
+        this@printContracts.forEach { contract ->
+            append("**`${contract.id}`**: ")
+            append("${contract.name} ")
+            append(Config.eggEmojiIds[contract.egg]
                 ?.let { EggBot.jdaClient.getEmoteById(it)?.asMention }
                 ?: "(${contract.egg.formattedName})"
             )
-            sb.append(", valid for ")
-            sb.append(
+            append(", valid for ")
+            append(
                 Duration(DateTime.now(), contract.expirationTime.toDateTime())
                     .toPeriod()
                     .normalizedStandard()
                     .asDaysHoursAndMinutes()
             )
-            sb.appendln()
+            appendln()
         }
-        return@let sb
     }.toString()
 }
 
