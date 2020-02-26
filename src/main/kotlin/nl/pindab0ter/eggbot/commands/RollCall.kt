@@ -112,7 +112,7 @@ object RollCall : Command() {
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
 
-            val progressBar = ProgressBarUpdater(farmers.count(), message, true)
+            val progressBar = ProgressBarUpdater(farmers.count(), message, false)
             event.channel.sendTyping().queue()
 
             transaction {
