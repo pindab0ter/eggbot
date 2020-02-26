@@ -3,11 +3,17 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
+import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.database.DiscordUsers.discordTag
+import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
+import nl.pindab0ter.eggbot.utilities.ProgressBarUpdater
 import nl.pindab0ter.eggbot.utilities.arguments
 import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.and
@@ -21,7 +27,7 @@ object CoopAdd : Command() {
     init {
         name = "coop-add"
         aliases = arrayOf("co-op-add", "ca")
-        arguments = "<contract-id> <co-op id>"
+        arguments = "<contract-id> <co-op id> [norole]"
         help = "Registers a co-op so it shows up in the co-ops info listing."
         category = AdminCategory
         guildOnly = false
@@ -33,8 +39,8 @@ object CoopAdd : Command() {
         (checkPrerequisites(
             event,
             adminRequired = true,
-            minArguments = 1,
-            maxArguments = 2
+            minArguments = 2,
+            maxArguments = 3
         ) as? PrerequisitesCheckResult.Failure)?.message?.let {
             event.replyWarning(it)
             log.debug { it }
@@ -43,6 +49,7 @@ object CoopAdd : Command() {
 
         val contractId: String = event.arguments[0]
         val coopId: String = event.arguments[1]
+        val noRole: Boolean = event.arguments.getOrNull(2) == "norole"
         val exists: Boolean = transaction {
             Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.toList()
         }.isNotEmpty()
@@ -60,14 +67,66 @@ object CoopAdd : Command() {
                 return@getCoopStatus
             }
 
+            val role = if (noRole) null else EggBot.guild.createRole()
+                .setName(name)
+                .setMentionable(true)
+                .complete()
+
             transaction {
                 Coop.new {
                     this.name = status.coopId
                     this.contract = status.contractId
+                    this.roleId = role?.id
                 }
             }
 
-            "Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.".let {
+            if (role != null) {
+                val message = event.channel.sendMessage("Assigning roles…").complete()
+                event.channel.sendTyping()
+
+                val progressBar = ProgressBarUpdater(status.contributorsList.count(), message, false)
+
+                val successes = mutableListOf<DiscordUser>()
+                val failures = mutableListOf<String>()
+
+                status.contributorsList.mapNotNull { contributionInfo ->
+                    contributionInfo to transaction { Farmer.findById(contributionInfo.userId)?.discordUser }
+                }.forEachIndexed { i, (contributionInfo, discordUser) ->
+                    log.debug { "${contributionInfo.userName}, ${discordUser?.discordTag}" }
+                    if (discordUser != null) EggBot.guild.addRoleToMember(discordUser.discordId, role).submit()
+                        .handle { _, exception ->
+                            if (exception == null) {
+                                successes.add(discordUser)
+                                log.info("Added $discordTag to ${role.name}")
+                            } else {
+                                failures.add(contributionInfo.userName)
+                                log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
+                            }
+                        }.join()
+                    else failures.add(contributionInfo.userName)
+                    progressBar.update(i + 1)
+                    event.channel.sendTyping().queue()
+                }
+                StringBuilder().apply {
+                    appendln("${Config.emojiSuccess} Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
+                    if (successes.isNotEmpty()) {
+                        appendln()
+                        appendln("The following players have been assigned the role ${role.asMention}:")
+                        successes.forEach { discordUser -> appendln(EggBot.guild.getMemberById(discordUser.discordId)?.asMention) }
+                    }
+                    if (failures.isNotEmpty()) {
+                        appendln()
+                        appendln("Unable to assign the following players their role:")
+                        appendln("```")
+                        failures.forEach { userName -> appendln(userName) }
+                        appendln("```")
+                    }
+                }.toString().let {
+                    message.editMessage(it).queue()
+                    log.debug { it }
+                    return
+                }
+            } else "Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.".let {
                 event.replySuccess(it)
                 log.debug { it }
                 return
