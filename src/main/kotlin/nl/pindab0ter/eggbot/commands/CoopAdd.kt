@@ -68,7 +68,7 @@ object CoopAdd : Command() {
             }
 
             val role = if (noRole) null else EggBot.guild.createRole()
-                .setName(name)
+                .setName(coopId)
                 .setMentionable(true)
                 .complete()
 
@@ -97,16 +97,17 @@ object CoopAdd : Command() {
                         .handle { _, exception ->
                             if (exception == null) {
                                 successes.add(discordUser)
-                                log.info("Added $discordTag to ${role.name}")
+                                log.info("Added ${discordUser.discordTag} to ${role.name}")
                             } else {
                                 failures.add(contributionInfo.userName)
-                                log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
+                                log.warn("Failed to add ${discordUser.discordTag} to ${role.name}. Cause: ${exception.localizedMessage}")
                             }
                         }.join()
                     else failures.add(contributionInfo.userName)
                     progressBar.update(i + 1)
                     event.channel.sendTyping().queue()
                 }
+
                 StringBuilder().apply {
                     appendln("${Config.emojiSuccess} Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
                     if (successes.isNotEmpty()) {
@@ -121,16 +122,8 @@ object CoopAdd : Command() {
                         failures.forEach { userName -> appendln(userName) }
                         appendln("```")
                     }
-                }.toString().let {
-                    message.editMessage(it).queue()
-                    log.debug { it }
-                    return
-                }
-            } else "Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.".let {
-                event.replySuccess(it)
-                log.debug { it }
-                return
-            }
+                }.toString().let { message.editMessage(it).queue() }
+            } else event.replySuccess("Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
         }
     }
 }
