@@ -12,7 +12,7 @@ plugins {
     application
     kotlin("jvm") version "1.3.61"
     id("com.google.protobuf") version "0.8.11"
-    id("com.github.ben-manes.versions") version "0.27.0"
+    id("com.github.ben-manes.versions") version "0.28.0"
 }
 
 repositories {
@@ -27,13 +27,13 @@ dependencies {
 
     implementation("com.jagrosh", "jda-utilities-commons", "3.0.2")
     implementation("com.jagrosh", "jda-utilities-command", "3.0.2")
-    implementation("net.dv8tion", "JDA", "4.0.0_73") {
+    implementation("net.dv8tion", "JDA", "4.1.1_109") {
         exclude("club.minnced", "opus-java")
     }
     implementation("org.jetbrains.exposed", "exposed", "0.17.7")
     implementation("joda-time", "joda-time", "2.10.5")
     implementation("com.github.kittinunf.fuel", "fuel", "2.2.1")
-    implementation("com.google.protobuf", "protobuf-java", "3.11.3")
+    implementation("com.google.protobuf", "protobuf-java", "3.11.4")
     implementation("io.github.microutils", "kotlin-logging", "1.7.8")
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
