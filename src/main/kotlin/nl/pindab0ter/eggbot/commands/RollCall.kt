@@ -22,13 +22,13 @@ import kotlin.math.roundToInt
 object RollCall : Command() {
 
     private val log = KotlinLogging.logger { }
-
+    private val allowedCharacters = Regex("""^[a-zA-Z0-9\-]+$""")
     private val guild get() = EggBot.guild
 
     init {
         name = "roll-call"
         arguments = "<contract id> <base name> [overwrite]"
-        help = "Create a co-op roll call for the specified contract, creating co-ops and server roles and assigns those roles."
+        help = "Create a co-op roll call for the specified contract, creating co-ops and server roles and assigns those roles. The names will be based on `<base name>`, which can only consist of letters, digits and dashes and cannot contain spaces."
         category = AdminCategory
         guildOnly = false
     }
@@ -51,6 +51,12 @@ object RollCall : Command() {
         val contractId: String = event.arguments[0]
         val baseName: String = event.arguments[1]
         val force: Boolean = event.arguments.getOrNull(2)?.equals("overwrite") == true
+
+        if (!allowedCharacters.matches(baseName)) "Only letters, digits and dashes are allowed.".let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
+        }
 
         val contractInfo: EggInc.Contract? = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find {
             it.id == contractId
