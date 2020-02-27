@@ -15,6 +15,8 @@ import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.math.ceil
+import kotlin.math.floor
 import kotlin.math.roundToInt
 
 object RollCall : Command() {
@@ -25,7 +27,7 @@ object RollCall : Command() {
 
     init {
         name = "roll-call"
-        arguments = "<contract id> [overwrite]"
+        arguments = "<contract id> <base name> [overwrite]"
         help = "Create a co-op roll call for the specified contract, creating co-ops and server roles and assigns those roles."
         category = AdminCategory
         guildOnly = false
@@ -38,21 +40,23 @@ object RollCall : Command() {
         (checkPrerequisites(
             event,
             adminRequired = true,
-            minArguments = 1,
-            maxArguments = 2
+            minArguments = 2,
+            maxArguments = 3
         ) as? PrerequisitesCheckResult.Failure)?.message?.let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
+        val contractId: String = event.arguments[0]
+        val baseName: String = event.arguments[1]
+        val force: Boolean = event.arguments.getOrNull(2)?.equals("overwrite") == true
+
         val contractInfo: EggInc.Contract? = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find {
-            it.id == event.arguments.first()
+            it.id == contractId
         }
 
-        val force: Boolean = event.arguments.getOrNull(1)?.equals("overwrite") == true
-
-        if (contractInfo == null) "No active contract found with id `${event.arguments.first()}`".let {
+        if (contractInfo == null) "No active contract found with id `${contractId}`".let {
             event.replyWarning(it)
             log.debug { it }
             return
@@ -100,7 +104,7 @@ object RollCall : Command() {
             val message = event.channel.sendMessage("Generating co-ops and creating roles…").complete()
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
-            val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo)
+            val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo, baseName)
 
             val progressBar = ProgressBarUpdater(farmers.count(), message, false)
             event.channel.sendTyping().queue()
@@ -170,32 +174,35 @@ object RollCall : Command() {
         private fun createCoops(
             farmers: List<Farmer>,
             contract: EggInc.Contract,
-            preferredCoopSize: Int
+            preferredCoopSize: Int,
+            baseName: String
         ): List<Coop> = transaction {
-            List((farmers.count() / preferredCoopSize) + 1) { index ->
-                val name = Config.coopIncrementChar.plus(index).toString() +
-                        Config.coopName +
-                        contract.maxCoopSize
+            val coopNames = coopNames(farmers.size, baseName)
+            List((farmers.size / preferredCoopSize) + 1) { index ->
                 val roleId = guild.createRole()
-                    .setName(name)
+                    .setName(coopNames[index])
                     .setMentionable(true)
                     .complete()
                     .id
                 Coop.new {
                     this.contract = contract.id
-                    this.name = name
+                    this.name = coopNames[index]
                     this.roleId = roleId
                 }
             }
         }
 
-        fun createRollCall(farmers: List<Farmer>, contract: EggInc.Contract): List<Coop> {
+        fun createRollCall(
+            farmers: List<Farmer>,
+            contract: EggInc.Contract,
+            baseName: String
+        ): List<Coop> {
             val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
             val inactiveFarmers = farmers.filter { !it.isActive }
             val preferredCoopSize: Int =
                 if (contract.maxCoopSize <= 10) contract.maxCoopSize
                 else (contract.maxCoopSize * FILL_PERCENTAGE).roundToInt()
-            val coops = createCoops(farmers, contract, preferredCoopSize)
+            val coops = createCoops(farmers, contract, preferredCoopSize, baseName)
 
             transaction {
                 // Fill each co-op with the next strongest player so that all co-ops have one
@@ -219,6 +226,18 @@ object RollCall : Command() {
                 }
             }
             return coops
+        }
+
+        private fun coopNames(amount: Int, baseName: String = "cluckerz"): List<String> = when {
+            amount <= 26 -> ('a' until 'a' + amount).map { char -> "$char$baseName" }
+            else -> {
+                val chunks = ceil(amount.div(26.toDouble())).toInt()
+                val chunkSize = floor(amount.toDouble().div(chunks)).toInt()
+                val remainder = amount - chunks * chunkSize
+                ('a' until 'a' + chunkSize).mapCartesianProducts(1..chunks) { char: Char, digit: Int ->
+                    "$char$digit$baseName"
+                }.plus(('a' until 'a' + remainder).map { c -> "${c + chunkSize}$baseName" })
+            }
         }
     }
 }

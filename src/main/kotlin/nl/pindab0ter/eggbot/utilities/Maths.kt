@@ -27,3 +27,5 @@ operator fun BigDecimal.times(other: Long): BigDecimal = this.multiply(other.toB
 operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())
 operator fun BigDecimal.div(other: BigDecimal): BigDecimal = this.divide(other, 6, HALF_UP)
 fun BigDecimal.round(scale: Int = 0): BigDecimal = this.setScale(scale, HALF_UP)
+val Int.odd: Boolean get() = this % 2 == 1
+val Int.even: Boolean get() = this % 2 == 0

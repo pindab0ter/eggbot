@@ -22,3 +22,13 @@ fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
 suspend fun <T, R> Iterable<T>.asyncMap(transform: suspend (T) -> R): List<R> = coroutineScope {
     map { async { transform(it) } }.awaitAll()
 }
+
+inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
+    other: Iterable<R>,
+    transform: (a: T, b: R) -> V
+): List<V> =
+    flatMap { a: T ->
+        other.map { b ->
+            transform(a, b)
+        }
+    }
