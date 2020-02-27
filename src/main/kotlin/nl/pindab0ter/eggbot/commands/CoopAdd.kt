@@ -26,7 +26,7 @@ object CoopAdd : Command() {
     init {
         name = "coop-add"
         arguments = "<contract-id> <co-op id> [norole]"
-        help = "Registers a co-op so it shows up in the co-ops info listing and creates a new role which it assigns to all it's members unless `norole` is added."
+        help = "Registers an _already existing_ co-op so it shows up in the co-ops info listing and creates a new role which it assigns to all it's members unless `norole` is added."
         category = AdminCategory
         guildOnly = false
     }

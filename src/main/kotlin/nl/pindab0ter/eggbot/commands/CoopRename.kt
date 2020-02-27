@@ -22,7 +22,7 @@ object CoopRename : Command() {
     init {
         name = "coop-rename"
         arguments = "<contract id> <co-op id> <new name>"
-        help = "Renames a co-op and it's associated role if available. Only letters, digits and dashes allowed."
+        help = "Renames a co-op and it's associated role if available, does NOT rename the co-op in-game. Only letters, digits and dashes allowed."
         category = AdminCategory
         guildOnly = false
     }
