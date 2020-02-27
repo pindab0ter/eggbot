@@ -47,6 +47,12 @@ object RollClear : Command() {
             Coop.find { Coops.contract eq contract }.toList()
         }
 
+        if (coops.isEmpty()) "Didn't find any co-ops for ${event.arguments.first()}".let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
+        }
+
         val coopsToRoles = coops.zip(coops.map { coop ->
             coop.roleId?.let { EggBot.guild.getRoleById(it) }
         })
