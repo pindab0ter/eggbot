@@ -129,7 +129,7 @@ object RollCall : Command() {
                         }.join()
                         i++
                         progressBar.update(i)
-                        event.channel.sendTyping().queue()
+                        event.channel.sendTyping().complete()
                     }
                 }
             }
