@@ -204,7 +204,7 @@ object RollCall : Command() {
             baseName: String
         ): List<Coop> {
             val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
-            val inactiveFarmers = farmers.filter { !it.isActive }
+            val inactiveFarmers = farmers.filter { !it.isActive }.sortedBy { it.earningsBonus }
             val preferredCoopSize: Int =
                 if (contract.maxCoopSize <= 10) contract.maxCoopSize
                 else (contract.maxCoopSize * FILL_PERCENTAGE).roundToInt()
