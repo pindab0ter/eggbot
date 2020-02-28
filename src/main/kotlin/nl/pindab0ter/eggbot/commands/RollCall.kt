@@ -28,7 +28,10 @@ object RollCall : Command() {
     init {
         name = "roll-call"
         arguments = "<contract id> <base name> [overwrite]"
-        help = "Create a co-op roll call for the specified contract, creating co-ops and server roles and assigns those roles. The names will be based on `<base name>`, which can only consist of letters, digits and dashes and cannot contain spaces."
+        help = "Create a co-op roll call for the specified contract, " +
+                "creating co-ops and server roles and assigns those roles. " +
+                "The names will be based on `<base name>`, " +
+                "which can only consist of letters, digits and dashes and cannot contain spaces."
         category = AdminCategory
         guildOnly = false
     }
@@ -183,8 +186,9 @@ object RollCall : Command() {
             preferredCoopSize: Int,
             baseName: String
         ): List<Coop> = transaction {
-            val coopNames = coopNames(farmers.size, baseName)
-            List((farmers.size / preferredCoopSize) + 1) { index ->
+            val amountOfCoops = (farmers.size / preferredCoopSize) + 1
+            val coopNames = coopNames(amountOfCoops, baseName)
+            List(amountOfCoops) { index ->
                 val roleId = guild.createRole()
                     .setName(coopNames[index])
                     .setMentionable(true)
@@ -234,10 +238,10 @@ object RollCall : Command() {
             return coops
         }
 
-        private fun coopNames(amount: Int, baseName: String = "cluckerz"): List<String> = when {
+        fun coopNames(amount: Int, baseName: String = Config.coopName): List<String> = when {
             amount <= 26 -> ('a' until 'a' + amount).map { char -> "$char$baseName" }
             else -> {
-                val chunks = ceil(amount.div(26.toDouble())).toInt()
+                val chunks = ceil(amount.div(26.0)).toInt()
                 val chunkSize = floor(amount.toDouble().div(chunks)).toInt()
                 val remainder = amount - chunks * chunkSize
                 ('a' until 'a' + chunkSize).mapCartesianProducts(1..chunks) { char: Char, digit: Int ->
