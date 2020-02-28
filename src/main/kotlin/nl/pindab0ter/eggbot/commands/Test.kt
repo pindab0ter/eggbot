@@ -13,6 +13,8 @@ object Test : Command(), CoroutineScope {
 
     init {
         name = "test"
+        help = "Command for testing and development purposes"
+        hidden = true
         guildOnly = false
     }
 
