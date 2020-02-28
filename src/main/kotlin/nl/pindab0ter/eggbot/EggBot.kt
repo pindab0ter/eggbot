@@ -5,7 +5,10 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.Guild
-import nl.pindab0ter.eggbot.database.*
+import nl.pindab0ter.eggbot.database.CoopFarmers
+import nl.pindab0ter.eggbot.database.Coops
+import nl.pindab0ter.eggbot.database.DiscordUsers
+import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.jda.CommandLogger
 import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.jobs.JobLogger
@@ -14,7 +17,6 @@ import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.deleteAll
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.CronScheduleBuilder.weeklyOnDayAndHourAndMinute
@@ -43,7 +45,7 @@ object EggBot {
     var clientVersion = Config.clientVersion
         set(value) {
             field = value
-            logger.info { "Client version upgraded to $value" }
+            logger.warn { "Client version upgraded to $value" }
         }
 
     @JvmStatic
