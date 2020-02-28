@@ -14,15 +14,15 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @Suppress("FoldInitializerAndIfToElvis")
-object CoopRename : Command() {
+object CoopReassign : Command() {
 
     private val log = KotlinLogging.logger { }
     private val allowedCharacters = Regex("""^[a-zA-Z0-9\-]+$""")
 
     init {
-        name = "coop-rename"
+        name = "coop-reassign"
         arguments = "<contract id> <co-op id> <new name>"
-        help = "Renames a co-op and it's associated role if available, does NOT rename the co-op in-game. Only letters, digits and dashes allowed."
+        help = "Reassigns a co-op and renames it's associated role if available, does NOT rename the co-op in-game. Only letters, digits and dashes allowed."
         category = AdminCategory
         guildOnly = false
     }
@@ -62,7 +62,7 @@ object CoopRename : Command() {
 
         if (role != null) role.manager.setName(newName).queue({
             transaction { coop.name = newName }
-            "Co-op and role successfully renamed from `$coopId` to `$newName`.".let {
+            "Co-op successfully reassigned from `$coopId` to `$newName` and role renamed accordingly.".let {
                 event.replySuccess(it)
                 log.debug { it }
             }
@@ -71,7 +71,7 @@ object CoopRename : Command() {
             event.replyWarning("Failed to rename Discord role (${exception.localizedMessage})")
         }) else {
             transaction { coop.name = newName }
-            "Co-op successfully renamed from `$coopId` to `$newName`.".let {
+            "Co-op successfully reassigned from `$coopId` to `$newName`.".let {
                 event.replySuccess(it)
                 log.debug { it }
             }
