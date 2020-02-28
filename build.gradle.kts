@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "nl.pindab0ter"
-version = "1.7.0"
+version = "1.8.0"
 
 application {
     mainClassName = "nl.pindab0ter.eggbot.EggBot"
