@@ -2,8 +2,6 @@ package nl.pindab0ter.eggbot.jda
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import mu.KotlinLogging
-import net.dv8tion.jda.api.entities.ChannelType
 import java.util.function.Consumer
 
 
@@ -22,7 +20,7 @@ object HelpConsumer : Consumer<CommandEvent> {
             }
         }
 
-        appendln("`<>` = required argument, `[]` = optional argument\nType the arguments without the brackets.\n")
+        appendln("`<>` = required argument, `[]` = optional argument\nType the arguments without the brackets.")
 
         commandClient.commands.let { commands ->
             if (commands.any { it.category != null }) {
