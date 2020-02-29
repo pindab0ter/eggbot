@@ -5,7 +5,6 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -53,7 +52,7 @@ object CoopsInfo : Command() {
         val results = runBlocking(Dispatchers.IO) {
             var i = 1
             coops.asyncMap { coop ->
-                CoopContractSimulation.Factory(coop.contract, coop.name).also {
+                CoopContractSimulation.Factory(coop.contract, coop.name, message).also {
                     progressBar.update(++i)
                 }
             }

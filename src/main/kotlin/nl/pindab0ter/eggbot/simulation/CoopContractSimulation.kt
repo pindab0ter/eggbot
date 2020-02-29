@@ -4,11 +4,13 @@ import com.auxbrain.ei.EggInc
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.Duration
 import org.joda.time.Duration.ZERO
+import org.joda.time.Duration.standardMinutes
 import java.math.BigDecimal
 import java.util.*
 
@@ -21,7 +23,7 @@ class CoopContractSimulation private constructor(
 
     // region Basic info
 
-    val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractId)!!
+    private val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractId)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
         backup.farmsList.any { farm -> farm.contractId == coopStatus.contractId }
@@ -49,9 +51,7 @@ class CoopContractSimulation private constructor(
 
     // region Simulation
 
-    val currentEggsPerHour: BigDecimal by lazy { farms.sumByBigDecimal { it.currentEggsPerHour } }
-
-    var elapsed: Duration = ZERO
+    private var elapsed: Duration = ZERO
     val currentEggs: BigDecimal = farms.sumByBigDecimal { it.currentEggs }
     private val projectedEggs: BigDecimal get() = farms.sumByBigDecimal { it.projectedEggs }
     val currentPopulation: BigDecimal = farms.sumByBigDecimal { it.currentPopulation }
@@ -68,15 +68,15 @@ class CoopContractSimulation private constructor(
     private fun step() {
         if (currentGoal != null && projectedEggs >= currentGoal!!.target)
             currentGoal!!.moment = elapsed
-        if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
+        if (!this::eggspected.isInitialized && elapsed.plus(standardMinutes(1)) >= timeRemaining)
             eggspected = projectedEggs
         farms.forEach { it.step() }
-        elapsed += Duration.standardMinutes(1)
+        elapsed += standardMinutes(1)
     }
 
     fun run() {
         do step() while (
-            (goalReachedMoments.any { it.moment == null } && elapsed < timeRemaining) // Not all goals have been reached in time
+            (goalReachedMoments.any { it.moment == null } || elapsed < timeRemaining) // Not all goals have been reached in time
             || elapsed < ONE_YEAR                                                     // Or one year hasn't yet passed
         )
     }
@@ -84,7 +84,10 @@ class CoopContractSimulation private constructor(
     // endregion
 
     companion object Factory {
-        operator fun invoke(contractId: String, coopId: String): CoopContractSimulationResult {
+
+        val log = KotlinLogging.logger { }
+
+        operator fun invoke(contractId: String, coopId: String, message: Message): CoopContractSimulationResult {
             val coopStatus = AuxBrain.getCoopStatus(contractId, coopId)
             val contractName: String? =
                 AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { contract ->
@@ -98,6 +101,9 @@ class CoopContractSimulation private constructor(
             // Is co-op abandoned?
             if (coopStatus.contributorsList.isEmpty())
                 return Abandoned(coopStatus, contractName)
+
+            message.editMessage("Fetching backups…").queue()
+            message.channel.sendTyping().queue()
 
             val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
                 coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
@@ -128,7 +134,11 @@ class CoopContractSimulation private constructor(
             ) return Finished(coopStatus, contractName)
 
             // Co-op in progress
-            return InProgress(CoopContractSimulation(backups, coopStatus)).also { it.simulation.run() }
+            return InProgress(CoopContractSimulation(backups, coopStatus)).also {
+                message.editMessage("Running simulation…").queue()
+                message.channel.sendTyping().queue()
+                it.simulation.run()
+            }
         }
     }
 }

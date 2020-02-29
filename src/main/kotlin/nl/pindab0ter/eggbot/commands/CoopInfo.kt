@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
+import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
@@ -28,7 +29,6 @@ object CoopInfo : Command() {
     }
 
     override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
 
         (checkPrerequisites(
             event,
@@ -44,6 +44,9 @@ object CoopInfo : Command() {
         val coopId: String = event.arguments[1]
         val compact: Boolean = event.arguments.getOrNull(2)?.startsWith("c") == true
 
+        val message: Message = event.channel.sendMessage("Fetching contract information…").complete()
+        event.channel.sendTyping().queue()
+
         getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
             if (status == null || !status.isInitialized) "Could not get co-op status. Are the `contract id` and `co-op id` correct?.".let {
                 event.replyWarning(it)
@@ -51,10 +54,11 @@ object CoopInfo : Command() {
                 return@getCoopStatus
             }
 
-            message(
-                CoopContractSimulation.Factory(status.contractId, status.coopId),
-                compact
-            ).let { messages ->
+            val simulation = CoopContractSimulation.Factory(status.contractId, status.coopId, message)
+
+            message.delete().queue()
+
+            messageBody(simulation, compact).let { messages ->
                 if (event.channel.id == Config.botCommandsChannel) {
                     messages.forEach { message -> event.reply(message) }
                 } else {
@@ -65,7 +69,7 @@ object CoopInfo : Command() {
         }
     }
 
-    fun message(result: CoopContractSimulationResult, compact: Boolean = false): List<String> = when (result) {
+    private fun messageBody(result: CoopContractSimulationResult, compact: Boolean = false): List<String> = when (result) {
         is CoopContractSimulationResult.NotFound -> listOf(
             "No co-op found for contract `${result.contractId}` with name `${result.coopId}`"
         )
