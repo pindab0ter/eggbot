@@ -12,7 +12,8 @@ import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
-import nl.pindab0ter.eggbot.utilities.ProgressBarUpdater
+import nl.pindab0ter.eggbot.utilities.ProgressBar
+import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import nl.pindab0ter.eggbot.utilities.arguments
 import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.and
@@ -32,8 +33,6 @@ object CoopAdd : Command() {
     }
 
     override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
         (checkPrerequisites(
             event,
             adminRequired = true,
@@ -80,9 +79,7 @@ object CoopAdd : Command() {
 
             if (role != null) {
                 val message = event.channel.sendMessage("Assigning roles…").complete()
-                event.channel.sendTyping()
-
-                val progressBar = ProgressBarUpdater(status.contributorsList.count(), message, false)
+                val progressBar = ProgressBar(status.contributorsList.count(), message, WhenDone.STOP_IMMEDIATELY)
 
                 val successes = mutableListOf<DiscordUser>()
                 val failures = mutableListOf<String>()
@@ -95,7 +92,7 @@ object CoopAdd : Command() {
                         .handle { _, exception ->
                             if (exception == null) {
                                 successes.add(discordUser)
-                                log.info("Added ${discordUser.discordTag} to ${role.name}")
+                                log.debug("Added ${discordUser.discordTag} to @${role.name}")
                             } else {
                                 failures.add(contributionInfo.userName)
                                 log.warn("Failed to add ${discordUser.discordTag} to ${role.name}. Cause: ${exception.localizedMessage}")
@@ -103,7 +100,6 @@ object CoopAdd : Command() {
                         }.join()
                     else failures.add(contributionInfo.userName)
                     progressBar.update(i + 1)
-                    event.channel.sendTyping().queue()
                 }
 
                 StringBuilder().apply {
@@ -120,7 +116,10 @@ object CoopAdd : Command() {
                         failures.forEach { userName -> appendln(userName) }
                         appendln("```")
                     }
-                }.toString().let { message.editMessage(it).queue() }
+                }.toString().let { messageBody ->
+                    message.delete().complete()
+                    event.reply(messageBody)
+                }
             } else event.replySuccess("Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
         }
     }

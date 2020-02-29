@@ -12,6 +12,7 @@ import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -115,8 +116,7 @@ object RollCall : Command() {
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo, baseName)
 
-            val progressBar = ProgressBarUpdater(farmers.count(), message, false)
-            event.channel.sendTyping().queue()
+            val progressBar = ProgressBar(farmers.count(), message, WhenDone.STOP_IMMEDIATELY)
 
             transaction {
                 var i = 0
@@ -130,8 +130,7 @@ object RollCall : Command() {
                             if (exception == null) log.info("Added $discordTag to ${role.name}")
                             else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
                         }.join()
-                        i++
-                        progressBar.update(i)
+                        progressBar.update(++i)
                         event.channel.sendTyping().complete()
                     }
                 }
@@ -139,7 +138,8 @@ object RollCall : Command() {
 
             // TODO: Replace with table
 
-            message.editMessage(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
+            message.delete().complete()
+            event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
@@ -155,7 +155,7 @@ object RollCall : Command() {
                     appendln()
                 }
                 append("```")
-            }.toString()).queue()
+            }.toString())
 
             coops.map { coop ->
                 val role = coop.roleId?.let { guild.getRoleById(it) }

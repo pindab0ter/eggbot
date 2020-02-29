@@ -94,6 +94,9 @@ object RollClear : Command() {
                 successes.forEach { appendln("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
                 appendln("```")
             }
-        }.toString().let { message.editMessage(it).complete() }
+        }.toString().let { messageBody ->
+            message.delete().complete()
+            event.reply(messageBody)
+        }
     }
 }

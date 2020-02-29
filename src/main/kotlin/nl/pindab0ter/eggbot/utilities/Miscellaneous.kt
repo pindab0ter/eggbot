@@ -23,9 +23,4 @@ suspend fun <T, R> Iterable<T>.asyncMap(transform: suspend (T) -> R): List<R> = 
 inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
     other: Iterable<R>,
     transform: (a: T, b: R) -> V
-): List<V> =
-    flatMap { a: T ->
-        other.map { b ->
-            transform(a, b)
-        }
-    }
+): List<V> = flatMap { a: T -> other.map { b -> transform(a, b) } }

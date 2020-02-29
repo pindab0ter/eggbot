@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -13,6 +14,7 @@ import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object CoopsInfo : Command() {
@@ -30,7 +32,6 @@ object CoopsInfo : Command() {
 
     @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
 
         (checkPrerequisites(
             event,
@@ -42,16 +43,23 @@ object CoopsInfo : Command() {
             return
         }
 
+        val message = event.channel.sendMessage("Looking for co-ops…").complete()
+
         val contractId = event.arguments.first()
         val coops = transaction {
             Coop.find { Coops.contract eq contractId }.toList().sortedBy { it.name }
         }
+        val progressBar = ProgressBar(coops.size, message, WhenDone.STOP_IMMEDIATELY)
         val results = runBlocking(Dispatchers.IO) {
+            var i = 1
             coops.asyncMap { coop ->
-                CoopContractSimulation.Factory(coop.contract, coop.name)
+                CoopContractSimulation.Factory(coop.contract, coop.name).also {
+                    progressBar.update(++i)
+                }
             }
         }
         if (results.isEmpty()) "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
+            message.delete().complete()
             event.replyWarning(it)
             log.debug { it }
             return
@@ -158,8 +166,9 @@ object CoopsInfo : Command() {
             appendln("```")
 
             // endregion Table
-        }.toString().let { string ->
-            event.reply(string)
+        }.toString().let { messageBody ->
+            message.delete().complete()
+            event.reply(messageBody)
         }
     }
 
