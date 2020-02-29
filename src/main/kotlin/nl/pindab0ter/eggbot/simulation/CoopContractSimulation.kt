@@ -76,8 +76,8 @@ class CoopContractSimulation private constructor(
 
     fun run() {
         do step() while (
-            (goalReachedMoments.any { it.moment == null } || elapsed < timeRemaining) // Not all goals have been reached in time
-            || elapsed < ONE_YEAR                                                     // Or one year hasn't yet passed
+            elapsed < timeRemaining &&                                            // Time limit hasn't been reached
+            (goalReachedMoments.any { it.moment == null } || elapsed < ONE_YEAR)  // either the goals haven't been reached or a year hasn't yet passed
         )
     }
 
