@@ -31,7 +31,7 @@ import java.util.*
 
 
 object EggBot {
-    val logger = KotlinLogging.logger {}
+    val log = KotlinLogging.logger {}
     val eventWaiter: EventWaiter = EventWaiter()
 
     val jdaClient: JDA = JDABuilder(Config.botToken)
@@ -45,22 +45,16 @@ object EggBot {
     var clientVersion = Config.clientVersion
         set(value) {
             field = value
-            logger.warn { "Client version upgraded to $value" }
+            log.warn { "Client version upgraded to $value" }
         }
 
     @JvmStatic
     fun main(args: Array<String>) {
-        startScheduler()
-        jdaClient.awaitReady()
         connectToDatabase()
         initializeDatabase()
-    }
-
-    private fun initializeDatabase() = transaction {
-        SchemaUtils.create(DiscordUsers)
-        SchemaUtils.create(Farmers)
-        SchemaUtils.create(Coops)
-        SchemaUtils.create(CoopFarmers)
+        startScheduler()
+        jdaClient.awaitReady()
+        log.info { "${jdaClient.selfUser.name} is ready for business!" }
     }
 
     private fun connectToDatabase() {
@@ -71,11 +65,21 @@ object EggBot {
                 connection.createStatement().execute("PRAGMA foreign_keys = ON")
             })
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+        KotlinLogging.logger("Exposed").info { "Connected to database" }
+    }
+
+    private fun initializeDatabase() = transaction {
+        SchemaUtils.create(DiscordUsers)
+        SchemaUtils.create(Farmers)
+        SchemaUtils.create(Coops)
+        SchemaUtils.create(CoopFarmers)
     }
 
     private fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply {
         // Use Europe/London because it moves with Daylight Saving Time
         val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
+
+        log.info { "Starting scheduler…" }
 
         if (!Config.devMode) scheduleJob(
             newJob(UpdateFarmersJob::class.java)
