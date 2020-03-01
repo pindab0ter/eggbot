@@ -52,7 +52,7 @@ object CoopsInfo : Command() {
         val results = runBlocking(Dispatchers.IO) {
             var i = 1
             coops.asyncMap { coop ->
-                CoopContractSimulation.Factory(coop.contract, coop.name, message).also {
+                CoopContractSimulation.Factory(coop.contract, coop.name).also {
                     progressBar.update(++i)
                 }
             }

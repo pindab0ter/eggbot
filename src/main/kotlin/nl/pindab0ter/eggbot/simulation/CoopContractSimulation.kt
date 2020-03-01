@@ -87,7 +87,11 @@ class CoopContractSimulation private constructor(
 
         val log = KotlinLogging.logger { }
 
-        operator fun invoke(contractId: String, coopId: String, message: Message): CoopContractSimulationResult {
+        operator fun invoke(
+            contractId: String,
+            coopId: String,
+            message: Message? = null
+        ): CoopContractSimulationResult {
             val coopStatus = AuxBrain.getCoopStatus(contractId, coopId)
             val contractName: String? =
                 AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { contract ->
@@ -102,8 +106,8 @@ class CoopContractSimulation private constructor(
             if (coopStatus.contributorsList.isEmpty())
                 return Abandoned(coopStatus, contractName)
 
-            message.editMessage("Fetching backups…").queue()
-            message.channel.sendTyping().queue()
+            message?.editMessage("Fetching backups…")?.complete()
+            message?.channel?.sendTyping()?.complete()
 
             val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
                 coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
@@ -135,8 +139,8 @@ class CoopContractSimulation private constructor(
 
             // Co-op in progress
             return InProgress(CoopContractSimulation(backups, coopStatus)).also {
-                message.editMessage("Running simulation…").queue()
-                message.channel.sendTyping().queue()
+                message?.editMessage("Running simulation…")?.queue()
+                message?.channel?.sendTyping()?.queue()
                 it.simulation.run()
             }
         }
