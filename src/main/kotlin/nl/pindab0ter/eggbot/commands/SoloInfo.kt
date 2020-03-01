@@ -77,7 +77,7 @@ object SoloInfo : Command() {
             simulation.run()
 
             message(simulation, compact).let { message ->
-                if (event.channel.id == Config.botCommandsChannel) {
+                if (event.channel == EggBot.botCommandsChannel) {
                     event.reply(message)
                 } else {
                     event.replyInDm(message)
@@ -91,9 +91,7 @@ object SoloInfo : Command() {
         simulation: ContractSimulation,
         compact: Boolean = false
     ): String = StringBuilder().apply {
-        val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
-            EggBot.jdaClient.getEmoteById(id)?.asMention
-        } ?: "🥚"
+        val eggEmote = EggBot.eggsToEmotes[simulation.egg] ?: "🥚"
 
         appendln("`${simulation.farmerName}` vs. _${simulation.contractName}_:")
         appendln()

@@ -4,7 +4,6 @@ import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -95,9 +94,8 @@ object RollCall : Command() {
                         role.delete().submit()
                     }
 
-                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${EggBot.jdaClient.getUserById(
-                        Config.ownerId
-                    )?.asMention ?: "the bot maintainer"}".let {
+                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${EggBot.botOwner?.asMention
+                        ?: "the bot maintainer"}".let {
                         event.replyWarning(it)
                         log.error { it }
                     }
@@ -238,7 +236,7 @@ object RollCall : Command() {
             return coops
         }
 
-        fun coopNames(amount: Int, baseName: String = Config.coopName): List<String> = when {
+        fun coopNames(amount: Int, baseName: String): List<String> = when {
             amount <= 26 -> ('a' until 'a' + amount).map { char -> "$char$baseName" }
             else -> {
                 val chunks = ceil(amount.div(26.0)).toInt()

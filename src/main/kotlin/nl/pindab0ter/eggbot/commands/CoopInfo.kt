@@ -59,7 +59,7 @@ object CoopInfo : Command() {
             message.delete().queue()
 
             messageBody(simulation, compact).let { messages ->
-                if (event.channel.id == Config.botCommandsChannel) {
+                if (event.channel == EggBot.botCommandsChannel) {
                     messages.forEach { message -> event.reply(message) }
                 } else {
                     event.replyInDms(messages)
@@ -69,7 +69,10 @@ object CoopInfo : Command() {
         }
     }
 
-    private fun messageBody(result: CoopContractSimulationResult, compact: Boolean = false): List<String> = when (result) {
+    private fun messageBody(
+        result: CoopContractSimulationResult,
+        compact: Boolean = false
+    ): List<String> = when (result) {
         is CoopContractSimulationResult.NotFound -> listOf(
             "No co-op found for contract `${result.contractId}` with name `${result.coopId}`"
         )
@@ -90,9 +93,7 @@ object CoopInfo : Command() {
         )
         is CoopContractSimulationResult.InProgress -> result.simulation.let { simulation ->
             StringBuilder().apply {
-                val eggEmote = Config.eggEmojiIds[simulation.egg]?.let { id ->
-                    EggBot.jdaClient.getEmoteById(id)?.asMention
-                } ?: "🥚"
+                val eggEmote = EggBot.eggsToEmotes[simulation.egg] ?: "🥚"
                 val farms = simulation.farms
 
                 appendln("`${simulation.coopId}` vs. _${simulation.contractName}_:")

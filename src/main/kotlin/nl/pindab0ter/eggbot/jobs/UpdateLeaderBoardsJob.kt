@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.jobs
 
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Config
+import net.dv8tion.jda.api.entities.TextChannel
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.database.Farmer
@@ -27,35 +27,35 @@ class UpdateLeaderBoardsJob : Job {
 
         updateLeaderBoard(
             "Earnings Bonus",
-            Config.earningsBonusLeaderBoardChannel,
+            EggBot.earningsBonusLeaderBoardChannel,
             farmers.sortedByDescending { it.earningsBonus },
             Messages::earningsBonusLeaderBoard
         )
 
         updateLeaderBoard(
             "Soul Eggs",
-            Config.soulEggsLeaderBoardChannel,
+            EggBot.soulEggsLeaderBoardChannel,
             farmers.sortedByDescending { it.soulEggs },
             Messages::soulEggsLeaderBoard
         )
 
         updateLeaderBoard(
             "Prestiges",
-            Config.prestigesLeaderBoardChannel,
+            EggBot.prestigesLeaderBoardChannel,
             farmers.sortedByDescending { it.prestiges },
             Messages::prestigesLeaderBoard
         )
 
         updateLeaderBoard(
             "Drone Takedowns",
-            Config.droneTakedownsLeaderBoardChannel,
+            EggBot.dronesLeaderBoardChannel,
             farmers.sortedByDescending { it.droneTakedowns },
             Messages::droneTakedownsLeaderBoard
         )
 
         updateLeaderBoard(
             "Elite Drone Takedowns",
-            Config.eliteDroneTakedownsLeaderBoardChannel,
+            EggBot.eliteDronesLeaderBoardChannel,
             farmers.sortedByDescending { it.eliteDroneTakedowns },
             Messages::eliteDroneTakedownsLeaderBoard
         )
@@ -63,10 +63,10 @@ class UpdateLeaderBoardsJob : Job {
 
     private fun updateLeaderBoard(
         title: String,
-        channel: String,
+        channel: TextChannel,
         sortedFarmers: List<Farmer>,
         messageFunction: (List<Farmer>) -> List<String>
-    ) = EggBot.jdaClient.getTextChannelById(channel)?.apply {
+    ) = channel.apply {
         log.info { "Updating $title leader board…" }
 
         history.retrievePast(100).complete().let {

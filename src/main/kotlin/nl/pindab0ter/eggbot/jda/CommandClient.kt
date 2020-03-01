@@ -6,7 +6,7 @@ import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.commands.*
 
 val commandClient: CommandClient = CommandClientBuilder().apply {
-    setOwnerId(Config.ownerId)
+    setOwnerId(Config.botOwnerId)
     setPrefix(Config.prefix)
     setHelpWord(Config.helpWord)
     useHelpBuilder(true)

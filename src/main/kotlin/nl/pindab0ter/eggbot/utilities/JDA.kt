@@ -6,8 +6,8 @@ import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.ChannelType.PRIVATE
 import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import net.dv8tion.jda.api.entities.User
-import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.Register
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.jda.commandClient
@@ -30,11 +30,11 @@ fun Command.checkPrerequisites(
     commandEvent.author.isRegistered < registrationRequired ->
         PrerequisitesCheckResult.Failure("You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.")
     commandEvent.author.isAdmin < adminRequired ->
-        PrerequisitesCheckResult.Failure("You must have a role called `${Config.adminRole}` or higher to use that!")
+        PrerequisitesCheckResult.Failure("You must have a role called `${EggBot.adminRole.name}` or higher to use that!")
     channelType == TEXT && channelType != commandEvent.channelType ->
         PrerequisitesCheckResult.Failure("This command cannot be used in DMs. Please try again in a public channel.")
     channelType == PRIVATE && channelType != commandEvent.channelType ->
-        PrerequisitesCheckResult.Failure("This command can only be used in DMs. Please try again by DMing ${EggBot.jdaClient.selfUser.asTag}.")
+        PrerequisitesCheckResult.Failure("This command can only be used in DMs. Please try again by DMing ${jdaClient.selfUser.asTag}.")
     commandEvent.arguments.size < minArguments ->
         PrerequisitesCheckResult.Failure("Missing argument(s). Use `${commandClient.textualPrefix}$name $arguments` without the brackets.")
     commandEvent.arguments.size > maxArguments ->
@@ -48,14 +48,8 @@ val User.isRegistered: Boolean
     }
 
 val User.isAdmin: Boolean
-    get() = mutualGuilds.any { guild ->
-        guild.getMember(this)?.let { author ->
-            author.isOwner || author.user.id == Config.ownerId || author.roles.any { memberRole ->
-                Config.adminRole != null && guild.getRolesByName(Config.adminRole, true).any { guildRole ->
-                    memberRole.position >= guildRole.position
-                }
-            }
-        } == true
-    }
+    get() = EggBot.guild.getMember(this)?.let { author ->
+        author.isOwner || author == EggBot.botOwner || author.roles.contains(EggBot.adminRole)
+    } == true
 
 val CommandEvent.arguments: List<String> get() = if (args.isBlank()) emptyList() else args.split(Regex("""\s"""))

@@ -1,10 +1,10 @@
 package nl.pindab0ter.eggbot
 
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter
+import com.auxbrain.ei.EggInc
 import mu.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
-import net.dv8tion.jda.api.entities.Guild
+import net.dv8tion.jda.api.entities.*
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
@@ -32,21 +32,60 @@ import java.util.*
 
 object EggBot {
     val log = KotlinLogging.logger {}
-    val eventWaiter: EventWaiter = EventWaiter()
 
     val jdaClient: JDA = JDABuilder(Config.botToken)
         .addEventListeners(
             CommandLogger,
-            eventWaiter,
             commandClient
         )
         .build()
 
+    val guild: Guild by lazy {
+        jdaClient.getGuildById(Config.guildId) ?: throw Exception("Could not find guild with ID ${Config.guildId}")
+    }
+    val botOwner: Member? by lazy {
+        guild.getMemberById(Config.botOwnerId)
+    }
+    val adminRole: Role by lazy {
+        guild.getRoleById(Config.adminRoleId) ?: throw Exception("Could not find role with ID ${Config.adminRoleId}")
+    }
     var clientVersion = Config.clientVersion
         set(value) {
             field = value
             log.warn { "Client version upgraded to $value" }
         }
+    val botCommandsChannel: TextChannel by lazy {
+        guild.getTextChannelById(Config.botCommandsChannelId)
+            ?: throw Exception("Could not find channel with ID ${Config.botCommandsChannelId}")
+    }
+    val earningsBonusLeaderBoardChannel: TextChannel by lazy {
+        guild.getTextChannelById(Config.earningsBonusLeaderBoardChannelId)
+            ?: throw Exception("Could not find channel with ID ${Config.earningsBonusLeaderBoardChannelId}")
+    }
+    val soulEggsLeaderBoardChannel: TextChannel by lazy {
+        guild.getTextChannelById(Config.soulEggsLeaderBoardChannelId)
+            ?: throw Exception("Could not find channel with ID ${Config.soulEggsLeaderBoardChannelId}")
+    }
+    val prestigesLeaderBoardChannel: TextChannel by lazy {
+        guild.getTextChannelById(Config.prestigesLeaderBoardChannelId)
+            ?: throw Exception("Could not find channel with ID ${Config.prestigesLeaderBoardChannelId}")
+    }
+    val dronesLeaderBoardChannel: TextChannel by lazy {
+        guild.getTextChannelById(Config.dronesLeaderBoardChannelId)
+            ?: throw Exception("Could not find channel with ID ${Config.dronesLeaderBoardChannelId}")
+    }
+    val eliteDronesLeaderBoardChannel: TextChannel by lazy {
+        guild.getTextChannelById(Config.eliteDronesLeaderBoardChannelId)
+            ?: throw Exception("Could not find channel with ID ${Config.eliteDronesLeaderBoardChannelId}")
+    }
+    val eggsToEmotes: Map<EggInc.Egg, Emote?> by lazy {
+        Config.eggsToEmoteIds.mapValues { (_, emoteId) ->
+            emoteId?.let { guild.getEmoteById(it) }
+        }
+    }
+    val emoteGoldenEgg: Emote? by lazy { Config.emoteGoldenEggId?.let { id -> guild.getEmoteById(id) } }
+    val emoteSoulEgg: Emote? by lazy { Config.emoteSoulEggId?.let { id -> guild.getEmoteById(id) } }
+    val emoteProphecyEgg: Emote? by lazy { Config.emoteProphecyEggId?.let { id -> guild.getEmoteById(id) } }
 
     @JvmStatic
     fun main(args: Array<String>) {
@@ -113,6 +152,4 @@ object EggBot {
         listenerManager.addJobListener(JobLogger)
         start()
     }
-
-    val guild: Guild by lazy { jdaClient.guilds.first() }
 }

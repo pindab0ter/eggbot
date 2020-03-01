@@ -3,8 +3,10 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
+import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
@@ -30,6 +32,7 @@ object CoopAdd : Command() {
         help = "Registers an _already existing_ co-op so it shows up in the co-ops info listing and creates a new role which it assigns to all it's members unless `norole` is added."
         category = AdminCategory
         guildOnly = false
+        botPermissions = arrayOf(MANAGE_ROLES)
     }
 
     override fun execute(event: CommandEvent) {
@@ -64,7 +67,7 @@ object CoopAdd : Command() {
                 return@getCoopStatus
             }
 
-            val role = if (noRole) null else EggBot.guild.createRole()
+            val role = if (noRole) null else guild.createRole()
                 .setName(coopId)
                 .setMentionable(true)
                 .complete()

@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.commands
 import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.network.AuxBrain
@@ -52,10 +51,7 @@ object ContractIDs : Command() {
         this@printContracts.forEach { contract ->
             append("**`${contract.id}`**: ")
             append("${contract.name} ")
-            append(Config.eggEmojiIds[contract.egg]
-                ?.let { EggBot.jdaClient.getEmoteById(it)?.asMention }
-                ?: "(${contract.egg.formattedName})"
-            )
+            append(EggBot.eggsToEmotes[contract.egg] ?: "(${contract.egg.formattedName})")
             append(", valid for ")
             append(
                 Duration(DateTime.now(), contract.expirationTime.toDateTime())

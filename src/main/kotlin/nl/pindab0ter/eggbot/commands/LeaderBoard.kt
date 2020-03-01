@@ -3,11 +3,12 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.Messages
-import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.utilities.arguments
+import nl.pindab0ter.eggbot.utilities.replyInDms
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : Command() {
@@ -24,7 +25,7 @@ object LeaderBoard : Command() {
     }
 
     override fun execute(event: CommandEvent) {
-        if (event.channel.id == Config.botCommandsChannel) {
+        if (event.channel == EggBot.botCommandsChannel) {
             event.channel.sendTyping()
         } else {
             event.author.openPrivateChannel().queue { it.sendTyping().complete() }
@@ -42,7 +43,7 @@ object LeaderBoard : Command() {
 
         (if (event.arguments.isNotEmpty()) Messages::earningsBonusLeaderBoardCompact
         else Messages::earningsBonusLeaderBoard).invoke(farmers).let { messages ->
-            if (event.channel.id == Config.botCommandsChannel) {
+            if (event.channel == EggBot.botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {
                 event.replyInDms(messages)

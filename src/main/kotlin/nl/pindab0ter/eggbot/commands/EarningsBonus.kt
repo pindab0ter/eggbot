@@ -2,14 +2,14 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.Messages
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -135,7 +135,7 @@ object EarningsBonus : Command() {
                     appendln("```")
 
                 }.toString().let {
-                    if (event.channel.id == Config.botCommandsChannel) {
+                    if (event.channel == EggBot.botCommandsChannel) {
                         event.reply(it)
                     } else event.replyInDm(it) {
                         if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
