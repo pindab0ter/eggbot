@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
@@ -58,7 +59,7 @@ object CoopReassign : Command() {
             return
         }
 
-        val role = transaction { coop.roleId?.let { EggBot.guild.getRoleById(it) } }
+        val role = transaction { coop.roleId?.let { guild.getRoleById(it) } }
 
         if (role != null) role.manager.setName(newName).queue({
             transaction { coop.name = newName }

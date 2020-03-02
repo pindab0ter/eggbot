@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
@@ -91,7 +92,7 @@ object SoloInfo : Command() {
         simulation: ContractSimulation,
         compact: Boolean = false
     ): String = StringBuilder().apply {
-        val eggEmote = EggBot.eggsToEmotes[simulation.egg] ?: "🥚"
+        val eggEmote = eggsToEmotes[simulation.egg]?.asMention ?: "🥚"
 
         appendln("`${simulation.farmerName}` vs. _${simulation.contractName}_:")
         appendln()

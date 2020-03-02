@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
@@ -93,7 +94,7 @@ object CoopInfo : Command() {
         )
         is CoopContractSimulationResult.InProgress -> result.simulation.let { simulation ->
             StringBuilder().apply {
-                val eggEmote = EggBot.eggsToEmotes[simulation.egg] ?: "🥚"
+                val eggEmote = eggsToEmotes[simulation.egg]?.asMention ?: "🥚"
                 val farms = simulation.farms
 
                 appendln("`${simulation.coopId}` vs. _${simulation.contractName}_:")

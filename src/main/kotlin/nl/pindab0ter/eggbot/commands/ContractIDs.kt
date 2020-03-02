@@ -4,6 +4,7 @@ import com.auxbrain.ei.EggInc
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.asDaysHoursAndMinutes
@@ -51,7 +52,7 @@ object ContractIDs : Command() {
         this@printContracts.forEach { contract ->
             append("**`${contract.id}`**: ")
             append("${contract.name} ")
-            append(EggBot.eggsToEmotes[contract.egg] ?: "(${contract.egg.formattedName})")
+            append(eggsToEmotes[contract.egg]?.asMention ?: "(${contract.egg.formattedName})")
             append(", valid for ")
             append(
                 Duration(DateTime.now(), contract.expirationTime.toDateTime())
