@@ -15,7 +15,6 @@ class ProgressBar(
     enum class WhenDone { STOP_IMMEDIATELY, PUBLISH_FINAL_UPDATE }
 
     override val coroutineContext: CoroutineContext = Dispatchers.Default
-    private val sendTypingEvents: MutableList<CompletableFuture<Void>> = mutableListOf()
     private var running: Boolean = true
     private var value: Int = 0
         set(value) {
@@ -29,28 +28,29 @@ class ProgressBar(
         job = loop()
     }
 
-    private fun loop() = GlobalScope.launch {
+    private fun loop(): Job = GlobalScope.launch {
+        message.channel.sendTyping().queue()
+        var i = 0
         while (running) when {
             dirty -> {
-                sendTypingEvents.add(message.channel.sendTyping().submit())
-                message.editMessage(drawProgressBar(value, goal)).complete()
+                message.editMessage(drawProgressBar(value, goal)).queue()
                 dirty = false
             }
-            else -> delay(1000)
+            else -> {
+                if (i++ % 5 == 0) message.channel.sendTyping().queue()
+                delay(1000)
+            }
         }
         message.editMessage(drawProgressBar(goal, goal)).complete()
     }
 
-    fun update(newValue: Int) = when {
+    fun update(newValue: Int): Unit = when {
         newValue >= goal -> stop()
         else -> value = newValue
     }
 
-    fun stop(onStop: WhenDone = whenDone) {
-        when (onStop) {
-            PUBLISH_FINAL_UPDATE -> running = false
-            STOP_IMMEDIATELY -> job.cancel()
-        }
-        sendTypingEvents.forEach { completableFuture -> completableFuture.cancel(true) }
+    fun stop(onStop: WhenDone = whenDone): Unit = when (onStop) {
+        PUBLISH_FINAL_UPDATE -> running = false
+        STOP_IMMEDIATELY -> job.cancel()
     }
 }

@@ -3,6 +3,8 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
@@ -49,12 +51,10 @@ object CoopsInfo : Command() {
             Coop.find { Coops.contract eq contractId }.toList().sortedBy { it.name }
         }
         val progressBar = ProgressBar(coops.size, message, WhenDone.STOP_IMMEDIATELY)
-        val results = runBlocking(Dispatchers.IO) {
-            var i = 1
-            coops.asyncMap { coop ->
-                CoopContractSimulation.Factory(coop.contract, coop.name).also {
-                    progressBar.update(++i)
-                }
+        // Replace with mapAsync if running on a multi threaded machine.
+        val results = coops.mapIndexed { i, coop ->
+            CoopContractSimulation.Factory(coop.contract, coop.name).also {
+                progressBar.update(i + 1)
             }
         }
         if (results.isEmpty()) "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
@@ -166,7 +166,7 @@ object CoopsInfo : Command() {
 
             // endregion Table
         }.toString().let { messageBody ->
-            message.delete().complete()
+            message.delete().queue()
             event.reply(messageBody)
         }
     }
