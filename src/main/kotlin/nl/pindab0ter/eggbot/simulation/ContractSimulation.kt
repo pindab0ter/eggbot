@@ -50,6 +50,9 @@ class ContractSimulation constructor(
     val goalsReached: Int get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
 
     fun step() {
+        elapsed += standardMinutes(1)
+        projectedEggs += projectedEggsPerMinute.coerceAtMost(shippingRatePerMinute)
+        projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
         if (currentGoal != null && projectedEggs >= currentGoal!!.target)
             currentGoal!!.moment = elapsed
         if (habBottleneckReached == null && projectedPopulation >= habsMaxCapacity)
@@ -58,15 +61,12 @@ class ContractSimulation constructor(
             transportBottleneckReached = elapsed
         if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
             eggspected = projectedEggs
-        elapsed += standardMinutes(1)
-        projectedEggs += projectedEggsPerMinute.coerceAtMost(shippingRatePerMinute)
-        projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
     }
 
     fun run() {
         do step() while (
-            (goalReachedMoments.any { it.moment == null } && elapsed < timeRemaining) // Not all goals have been reached in time
-            || elapsed < ONE_YEAR                                                     // Or one year hasn't yet passed
+            elapsed <= timeRemaining &&                                            // Time limit hasn't been reached and
+            (goalReachedMoments.any { it.moment == null } || elapsed <= ONE_YEAR) // either the goals haven't been reached or a year hasn't yet passed
         )
     }
 

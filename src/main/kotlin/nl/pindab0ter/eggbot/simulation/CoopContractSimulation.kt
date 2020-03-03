@@ -66,18 +66,18 @@ class CoopContractSimulation private constructor(
     val eggsPerHour: BigDecimal get() = farms.sumByBigDecimal { it.currentEggsPerHour }
 
     private fun step() {
-        if (currentGoal != null && projectedEggs >= currentGoal!!.target)
-            currentGoal!!.moment = elapsed
-        if (!this::eggspected.isInitialized && elapsed.plus(standardMinutes(1)) >= timeRemaining)
-            eggspected = projectedEggs
         farms.forEach { it.step() }
         elapsed += standardMinutes(1)
+        if (currentGoal != null && projectedEggs >= currentGoal!!.target)
+            currentGoal!!.moment = elapsed
+        if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
+            eggspected = projectedEggs
     }
 
     fun run() {
         do step() while (
-            elapsed < timeRemaining &&                                            // Time limit hasn't been reached
-            (goalReachedMoments.any { it.moment == null } || elapsed < ONE_YEAR)  // either the goals haven't been reached or a year hasn't yet passed
+            elapsed <= timeRemaining &&                                            // Time limit hasn't been reached and
+            (goalReachedMoments.any { it.moment == null } || elapsed <= ONE_YEAR) // either the goals haven't been reached or a year hasn't yet passed
         )
     }
 
