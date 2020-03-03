@@ -37,6 +37,7 @@ dependencies {
     implementation("io.github.microutils", "kotlin-logging", "1.7.8")
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
+    implementation("org.campagnelab.ext", "jsap", "3.0.0")
 
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.13.0")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.30.1")

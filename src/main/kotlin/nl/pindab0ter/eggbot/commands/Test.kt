@@ -1,44 +1,39 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import mu.KotlinLogging
-import nl.pindab0ter.eggbot.utilities.ProgressBar
-import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
-import kotlin.coroutines.CoroutineContext
+import com.martiansoftware.jsap.JSAP.REQUIRED
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.Parameter
+import com.martiansoftware.jsap.Switch
+import com.martiansoftware.jsap.UnflaggedOption
+import nl.pindab0ter.eggbot.jda.ArgumentCommand
 
-object Test : Command(), CoroutineScope {
-
-    private val log = KotlinLogging.logger { }
+object Test : ArgumentCommand() {
 
     init {
         name = "test"
-        help = "Command for testing and development purposes"
+        help = "Command for testing and development purposes. None of these arguments will have any effect."
         hidden = true
         guildOnly = false
     }
 
-    @Suppress("FoldInitializerAndIfToElvis")
-    override fun execute(event: CommandEvent) {
-        launch {
-            event.channel.sendTyping().queue()
+    private const val PLAYER_NAME = "player name"
+    private const val AVAILABLE = "available"
 
-            val message = event.channel.sendMessage("Progress…").complete()
-            val total = 12
-            val progressBar = ProgressBar(total, message, WhenDone.PUBLISH_FINAL_UPDATE)
-            (1..total).forEach { i ->
-                progressBar.update(i)
-                log.info { i }
-                delay(250)
-            }
-            event.replySuccess("Done!")
-        }
+    override val parameters: List<Parameter> = listOf(
+        Switch(AVAILABLE)
+            .setShortFlag('a')
+            .setLongFlag("available")
+            .setHelp("set this player as available"),
+        UnflaggedOption(PLAYER_NAME)
+            .setRequired(REQUIRED)
+            .setHelp("name of the player")
+    )
+
+    override fun execute(event: CommandEvent, arguments: JSAPResult) {
+        val playerName = arguments.getString(PLAYER_NAME)
+        val available = arguments.getBoolean(AVAILABLE, false)
+
+        event.reply("$playerName is ${if (available) "" else "not "}available.")
     }
-
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Default
 }

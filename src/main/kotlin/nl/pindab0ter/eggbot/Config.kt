@@ -11,7 +11,7 @@ object Config {
     private const val FILE_NAME = "eggbot.properties"
 
     val botToken: String
-    val prefix: String?
+    val prefix: String
     val helpWord: String
     val emojiSuccess: String
     val emojiWarning: String
