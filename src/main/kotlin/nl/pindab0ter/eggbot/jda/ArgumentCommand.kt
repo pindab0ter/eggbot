@@ -11,34 +11,37 @@ import nl.pindab0ter.eggbot.Config
 
 abstract class ArgumentCommand : Command() {
 
-    val log = KotlinLogging.logger {}
-    abstract val parameters: List<Parameter>
-    private val parser: JSAP by lazy {
-        JSAP().apply {
+    private val log = KotlinLogging.logger {}
+    private lateinit var parser: JSAP
+    private lateinit var helpMessage: String
+    protected lateinit var parameters: List<Parameter>
+    lateinit var usage: String
+        private set
+
+    /** Child MUST call this method **/
+    protected fun init() {
+        parser = JSAP().apply {
             parameters.forEach { registerParameter(it) }
         }
-    }
-    private val helpMessage: String by lazy {
-        """```
+        usage = parser.usage
+        helpMessage = """```
             |Usage: ${Config.prefix}$name ${parser.usage}
             |
             |$help
             |
             |${parser.help}
             |```""".trimMargin()
+        parser.registerParameter(
+            Switch("help")
+                .setShortFlag('h')
+                .setLongFlag("help")
+                .setHelp("Display a help message.")
+        )
     }
 
-    final override fun execute(event: CommandEvent) {
-        if (!parser.idMap.idExists("help")) {
-            helpMessage
-            parser.registerParameter(
-                Switch("help")
-                    .setShortFlag('h')
-                    .setLongFlag("help")
-                    .setHelp("shows this message")
-            )
-        }
+    // TODO: Write custom help formatter
 
+    final override fun execute(event: CommandEvent) {
         val result: JSAPResult = parser.parse(event.args)
 
         when {
