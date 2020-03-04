@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.github.kittinunf.fuel.core.Body
+import com.martiansoftware.jsap.JSAP
+import com.martiansoftware.jsap.Parameter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
@@ -24,3 +26,5 @@ inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
     other: Iterable<R>,
     transform: (a: T, b: R) -> V
 ): List<V> = flatMap { a: T -> other.map { b -> transform(a, b) } }
+
+val JSAP.parameters: List<Parameter> get() = idMap.idIterator().asSequence().map { getByID(it as String) }.toList()

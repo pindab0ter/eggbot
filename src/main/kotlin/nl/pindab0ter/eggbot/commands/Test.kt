@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
-import com.martiansoftware.jsap.Parameter
 import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
@@ -18,6 +17,7 @@ object Test : ArgumentCommand() {
 
     init {
         name = "test"
+        aliases = arrayOf("t", "testing")
         help = "Command for testing and development purposes. None of these arguments will have any effect."
         hidden = true
         guildOnly = false
@@ -25,10 +25,11 @@ object Test : ArgumentCommand() {
             Switch(AVAILABLE)
                 .setShortFlag('a')
                 .setLongFlag("available")
-                .setHelp("set this player as available"),
+                .setHelp("Set this player as available."),
             UnflaggedOption(PLAYER_NAME)
                 .setRequired(REQUIRED)
-                .setHelp("name of the player")
+                .setDefault("pindab0ter")
+                .setHelp("Name of the player.")
         )
         init()
     }
