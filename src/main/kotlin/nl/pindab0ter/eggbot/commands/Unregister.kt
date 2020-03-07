@@ -25,7 +25,10 @@ object Unregister : EggBotCommand() {
         parameters = listOf(
             UnflaggedOption(DISCORD_USER)
                 .setRequired(REQUIRED)
-                .setHelp("The discord tag of the user to be removed. Must be formatted as a _Discord tag_; ")
+                .setHelp(
+                    "The discord tag of the user to be removed. Must be formatted as a _Discord tag_: " +
+                            "2-32 characters, followed by a `#`-sign and four digits. E.g.: \"`DiscordUser#1234`\""
+                )
         )
         init()
     }
@@ -36,6 +39,13 @@ object Unregister : EggBotCommand() {
         // TODO: Enable @-mentions
         val tag = parameters.getString(DISCORD_USER)
 
+        if (!tag.matches(Regex("""^(?:[^@#:]){2,32}#\d{4}${'$'}"""))) "Not a valid Discord tag. " +
+                "Must be 2-32 characters, followed by a `#`-sign and four digits. E.g.: \"`DiscordUser#1234`\"".let {
+                    event.replyWarning(it)
+                    log.debug { it }
+                    return
+                }
+
         transaction {
             val discordUser = DiscordUser.find { DiscordUsers.discordTag like tag }.firstOrNull()
                 ?: "No registered users found with Discord tag `${tag}`.".let {
@@ -43,8 +53,6 @@ object Unregister : EggBotCommand() {
                     log.debug { it }
                     return@transaction
                 }
-
-            discordUser.delete()
 
             StringBuilder()
                 .append("`${discordUser.discordTag}` has been unregistered, along with the ")
@@ -57,9 +65,11 @@ object Unregister : EggBotCommand() {
                     }
                 )
                 .toString().let {
-                    event.replyWarning(it)
+                    event.replySuccess(it)
                     log.debug { it }
                 }
+
+            discordUser.delete()
         }
     }
 }
