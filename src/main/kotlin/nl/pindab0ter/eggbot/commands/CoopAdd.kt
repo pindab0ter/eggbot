@@ -30,12 +30,12 @@ object CoopAdd : EggBotCommand() {
         name = "coop-add"
         help = "Registers an _already existing_ co-op so it shows up in the co-ops info listing and creates a new role which it assigns to all it's members unless the `no-role` flag is set."
         parameters = listOf(
+            contractIdOption,
+            coopIdOption,
             Switch(NO_ROLE)
                 .setShortFlag('n')
                 .setLongFlag("no-role")
-                .setHelp("Don't create a role for this co-op. Use this when tracking co-ops not part of ${guild.name}"),
-            contractIdOption,
-            coopIdOption
+                .setHelp("Don't create a role for this co-op. Use this when tracking co-ops not part of ${guild.name}")
         )
         adminRequired = true
         botPermissions = arrayOf(MANAGE_ROLES)

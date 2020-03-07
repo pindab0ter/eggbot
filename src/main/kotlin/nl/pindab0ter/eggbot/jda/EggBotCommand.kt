@@ -16,7 +16,7 @@ import nl.pindab0ter.eggbot.utilities.isRegistered
 abstract class EggBotCommand : Command() {
 
     private val parser: JSAP = JSAP()
-    private lateinit var helpMessage: String
+    private lateinit var commandHelp: String
     protected var parameters: List<Parameter>? = null
     var adminRequired: Boolean = false
     var registrationRequired: Boolean = true
@@ -35,16 +35,18 @@ abstract class EggBotCommand : Command() {
     /** Child MUST call this method **/
     protected fun init() {
         parameters?.forEach { parser.registerParameter(it) }
-        arguments = parser.usage
-        helpMessage = generateHelp()
+        arguments = parser.usage.replace("[<", "[").replace(">]", "]")
+        commandHelp = generateCommandHelp()
         parser.registerParameter(helpFlag)
     }
 
-    private fun generateHelp() = StringBuilder().apply {
-        append("ℹ️ **`${Config.prefix}$name ")
+    private fun generateCommandHelp() = StringBuilder().apply {
+        append("ℹ️ **`${Config.prefix}$name")
         if (parameters != null) {
             append(" ")
-            append(parameters?.joinToString(" ") { parameter -> parameter.syntax })
+            append(parameters?.joinToString(" ") { parameter ->
+                parameter.syntax.replace("[<", "[").replace(">]", "]")
+            })
         }
         appendln("`**")
         when (aliases.size) {
@@ -58,7 +60,7 @@ abstract class EggBotCommand : Command() {
         if (parameters != null) {
             appendln("__**Arguments:**__")
             parameters?.forEach { parameter ->
-                appendln("`${parameter.syntax}`")
+                appendln("`${parameter.syntax.replace("[<", "[").replace(">]", "]")}`")
                 appendln("    ${parameter.help}")
             }
         }
@@ -75,7 +77,7 @@ abstract class EggBotCommand : Command() {
                 event.replyError("You must have a role called `${EggBot.adminRole.name}` or higher to use that!")
             dmOnly && event.channelType != PRIVATE ->
                 event.replyError("This command can only be used in DMs. Please try again by DMing ${EggBot.jdaClient.selfUser.asMention}.")
-            result.getBoolean("help", false) -> event.reply(helpMessage)
+            result.getBoolean("help", false) -> event.reply(commandHelp)
             !result.success() -> {
                 val errorMessage = result.errorMessageIterator.next().toString().replace("'", "`")
                 event.replyWarning("$errorMessage Type `${Config.prefix}$name --\u200Dhelp` or `${Config.prefix}$name -\u200Dh` for help with this command.")

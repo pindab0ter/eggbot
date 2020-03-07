@@ -18,7 +18,7 @@ object HelpConsumer : Consumer<CommandEvent> {
                 append("\n`")
                 append(Config.prefix)
                 append(command.name)
-                append(if (command.arguments == null) "`" else " ${command.arguments}`")
+                append(if (command.arguments.isNullOrBlank()) "`" else " ${command.arguments}`")
                 appendln()
                 append("    ${command.help}")
             }

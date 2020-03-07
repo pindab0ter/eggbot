@@ -23,14 +23,15 @@ object Inactive : EggBotCommand() {
         category = FarmersCategory
         name = "inactive"
         help = "Set yourself as inactive for `[days]` amount of days or check whether you're inactive. " +
-                "You can set yourself as active again before that moment by calling ${Config.prefix}${Active.name}"
+                "You can set yourself as active again before that moment by calling ${Config.prefix}${Active.name}" +
                 "Being inactive means your EB will not be counted in the co-op roll call, " +
-                "but you will still be assigned to a team."
+                "but you will still be assigned to a team. If you don't provide `[days]` the command will show you " +
+                "if you're currently set as inactive and if you are for how long."
         parameters = listOf(
             UnflaggedOption(DAYS)
                 .setRequired(NOT_REQUIRED)
                 .setStringParser(INTEGER_PARSER)
-                .setHelp("The amount of days you expect to be inactive for.")
+                .setHelp("The amount of days you want to be set as inactive for.")
         )
         init()
     }
