@@ -7,6 +7,8 @@ import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
@@ -61,6 +63,7 @@ object RollCall : EggBotCommand() {
                 .setLongFlag("dash")
                 .setHelp("Add a dash to the start of the base name.")
         )
+        botPermissions = arrayOf(MANAGE_ROLES)
         init()
     }
 

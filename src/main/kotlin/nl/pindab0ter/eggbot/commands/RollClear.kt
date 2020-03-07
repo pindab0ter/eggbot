@@ -3,6 +3,8 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
+import net.dv8tion.jda.api.Permission
+import net.dv8tion.jda.api.Permission.*
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
@@ -21,6 +23,7 @@ object RollClear : EggBotCommand() {
         help = "Delete all the roles associated with the specified `<contract id>`."
         adminRequired = true
         parameters = listOf(contractIdOption)
+        botPermissions = arrayOf(MANAGE_ROLES)
         init()
     }
 
