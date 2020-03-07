@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
@@ -10,42 +10,30 @@ import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.Duration
 
-object SoloInfo : Command() {
+object SoloInfo : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
     init {
-        name = "solo"
-        aliases = arrayOf("si", "solo-info")
-        help = "Shows the progress of one of your own contracts."
-        arguments = "<contract id> [compact]"
         category = ContractsCategory
-        guildOnly = false
+        name = "solo"
+        help = "Shows the progress of a contract you're not in a co-op for."
+        parameters = listOf(contractIdOption, compactSwitch)
+        init()
     }
 
-    @Suppress("ReplaceSizeZeroCheckWithIsEmpty", "FoldInitializerAndIfToElvis")
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
-        (checkPrerequisites(
-            event,
-            minArguments = 1,
-            maxArguments = 2
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
+    @Suppress("FoldInitializerAndIfToElvis")
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList()!! }
-        val contractId = event.arguments.first()
-        val compact: Boolean = event.arguments.getOrNull(1)?.startsWith("c") == true
+        val contractId: String = parameters.getString(CONTRACT_ID)
+        val compact: Boolean = parameters.getBoolean(COMPACT)
 
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
             val contract = if (backup.hasGame()) backup.contracts.contractsList.find {

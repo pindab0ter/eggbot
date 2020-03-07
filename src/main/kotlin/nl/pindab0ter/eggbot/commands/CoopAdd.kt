@@ -1,7 +1,8 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.Switch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.Config
@@ -12,44 +13,39 @@ import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
-import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
 import nl.pindab0ter.eggbot.utilities.ProgressBar
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
-import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.checkPrerequisites
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @Suppress("FoldInitializerAndIfToElvis")
-object CoopAdd : Command() {
+object CoopAdd : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
     init {
-        name = "coop-add"
-        arguments = "<contract-id> <co-op id> [norole]"
-        help = "Registers an _already existing_ co-op so it shows up in the co-ops info listing and creates a new role which it assigns to all it's members unless `norole` is added."
         category = AdminCategory
-        guildOnly = false
+        name = "coop-add"
+        help = "Registers an _already existing_ co-op so it shows up in the co-ops info listing and creates a new role which it assigns to all it's members unless the `no-role` flag is set."
+        parameters = listOf(
+            Switch(NO_ROLE)
+                .setShortFlag('n')
+                .setLongFlag("no-role")
+                .setHelp("Don't create a role for this co-op. Use this when tracking co-ops not part of ${guild.name}"),
+            contractIdOption,
+            coopIdOption
+        )
+        adminRequired = true
         botPermissions = arrayOf(MANAGE_ROLES)
+        init()
     }
 
-    override fun execute(event: CommandEvent) {
-        (checkPrerequisites(
-            event,
-            adminRequired = true,
-            minArguments = 2,
-            maxArguments = 3
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val contractId: String = event.arguments[0]
-        val coopId: String = event.arguments[1]
-        val noRole: Boolean = event.arguments.getOrNull(2) == "norole"
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val contractId: String = parameters.getString(CONTRACT_ID)
+        val coopId: String = parameters.getString(COOP_ID)
+        val noRole: Boolean = parameters.getBoolean(NO_ROLE)
         val exists: Boolean = transaction {
             Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.toList()
         }.isNotEmpty()

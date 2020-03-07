@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
@@ -9,33 +11,35 @@ import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.database.Farmers
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object WhoIs : Command() {
+object WhoIs : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
+    private const val USER = "user"
 
     init {
-        name = "whois"
-        aliases = arrayOf("who-is", "who", "w", "whothefuckis")
-        arguments = "<in-game name OR discord (nick)name>"
-        help = "See which Discord user is registered with the given in-game name or vice versa."
         category = FarmersCategory
-        guildOnly = false
+        name = "whois"
+        aliases = arrayOf("whothefuckis")
+        help = "See which Discord user is registered with the given in-game name or vice versa."
+        parameters = listOf(
+            UnflaggedOption(USER)
+                .setUsageName("in-game name OR discord (nick)name")
+                .setRequired(true)
+                .setHelp(
+                    "The in-game name or Discord (nick)name of who you want to look up. If the name contains" +
+                            "spaces, use quotation marks."
+                )
+        )
+        init()
     }
 
     @Suppress("FoldInitializerAndIfToElvis")
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
-        if (event.arguments.isEmpty()) missingArguments.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val name = event.arguments.joinToString(" ").replace(Regex("""^@?(\w*)(?:#\d{4})?$"""), "$1")
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val name = parameters.getString(USER).replace(Regex("""^@?(\w*)(?:#\d{4})?$"""), "$1")
 
         transaction {
             (DiscordUser.find {

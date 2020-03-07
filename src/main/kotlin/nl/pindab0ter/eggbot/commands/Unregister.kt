@@ -1,42 +1,40 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAP.REQUIRED
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
-import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
-import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.checkPrerequisites
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object Unregister : Command() {
+object Unregister : EggBotCommand() {
+
     private val log = KotlinLogging.logger { }
+    private const val DISCORD_USER = "discord user"
 
     init {
-        name = "unregister"
-        arguments = "<discord tag>"
-        help = "Unregister a user. This cannot be undone!"
         category = AdminCategory
-        guildOnly = false
+        name = "unregister"
+        adminRequired = true
+        help = "Unregister a user."
+        parameters = listOf(
+            UnflaggedOption(DISCORD_USER)
+                .setRequired(REQUIRED)
+                .setHelp("The discord tag of the user to be removed. Must be formatted as a _Discord tag_; ")
+        )
+        init()
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
         event.channel.sendTyping().queue()
 
-        (checkPrerequisites(
-            event,
-            adminRequired = true,
-            minArguments = 1,
-            maxArguments = 2
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val tag = event.arguments.first()
+        // TODO: Enable @-mentions
+        val tag = parameters.getString(DISCORD_USER)
 
         transaction {
             val discordUser = DiscordUser.find { DiscordUsers.discordTag like tag }.firstOrNull()

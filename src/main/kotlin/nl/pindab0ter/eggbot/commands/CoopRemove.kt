@@ -1,47 +1,37 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
+import net.dv8tion.jda.api.Permission
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
-import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.checkPrerequisites
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
-@Suppress("FoldInitializerAndIfToElvis")
-object CoopRemove : Command() {
+object CoopRemove : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
     init {
-        name = "coop-remove"
-        arguments = "<contract id> <co-op id>"
-        help = "Unregisters a co-op so it no longer shows up in the co-ops listing and delete it's associated role."
         category = AdminCategory
-        guildOnly = false
+        name = "coop-remove"
+        help = "Unregisters a co-op so it no longer shows up in the co-ops listing and delete it's associated role."
+        parameters = listOf(
+            contractIdOption,
+            coopIdOption
+        )
+        adminRequired = true
+        botPermissions = arrayOf(Permission.MANAGE_ROLES)
+        init()
     }
 
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
-        (checkPrerequisites(
-            event,
-            adminRequired = true,
-            minArguments = 2,
-            maxArguments = 2
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val contractId: String = event.arguments[0]
-        val coopId: String = event.arguments[1]
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val contractId: String = parameters.getString(CONTRACT_ID)
+        val coopId: String = parameters.getString(COOP_ID)
         val coop = transaction { Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.firstOrNull() }
 
         if (coop == null) "No co-op registered with that `contract id` and `co-op id`.".let {

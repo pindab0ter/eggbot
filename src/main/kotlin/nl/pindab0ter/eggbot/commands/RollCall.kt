@@ -1,14 +1,20 @@
 package nl.pindab0ter.eggbot.commands
 
 import com.auxbrain.ei.EggInc
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAP.REQUIRED
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.Switch
+import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
+import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
@@ -19,41 +25,51 @@ import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
 
-object RollCall : Command() {
+object RollCall : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
     private val allowedCharacters = Regex("""^[a-zA-Z0-9\-]+$""")
-    private val guild get() = EggBot.guild
+    private const val BASE_NAME = "base name"
+    private const val OVERWRITE = "overwrite"
+    private const val DASH = "start with dash"
 
     init {
-        name = "roll-call"
-        arguments = "<contract id> <base name> [overwrite]"
-        help = "Create a co-op roll call for the specified contract, " +
-                "creating co-ops and server roles and assigns those roles. " +
-                "The names will be based on `<base name>`, " +
-                "which can only consist of letters, digits and dashes and cannot contain spaces."
         category = AdminCategory
-        guildOnly = false
+        name = "roll-call"
+        help = "Create a co-op roll call for the specified contract, creating co-ops and server roles and assigns " +
+                "those roles. The names will start with a letter followed by `<base name>`, which can only consist of " +
+                "letters, digits and dashes, cannot start with a dash and cannot contain spaces."
+        adminRequired = true
+        parameters = listOf(
+            contractIdOption,
+            UnflaggedOption(BASE_NAME)
+                .setRequired(REQUIRED)
+                .setHelp(
+                    "The base name for the co-ops. Can only consist of letters, digits and dashes, cannot start " +
+                            "with a dash and cannot contain spaces. If you want the base name to start with a dash, " +
+                            "use the "
+                ),
+            Switch(OVERWRITE)
+                .setShortFlag('o')
+                .setLongFlag("overwrite")
+                .setHelp(
+                    "Force overwrite existing co-ops registered with ${jdaClient.selfUser.name}. This will also " +
+                            "delete any roles currently associated with that co-op and re-create those."
+                ),
+            Switch(DASH)
+                .setShortFlag('d')
+                .setLongFlag("dash")
+                .setHelp("Add a dash to the start of the base name.")
+        )
+        init()
     }
 
     @Suppress("FoldInitializerAndIfToElvis")
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
-        (checkPrerequisites(
-            event,
-            adminRequired = true,
-            minArguments = 2,
-            maxArguments = 3
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val contractId: String = event.arguments[0]
-        val baseName: String = event.arguments[1]
-        val force: Boolean = event.arguments.getOrNull(2)?.equals("overwrite") == true
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val contractId: String = parameters.getString(CONTRACT_ID)
+        val force: Boolean = parameters.getBoolean(OVERWRITE)
+        val dash: Boolean = parameters.getBoolean(DASH)
+        val baseName = "${if (dash) "-" else ""}${parameters.getString(BASE_NAME)}"
 
         if (!allowedCharacters.matches(baseName)) "Only letters, digits and dashes are allowed.".let {
             event.replyWarning(it)

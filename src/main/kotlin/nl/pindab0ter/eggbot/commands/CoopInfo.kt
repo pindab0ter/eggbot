@@ -1,10 +1,7 @@
 package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
-import com.martiansoftware.jsap.Switch
-import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
@@ -12,7 +9,7 @@ import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
-import nl.pindab0ter.eggbot.jda.ArgumentCommand
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
@@ -20,13 +17,9 @@ import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.Duration
 
 @Suppress("FoldInitializerAndIfToElvis")
-object CoopInfo : ArgumentCommand() {
+object CoopInfo : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
-
-    private const val COMPACT = "compact"
-    private const val CONTRACT_ID = "contract id"
-    private const val COOP_ID = "co-op id"
 
     init {
         name = "coop"
@@ -34,29 +27,16 @@ object CoopInfo : ArgumentCommand() {
                 "simulation to estimate whether/when the goals will be reached and if people will reach their " +
                 "habitat or transport bottlenecks."
         category = ContractsCategory
-        guildOnly = false
-        parameters = listOf(
-            Switch(COMPACT)
-                .setShortFlag('c')
-                .setLongFlag("compact")
-                .setHelp("Use a narrower output to better fit mobile devices."),
-            UnflaggedOption(CONTRACT_ID)
-                .setRequired(REQUIRED)
-                .setHelp("The contract ID. Can be found using ${Config.prefix}${ContractIDs.name}."),
-            UnflaggedOption(COOP_ID)
-                .setRequired(REQUIRED)
-                .setHelp("The co-op ID. Can be found in either `#roll-call` or in-game under \"CO-OP INFO\" in the current egg information screen.")
-        )
+        parameters = listOf(compactSwitch, contractIdOption, coopIdOption)
         init()
     }
 
-    override fun execute(event: CommandEvent, arguments: JSAPResult) {
-        val compact: Boolean = arguments.getBoolean(COMPACT, false)
-        val contractId: String = arguments.getString(CONTRACT_ID)
-        val coopId: String = arguments.getString(COOP_ID)
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val contractId: String = parameters.getString(CONTRACT_ID)
+        val coopId: String = parameters.getString(COOP_ID)
+        val compact: Boolean = parameters.getBoolean(COMPACT, false)
 
         val message: Message = event.channel.sendMessage("Fetching contract information…").complete()
-        event.channel.sendTyping().queue()
 
         getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
             if (status == null || !status.isInitialized) "Could not get co-op status. Are the `contract id` and `co-op id` correct?.".let {

@@ -1,30 +1,57 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAP
+import com.martiansoftware.jsap.JSAP.*
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 
-object Register : Command() {
+object Register : EggBotCommand() {
+
     private val log = KotlinLogging.logger { }
+    private const val IN_GAME_ID = "in-game id"
+    private const val IN_GAME_NAME = "in-game name"
 
     init {
-        name = "register"
-        arguments = "<in-game id> <in-game name>"
-        help = "Register on this server with your in-game name and in-game ID. **DM only!**"
         category = FarmersCategory
-        guildOnly = false
+        name = "register"
+        help = "Register on this server with your in-game name and in-game ID. **DM only!**"
+        registrationRequired = false
+        sendTyping = false
+        parameters = listOf(
+            UnflaggedOption(IN_GAME_ID)
+                .setRequired(REQUIRED)
+                .setHelp(
+                    "You in-game ID. Can be found by going to the Menu → Settings → More and looking in the" +
+                            "bottom of that screen."
+                ),
+            UnflaggedOption(IN_GAME_NAME)
+                .setRequired(REQUIRED)
+                .setHelp(
+                    "Your in-game name. If it contains spaces you must surround it with quotation marks " +
+                            "(`\"name with spaces\"`). You can find your in-game name on iOS by going to your Settings" +
+                            "app → Game Center → Nickname and on Android devices by going to the Play Games app → " +
+                            "Edit profile → Gamer ID."
+                )
+        )
+        botPermissions = arrayOf(
+            MESSAGE_MANAGE
+        )
+        init()
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
         event.author.openPrivateChannel().queue { it.sendTyping().complete() }
 
         if (event.isFromType(TEXT)) {
@@ -39,17 +66,11 @@ object Register : Command() {
             return
         }
 
-        if (event.arguments.size < 2) missingArguments.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
         val registrant = object {
             val discordId = event.author.id
             val discordTag = event.author.asTag
-            val inGameId = event.arguments.first()
-            val inGameName = event.arguments.tail().joinToString(" ")
+            val inGameId = parameters.getString(IN_GAME_ID)
+            val inGameName = parameters.getString(IN_GAME_NAME)
         }
 
         transaction {

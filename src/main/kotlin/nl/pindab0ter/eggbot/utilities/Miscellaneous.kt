@@ -2,10 +2,15 @@ package nl.pindab0ter.eggbot.utilities
 
 import com.github.kittinunf.fuel.core.Body
 import com.martiansoftware.jsap.JSAP
+import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Parameter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import net.dv8tion.jda.api.entities.User
+import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.database.DiscordUser
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.util.*
@@ -27,4 +32,14 @@ inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
     transform: (a: T, b: R) -> V
 ): List<V> = flatMap { a: T -> other.map { b -> transform(a, b) } }
 
-val JSAP.parameters: List<Parameter> get() = idMap.idIterator().asSequence().map { getByID(it as String) }.toList()
+val User.isRegistered: Boolean
+    get() = transaction {
+        DiscordUser.findById(id)?.farmers?.toList()?.sortedBy { it.inGameName }?.isNotEmpty() == true
+    }
+
+val User.isAdmin: Boolean
+    get() = EggBot.guild.getMember(this)?.let { author ->
+        author.isOwner || author == EggBot.botOwner || author.roles.contains(EggBot.adminRole)
+    } == true
+
+fun JSAPResult.getIntOrNull(id: String) = if (contains(id)) getInt(id) else null

@@ -1,53 +1,38 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
-import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.checkPrerequisites
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object RollClear : Command() {
+object RollClear : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
     init {
-        name = "roll-clear"
-        arguments = "<contract id>"
-        aliases = arrayOf("role-clear")
-        help = "Delete all the roles associated with the specified contract id."
         category = AdminCategory
-        guildOnly = false
+        name = "roll-clear"
+        help = "Delete all the roles associated with the specified `<contract id>`."
+        adminRequired = true
+        parameters = listOf(contractIdOption)
+        init()
     }
 
     @Suppress("FoldInitializerAndIfToElvis")
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
-        (checkPrerequisites(
-            event,
-            adminRequired = true,
-            minArguments = 1,
-            maxArguments = 1
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val contract = event.arguments.first()
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val contractId = parameters.getString(CONTRACT_ID)
 
         val coops: List<Coop> = transaction {
-            Coop.find { Coops.contract eq contract }.toList()
+            Coop.find { Coops.contract eq contractId }.toList()
         }
 
-        if (coops.isEmpty()) "Didn't find any co-ops for ${event.arguments.first()}".let {
+        if (coops.isEmpty()) "Didn't find any co-ops for $contractId".let {
             event.replyWarning(it)
             log.debug { it }
             return
@@ -83,13 +68,13 @@ object RollClear : Command() {
 
         StringBuilder().apply {
             if (successes.isNotEmpty()) {
-                appendln("${Config.emojiSuccess} The following coops for `$contract` have been deleted:")
+                appendln("${Config.emojiSuccess} The following coops for `$contractId` have been deleted:")
                 appendln("```")
                 successes.forEach { appendln("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
                 appendln("```")
             }
             if (failures.isNotEmpty()) {
-                appendln("${Config.emojiWarning} The following coops for `$contract` could not be deleted:")
+                appendln("${Config.emojiWarning} The following coops for `$contractId` could not be deleted:")
                 appendln("```")
                 successes.forEach { appendln("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
                 appendln("```")

@@ -1,50 +1,46 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAP.REQUIRED
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.EggBot
+import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.utilities.PrerequisitesCheckResult
-import nl.pindab0ter.eggbot.utilities.arguments
-import nl.pindab0ter.eggbot.utilities.checkPrerequisites
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @Suppress("FoldInitializerAndIfToElvis")
-object CoopReassign : Command() {
+object CoopReassign : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
     private val allowedCharacters = Regex("""^[a-zA-Z0-9\-]+$""")
+    private const val NEW_NAME = "new name"
 
     init {
         name = "coop-reassign"
-        arguments = "<contract id> <co-op id> <new name>"
         help = "Reassigns a co-op and renames it's associated role if available, does NOT rename the co-op in-game. Only letters, digits and dashes allowed."
         category = AdminCategory
-        guildOnly = false
+        parameters = listOf(
+            contractIdOption,
+            coopIdOption,
+            UnflaggedOption(NEW_NAME)
+                .setRequired(REQUIRED)
+                .setHelp("The name of the co-op. No checks are performed, this co-op might not (yet) exist in-game, so make sure it's spelled correctly.")
+        )
+        adminRequired = true
+        botPermissions = arrayOf(MANAGE_ROLES)
+        init()
     }
 
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
-        (checkPrerequisites(
-            event,
-            adminRequired = true,
-            minArguments = 3,
-            maxArguments = 3
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val contractId: String = event.arguments[0]
-        val coopId: String = event.arguments[1]
-        val newName: String = event.arguments[2]
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val contractId: String = parameters.getString(CONTRACT_ID)
+        val coopId: String = parameters.getString(COOP_ID)
+        val newName: String = parameters.getString(NEW_NAME)
         val coop = transaction { Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.firstOrNull() }
 
         if (coop == null) "No co-op registered with that `contract id` and `co-op id`.".let {

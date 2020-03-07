@@ -1,11 +1,11 @@
 package nl.pindab0ter.eggbot.commands
 
 import com.auxbrain.ei.EggInc
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import nl.pindab0ter.eggbot.EggBot
+import com.martiansoftware.jsap.JSAPResult
 import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.asDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.utilities.formattedName
@@ -13,19 +13,17 @@ import nl.pindab0ter.eggbot.utilities.toDateTime
 import org.joda.time.DateTime
 import org.joda.time.Duration
 
-object ContractIDs : Command() {
+object ContractIDs : EggBotCommand() {
 
     init {
-        name = "contract-ids"
-        aliases = arrayOf("ids", "current-ids")
-        help = "Shows the IDs of the currently active contracts"
         category = ContractsCategory
-        guildOnly = false
+        name = "contract-ids"
+        aliases = arrayOf("ids")
+        help = "Shows the IDs of the currently active contracts"
+        init()
     }
 
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
         AuxBrain.getPeriodicals { periodicalsResponse ->
             val (soloContracts, coopContracts) = periodicalsResponse.contracts.contractsList
                 .sortedBy { it.expirationTime }

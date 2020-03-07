@@ -34,10 +34,7 @@ object EggBot {
     val log = KotlinLogging.logger {}
 
     val jdaClient: JDA = JDABuilder(Config.botToken)
-        .addEventListeners(
-            CommandLogger,
-            commandClient
-        )
+        .addEventListeners(CommandLogger)
         .build()
 
     val guild: Guild by lazy {
@@ -93,6 +90,7 @@ object EggBot {
         initializeDatabase()
         startScheduler()
         jdaClient.awaitReady()
+        jdaClient.addEventListener(commandClient)
         log.info { "${jdaClient.selfUser.name} is ready for business!" }
     }
 

@@ -1,7 +1,8 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.Switch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -10,37 +11,37 @@ import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.formatIllions
+import nl.pindab0ter.eggbot.utilities.formatInteger
+import nl.pindab0ter.eggbot.utilities.paddingCharacters
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.math.RoundingMode
 
-object EarningsBonus : Command() {
+object EarningsBonus : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
+    private const val EXTENDED = "extended"
+
+    // TODO: Make non-compact by default (https://dynalist.io/d/UURDu2p-Y76LCBzfbxg7qhlI#z=Zu2QXVgzkeKlaQ4viifuDA_-)
 
     init {
-        name = "earnings-bonus"
-        aliases = arrayOf("eb", "earning-bonus")
-        help = "Shows your EB, EB rank and how much SE till your next rank"
         category = FarmersCategory
-        arguments = "[extended]"
-        guildOnly = false
+        name = "earnings-bonus"
+        aliases = arrayOf("eb")
+        help = "Shows your EB, EB rank and how much SE till your next rank."
+        parameters = listOf(
+            Switch(EXTENDED)
+                .setShortFlag('e')
+                .setLongFlag("extended")
+                .setHelp("Show unshortened output.")
+        )
+        init()
     }
 
-    override fun execute(event: CommandEvent) {
-        event.channel.sendTyping().queue()
-
-        (checkPrerequisites(
-            event,
-            maxArguments = 1
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        val extended = event.arguments.any { it.startsWith("e") }
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val extended = parameters.getBoolean(EXTENDED)
 
         val farmers = transaction {
             DiscordUser.findById(event.author.id)?.farmers?.toList()?.sortedBy { it.inGameName }!!

@@ -1,16 +1,13 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
+import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
@@ -18,35 +15,22 @@ import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.transactions.transaction
 
-object CoopsInfo : Command() {
+object CoopsInfo : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
     init {
-        name = "coops"
-        aliases = arrayOf("coops-info")
-        arguments = "<contract id>"
-        help = "Shows info on all known co-ops for the specified contract."
         category = ContractsCategory
-        guildOnly = false
+        name = "coops"
+        help = "Shows info on all known co-ops for the specified contract."
+        parameters = listOf(contractIdOption)
+        init()
     }
 
-    @Suppress("FoldInitializerAndIfToElvis")
-    override fun execute(event: CommandEvent) {
-
-        (checkPrerequisites(
-            event,
-            minArguments = 1,
-            maxArguments = 1
-        ) as? PrerequisitesCheckResult.Failure)?.message?.let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
+    override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val message = event.channel.sendMessage("Looking for co-ops…").complete()
 
-        val contractId = event.arguments.first()
+        val contractId = parameters.getString(CONTRACT_ID)
         val coops = transaction {
             Coop.find { Coops.contract eq contractId }.toList().sortedBy { it.name }
         }
