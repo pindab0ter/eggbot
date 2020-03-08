@@ -18,7 +18,7 @@ object HelpConsumer : Consumer<CommandEvent> {
                 append("\n`")
                 append(Config.prefix)
                 append(command.name)
-                append(if (command.arguments.isNullOrBlank()) "`" else " ${command.arguments}`")
+                append(if (command.arguments == null) "`" else " ${command.arguments}`")
                 appendln()
                 append("    ${command.help}")
             }
@@ -34,6 +34,7 @@ object HelpConsumer : Consumer<CommandEvent> {
             Arguments in angled brackets (`<>`) are required, arguments in square brackets (`[]`) are optional.
             When it says `[-h|--help]` that means either `-h` or `--help` will work.
             Type the arguments without the brackets. For example: `${Config.prefix}${CoopInfo.name} --compact contract coopname`
+            When an argument contains spaces, surround it with quotation marks (e.g.: `!whois "name with spaces"`) or it will assume each word is an argument.
             For more information on a specific command, type `${Config.prefix}command -h` or `${Config.prefix}command --help`""".trimIndent()
         )
 
