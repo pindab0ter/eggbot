@@ -6,15 +6,20 @@ import com.martiansoftware.jsap.JSAP
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Parameter
 import com.martiansoftware.jsap.Switch
+import mu.KLogger
+import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType.PRIVATE
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.adminRole
+import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.Register
 import nl.pindab0ter.eggbot.utilities.isAdmin
 import nl.pindab0ter.eggbot.utilities.isRegistered
 
 abstract class EggBotCommand : Command() {
 
+    private val log: KLogger = KotlinLogging.logger {}
     private val parser: JSAP = JSAP()
     private lateinit var commandHelp: String
     protected var parameters: List<Parameter>? = null
@@ -71,16 +76,25 @@ abstract class EggBotCommand : Command() {
         val result: JSAPResult = parser.parse(event.args)
 
         when {
-            event.author.isRegistered < registrationRequired ->
-                event.replyError("You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.")
-            event.author.isAdmin < adminRequired ->
-                event.replyError("You must have a role called `${EggBot.adminRole.name}` or higher to use that!")
-            dmOnly && event.channelType != PRIVATE ->
-                event.replyError("This command can only be used in DMs. Please try again by DMing ${EggBot.jdaClient.selfUser.asMention}.")
-            result.getBoolean("help", false) -> event.reply(commandHelp)
+            event.author.isRegistered < registrationRequired -> "You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.".let {
+                log.debug { it }
+                event.replyError(it)
+            }
+            event.author.isAdmin < adminRequired -> "You must have a role called `${adminRole.name}` or higher to use that!".let {
+                log.debug { it }
+                event.replyError(it)
+            }
+            dmOnly && event.channelType != PRIVATE -> "This command can only be used in DMs. Please try again by DMing ${jdaClient.selfUser.asMention}.".let {
+                log.debug { it }
+                event.replyError(it)
+            }
+            result.getBoolean("help") -> event.reply(commandHelp)
             !result.success() -> {
                 val errorMessage = result.errorMessageIterator.next().toString().replace("'", "`")
-                event.replyWarning("$errorMessage Type `${Config.prefix}$name --\u200Dhelp` or `${Config.prefix}$name -\u200Dh` for help with this command.")
+                "$errorMessage Type `${Config.prefix}$name --\u200Dhelp` or `${Config.prefix}$name -\u200Dh` for help with this command.".let {
+                    log.debug { it }
+                    event.replyWarning(it)
+                }
             }
             else -> execute(event, result)
         }
