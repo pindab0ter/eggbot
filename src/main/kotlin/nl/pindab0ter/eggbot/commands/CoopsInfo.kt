@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
@@ -79,7 +80,7 @@ object CoopsInfo : EggBotCommand() {
         val longestEggspected = resultRows.map { it.eggspected }.plus("Eggspected").maxBy { it.length }!!
         val longestMembers = resultRows.map { it.members }.maxBy { it.length }!!
 
-        StringBuilder("`${EggBot.guild.name}` vs _${contractId}_:\n").apply {
+        StringBuilder("`${guild.name}` vs _${contractId}_:\n").apply {
 
             // region Basic info
 

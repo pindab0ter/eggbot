@@ -6,6 +6,7 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
@@ -66,7 +67,7 @@ object SoloInfo : EggBotCommand() {
             simulation.run()
 
             message(simulation, compact).let { message ->
-                if (event.channel == EggBot.botCommandsChannel) {
+                if (event.channel == botCommandsChannel) {
                     event.reply(message)
                 } else {
                     event.replyInDm(message)

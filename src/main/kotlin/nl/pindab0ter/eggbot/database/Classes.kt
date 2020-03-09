@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.database
 
 import com.auxbrain.ei.EggInc
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.clientVersion
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.prophecyBonus
 import nl.pindab0ter.eggbot.utilities.soulBonus
@@ -20,7 +22,7 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
 
     val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
 
-    fun updateTag() = EggBot.guild.getMemberById(discordId)?.user?.asTag.takeIf { it != discordTag }?.let { tag ->
+    fun updateTag() = guild.getMemberById(discordId)?.user?.asTag.takeIf { it != discordTag }?.let { tag ->
         discordTag = tag
     }
 
@@ -96,7 +98,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     }
 
     fun update(backup: EggInc.Backup) {
-        if (backup.clientVersion > EggBot.clientVersion) EggBot.clientVersion = backup.clientVersion
+        if (backup.clientVersion > clientVersion) clientVersion = backup.clientVersion
         if (!backup.hasGame()) return
         if (!backup.userName.matches(Regex("""\[(android-)?unknown\]"""))) inGameName = backup.userName
         prestiges = backup.stats.prestigeCount

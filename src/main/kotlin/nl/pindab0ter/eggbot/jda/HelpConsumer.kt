@@ -4,6 +4,8 @@ import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
+import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.CoopInfo
 import nl.pindab0ter.eggbot.utilities.splitMessage
 import java.util.function.Consumer
@@ -28,7 +30,7 @@ object HelpConsumer : Consumer<CommandEvent> {
             """
             ℹ️ **Help:**
             __**Description:**__
-            ${EggBot.jdaClient.selfUser.name} helps the members of ${EggBot.guild.name} tackle Egg, Inc.'s multiplayer contracts by offering a range of commands that help make people's lives a little bit easier. It won't do your dishes, but it will tell you if you're going to make it to that final goal.
+            ${jdaClient.selfUser.name} helps the members of ${guild.name} tackle Egg, Inc.'s multiplayer contracts by offering a range of commands that help make people's lives a little bit easier. It won't do your dishes, but it will tell you if you're going to make it to that final goal.
 
             __**Instructions:**__
             Arguments in angled brackets (`<>`) are required, arguments in square brackets (`[]`) are optional.

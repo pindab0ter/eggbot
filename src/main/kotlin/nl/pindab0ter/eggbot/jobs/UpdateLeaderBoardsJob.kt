@@ -3,6 +3,11 @@ package nl.pindab0ter.eggbot.jobs
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.TextChannel
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.dronesLeaderBoardChannel
+import nl.pindab0ter.eggbot.EggBot.earningsBonusLeaderBoardChannel
+import nl.pindab0ter.eggbot.EggBot.eliteDronesLeaderBoardChannel
+import nl.pindab0ter.eggbot.EggBot.prestigesLeaderBoardChannel
+import nl.pindab0ter.eggbot.EggBot.soulEggsLeaderBoardChannel
 import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -27,35 +32,35 @@ class UpdateLeaderBoardsJob : Job {
 
         updateLeaderBoard(
             "Earnings Bonus",
-            EggBot.earningsBonusLeaderBoardChannel,
+            earningsBonusLeaderBoardChannel,
             farmers.sortedByDescending { it.earningsBonus },
             Messages::earningsBonusLeaderBoard
         )
 
         updateLeaderBoard(
             "Soul Eggs",
-            EggBot.soulEggsLeaderBoardChannel,
+            soulEggsLeaderBoardChannel,
             farmers.sortedByDescending { it.soulEggs },
             Messages::soulEggsLeaderBoard
         )
 
         updateLeaderBoard(
             "Prestiges",
-            EggBot.prestigesLeaderBoardChannel,
+            prestigesLeaderBoardChannel,
             farmers.sortedByDescending { it.prestiges },
             Messages::prestigesLeaderBoard
         )
 
         updateLeaderBoard(
             "Drone Takedowns",
-            EggBot.dronesLeaderBoardChannel,
+            dronesLeaderBoardChannel,
             farmers.sortedByDescending { it.droneTakedowns },
             Messages::droneTakedownsLeaderBoard
         )
 
         updateLeaderBoard(
             "Elite Drone Takedowns",
-            EggBot.eliteDronesLeaderBoardChannel,
+            eliteDronesLeaderBoardChannel,
             farmers.sortedByDescending { it.eliteDroneTakedowns },
             Messages::eliteDroneTakedownsLeaderBoard
         )

@@ -5,6 +5,7 @@ import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
@@ -40,7 +41,7 @@ object CoopRemove : EggBotCommand() {
             return
         }
 
-        val role = transaction { coop.roleId?.let { EggBot.guild.getRoleById(it) } }
+        val role = transaction { coop.roleId?.let { guild.getRoleById(it) } }
 
         if (role != null) role.delete().queue({
             transaction { coop.delete() }

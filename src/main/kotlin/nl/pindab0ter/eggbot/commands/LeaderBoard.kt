@@ -4,6 +4,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.Messages
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.Farmer
@@ -39,7 +40,7 @@ object LeaderBoard : EggBotCommand() {
 
         (if (parameters.getBoolean(COMPACT)) Messages::earningsBonusLeaderBoardCompact
         else Messages::earningsBonusLeaderBoard).invoke(farmers).let { messages ->
-            if (event.channel == EggBot.botCommandsChannel) {
+            if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {
                 event.replyInDms(messages)

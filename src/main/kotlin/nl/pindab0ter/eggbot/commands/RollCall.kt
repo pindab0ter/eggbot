@@ -10,6 +10,7 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.botOwner
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
@@ -113,7 +114,7 @@ object RollCall : EggBotCommand() {
                         role.delete().submit()
                     }
 
-                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${EggBot.botOwner?.asMention
+                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${botOwner?.asMention
                         ?: "the bot maintainer"}".let {
                         event.replyWarning(it)
                         log.error { it }

@@ -6,6 +6,7 @@ import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
@@ -44,11 +45,11 @@ object WhoIs : EggBotCommand() {
         transaction {
             (DiscordUser.find {
                 DiscordUsers.discordTag like "${name}_____"
-            }.firstOrNull() ?: EggBot.guild.getMembersByNickname(name, true).firstOrNull()?.let { discordUser ->
+            }.firstOrNull() ?: guild.getMembersByNickname(name, true).firstOrNull()?.let { discordUser ->
                 DiscordUser[discordUser.user.id]
             })?.let { discordUser ->
                 val discordUserName = discordUser.discordTag.dropLast(5)
-                val nickname = EggBot.guild.getMemberById(discordUser.discordId)?.nickname
+                val nickname = guild.getMemberById(discordUser.discordId)?.nickname
                     ?.let { nickname -> " ($nickname)" } ?: ""
                 val farmerNames = discordUser.farmers.joinToString("`, `") { it.inGameName }
 
@@ -60,7 +61,7 @@ object WhoIs : EggBotCommand() {
 
             Farmer.find { Farmers.inGameName like name }.firstOrNull()?.let { farmer ->
                 val discordUserName = farmer.discordUser.discordTag.dropLast(5)
-                val nickname = EggBot.guild.getMemberById(farmer.discordUser.discordId)?.nickname
+                val nickname = guild.getMemberById(farmer.discordUser.discordId)?.nickname
                     ?.let { nickname -> " ($nickname)" } ?: ""
 
                 "`${farmer.inGameName}` belongs to `@$discordUserName$nickname`".let {

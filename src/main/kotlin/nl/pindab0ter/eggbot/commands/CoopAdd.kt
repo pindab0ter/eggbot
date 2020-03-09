@@ -87,7 +87,7 @@ object CoopAdd : EggBotCommand() {
                     contributionInfo to transaction { Farmer.findById(contributionInfo.userId)?.discordUser }
                 }.forEachIndexed { i, (contributionInfo, discordUser) ->
                     log.debug { "${contributionInfo.userName}, ${discordUser?.discordTag}" }
-                    if (discordUser != null) EggBot.guild.addRoleToMember(discordUser.discordId, role).submit()
+                    if (discordUser != null) guild.addRoleToMember(discordUser.discordId, role).submit()
                         .handle { _, exception ->
                             if (exception == null) {
                                 successes.add(discordUser)
@@ -106,7 +106,7 @@ object CoopAdd : EggBotCommand() {
                     if (successes.isNotEmpty()) {
                         appendln()
                         appendln("The following players have been assigned the role ${role.asMention}:")
-                        successes.forEach { discordUser -> appendln(EggBot.guild.getMemberById(discordUser.discordId)?.asMention) }
+                        successes.forEach { discordUser -> appendln(guild.getMemberById(discordUser.discordId)?.asMention) }
                     }
                     if (failures.isNotEmpty()) {
                         appendln()

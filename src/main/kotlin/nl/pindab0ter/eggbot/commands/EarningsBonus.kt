@@ -9,6 +9,7 @@ import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.jda.EggBotCommand
@@ -136,7 +137,7 @@ object EarningsBonus : EggBotCommand() {
                     appendln("```")
 
                 }.toString().let {
-                    if (event.channel == EggBot.botCommandsChannel) {
+                    if (event.channel == botCommandsChannel) {
                         event.reply(it)
                     } else event.replyInDm(it) {
                         if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()

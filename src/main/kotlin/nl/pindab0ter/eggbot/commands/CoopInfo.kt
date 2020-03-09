@@ -6,7 +6,7 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.jda.EggBotCommand
@@ -50,7 +50,7 @@ object CoopInfo : EggBotCommand() {
             message.delete().queue()
 
             messageBody(simulation, compact).let { messages ->
-                if (event.channel == EggBot.botCommandsChannel) {
+                if (event.channel == botCommandsChannel) {
                     messages.forEach { message -> event.reply(message) }
                 } else {
                     event.replyInDms(messages)

@@ -7,6 +7,7 @@ import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.Permission.*
 import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
@@ -42,7 +43,7 @@ object RollClear : EggBotCommand() {
         }
 
         val coopsToRoles = coops.zip(coops.map { coop ->
-            coop.roleId?.let { EggBot.guild.getRoleById(it) }
+            coop.roleId?.let { guild.getRoleById(it) }
         })
 
         val message = event.channel.sendMessage("Deleting roles…").complete()

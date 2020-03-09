@@ -6,6 +6,7 @@ import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.jdaClient
 import javax.annotation.Nonnull
 
 
@@ -17,15 +18,15 @@ object CommandLogger : ListenerAdapter() {
         if (!event.author.isBot && listOfNotNull(
                 commandClient.prefix,
                 commandClient.altPrefix,
-                "<@${EggBot.jdaClient.selfUser.id}>"
-            ).any { event.message.contentRaw.startsWith(it) == true }
+                jdaClient.selfUser.asMention
+            ).any { event.message.contentRaw.startsWith(it) }
         ) log.trace {
-            @Suppress("NON_EXHAUSTIVE_WHEN")
             StringBuilder(event.author.name).apply {
                 append(" (")
                 when (event.channelType) {
                     PRIVATE -> append("DM")
                     TEXT -> append("#${event.channel.name}")
+                    else -> Unit
                 }
                 append("): ")
                 append(event.message.contentDisplay)

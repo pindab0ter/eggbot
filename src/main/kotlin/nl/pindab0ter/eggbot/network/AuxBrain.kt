@@ -9,6 +9,7 @@ import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.clientVersion
 import nl.pindab0ter.eggbot.utilities.decodeBase64
 
 
@@ -26,7 +27,7 @@ object AuxBrain {
         .body(
             "data=${EggInc.PeriodicalsRequest
                 .newBuilder()
-                .setClientVersion(EggBot.clientVersion)
+                .setClientVersion(clientVersion)
                 .build()
                 .toByteString()
                 .toStringUtf8()

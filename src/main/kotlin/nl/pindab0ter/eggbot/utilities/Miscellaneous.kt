@@ -9,6 +9,9 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import net.dv8tion.jda.api.entities.User
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.adminRole
+import nl.pindab0ter.eggbot.EggBot.botOwner
+import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -38,8 +41,8 @@ val User.isRegistered: Boolean
     }
 
 val User.isAdmin: Boolean
-    get() = EggBot.guild.getMember(this)?.let { author ->
-        author.isOwner || author == EggBot.botOwner || author.roles.contains(EggBot.adminRole)
+    get() = guild.getMember(this)?.let { author ->
+        author.isOwner || author == botOwner || author.roles.contains(adminRole)
     } == true
 
 fun JSAPResult.getIntOrNull(id: String) = if (contains(id)) getInt(id) else null
