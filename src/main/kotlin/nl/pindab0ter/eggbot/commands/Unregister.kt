@@ -47,27 +47,27 @@ object Unregister : EggBotCommand() {
             }
 
         transaction {
-            val discordUser = DiscordUser.find { DiscordUsers.discordTag like tag }.firstOrNull()
+            val discordUser = DiscordUser.find { DiscordUsers.discordTag eq tag }.firstOrNull()
                 ?: "No registered users found with Discord tag `${tag}`.".let {
                     event.replyWarning(it)
                     log.debug { it }
                     return@transaction
                 }
 
-            StringBuilder()
-                .append("`${discordUser.discordTag}` has been unregistered, along with the ")
-                .append(
-                    when {
-                        discordUser.farmers.count() > 1 ->
-                            "farmers `${discordUser.farmers.joinToString(", ") { it.inGameName }}`"
-                        else ->
-                            "farmer `${discordUser.farmers.first().inGameName}`"
-                    }
-                )
-                .toString().let {
-                    event.replySuccess(it)
-                    log.debug { it }
+            StringBuilder().apply {
+
+                append("`${discordUser.discordTag}` has been unregistered")
+                when {
+                    discordUser.farmers.count() == 1 ->
+                        append(", along with the farmer `${discordUser.farmers.first().inGameName}`")
+                    discordUser.farmers.count() > 1 ->
+                        append(", along with the farmers `${discordUser.farmers.joinToString(", ") { it.inGameName }}`")
                 }
+                append(".")
+            }.toString().let {
+                event.replySuccess(it)
+                log.debug { it }
+            }
 
             discordUser.delete()
         }
