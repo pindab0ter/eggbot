@@ -39,12 +39,12 @@ object Unregister : EggBotCommand() {
         // TODO: Enable @-mentions
         val tag = parameters.getString(DISCORD_USER)
 
-        if (!tag.matches(Regex("""^(?:[^@#:]){2,32}#\d{4}${'$'}"""))) "Not a valid Discord tag. " +
-                "Must be 2-32 characters, followed by a `#`-sign and four digits. E.g.: \"`DiscordUser#1234`\"".let {
-                    event.replyWarning(it)
-                    log.debug { it }
-                    return
-                }
+        if (!tag.matches(Regex("""^(?:[^@#:]){2,32}#\d{4}${'$'}""")))
+            "Not a valid Discord tag. Must be 2-32 characters, followed by a `#`-sign and four digits. E.g.: \"`DiscordUser#1234`\"".let {
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
 
         transaction {
             val discordUser = DiscordUser.find { DiscordUsers.discordTag like tag }.firstOrNull()
