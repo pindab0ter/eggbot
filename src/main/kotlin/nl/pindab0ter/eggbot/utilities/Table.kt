@@ -1,82 +1,91 @@
 package nl.pindab0ter.eggbot.utilities
 
-import nl.pindab0ter.eggbot.utilities.Aligned.*
-import kotlin.text.StringBuilder
+import nl.pindab0ter.eggbot.utilities.ValueColumn.Aligned.LEFT
+import nl.pindab0ter.eggbot.utilities.ValueColumn.Aligned.RIGHT
 
 @DslMarker
 annotation class TableMarker
 
-class Table(
-    val columns: List<Column>
-) {
-    val amountOfRows: Int = columns.first().cells.size
+@TableMarker
+class Table {
+    private val columns: MutableList<Column> = mutableListOf()
+    private val valueColumns: List<ValueColumn> get() = columns.filterIsInstance<ValueColumn>()
+    private val amountOfRows: Int get() = (columns.first { it is ValueColumn } as? ValueColumn)?.values?.size ?: 0
 
-    init {
-        require(columns.all { it.size == amountOfRows }) { "All columns must be of equal size" }
+    private fun <T : Column> initColumn(column: T, init: T.() -> Unit): T {
+        column.init()
+        columns += column
+        return column
     }
 
+    fun valueColumn(init: ValueColumn.() -> Unit): ValueColumn = initColumn(ValueColumn(), init)
+    fun dividerColumn(init: DividerColumn.() -> Unit): DividerColumn = initColumn(DividerColumn(), init)
+
     override fun toString(): String = StringBuilder().apply {
+        require(valueColumns.isNotEmpty()) { "Table must have ValueColumns" }
+        require(valueColumns.all { it.values?.size == amountOfRows }) { "All columns must be of equal size" }
 
-        // Calculate spacing:
+        // Add SpacingColumns between adjacent left and right aligned columns
+        val spacedColumns: List<Column> = columns.interleave(columns.zipWithNext { left, right ->
+            if (left is ValueColumn && left.alignment == LEFT && right is ValueColumn && right.alignment == RIGHT)
+                SpacingColumn(left, right)
+            else
+                null
+        }).filterNotNull()
 
-        val spacingColumns = columns.zipWithNext { left, right ->
-            if (left is ValueColumn && left.aligned == LEFT &&
-                right is ValueColumn && right.aligned == RIGHT
-            ) {
-                val widest = left.cells.zip(right.cells).map { (a, b) -> a.length + b.length }.max()!!
+        // TODO: Headers
 
-                // TODO: Move to SpacingColumn constructor/init
-                SpacingColumn(left.cells.zip(right.cells) { a: String, b: String ->
-                    widest - (a.length + b.length)
-                })
-
-            } else {
-                SpacingColumn(length, 1)
-            }
-        }
-
-        val spacedColumns = columns.interleave(spacingColumns)
-
+        // For each row of data
         (0 until amountOfRows).forEach { row ->
+
+            // Loop through each column
             spacedColumns.forEach { column ->
-                append(column.cells[row])
+
+                // Pad left
+                if (column is SuppliedColumn) append(" ".repeat(column.leftPadding))
+
+                // Draw
+                when (column) {
+                    is DividerColumn -> append(column.divider)
+                    is SpacingColumn -> append(column.spacing[row])
+                    is ValueColumn -> append(column.values!![row])
+                }
+
+                // Pad right
+                if (column is SuppliedColumn && column != columns.last()) append(" ".repeat(column.rightPadding))
             }
             appendln()
         }
     }.toString()
 }
 
-abstract class Column(
-    val header: String,
-    val cells: List<String>
-) {
-    init {
-        require(cells.isNotEmpty()) { "Columns must have data" }
+inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
+
+@TableMarker
+interface Column
+
+abstract class SuppliedColumn : Column {
+    var leftPadding = 0
+    var rightPadding = 1
+}
+
+class ValueColumn : SuppliedColumn() {
+    enum class Aligned { LEFT, RIGHT }
+
+    var header: String? = null
+    var alignment: Aligned = LEFT
+    var values: List<String>? = null
+}
+
+open class DividerColumn : SuppliedColumn() {
+    var divider: String = "│"
+}
+
+private class SpacingColumn(left: ValueColumn, right: ValueColumn) : Column {
+    val spacing = left.values!!.zip(right.values!!).let { columns ->
+        val widestPair = columns.map { (a, b) -> a.length + b.length }.max()!!
+        columns.map { (a: String, b: String) ->
+            " ".repeat(widestPair - (a.length + b.length))
+        }
     }
-
-    val size: Int = cells.size
-    val widths: List<Int> = cells.map(String::length)
-    val widest: Int = widths.max()!!
 }
-
-open class DividerColumn(
-    divider: String = "│",
-    size: Int
-) : Column(divider, List(size) { divider })
-
-class SpacingColumn : Column {
-    constructor(size: Int, width: Int) : super(" ", List(size) { " ".repeat(width) })
-    constructor(widths: List<Int>) : super(" ", widths.map { width -> " ".repeat(width) })
-}
-
-enum class Aligned {
-    LEFT, RIGHT
-}
-
-class ValueColumn(
-    header: String,
-    values: List<Any>,
-    val aligned: Aligned = LEFT
-) : Column(header, values.map(Any::toString))
-
-// fun table(init: Table.() -> Unit): Table = Table().also(init)
