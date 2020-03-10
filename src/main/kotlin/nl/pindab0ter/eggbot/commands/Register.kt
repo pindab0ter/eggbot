@@ -88,6 +88,7 @@ object Register : EggBotCommand() {
                 "You are already registered with the in-game names: `${discordUser.farmers.joinToString("`, `") { it.inGameName }}`.".let {
                     event.replyWarning(it)
                     log.debug { it }
+                    rollback()
                     return@transaction
                 }
 
@@ -96,6 +97,7 @@ object Register : EggBotCommand() {
                 "Someone else has already registered the in-game name `${registrant.inGameName}`.".let {
                     event.replyWarning(it)
                     log.debug { it }
+                    rollback()
                     return@transaction
                 }
 
@@ -105,6 +107,7 @@ object Register : EggBotCommand() {
                         "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
                     event.replyError(it)
                     log.debug { it }
+                    rollback()
                     return@transaction
                 }
 
@@ -114,6 +117,7 @@ object Register : EggBotCommand() {
                         "If this is you, please register with `${event.client.textualPrefix}$name ${backup.userId} ${backup.userName}`").let {
                     event.replyError(it)
                     log.debug { it }
+                    rollback()
                     return@transaction
                 }
 
