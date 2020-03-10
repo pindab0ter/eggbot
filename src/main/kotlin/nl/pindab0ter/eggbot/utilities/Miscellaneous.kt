@@ -35,6 +35,9 @@ inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
     transform: (a: T, b: R) -> V
 ): List<V> = flatMap { a: T -> other.map { b -> transform(a, b) } }
 
+fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
+    zip(other).flatMap(Pair<T, T>::toList) + if (size > other.size) drop(other.size) else other.drop(size)
+
 val User.isRegistered: Boolean
     get() = transaction {
         DiscordUser.findById(id)?.farmers?.toList()?.sortedBy { it.inGameName }?.isNotEmpty() == true
