@@ -21,7 +21,10 @@ class Table {
     }
 
     fun column(init: ValueColumn.() -> Unit): ValueColumn = initColumn(ValueColumn(), init)
-    fun divider(init: DividerColumn.() -> Unit): DividerColumn = initColumn(DividerColumn(), init)
+    fun divider(border: Char = '│', intersection: Char = '╪'): DividerColumn = initColumn(DividerColumn(), {
+        this.border = border
+        this.intersection = intersection
+    })
 
     override fun toString(): String = StringBuilder().apply {
         require(valueColumns.isNotEmpty()) { "Table must have ValueColumns" }
@@ -42,7 +45,7 @@ class Table {
             // Draw table header
             appendRow(spacedColumns) {
                 when (this) {
-                    is DividerColumn -> divider
+                    is DividerColumn -> "$border"
                     is SpacingColumn -> header
                     is ValueColumn -> header
                     else -> ""
@@ -52,7 +55,7 @@ class Table {
             // Draw header border
             appendRow(spacedColumns, '═') {
                 when (this) {
-                    is DividerColumn -> intersection
+                    is DividerColumn -> "$intersection"
                     is SpacingColumn -> '═'.repeat(header.length)
                     is ValueColumn -> '═'.repeat(header.length)
                     else -> ""
@@ -64,7 +67,7 @@ class Table {
         (0 until amountOfRows).forEach { row ->
             appendRow(spacedColumns) {
                 when (this) {
-                    is DividerColumn -> divider
+                    is DividerColumn -> "$border"
                     is SpacingColumn -> spacing[row]
                     is ValueColumn -> cells!![row]
                     else -> ""
@@ -91,8 +94,8 @@ class Table {
     }
 
     open class DividerColumn : SuppliedColumn() {
-        var divider: String = "│"
-        var intersection: String = "╪"
+        var border: Char = '│'
+        var intersection: Char = '╪'
     }
 
     private class SpacingColumn(left: Column, right: Column) : Column {
