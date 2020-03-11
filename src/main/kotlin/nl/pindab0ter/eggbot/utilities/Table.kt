@@ -14,6 +14,65 @@ class Table {
     var title: String? = null
     var displayHeader: Boolean = true
 
+    @TableMarker
+    interface Column
+
+    abstract class SuppliedColumn : Column {
+        var leftPadding = 0
+        var rightPadding = 0
+    }
+
+    class ValueColumn : SuppliedColumn() {
+        enum class Aligned { LEFT, RIGHT }
+
+        var header: String = ""
+        var alignment: Aligned = LEFT
+        var cells: List<String>? = null
+    }
+
+    open class DividerColumn : SuppliedColumn() {
+        var border: Char = '│'
+        var intersection: Char = '╪'
+    }
+
+    private class SpacingColumn(left: Column, right: Column) : Column {
+        val header: String
+        val spacing: List<String>
+
+        init {
+            val (header, spacing) = when {
+                left is ValueColumn && left.alignment == LEFT && right is ValueColumn && right.alignment == RIGHT ->
+                    left.widths.zip(right.widths).let { rows ->
+                        val widestPair = rows.map { (a, b) -> a + b }.max()!!
+
+                        ' '.repeat(widestPair - (left.header.length + right.header.length)) to rows.map { (a, b) ->
+                            ' '.repeat(widestPair - (a + b))
+                        }
+                    }
+                left is ValueColumn && left.alignment == LEFT ->
+                    left.widest.let { widest ->
+                        ' '.repeat(widest - left.header.length) to left.widths.map { width ->
+                            ' '.repeat(widest - width)
+                        }
+                    }
+                right is ValueColumn && right.alignment == RIGHT ->
+                    right.widest.let { widest ->
+                        ' '.repeat(widest - right.header.length) to right.widths.map { width ->
+                            ' '.repeat(widest - width)
+                        }
+                    }
+                else -> "" to listOf("")
+            }
+
+            this.header = header
+            this.spacing = spacing
+        }
+
+        // Moved here instead of in ValueColumn to prevent visibility from constructor lambda
+        val ValueColumn.widths: List<Int> get() = cells?.plus(header)?.map { row -> row.length } ?: emptyList()
+        val ValueColumn.widest: Int get() = cells?.plus(header)?.map { row -> row.length }?.max() ?: 0
+    }
+
     private fun <T : Column> initColumn(column: T, init: T.() -> Unit): T {
         column.init()
         columns += column
@@ -76,65 +135,6 @@ class Table {
         }
         appendln("```")
     }.toString()
-
-    @TableMarker
-    interface Column
-
-    abstract class SuppliedColumn : Column {
-        var leftPadding = 0
-        var rightPadding = 0
-    }
-
-    class ValueColumn : SuppliedColumn() {
-        enum class Aligned { LEFT, RIGHT }
-
-        var header: String = ""
-        var alignment: Aligned = LEFT
-        var cells: List<String>? = null
-    }
-
-    open class DividerColumn : SuppliedColumn() {
-        var border: Char = '│'
-        var intersection: Char = '╪'
-    }
-
-    private class SpacingColumn(left: Column, right: Column) : Column {
-        val header: String
-        val spacing: List<String>
-
-        init {
-            val (header, spacing) = when {
-                left is ValueColumn && left.alignment == LEFT && right is ValueColumn && right.alignment == RIGHT ->
-                    left.widths.zip(right.widths).let { rows ->
-                        val widestPair = rows.map { (a, b) -> a + b }.max()!!
-
-                        ' '.repeat(widestPair - (left.header.length + right.header.length)) to rows.map { (a, b) ->
-                            ' '.repeat(widestPair - (a + b))
-                        }
-                    }
-                left is ValueColumn && left.alignment == LEFT ->
-                    left.widest.let { widest ->
-                        ' '.repeat(widest - left.header.length) to left.widths.map { width ->
-                            ' '.repeat(widest - width)
-                        }
-                    }
-                right is ValueColumn && right.alignment == RIGHT ->
-                    right.widest.let { widest ->
-                        ' '.repeat(widest - right.header.length) to right.widths.map { width ->
-                            ' '.repeat(widest - width)
-                        }
-                    }
-                else -> "" to listOf("")
-            }
-
-            this.header = header
-            this.spacing = spacing
-        }
-
-        // Moved here instead of in ValueColumn to prevent visibility from constructor lambda
-        val ValueColumn.widths: List<Int> get() = cells?.plus(header)?.map { row -> row.length } ?: emptyList()
-        val ValueColumn.widest: Int get() = cells?.plus(header)?.map { row -> row.length }?.max() ?: 0
-    }
 }
 
 inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
