@@ -20,8 +20,8 @@ class Table {
         return column
     }
 
-    fun valueColumn(init: ValueColumn.() -> Unit): ValueColumn = initColumn(ValueColumn(), init)
-    fun dividerColumn(init: DividerColumn.() -> Unit): DividerColumn = initColumn(DividerColumn(), init)
+    fun column(init: ValueColumn.() -> Unit): ValueColumn = initColumn(ValueColumn(), init)
+    fun divider(init: DividerColumn.() -> Unit): DividerColumn = initColumn(DividerColumn(), init)
 
     override fun toString(): String = StringBuilder().apply {
         require(valueColumns.isNotEmpty()) { "Table must have ValueColumns" }
