@@ -45,22 +45,25 @@ class ContractSimulation constructor(
     val goalReachedMoments: SortedSet<GoalReachedMoment> = goals.map { goal ->
         GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
     }.toSortedSet()
-    private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
-    private val projectedEggsPerMinute: BigDecimal get() = projectedPopulation * eggsPerChickenPerMinute
-    val goalsReached: Int get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
+    private val currentGoal: GoalReachedMoment?
+        get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
+    private val projectedEggsPerMinute: BigDecimal
+        get() = projectedPopulation * eggsPerChickenPerMinute
+    val goalsReached: Int
+        get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
 
     fun step() {
-        elapsed += standardMinutes(1)
-        projectedEggs += projectedEggsPerMinute.coerceAtMost(shippingRatePerMinute)
-        projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
-        if (currentGoal != null && projectedEggs >= currentGoal!!.target)
-            currentGoal!!.moment = elapsed
         if (habBottleneckReached == null && projectedPopulation >= habsMaxCapacity)
             habBottleneckReached = elapsed
         if (transportBottleneckReached == null && projectedEggsPerMinute >= shippingRatePerMinute)
             transportBottleneckReached = elapsed
+        if (currentGoal != null && projectedEggs >= currentGoal!!.target)
+            currentGoal!!.moment = elapsed
         if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
             eggspected = projectedEggs
+        elapsed += standardMinutes(1)
+        projectedEggs += projectedEggsPerMinute.coerceAtMost(shippingRatePerMinute)
+        projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
     }
 
     fun run() {
