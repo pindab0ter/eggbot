@@ -33,10 +33,11 @@ import java.util.*
 object EggBot {
     val log = KotlinLogging.logger {}
 
+    // region Public values
+
     val jdaClient: JDA = JDABuilder(Config.botToken)
         .addEventListeners(CommandLogger)
         .build()
-
     val guild: Guild by lazy {
         jdaClient.getGuildById(Config.guildId) ?: throw Exception("Could not find guild with ID ${Config.guildId}")
     }
@@ -83,6 +84,10 @@ object EggBot {
     val emoteGoldenEgg: Emote? by lazy { Config.emoteGoldenEggId?.let { id -> guild.getEmoteById(id) } }
     val emoteSoulEgg: Emote? by lazy { Config.emoteSoulEggId?.let { id -> guild.getEmoteById(id) } }
     val emoteProphecyEgg: Emote? by lazy { Config.emoteProphecyEggId?.let { id -> guild.getEmoteById(id) } }
+
+    fun EggInc.Egg.toEmote() = eggsToEmotes[this]?.asMention ?: "🥚"
+
+    // endregion
 
     @JvmStatic
     fun main(args: Array<String>) {
