@@ -79,7 +79,7 @@ class Table {
 
     abstract class SuppliedColumn : Column {
         var leftPadding = 0
-        var rightPadding = 1
+        var rightPadding = 0
     }
 
     class ValueColumn : SuppliedColumn() {
