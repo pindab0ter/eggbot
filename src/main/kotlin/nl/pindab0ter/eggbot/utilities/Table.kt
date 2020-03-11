@@ -10,7 +10,7 @@ annotation class TableMarker
 class Table {
     private val columns: MutableList<Column> = mutableListOf()
     private val valueColumns: List<ValueColumn> get() = columns.filterIsInstance<ValueColumn>()
-    private val amountOfRows: Int get() = (columns.first { it is ValueColumn } as? ValueColumn)?.values?.size ?: 0
+    private val amountOfRows: Int get() = (columns.first { it is ValueColumn } as? ValueColumn)?.cells?.size ?: 0
 
     private fun <T : Column> initColumn(column: T, init: T.() -> Unit): T {
         column.init()
@@ -23,7 +23,7 @@ class Table {
 
     override fun toString(): String = StringBuilder().apply {
         require(valueColumns.isNotEmpty()) { "Table must have ValueColumns" }
-        require(valueColumns.all { it.values?.size == amountOfRows }) { "All columns must be of equal size" }
+        require(valueColumns.all { it.cells?.size == amountOfRows }) { "All columns must be of equal size" }
 
         // Add SpacingColumns between adjacent left and right aligned columns
         val spacedColumns: List<Column> = columns.interleave(columns.zipWithNext { left, right ->
@@ -59,7 +59,7 @@ class Table {
                 when (this) {
                     is DividerColumn -> divider
                     is SpacingColumn -> spacing[row]
-                    is ValueColumn -> values!![row]
+                    is ValueColumn -> cells!![row]
                     else -> ""
                 }
             }
@@ -79,7 +79,7 @@ class Table {
 
         var header: String = ""
         var alignment: Aligned = LEFT
-        var values: List<String>? = null
+        var cells: List<String>? = null
     }
 
     open class DividerColumn : SuppliedColumn() {
@@ -93,7 +93,7 @@ class Table {
 
         init {
             require(left.alignment == LEFT && right.alignment == RIGHT) { "Can only space opposing columns" }
-            require(left.values != null && right.values != null) { "Values can not be null" }
+            require(left.cells != null && right.cells != null) { "Values can not be null" }
 
             val (header, spacing) = left.widths!!.zip(right.widths!!).let { rows ->
                 val widestPair = rows.map { (a, b) -> a + b }.max()!!
@@ -108,9 +108,8 @@ class Table {
         }
 
         // Moved here instead of in ValueColumn to prevent visibility from constructor lambda
-        val ValueColumn.widths: List<Int>? get() = values?.plus(header)?.map { row -> row.length }
+        val ValueColumn.widths: List<Int>? get() = cells?.plus(header)?.map { row -> row.length }
     }
 }
-
 
 inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
