@@ -11,6 +11,7 @@ class Table {
     private val columns: MutableList<Column> = mutableListOf()
     private val valueColumns: List<ValueColumn> get() = columns.filterIsInstance<ValueColumn>()
     private val amountOfRows: Int get() = (columns.first { it is ValueColumn } as? ValueColumn)?.cells?.size ?: 0
+    var displayHeader: Boolean = true
 
     private fun <T : Column> initColumn(column: T, init: T.() -> Unit): T {
         column.init()
@@ -33,23 +34,25 @@ class Table {
                 null
         }).filterNotNull()
 
-        // Draw table header
-        appendRow(spacedColumns) {
-            when (this) {
-                is DividerColumn -> divider
-                is SpacingColumn -> header
-                is ValueColumn -> header
-                else -> ""
+        if (displayHeader) {
+            // Draw table header
+            appendRow(spacedColumns) {
+                when (this) {
+                    is DividerColumn -> divider
+                    is SpacingColumn -> header
+                    is ValueColumn -> header
+                    else -> ""
+                }
             }
-        }
 
-        // Draw header border
-        appendRow(spacedColumns, '═') {
-            when (this) {
-                is DividerColumn -> intersection
-                is SpacingColumn -> '═'.repeat(header.length)
-                is ValueColumn -> '═'.repeat(header.length)
-                else -> ""
+            // Draw header border
+            appendRow(spacedColumns, '═') {
+                when (this) {
+                    is DividerColumn -> intersection
+                    is SpacingColumn -> '═'.repeat(header.length)
+                    is ValueColumn -> '═'.repeat(header.length)
+                    else -> ""
+                }
             }
         }
 
