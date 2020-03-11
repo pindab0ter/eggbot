@@ -135,3 +135,4 @@ class Table {
 }
 
 inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
+inline fun StringBuilder.appendTable(init: Table.() -> Unit): StringBuilder = append(Table().also(init).toString())
