@@ -46,12 +46,12 @@ object HelpConsumer : Consumer<CommandEvent> {
                     .filterNot { (_, commands) -> commands.all { command -> command.isHidden } }
                     .forEachIndexed { i, (category, commands) ->
                         append(if (i == 0) "\n" else "\n\n")
-                        append("\u200D__${if (category != null) category.name else "No category"}:__")
+                        append("\u200B__${if (category != null) category.name else "No category"}:__")
                         append(commands)
                     }
             } else append(commands)
         }
-    }.toString().splitMessage(prefix = "Continued…\n", separator = '\u200D').forEach { section ->
+    }.toString().splitMessage(prefix = "Continued…\n", separator = '\u200B').forEach { section ->
         event.reply(section)
     }
 }

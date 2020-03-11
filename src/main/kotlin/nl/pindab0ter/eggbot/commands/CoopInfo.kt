@@ -14,7 +14,8 @@ import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
-import org.joda.time.Duration
+import nl.pindab0ter.eggbot.utilities.Table.ValueColumn.Aligned.*
+import org.joda.time.Duration.*
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
@@ -82,318 +83,253 @@ object CoopInfo : EggBotCommand() {
                 
                 This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent()
         )
-        is CoopContractSimulationResult.InProgress -> result.simulation.let { simulation ->
-            StringBuilder().apply {
-                val farms = simulation.farms
+        is CoopContractSimulationResult.InProgress -> StringBuilder().apply {
+            result.simulation.apply {
+                val farms = farms
 
-                appendln("`${simulation.coopId}` vs. _${simulation.contractName}_:")
+                appendln("`${coopId}` vs. _${contractName}_:")
                 appendln()
 
                 // region Goals
 
-                appendln("__${simulation.egg.toEmote()} **Goals** (${simulation.goalsReached}/${simulation.goals.count()}):__ ```")
-                simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
-                    append("${index + 1}. ")
-                    appendPaddingCharacters(
-                        goal.formatIllions(true),
-                        simulation.goalReachedMoments.map { it.target.formatIllions(rounded = true) }
-                    )
-                    append(goal.formatIllions(true))
-                    append(
-                        when {
-                            moment == null || moment > simulation.timeRemaining -> " 🔴 "
-                            moment == Duration.ZERO -> " 🏁 "
-                            else -> " 🟢 "
-                        }
-                    )
-                    when (moment) {
-                        null -> append("More than a year")
-                        Duration.ZERO -> append("Goal reached!")
-                        else -> append(moment.asDaysHoursAndMinutes(compact))
+                appendTable {
+                    title = "__${egg.toEmote()} **Goals** (${goalsReached}/${goals.count()}):__"
+                    displayHeader = false
+
+                    column {
+                        rightPadding = 1
+                        cells = goals.mapIndexed { index, _ -> "${index + 1}." }
                     }
-                    if (index + 1 < simulation.goals.count()) appendln()
+                    column {
+                        cells = goals.map { goal -> goal.formatIllions(true) }
+                    }
+                    column {
+                        leftPadding = 2
+                        rightPadding = 2
+                        cells = goalReachedMoments.map { (_, moment) ->
+                            when {
+                                moment == null || moment > timeRemaining -> "🔴"
+                                moment == ZERO -> "🏁"
+                                else -> "🟢"
+                            }
+                        }
+                    }
+                    column {
+                        cells = goalReachedMoments.map { (_, moment) ->
+                            when (moment) {
+                                null -> "More than a year"
+                                ZERO -> "Goal reached!"
+                                else -> moment.asDaysHoursAndMinutes(compact)
+                            }
+                        }
+                    }
                 }
-                appendln("```")
 
                 // endregion Goals
 
                 // region Basic info and totals
 
                 appendln("__🗒️ **Basic info**:__ ```")
-                simulation.apply {
-                    appendln("Eggspected:       ${eggspected.formatIllions()}")
-                    appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
-                    append("Current chickens: ${currentPopulation.formatIllions()} ")
-                    if (!compact) append("(${populationIncreasePerHour.formatIllions()}/hr)")
-                    appendln()
-                    append("Current eggs:     ${currentEggs.formatIllions()} ")
-                    if (!compact) append("(${eggsPerHour.formatIllions()}/hr) ")
-                    appendln()
-                    appendln("Tokens available: $tokensAvailable")
-                    appendln("Tokens spent:     $tokensSpent")
-                    if (simulation.coopStatus.public) appendln("Access:           This co-op is PUBLIC")
-                    appendln("```")
-                }
+                appendln("Eggspected:       ${eggspected.formatIllions()}")
+                appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
+                append("Current chickens: ${currentPopulation.formatIllions()} ")
+                if (!compact) append("(${populationIncreasePerHour.formatIllions()}/hr)")
+                appendln()
+                append("Current eggs:     ${currentEggs.formatIllions()} ")
+                if (!compact) append("(${eggsPerHour.formatIllions()}/hr) ")
+                appendln()
+                appendln("Tokens available: $tokensAvailable")
+                appendln("Tokens spent:     $tokensSpent")
+                if (coopStatus.public) appendln("Access:           This co-op is PUBLIC")
+                appendln("```")
+
+                append('\u200B')
 
                 // endregion Basic info and totals
 
-                // region Members
-
-                appendln("__🚜 **Members** (${farms.count()}/${simulation.maxCoopSize}):__")
-                appendln("```")
-
-                // region Table header
-
-                val name = "Name"
-                val eggs = "Eggs"
-                val eggRate = "Egg/hr"
-                val chickens = "Chickens"
-                val chickenRate = "Chicken/hr"
-                val tokensAvailable = "Tkns"
-                val tokensSpent = "Spent"
-                val shortenedNames = farms.map { farm ->
-                    farm.farmerName.let { name ->
-                        if (name.length <= 9) name
-                        else "${name.substring(0 until 9)}…"
-                    }
-                }
-
                 if (!compact) {
-                    appendPaddingCharacters("", farms.count(), "#")
-                    append(": ")
-                }
-                append("$name ")
-                if (compact) {
-                    appendPaddingCharacters(
-                        name,
-                        farms.mapIndexed { i, f ->
-                            "${shortenedNames[i]}${if (!f.isActive) " zZ" else ""}"
+
+                    // region Non-compact
+
+                    appendTable {
+                        title = "__🚜 **Members** (${farms.count()}/${maxCoopSize}):__"
+
+                        column {
+                            header = "${'#'.repeat("${farms.count()}".length)}:"
+                            rightPadding = 1
+                            cells = (1..farms.count()).map { index -> "$index:" }
                         }
-                    )
-                } else {
-                    appendPaddingCharacters(
-                        name,
-                        farms.map {
-                            it.farmerName + if (!it.isActive) " zZ" else ""
-                        }
-                    )
-                }
-                appendPaddingCharacters(eggs, farms.map { it.currentEggs.formatIllions() })
-                append(eggs)
-                append("│")
-                append(eggRate)
-                appendPaddingCharacters(
-                    eggRate,
-                    farms.map { it.currentEggsPerHour.formatIllions() + "/hr" }.plus(eggRate)
-                )
-                append(" ")
-                appendPaddingCharacters(
-                    chickens,
-                    farms.map { it.currentPopulation.formatIllions() }.plus(chickens)
-                )
-
-                if (!compact) {
-                    append(chickens)
-                    append("|")
-                    append(chickenRate)
-                    append(" ")
-                    append(tokensAvailable)
-                    append("│")
-                    append(tokensSpent)
-                }
-                appendln()
-
-                if (!compact) append("══")
-                append("═════")
-                if (compact) {
-                    appendPaddingCharacters(
-                        name,
-                        farms.mapIndexed { i, f -> "${shortenedNames[i]}${if (!f.isActive) " zZ" else ""}" },
-                        "═"
-                    )
-                } else {
-                    appendPaddingCharacters("", farms.count(), "═")
-                    appendPaddingCharacters(
-                        name,
-                        farms.map { it.farmerName + if (!it.isActive) " zZ" else "" }.plus(name),
-                        "═"
-                    )
-                }
-                appendPaddingCharacters("", farms.map { it.currentEggs.formatIllions() }, "═")
-                append("╪")
-                appendPaddingCharacters(
-                    "",
-                    farms.map { "${it.currentEggsPerHour.formatIllions()}/hr" }.plus(eggRate),
-                    "═"
-                )
-                if (!compact) {
-                    append("═")
-                    appendPaddingCharacters(
-                        "",
-                        farms.map { it.currentPopulation.formatIllions() }.plus(chickens),
-                        "═"
-                    )
-                    append("╪")
-                    appendPaddingCharacters(
-                        "",
-                        farms.map { "${it.populationIncreasePerHour.formatIllions()}/hr" }.plus(chickenRate),
-                        "═"
-                    )
-                    append("═")
-                    appendPaddingCharacters(
-                        "",
-                        farms.map { it.boostTokensCurrent }.plus(tokensAvailable),
-                        "═"
-                    )
-                    append("╪")
-                    appendPaddingCharacters(
-                        "",
-                        farms.map { it.farm.boostTokensSpent }.plus(tokensSpent),
-                        "═"
-                    )
-                }
-                appendln()
-
-                // endregion Table header
-
-                // region Table body
-
-                farms.forEachIndexed { index, farm ->
-                    if (compact) {
-                        append(shortenedNames[index])
-                        appendPaddingCharacters(
-                            "${shortenedNames[index]}${if (!farm.isActive) " zZ" else ""}",
-                            farms.mapIndexed { i, f -> "${shortenedNames[i]}${if (!f.isActive) " zZ" else ""}" }
-                        )
-                    } else {
-                        appendPaddingCharacters(index + 1, farms.count())
-                        append("${index + 1}: ")
-                        append(farm.farmerName)
-                        appendPaddingCharacters(
-                            farm.farmerName + if (!farm.isActive) " zZ" else "",
-                            farms.map { it.farmerName + if (!it.isActive) " zZ" else "" }.plus(name)
-                        )
-                        if (!farm.isActive) append(" zZ")
-                    }
-                    append(" ")
-                    appendPaddingCharacters(
-                        farm.currentEggs.formatIllions(),
-                        farms.map { it.currentEggs.formatIllions() }.plus(eggs)
-                    )
-                    append(farm.currentEggs.formatIllions())
-                    append("│")
-                    append("${farm.currentEggsPerHour.formatIllions()}/hr")
-                    if (!compact) appendPaddingCharacters(
-                        "${farm.currentEggsPerHour.formatIllions()}/hr",
-                        farms.map { "${it.currentEggsPerHour.formatIllions()}/hr" }.plus(eggRate)
-                    )
-                    if (!compact) {
-                        append(" ")
-                        appendPaddingCharacters(
-                            farm.currentPopulation.formatIllions(),
-                            farms.map { it.currentPopulation.formatIllions() }.plus(chickens)
-                        )
-                        append(farm.currentPopulation.formatIllions())
-                        append("│")
-                        append("${farm.populationIncreasePerHour.formatIllions()}/hr")
-                        appendPaddingCharacters(
-                            "${farm.populationIncreasePerHour.formatIllions()}/hr",
-                            farms.map { "${it.populationIncreasePerHour.formatIllions()}/hr" }.plus(chickenRate)
-                        )
-                        append(" ")
-                        appendPaddingCharacters(
-                            farm.boostTokensCurrent,
-                            farms.map { it.boostTokensCurrent }.plus(tokensAvailable)
-                        )
-                        append(if (farm.boostTokensCurrent > 0) farm.boostTokensCurrent else " ")
-                        append("│")
-                        append(if (farm.farm.boostTokensSpent > 0) farm.farm.boostTokensSpent else " ")
-                    }
-                    appendln()
-                }
-
-                // endregion Table body
-
-                // endregion Members
-
-                // region Tokens
-
-                if (compact) {
-                    appendln("```")
-                    appendln("__🎫 **Tokens**__: ```") // TODO: Toucan emote
-
-                    append(name)
-                    appendPaddingCharacters(name, shortenedNames)
-                    appendPaddingCharacters("Owned", farms.map { it.boostTokensCurrent })
-                    append("Owned")
-                    append("│")
-                    append("Spent")
-
-                    appendln()
-                    appendPaddingCharacters("", shortenedNames, "═")
-                    appendPaddingCharacters("", farms.map { it.boostTokensCurrent }.plus("Owned"), "═")
-                    append("╪")
-                    appendPaddingCharacters("", farms.map { it.farm.boostTokensSpent }.plus("Spent"), "═")
-                    appendln()
-
-                    farms.forEachIndexed { index, farm ->
-                        append(shortenedNames[index])
-                        appendPaddingCharacters(shortenedNames[index], shortenedNames)
-                        appendPaddingCharacters(
-                            farm.boostTokensCurrent,
-                            farms.map { it.boostTokensCurrent }.plus("Owned")
-                        )
-                        append(farm.boostTokensCurrent)
-                        append("│")
-                        append(farm.farm.boostTokensSpent)
-                        appendln()
-                    }
-
-                    appendln()
-                }
-
-                // endregion Tokens
-
-                // region Bottlenecks
-
-                farms.filter { it.habBottleneckReached != null || it.transportBottleneckReached != null }
-                    .let BottleneckedFarms@{ bottleneckedFarms ->
-                        if (bottleneckedFarms.isEmpty()) return@BottleneckedFarms
-                        appendln("```")
-                        appendln("__⚠ **Bottlenecks**__: ```")
-                        bottleneckedFarms.forEachIndexed { i, farm ->
-                            if (compact) {
-                                append("${shortenedNames[i]}: ")
-                                appendPaddingCharacters(shortenedNames[i], shortenedNames)
-                            } else {
-                                append("${farm.farmerName}: ")
-                                appendPaddingCharacters(farm.farmerName, bottleneckedFarms.map { it.farmerName })
+                        column {
+                            header = "Name"
+                            rightPadding = 3
+                            cells = farms.map { farm ->
+                                "${farm.farmerName}${if (farm.isActive) "" else " zZ"}"
                             }
+                        }
+                        column {
+                            header = "Eggs"
+                            alignment = RIGHT
+                            cells = farms.map { farm -> farm.currentEggs.formatIllions() }
+                        }
+                        divider()
+                        column {
+                            header = "/hr"
+                            rightPadding = 3
+                            cells = farms.map { farm -> farm.currentEggsPerHour.formatIllions() }
+                        }
+                        column {
+                            header = "Chickens"
+                            alignment = RIGHT
+                            cells = farms.map { farm -> farm.currentPopulation.formatIllions() }
+                        }
+                        divider()
+                        column {
+                            header = "/hr"
+                            rightPadding = 3
+                            cells = farms.map { farm -> farm.populationIncreasePerHour.formatIllions() }
+                        }
+                        column {
+                            header = "Tkns"
+                            alignment = RIGHT
+                            cells = farms.map { farm -> if (farm.boostTokensCurrent > 0) "${farm.boostTokensCurrent}" else "" }
+                        }
+                        divider()
+                        column {
+                            header = "Spent"
+                            cells = farms.map { farm -> if (farm.boostTokensSpent > 0) "${farm.boostTokensSpent}" else "" }
+                        }
+                    }
 
-                            farm.habBottleneckReached?.let {
-                                when {
-                                    it == Duration.ZERO -> append("🏠Full! ")
-                                    compact -> append("🏠${it.asHoursAndMinutes()} ")
-                                    else -> append("🏠${it.asDaysHoursAndMinutes(true)} ")
+                    append('\u200B')
+
+                    appendTable {
+                        title = "__⚠ **Bottlenecks**:__"
+                        displayHeader = false
+
+                        val bottleneckedFarmers = farms.filter { farm ->
+                            farm.habBottleneckReached != null || farm.transportBottleneckReached != null
+                        }
+
+                        column {
+                            rightPadding = 1
+                            cells = bottleneckedFarmers.map { farm -> "${farm.farmerName}:" }
+                        }
+                        column {
+                            cells = bottleneckedFarmers.map { farm ->
+                                val habs = farm.habBottleneckReached.let { duration ->
+                                    when (duration) {
+                                        null -> ""
+                                        ZERO -> "🏠Full! "
+                                        else -> "🏠${duration.asDaysHoursAndMinutes(true)} "
+                                    }
                                 }
-                            }
-
-                            farm.transportBottleneckReached?.let {
-                                when {
-                                    it == Duration.ZERO -> append("🚛Full! ")
-                                    compact -> append("🚛${it.asHoursAndMinutes()} ")
-                                    else -> append("🚛${it.asDaysHoursAndMinutes(true)} ")
+                                val transport = farm.transportBottleneckReached.let { duration ->
+                                    when (duration) {
+                                        null -> ""
+                                        ZERO -> "🚛Full! "
+                                        else -> "🚛${duration.asDaysHoursAndMinutes(true)} "
+                                    }
                                 }
+                                "$habs${if (habs.isNotEmpty()) " " else ""}$transport"
                             }
-
-                            appendln()
                         }
                     }
 
-                // endregion Bottlenecks
+                    // endregion Non-compact
 
-            }.toString().splitMessage(prefix = "```", postfix = "```")
-        }
+                } else {
+
+                    // region Compact
+
+                    val shortenedNames = farms.map { farm ->
+                        farm.farmerName.let { name ->
+                            if (name.length <= 10) name
+                            else "${name.substring(0 until 9)}…"
+                        }
+                    }
+
+                    appendTable {
+                        title = "__🚜 **Members** (${farms.count()}/${maxCoopSize}):__"
+
+                        column {
+                            header = "Name"
+                            rightPadding = 2
+                            cells = farms.zip(shortenedNames).map { (farm, name) ->
+                                "$name${if (farm.isActive) "" else " zZ"}"
+                            }
+                        }
+                        column {
+                            header = "Eggs"
+                            alignment = RIGHT
+                            cells = farms.map { farm -> farm.currentEggs.formatIllions() }
+                        }
+                        divider()
+                        column {
+                            header = "/hr"
+                            rightPadding = 2
+                            cells = farms.map { farm -> farm.currentEggsPerHour.formatIllions() }
+                        }
+                    }
+
+                    append('\u200B')
+
+                    appendTable {
+                        title = "__🎫 **Tokens**__:"
+                        column {
+                            header = "Name"
+                            rightPadding = 2
+                            cells = shortenedNames
+                        }
+                        column {
+                            header = "Tokens"
+                            alignment = RIGHT
+                            cells = farms.map { farm -> "${farm.boostTokensCurrent}" }
+                        }
+                        divider()
+                        column {
+                            header = "Spent"
+                            cells = farms.map { farm -> "${farm.boostTokensSpent}" }
+                        }
+                    }
+
+                    append('\u200B')
+
+                    appendTable {
+                        title = "__⚠ **Bottlenecks**:__"
+                        displayHeader = false
+                        val bottleneckedFarmers = farms.zip(shortenedNames).filter { (farm, _) ->
+                            farm.habBottleneckReached != null || farm.transportBottleneckReached != null
+                        }
+
+                        column {
+                            rightPadding = 1
+                            cells = bottleneckedFarmers.map { (_, name) -> "$name:" }
+                        }
+                        column {
+                            cells = bottleneckedFarmers.map { (farm, _) ->
+                                val habs = farm.habBottleneckReached.let { duration ->
+                                    when (duration) {
+                                        null -> ""
+                                        ZERO -> "🏠Full!"
+                                        else -> "🏠${duration.asHoursAndMinutes()}"
+                                    }
+                                }
+                                val transport = farm.transportBottleneckReached.let { duration ->
+                                    when (duration) {
+                                        null -> ""
+                                        ZERO -> "🚛Full!"
+                                        else -> "🚛${duration.asHoursAndMinutes()}"
+                                    }
+                                }
+                                "$habs${if (habs.isNotEmpty()) " " else ""}$transport"
+                            }
+                        }
+                    }
+
+                    // endregion Compact
+
+                }
+            }
+        }.toString().splitMessage(separator = '\u200B')
     }
 }
-
