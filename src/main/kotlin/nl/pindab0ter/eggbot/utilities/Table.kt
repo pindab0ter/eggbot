@@ -33,7 +33,29 @@ class Table {
                 null
         }).filterNotNull()
 
-        // TODO: Headers
+        // Draw header row
+        spacedColumns.forEach { column ->
+            if (column is SuppliedColumn) append(' '.repeat(column.leftPadding))
+            when (column) {
+                is DividerColumn -> append(column.divider)
+                is SpacingColumn -> append(column.header)
+                is ValueColumn -> append(column.header)
+            }
+            if (column is SuppliedColumn && column != columns.last()) append(' '.repeat(column.rightPadding))
+        }
+        appendln()
+
+        // Draw border row
+        spacedColumns.forEach { column ->
+            if (column is SuppliedColumn) append('═'.repeat(column.leftPadding))
+            when (column) {
+                is DividerColumn -> append(column.intersection)
+                is SpacingColumn -> append('═'.repeat(column.header.length))
+                is ValueColumn -> append('═'.repeat(column.header.length))
+            }
+            if (column is SuppliedColumn && column != columns.last()) append('═'.repeat(column.rightPadding))
+        }
+        appendln()
 
         // For each row of data
         (0 until amountOfRows).forEach { row ->
@@ -42,7 +64,7 @@ class Table {
             spacedColumns.forEach { column ->
 
                 // Pad left
-                if (column is SuppliedColumn) append(" ".repeat(column.leftPadding))
+                if (column is SuppliedColumn) append(' '.repeat(column.leftPadding))
 
                 // Draw
                 when (column) {
@@ -52,7 +74,7 @@ class Table {
                 }
 
                 // Pad right
-                if (column is SuppliedColumn && column != columns.last()) append(" ".repeat(column.rightPadding))
+                if (column is SuppliedColumn && column != columns.last()) append(' '.repeat(column.rightPadding))
             }
             appendln()
         }
@@ -72,20 +94,34 @@ abstract class SuppliedColumn : Column {
 class ValueColumn : SuppliedColumn() {
     enum class Aligned { LEFT, RIGHT }
 
-    var header: String? = null
+    var header: String = ""
     var alignment: Aligned = LEFT
     var values: List<String>? = null
+    val widths: List<Int>? get() = values?.plus(header)?.map { row -> row.length }
 }
 
 open class DividerColumn : SuppliedColumn() {
     var divider: String = "│"
+    var intersection: String = "╪"
 }
 
 private class SpacingColumn(left: ValueColumn, right: ValueColumn) : Column {
-    val spacing = left.values!!.zip(right.values!!).let { columns ->
-        val widestPair = columns.map { (a, b) -> a.length + b.length }.max()!!
-        columns.map { (a: String, b: String) ->
-            " ".repeat(widestPair - (a.length + b.length))
+    val header: String
+    val spacing: List<String>
+
+    init {
+        require(left.alignment == LEFT && right.alignment == RIGHT) { "Can only space opposing columns" }
+        require(left.values != null && right.values != null) { "Values can not be null" }
+
+        val (header, spacing) = left.widths!!.zip(right.widths!!).let { rows ->
+            val widestPair = rows.map { (a, b) -> a + b }.max()!!
+
+            ' '.repeat(widestPair - (left.header.length + right.header.length)) to rows.map { (a, b) ->
+                ' '.repeat(widestPair - (a + b))
+            }
         }
+
+        this.header = header
+        this.spacing = spacing
     }
 }

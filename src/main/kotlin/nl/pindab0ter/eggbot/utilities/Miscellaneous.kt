@@ -49,3 +49,17 @@ val User.isAdmin: Boolean
     } == true
 
 fun JSAPResult.getIntOrNull(id: String) = if (contains(id)) getInt(id) else null
+
+/**
+ * Returns a string containing this char repeated [n] times.
+ * @throws [IllegalArgumentException] when n < 0.
+ */
+fun Char.repeat(n: Int): String {
+    require(n >= 0) { "Count 'n' must be non-negative, but was $n." }
+
+    return when (n) {
+        0 -> ""
+        1 -> toString()
+        else -> String(CharArray(n) { this })
+    }
+}
