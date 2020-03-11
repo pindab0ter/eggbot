@@ -11,6 +11,7 @@ class Table {
     private val columns: MutableList<Column> = mutableListOf()
     private val valueColumns: List<ValueColumn> get() = columns.filterIsInstance<ValueColumn>()
     private val amountOfRows: Int get() = (columns.first { it is ValueColumn } as? ValueColumn)?.cells?.size ?: 0
+    var title: String? = null
     var displayHeader: Boolean = true
 
     private fun <T : Column> initColumn(column: T, init: T.() -> Unit): T {
@@ -33,6 +34,9 @@ class Table {
             else
                 null
         }).filterNotNull()
+
+        if (title != null) appendln("$title ```")
+        else appendln("```")
 
         if (displayHeader) {
             // Draw table header
@@ -67,6 +71,7 @@ class Table {
                 }
             }
         }
+        appendln("```")
     }.toString()
 
     @TableMarker
