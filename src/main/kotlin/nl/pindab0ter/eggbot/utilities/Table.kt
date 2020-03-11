@@ -28,7 +28,7 @@ class Table {
 
         // Add SpacingColumns between adjacent left and right aligned columns
         val spacedColumns: List<Column> = columns.interleave(columns.zipWithNext { left, right ->
-            if (left is ValueColumn && left.alignment == LEFT && right is ValueColumn && right.alignment == RIGHT)
+            if ((left is ValueColumn && left.alignment == LEFT) || (right is ValueColumn && right.alignment == RIGHT))
                 SpacingColumn(left, right)
             else
                 null
@@ -90,20 +90,33 @@ class Table {
         var intersection: String = "╪"
     }
 
-    private class SpacingColumn(left: ValueColumn, right: ValueColumn) : Column {
+    private class SpacingColumn(left: Column, right: Column) : Column {
         val header: String
         val spacing: List<String>
 
         init {
-            require(left.alignment == LEFT && right.alignment == RIGHT) { "Can only space opposing columns" }
-            require(left.cells != null && right.cells != null) { "Values can not be null" }
+            val (header, spacing) = when {
+                left is ValueColumn && left.alignment == LEFT && right is ValueColumn && right.alignment == RIGHT ->
+                    left.widths.zip(right.widths).let { rows ->
+                        val widestPair = rows.map { (a, b) -> a + b }.max()!!
 
-            val (header, spacing) = left.widths!!.zip(right.widths!!).let { rows ->
-                val widestPair = rows.map { (a, b) -> a + b }.max()!!
-
-                ' '.repeat(widestPair - (left.header.length + right.header.length)) to rows.map { (a, b) ->
-                    ' '.repeat(widestPair - (a + b))
-                }
+                        ' '.repeat(widestPair - (left.header.length + right.header.length)) to rows.map { (a, b) ->
+                            ' '.repeat(widestPair - (a + b))
+                        }
+                    }
+                left is ValueColumn && left.alignment == LEFT ->
+                    left.widest.let { widest ->
+                        ' '.repeat(widest - left.header.length) to left.widths.map { width ->
+                            ' '.repeat(widest - width)
+                        }
+                    }
+                right is ValueColumn && right.alignment == RIGHT ->
+                    right.widest.let { widest ->
+                        ' '.repeat(widest - right.header.length) to right.widths.map { width ->
+                            ' '.repeat(widest - width)
+                        }
+                    }
+                else -> "" to listOf("")
             }
 
             this.header = header
@@ -111,7 +124,8 @@ class Table {
         }
 
         // Moved here instead of in ValueColumn to prevent visibility from constructor lambda
-        val ValueColumn.widths: List<Int>? get() = cells?.plus(header)?.map { row -> row.length }
+        val ValueColumn.widths: List<Int> get() = cells?.plus(header)?.map { row -> row.length } ?: emptyList()
+        val ValueColumn.widest: Int get() = cells?.plus(header)?.map { row -> row.length }?.max() ?: 0
     }
 }
 
