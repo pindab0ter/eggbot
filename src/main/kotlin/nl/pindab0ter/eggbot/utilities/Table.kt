@@ -33,52 +33,51 @@ class Table {
                 null
         }).filterNotNull()
 
-        // Draw header row
-        spacedColumns.forEach { column ->
-            if (column is SuppliedColumn) append(' '.repeat(column.leftPadding))
-            when (column) {
-                is DividerColumn -> append(column.divider)
-                is SpacingColumn -> append(column.header)
-                is ValueColumn -> append(column.header)
+        // Draw table header
+        appendRow(spacedColumns) {
+            when (this) {
+                is DividerColumn -> divider
+                is SpacingColumn -> header
+                is ValueColumn -> header
+                else -> ""
             }
-            if (column is SuppliedColumn && column != columns.last()) append(' '.repeat(column.rightPadding))
         }
-        appendln()
 
-        // Draw border row
-        spacedColumns.forEach { column ->
-            if (column is SuppliedColumn) append('═'.repeat(column.leftPadding))
-            when (column) {
-                is DividerColumn -> append(column.intersection)
-                is SpacingColumn -> append('═'.repeat(column.header.length))
-                is ValueColumn -> append('═'.repeat(column.header.length))
+        // Draw header border
+        appendRow(spacedColumns, '═') {
+            when (this) {
+                is DividerColumn -> intersection
+                is SpacingColumn -> '═'.repeat(header.length)
+                is ValueColumn -> '═'.repeat(header.length)
+                else -> ""
             }
-            if (column is SuppliedColumn && column != columns.last()) append('═'.repeat(column.rightPadding))
         }
-        appendln()
 
-        // For each row of data
+        // Draw table body
         (0 until amountOfRows).forEach { row ->
-
-            // Loop through each column
-            spacedColumns.forEach { column ->
-
-                // Pad left
-                if (column is SuppliedColumn) append(' '.repeat(column.leftPadding))
-
-                // Draw
-                when (column) {
-                    is DividerColumn -> append(column.divider)
-                    is SpacingColumn -> append(column.spacing[row])
-                    is ValueColumn -> append(column.values!![row])
+            appendRow(spacedColumns) {
+                when (this) {
+                    is DividerColumn -> divider
+                    is SpacingColumn -> spacing[row]
+                    is ValueColumn -> values!![row]
+                    else -> ""
                 }
-
-                // Pad right
-                if (column is SuppliedColumn && column != columns.last()) append(' '.repeat(column.rightPadding))
             }
-            appendln()
         }
     }.toString()
+
+    private fun StringBuilder.appendRow(
+        columns: List<Column>,
+        spacingChar: Char = ' ',
+        transform: Column.() -> String
+    ) {
+        columns.forEach { column ->
+            if (column is SuppliedColumn) append(spacingChar.repeat(column.leftPadding))
+            append(column.transform())
+            if (column is SuppliedColumn && column != columns.last()) append(spacingChar.repeat(column.rightPadding))
+        }
+        appendln()
+    }
 }
 
 inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
