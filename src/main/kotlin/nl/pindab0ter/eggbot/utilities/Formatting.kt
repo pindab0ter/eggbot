@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.auxbrain.ei.EggInc
+import nl.pindab0ter.eggbot.utilities.Table.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Period
@@ -221,6 +222,19 @@ fun <T : Any> StringBuilder.appendPaddingCharacters(
     containsLongest: Iterable<T>,
     character: String = " "
 ): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
+
+fun StringBuilder.appendRow(
+    columns: List<Column>,
+    spacingChar: Char = ' ',
+    transform: Column.() -> String
+) {
+    columns.forEach { column ->
+        if (column is SuppliedColumn) append(spacingChar.repeat(column.leftPadding))
+        append(column.transform())
+        if (column is SuppliedColumn && column != columns.last()) append(spacingChar.repeat(column.rightPadding))
+    }
+    appendln()
+}
 
 fun drawProgressBar(
     current: Int,

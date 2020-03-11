@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.utilities
 
-import nl.pindab0ter.eggbot.utilities.ValueColumn.Aligned.LEFT
-import nl.pindab0ter.eggbot.utilities.ValueColumn.Aligned.RIGHT
+import nl.pindab0ter.eggbot.utilities.Table.ValueColumn.Aligned.LEFT
+import nl.pindab0ter.eggbot.utilities.Table.ValueColumn.Aligned.RIGHT
 
 @DslMarker
 annotation class TableMarker
@@ -66,61 +66,51 @@ class Table {
         }
     }.toString()
 
-    private fun StringBuilder.appendRow(
-        columns: List<Column>,
-        spacingChar: Char = ' ',
-        transform: Column.() -> String
-    ) {
-        columns.forEach { column ->
-            if (column is SuppliedColumn) append(spacingChar.repeat(column.leftPadding))
-            append(column.transform())
-            if (column is SuppliedColumn && column != columns.last()) append(spacingChar.repeat(column.rightPadding))
+    @TableMarker
+    interface Column
+
+    abstract class SuppliedColumn : Column {
+        var leftPadding = 0
+        var rightPadding = 1
+    }
+
+    class ValueColumn : SuppliedColumn() {
+        enum class Aligned { LEFT, RIGHT }
+
+        var header: String = ""
+        var alignment: Aligned = LEFT
+        var values: List<String>? = null
+    }
+
+    open class DividerColumn : SuppliedColumn() {
+        var divider: String = "│"
+        var intersection: String = "╪"
+    }
+
+    private class SpacingColumn(left: ValueColumn, right: ValueColumn) : Column {
+        val header: String
+        val spacing: List<String>
+
+        init {
+            require(left.alignment == LEFT && right.alignment == RIGHT) { "Can only space opposing columns" }
+            require(left.values != null && right.values != null) { "Values can not be null" }
+
+            val (header, spacing) = left.widths!!.zip(right.widths!!).let { rows ->
+                val widestPair = rows.map { (a, b) -> a + b }.max()!!
+
+                ' '.repeat(widestPair - (left.header.length + right.header.length)) to rows.map { (a, b) ->
+                    ' '.repeat(widestPair - (a + b))
+                }
+            }
+
+            this.header = header
+            this.spacing = spacing
         }
-        appendln()
+
+        // Moved here instead of in ValueColumn to prevent visibility from constructor lambda
+        val ValueColumn.widths: List<Int>? get() = values?.plus(header)?.map { row -> row.length }
     }
 }
+
 
 inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
-
-@TableMarker
-interface Column
-
-abstract class SuppliedColumn : Column {
-    var leftPadding = 0
-    var rightPadding = 1
-}
-
-class ValueColumn : SuppliedColumn() {
-    enum class Aligned { LEFT, RIGHT }
-
-    var header: String = ""
-    var alignment: Aligned = LEFT
-    var values: List<String>? = null
-    val widths: List<Int>? get() = values?.plus(header)?.map { row -> row.length }
-}
-
-open class DividerColumn : SuppliedColumn() {
-    var divider: String = "│"
-    var intersection: String = "╪"
-}
-
-private class SpacingColumn(left: ValueColumn, right: ValueColumn) : Column {
-    val header: String
-    val spacing: List<String>
-
-    init {
-        require(left.alignment == LEFT && right.alignment == RIGHT) { "Can only space opposing columns" }
-        require(left.values != null && right.values != null) { "Values can not be null" }
-
-        val (header, spacing) = left.widths!!.zip(right.widths!!).let { rows ->
-            val widestPair = rows.map { (a, b) -> a + b }.max()!!
-
-            ' '.repeat(widestPair - (left.header.length + right.header.length)) to rows.map { (a, b) ->
-                ' '.repeat(widestPair - (a + b))
-            }
-        }
-
-        this.header = header
-        this.spacing = spacing
-    }
-}
