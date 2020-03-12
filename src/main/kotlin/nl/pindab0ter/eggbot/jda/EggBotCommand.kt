@@ -91,7 +91,7 @@ abstract class EggBotCommand : Command() {
             result.getBoolean("help") -> event.reply(commandHelp)
             !result.success() -> {
                 val errorMessage = result.errorMessageIterator.next().toString().replace("'", "`")
-                "$errorMessage Type `${Config.prefix}$name --\u200Dhelp` or `${Config.prefix}$name -\u200Dh` for help with this command.".let {
+                "$errorMessage The syntax for this command is: `${Config.prefix}$name ${arguments}`.\nFor more information on this command, type `${Config.prefix}$name --\u200Dhelp` or `${Config.prefix}$name -\u200Dh`.".let {
                     log.debug { it }
                     event.replyWarning(it)
                 }
