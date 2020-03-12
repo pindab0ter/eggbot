@@ -223,19 +223,6 @@ fun <T : Any> StringBuilder.appendPaddingCharacters(
     character: String = " "
 ): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
 
-fun StringBuilder.appendRow(
-    columns: List<Column>,
-    spacingChar: Char = ' ',
-    transform: Column.() -> String
-) {
-    columns.forEach { column ->
-        if (column is SuppliedColumn) append(spacingChar.repeat(column.leftPadding))
-        append(column.transform())
-        if (column is SuppliedColumn && column != columns.last()) append(spacingChar.repeat(column.rightPadding))
-    }
-    appendln()
-}
-
 fun drawProgressBar(
     current: Int,
     total: Int,

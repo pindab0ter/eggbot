@@ -14,7 +14,7 @@ import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
-import nl.pindab0ter.eggbot.utilities.Table.ValueColumn.Aligned.*
+import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
 import org.joda.time.Duration.*
 
 @Suppress("FoldInitializerAndIfToElvis")
@@ -96,11 +96,9 @@ object CoopInfo : EggBotCommand() {
                     title = "__${egg.toEmote()} **Goals** (${goalsReached}/${goals.count()}):__"
                     displayHeader = false
 
+                    incrementColumn(suffix = ".")
                     column {
-                        rightPadding = 1
-                        cells = goals.mapIndexed { index, _ -> "${index + 1}." }
-                    }
-                    column {
+                        leftPadding = 1
                         cells = goals.map { goal -> goal.formatIllions(true) }
                     }
                     column {
@@ -154,13 +152,10 @@ object CoopInfo : EggBotCommand() {
                     appendTable {
                         title = "__🚜 **Members** (${farms.count()}/${maxCoopSize}):__"
 
-                        column {
-                            header = "${'#'.repeat("${farms.count()}".length)}:"
-                            rightPadding = 1
-                            cells = (1..farms.count()).map { index -> "$index:" }
-                        }
+                        incrementColumn()
                         column {
                             header = "Name"
+                            leftPadding = 1
                             rightPadding = 3
                             cells = farms.map { farm ->
                                 "${farm.farmerName}${if (farm.isActive) "" else " zZ"}"
