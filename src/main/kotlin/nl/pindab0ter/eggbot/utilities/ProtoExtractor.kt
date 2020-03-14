@@ -1,12 +1,13 @@
 package nl.pindab0ter.eggbot.utilities
 
 import java.io.File
+import kotlin.text.RegexOption.*
 
 const val START = "/Users/auxbrain/dev/egginc/game/common/generated/protocol_buffers/ei.pb.cc"
-const val END = "\u0064\u0000\u0000\u0018"
+const val END = "\u000A\u0003Egg"
 
 fun main(args: Array<String>) {
-    val protoBufDefinition = File(args.first()).let { file ->
+    val protobufSection = File(args.first()).let { file ->
         require(file.name == "libegginc.so") { "Provide path to libegginc.so" }
         val text = file.bufferedReader().readText()
         val startPosition = text.indexOf(START, ignoreCase = false)
@@ -16,14 +17,13 @@ fun main(args: Array<String>) {
         text.substring(startPosition.plus(START.length), endPosition)
     }
 
-    val typeSeparator = Regex("""[\x02\x22]((?!\x12).){1,2}\x0A.""")
+    val messagePattern = Regex("""(?:\x0A.{0,2})([A-Z].*?)(?=\x0A.{0,2}[A-Z])""", DOT_MATCHES_ALL)
     val propertySeparator = Regex("""\x12.\x0A.""")
-    val enumSeparator = Regex("""\x2A.{1,2}\x0A.""")
 
     val word = Regex("""[a-zA-Z_.]+""")
     val classProperty = Regex("""\.((\w+|\.)+)""")
 
-    val separatedByType = protoBufDefinition.split(typeSeparator).drop(1)
+    val messageLines = messagePattern.findAll(protobufSection).map { it.groupValues[1] }
 
     data class Property(
         val name: String,
@@ -38,27 +38,31 @@ fun main(args: Array<String>) {
 
     fun Int.toType(): String = when (this) {
         1 -> "double"
+        2 -> "float"
+        5 -> "int32"
+        4 -> "uint64"
         8 -> "bool"
         9 -> "string"
+        13 -> "uint32"
         else -> "??? ($this)"
     }
 
-    val classes = separatedByType.map { line ->
+    val messages = messageLines.map { messageLine ->
         Type(
-            name = word.find(line)!!.value,
-            properties = line.split(propertySeparator).mapNotNull { line ->
-                val wordResult = word.findAll(line)
-                val classPropertyResult = classProperty.find(line)
+            name = word.find(messageLine)!!.value,
+            properties = messageLine.split(propertySeparator).mapNotNull { propertyLine ->
+                val wordResult = word.findAll(propertyLine)
+                val classPropertyResult = classProperty.find(propertyLine)
                 when {
                     classPropertyResult != null && wordResult.first() != classPropertyResult -> Property(
                         name = wordResult.first().value,
-                        index = line.getOrNull(line.indexOf('\u0018') + 1)?.toInt() ?: -1,
-                        type = classProperty.find(line)!!.groups[1]!!.value
+                        index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
+                        type = classProperty.find(propertyLine)!!.groups[1]!!.value
                     )
-                    line.contains('\u0018') && line.contains('\u0028') -> Property(
-                        name = word.find(line)!!.value,
-                        index = line.getOrNull(line.indexOf('\u0018') + 1)?.toInt() ?: -1,
-                        type = line[line.indexOf('\u0028') + 1].toInt().toType()
+                    propertyLine.contains('\u0018') && propertyLine.contains('\u0028') -> Property(
+                        name = word.find(propertyLine)!!.value,
+                        index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
+                        type = propertyLine[propertyLine.indexOf('\u0028') + 1].toInt().toType()
                     )
                     else -> null
                 }
@@ -66,8 +70,8 @@ fun main(args: Array<String>) {
         )
     }
 
-    println(classes.joinToString("\n\n") { type ->
-        "message ${type.name} {\n${type.properties.joinToString("\n") { property ->
+    println(messages.joinToString("\n\n") { message ->
+        "message ${message.name} {\n${message.properties.sortedBy { it.index }.joinToString("\n") { property ->
             "    ${property.type} ${property.name} = ${property.index};"
         }}\n}"
     })
