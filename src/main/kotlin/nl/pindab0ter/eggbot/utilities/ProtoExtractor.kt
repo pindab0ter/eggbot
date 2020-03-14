@@ -18,10 +18,11 @@ fun main(args: Array<String>) {
     }
 
     val messagePattern = Regex("""(?:\x0A.{0,2})([A-Z].*?)(?=\x0A.{0,2}[A-Z])""", DOT_MATCHES_ALL)
-    val propertyPattern = Regex("""(?:\x0A[^a-z]{0,2})([a-z].*?)(?=\x0A.{0,2}[a-z])""", DOT_MATCHES_ALL)
+    val propertyPattern = Regex("""(?:\x0A[^\w]{0,2})([a-z_]*?.*?)(?=\x12.\x0A|$)""", DOT_MATCHES_ALL)
 
     val word = Regex("""[a-zA-Z_.]+""")
     val classProperty = Regex("""\.((\w+|\.)+)""")
+    val propertyAnchor = Regex("""[\x01-\x03]\x28""")
 
     val messageLines = messagePattern.findAll(protobufSection).map { it.groupValues[1] }
 
@@ -56,18 +57,19 @@ fun main(args: Array<String>) {
                 .mapNotNull { propertyLine ->
                     val wordResult = word.findAll(propertyLine)
                     val classPropertyResult = classProperty.find(propertyLine)
+                    val anchorPosition = propertyAnchor.find(propertyLine)?.range?.first ?: -1
                     when {
                         classPropertyResult != null && wordResult.first() != classPropertyResult -> Property(
                             name = wordResult.first().value,
                             index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
                             type = classProperty.find(propertyLine)!!.groups[1]!!.value,
-                            repeated = propertyLine[propertyLine.indexOf('\u0028') - 1] == '\u0003'
+                            repeated = propertyLine[anchorPosition] == '\u0003'
                         )
                         propertyLine.contains('\u0018') && propertyLine.contains('\u0028') -> Property(
                             name = word.find(propertyLine)!!.value,
                             index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
-                            type = propertyLine[propertyLine.indexOf('\u0028') + 1].toInt().toType(),
-                            repeated = propertyLine[propertyLine.indexOf('\u0028') - 1] == '\u0003'
+                            type = propertyLine[anchorPosition + 2].toInt().toType(),
+                            repeated = propertyLine[anchorPosition] == '\u0003'
                         )
                         else -> null
                     }
