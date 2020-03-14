@@ -18,7 +18,7 @@ fun main(args: Array<String>) {
     }
 
     val messagePattern = Regex("""(?:\x0A.{0,2})([A-Z].*?)(?=\x0A.{0,2}[A-Z])""", DOT_MATCHES_ALL)
-    val propertySeparator = Regex("""\x12.\x0A.""")
+    val propertyPattern = Regex("""(?:\x0A[^a-z]{0,2})([a-z].*?)(?=\x0A.{0,2}[a-z])""", DOT_MATCHES_ALL)
 
     val word = Regex("""[a-zA-Z_.]+""")
     val classProperty = Regex("""\.((\w+|\.)+)""")
@@ -28,7 +28,8 @@ fun main(args: Array<String>) {
     data class Property(
         val name: String,
         val index: Int,
-        val type: String
+        val type: String,
+        val repeated: Boolean
     )
 
     data class Type(
@@ -50,29 +51,34 @@ fun main(args: Array<String>) {
     val messages = messageLines.map { messageLine ->
         Type(
             name = word.find(messageLine)!!.value,
-            properties = messageLine.split(propertySeparator).mapNotNull { propertyLine ->
-                val wordResult = word.findAll(propertyLine)
-                val classPropertyResult = classProperty.find(propertyLine)
-                when {
-                    classPropertyResult != null && wordResult.first() != classPropertyResult -> Property(
-                        name = wordResult.first().value,
-                        index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
-                        type = classProperty.find(propertyLine)!!.groups[1]!!.value
-                    )
-                    propertyLine.contains('\u0018') && propertyLine.contains('\u0028') -> Property(
-                        name = word.find(propertyLine)!!.value,
-                        index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
-                        type = propertyLine[propertyLine.indexOf('\u0028') + 1].toInt().toType()
-                    )
-                    else -> null
+            properties = propertyPattern.findAll(messageLine)
+                .map { propertyLine -> propertyLine.groupValues[1] }
+                .mapNotNull { propertyLine ->
+                    val wordResult = word.findAll(propertyLine)
+                    val classPropertyResult = classProperty.find(propertyLine)
+                    when {
+                        classPropertyResult != null && wordResult.first() != classPropertyResult -> Property(
+                            name = wordResult.first().value,
+                            index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
+                            type = classProperty.find(propertyLine)!!.groups[1]!!.value,
+                            repeated = propertyLine[propertyLine.indexOf('\u0028') - 1] == '\u0003'
+                        )
+                        propertyLine.contains('\u0018') && propertyLine.contains('\u0028') -> Property(
+                            name = word.find(propertyLine)!!.value,
+                            index = propertyLine.getOrNull(propertyLine.indexOf('\u0018') + 1)?.toInt() ?: -1,
+                            type = propertyLine[propertyLine.indexOf('\u0028') + 1].toInt().toType(),
+                            repeated = propertyLine[propertyLine.indexOf('\u0028') - 1] == '\u0003'
+                        )
+                        else -> null
+                    }
                 }
-            }
+                .toList()
         )
     }
 
     println(messages.joinToString("\n\n") { message ->
         "message ${message.name} {\n${message.properties.sortedBy { it.index }.joinToString("\n") { property ->
-            "    ${property.type} ${property.name} = ${property.index};"
+            "    ${if (property.repeated) "repeated " else ""}${property.type} ${property.name} = ${property.index};"
         }}\n}"
     })
 }
