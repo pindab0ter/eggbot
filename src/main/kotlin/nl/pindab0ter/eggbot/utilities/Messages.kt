@@ -1,9 +1,7 @@
 package nl.pindab0ter.eggbot.utilities
 
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.jda.commandClient
 
 fun String.splitMessage(
     prefix: String = "",
@@ -15,7 +13,6 @@ fun String.splitMessage(
         if ("${acc.last()}$section$postfix$separator".length < 2000) acc.replaceLast { "$it$section$separator" }
         else acc.replaceLast { "$it$postfix" }.plus("$prefix$section$separator")
     }
-    .replaceLast { "$it$postfix" }
 
 fun CommandEvent.replyInDms(messages: List<String>) {
     var successful: Boolean? = null
@@ -29,7 +26,3 @@ fun CommandEvent.replyInDms(messages: List<String>) {
         })
     }
 }
-
-val Command.missingArguments get() = "Missing argument(s). Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
-val Command.tooManyArguments get() = "Too many arguments. Use `${commandClient.textualPrefix}${this.name} ${this.arguments}` without the brackets."
-

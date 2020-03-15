@@ -99,7 +99,7 @@ object CoopInfo : EggBotCommand() {
                     incrementColumn(suffix = ".")
                     column {
                         leftPadding = 1
-                        cells = goals.map { goal -> goal.formatIllions(true) }
+                        cells = goals.map { goal -> goal.asIllions(true) }
                     }
                     column {
                         leftPadding = 2
@@ -127,14 +127,14 @@ object CoopInfo : EggBotCommand() {
 
                 // region Basic info and totals
 
-                appendln("__🗒️ **Basic info**:__ ```")
-                appendln("Eggspected:       ${eggspected.formatIllions()}")
+                appendln("__🗒️ **Basic info**__ ```")
+                appendln("Eggspected:       ${eggspected.asIllions()}")
                 appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
-                append("Current chickens: ${currentPopulation.formatIllions()} ")
-                if (!compact) append("(${populationIncreasePerHour.formatIllions()}/hr)")
+                append("Current chickens: ${currentPopulation.asIllions()} ")
+                if (!compact) append("(${populationIncreasePerHour.asIllions()}/hr)")
                 appendln()
-                append("Current eggs:     ${currentEggs.formatIllions()} ")
-                if (!compact) append("(${eggsPerHour.formatIllions()}/hr) ")
+                append("Current eggs:     ${currentEggs.asIllions()} ")
+                if (!compact) append("(${eggsPerHour.asIllions()}/hr) ")
                 appendln()
                 appendln("Tokens available: $tokensAvailable")
                 appendln("Tokens spent:     $tokensSpent")
@@ -150,7 +150,7 @@ object CoopInfo : EggBotCommand() {
                     // region Non-compact
 
                     appendTable {
-                        title = "__🚜 **Members** (${farms.count()}/${maxCoopSize}):__"
+                        title = "__**🚜 Members** (${farms.count()}/${maxCoopSize}):__"
 
                         incrementColumn()
                         column {
@@ -164,24 +164,24 @@ object CoopInfo : EggBotCommand() {
                         column {
                             header = "Eggs"
                             alignment = RIGHT
-                            cells = farms.map { farm -> farm.currentEggs.formatIllions() }
+                            cells = farms.map { farm -> farm.currentEggs.asIllions() }
                         }
                         divider()
                         column {
                             header = "/hr"
                             rightPadding = 3
-                            cells = farms.map { farm -> farm.currentEggsPerHour.formatIllions() }
+                            cells = farms.map { farm -> farm.currentEggsPerHour.asIllions() }
                         }
                         column {
                             header = "Chickens"
                             alignment = RIGHT
-                            cells = farms.map { farm -> farm.currentPopulation.formatIllions() }
+                            cells = farms.map { farm -> farm.currentPopulation.asIllions() }
                         }
                         divider()
                         column {
                             header = "/hr"
                             rightPadding = 3
-                            cells = farms.map { farm -> farm.populationIncreasePerHour.formatIllions() }
+                            cells = farms.map { farm -> farm.populationIncreasePerHour.asIllions() }
                         }
                         column {
                             header = "Tkns"
@@ -198,7 +198,7 @@ object CoopInfo : EggBotCommand() {
                     append('\u200B')
 
                     appendTable {
-                        title = "__⚠ **Bottlenecks**:__"
+                        title = "__**⚠ Bottlenecks**:__"
                         displayHeader = false
 
                         val bottleneckedFarmers = farms.filter { farm ->
@@ -244,7 +244,7 @@ object CoopInfo : EggBotCommand() {
                     }
 
                     appendTable {
-                        title = "__🚜 **Members** (${farms.count()}/${maxCoopSize}):__"
+                        title = "__**🚜 Members** (${farms.count()}/${maxCoopSize}):__"
 
                         column {
                             header = "Name"
@@ -256,20 +256,20 @@ object CoopInfo : EggBotCommand() {
                         column {
                             header = "Eggs"
                             alignment = RIGHT
-                            cells = farms.map { farm -> farm.currentEggs.formatIllions() }
+                            cells = farms.map { farm -> farm.currentEggs.asIllions() }
                         }
                         divider()
                         column {
                             header = "/hr"
                             rightPadding = 2
-                            cells = farms.map { farm -> farm.currentEggsPerHour.formatIllions() }
+                            cells = farms.map { farm -> farm.currentEggsPerHour.asIllions() }
                         }
                     }
 
                     append('\u200B')
 
                     appendTable {
-                        title = "__🎫 **Tokens**__:"
+                        title = "__**🎫 Tokens**__"
                         column {
                             header = "Name"
                             rightPadding = 2
@@ -290,7 +290,7 @@ object CoopInfo : EggBotCommand() {
                     append('\u200B')
 
                     appendTable {
-                        title = "__⚠ **Bottlenecks**:__"
+                        title = "__**⚠ Bottlenecks**__"
                         displayHeader = false
                         val bottleneckedFarmers = farms.zip(shortenedNames).filter { (farm, _) ->
                             farm.habBottleneckReached != null || farm.transportBottleneckReached != null

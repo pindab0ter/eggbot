@@ -7,9 +7,7 @@ import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
-import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.botOwner
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
@@ -167,9 +165,9 @@ object RollCall : EggBotCommand() {
                     append(coop.farmers.count())
                     append("/${contractInfo.maxCoopSize} members): ")
                     appendPaddingCharacters(
-                        coop.activeEarningsBonus.formatIllions(true),
-                        coops.map { it.activeEarningsBonus.formatIllions(true) })
-                    append(coop.activeEarningsBonus.formatIllions(true) + " %")
+                        coop.activeEarningsBonus.asIllions(true),
+                        coops.map { it.activeEarningsBonus.asIllions(true) })
+                    append(coop.activeEarningsBonus.asIllions(true) + " %")
                     appendln()
                 }
                 append("```")
@@ -178,7 +176,7 @@ object RollCall : EggBotCommand() {
             coops.map { coop ->
                 val role = coop.roleId?.let { guild.getRoleById(it) }
                 StringBuilder().apply {
-                    appendln("__**Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)**__:")
+                    appendln("__**Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)**__")
                     coop.farmers.forEach { farmer ->
                         append(
                             guild.getMemberById(farmer.discordUser.discordId)?.asMention

@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -60,14 +59,14 @@ object CoopsInfo : EggBotCommand() {
                         result.simulation.coopId,
                         "🟢",
                         "On track",
-                        result.simulation.eggspected.formatIllions(),
+                        result.simulation.eggspected.asIllions(),
                         result.simulation.coopStatus.contributorsCount.toString()
                     )
                     else -> ResultRow(
                         result.simulation.coopId,
                         "🔴",
                         "Not on track",
-                        result.simulation.eggspected.formatIllions(),
+                        result.simulation.eggspected.asIllions(),
                         result.simulation.coopStatus.contributorsCount.toString()
                     )
                 }
@@ -85,9 +84,9 @@ object CoopsInfo : EggBotCommand() {
             // region Basic info
 
             appendln()
-            appendln("__🗒️ **Basic info**:__ ```")
+            appendln("__🗒️ **Basic info**__ ```")
             appendln("Contract:         ${contract.name}")
-            appendln("Final goal:       ${contract.finalGoal.formatIllions(true)}")
+            appendln("Final goal:       ${contract.finalGoal.asIllions(true)}")
             appendln("Time to complete: ${contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true)}")
             appendln("Max size:         ${contract.maxCoopSize} farmers")
 
@@ -97,7 +96,7 @@ object CoopsInfo : EggBotCommand() {
 
             // region Table
 
-            appendln("__**🤝 Co-ops:**__```")
+            appendln("__**🤝 Co-ops**__```")
 
             // region Table header
 

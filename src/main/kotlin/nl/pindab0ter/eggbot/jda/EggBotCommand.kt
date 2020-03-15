@@ -60,10 +60,10 @@ abstract class EggBotCommand : Command() {
             else -> appendln(aliases.joinToString(prefix = "    Aliases: ") { "`${Config.prefix}$it`" })
         }
         if (adminRequired) appendln("Admin only.")
-        appendln("__**Description:**__")
+        appendln("__**Description**__")
         appendln("    $help")
         if (parameters != null) {
-            appendln("__**Arguments:**__")
+            appendln("__**Arguments**__")
             parameters?.forEach { parameter ->
                 appendln("`${parameter.syntax.replace("[<", "[").replace(">]", "]")}`")
                 appendln("    ${parameter.help}")

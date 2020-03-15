@@ -5,7 +5,6 @@ import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
@@ -97,10 +96,10 @@ object SoloInfo : EggBotCommand() {
         simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
             append("${index + 1}. ")
             appendPaddingCharacters(
-                goal.formatIllions(true),
-                simulation.goalReachedMoments.map { it.target.formatIllions(rounded = true) }
+                goal.asIllions(true),
+                simulation.goalReachedMoments.map { it.target.asIllions(rounded = true) }
             )
-            append(goal.formatIllions(true))
+            append(goal.asIllions(true))
             append(
                 when {
                     moment == null || moment > simulation.timeRemaining -> " 🔴 "
@@ -121,15 +120,15 @@ object SoloInfo : EggBotCommand() {
 
         // region Basic info and totals
 
-        appendln("__🗒️ **Basic info**__: ```")
+        appendln("__🗒️ **Basic info**__ ```")
         simulation.apply {
-            appendln("Eggspected:       ${eggspected.formatIllions()}")
+            appendln("Eggspected:       ${eggspected.asIllions()}")
             appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
-            append("Current chickens: ${currentPopulation.formatIllions()} ")
-            if (!compact) append("(${populationIncreasePerHour.formatIllions()}/hr)")
+            append("Current chickens: ${currentPopulation.asIllions()} ")
+            if (!compact) append("(${populationIncreasePerHour.asIllions()}/hr)")
             appendln()
-            append("Current eggs:     ${currentEggs.formatIllions()} ")
-            if (!compact) append("(${(eggsPerChickenPerMinute * currentPopulation * 60).formatIllions()}/hr) ")
+            append("Current eggs:     ${currentEggs.asIllions()} ")
+            if (!compact) append("(${(eggsPerChickenPerMinute * currentPopulation * 60).asIllions()}/hr) ")
             appendln()
             appendln("Last update:      ${timeSinceLastUpdate.asDaysHoursAndMinutes(compact)} ago")
             appendln("```")
@@ -141,7 +140,7 @@ object SoloInfo : EggBotCommand() {
 
         simulation.apply {
             if (habBottleneckReached != null || transportBottleneckReached != null) {
-                appendln("__⚠ **Bottlenecks**__: ```")
+                appendln("__**⚠ Bottlenecks**__ ```")
                 habBottleneckReached?.let {
                     if (it == Duration.ZERO) append("🏠Full! ")
                     else append("🏠${it.asDaysHoursAndMinutes(true)} ")

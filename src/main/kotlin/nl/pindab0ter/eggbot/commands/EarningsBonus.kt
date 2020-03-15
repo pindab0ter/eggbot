@@ -8,13 +8,12 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.formatIllions
+import nl.pindab0ter.eggbot.utilities.asIllions
 import nl.pindab0ter.eggbot.utilities.formatInteger
 import nl.pindab0ter.eggbot.utilities.paddingCharacters
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -73,12 +72,12 @@ object EarningsBonus : EggBotCommand() {
                     val earningsBonusLabel = "Earnings bonus:  "
                     val earningsBonus =
                         if (extended) farmer.earningsBonus.formatInteger()
-                        else farmer.earningsBonus.formatIllions(false)
+                        else farmer.earningsBonus.asIllions(false)
                     val earningsBonusSuffix = " %"
                     val soulEggsLabel = "Soul Eggs:  "
                     val soulEggs =
                         if (extended) farmer.soulEggs.formatInteger()
-                        else farmer.soulEggs.formatIllions(false)
+                        else farmer.soulEggs.asIllions(false)
                     val soulEggsSuffix = " SE"
                     val prophecyEggsLabel = "Prophecy Eggs:  "
                     val prophecyEggs = farmer.prophecyEggs.formatInteger()
@@ -94,7 +93,7 @@ object EarningsBonus : EggBotCommand() {
                         ?.lowerBound
                         ?.minus(farmer.earningsBonus)
                         ?.divide(farmer.bonusPerSoulEgg, RoundingMode.HALF_UP)
-                        ?.formatIllions(false)
+                        ?.asIllions(false)
                         ?.let { "+ $it" } ?: "Unknown"
 
                     append("Earnings bonus for **${farmer.inGameName}**:```\n")
