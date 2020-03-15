@@ -117,6 +117,8 @@ class Table {
         this.intersection = intersection
     })
 
+    fun divider(init: DividerColumn.() -> Unit): DividerColumn = initColumn(DividerColumn(), init)
+
     // endregion
 
     companion object {
@@ -187,9 +189,9 @@ inline fun StringBuilder.appendRow(
     transform: Column.() -> String
 ) {
     columns.forEach { column ->
-        if (column is AlignedColumn) append(spacingChar.repeat(column.leftPadding))
+        append(spacingChar.repeat(column.leftPadding))
         append(column.transform())
-        if (column is AlignedColumn && column != columns.last()) append(spacingChar.repeat(column.rightPadding))
+        if (column != columns.last()) append(spacingChar.repeat(column.rightPadding))
     }
     appendln()
 }

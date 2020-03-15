@@ -193,6 +193,46 @@ fun BigDecimal.asIllions(rounded: Boolean = false, shortened: Boolean = true): S
     }.replace("-", "illion")
 }
 
+fun BigDecimal.asFarmerRole(): String = when (this) {
+    in (ZERO..TEN.pow(2) - ONE) -> "Farmer"
+    in (TEN.pow(2)..TEN.pow(3) - ONE) -> "Farmer II"
+    in (TEN.pow(3)..TEN.pow(4) - ONE) -> "Farmer III"
+    in (TEN.pow(4)..TEN.pow(5) - ONE) -> "Kilo"
+    in (TEN.pow(5)..TEN.pow(6) - ONE) -> "Kilo II"
+    in (TEN.pow(6)..TEN.pow(7) - ONE) -> "Kilo III"
+    in (TEN.pow(7)..TEN.pow(8) - ONE) -> "Mega"
+    in (TEN.pow(8)..TEN.pow(9) - ONE) -> "Mega II"
+    in (TEN.pow(9)..TEN.pow(10) - ONE) -> "Mega III"
+    in (TEN.pow(10)..TEN.pow(11) - ONE) -> "Giga"
+    in (TEN.pow(11)..TEN.pow(12) - ONE) -> "Giga II"
+    in (TEN.pow(12)..TEN.pow(13) - ONE) -> "Giga III"
+    in (TEN.pow(13)..TEN.pow(14) - ONE) -> "Tera"
+    in (TEN.pow(14)..TEN.pow(15) - ONE) -> "Tera II"
+    in (TEN.pow(15)..TEN.pow(16) - ONE) -> "Tera III"
+    in (TEN.pow(16)..TEN.pow(17) - ONE) -> "Peta"
+    in (TEN.pow(17)..TEN.pow(18) - ONE) -> "Peta II"
+    in (TEN.pow(18)..TEN.pow(19) - ONE) -> "Peta III"
+    in (TEN.pow(19)..TEN.pow(20) - ONE) -> "Exa"
+    in (TEN.pow(20)..TEN.pow(21) - ONE) -> "Exa II"
+    in (TEN.pow(21)..TEN.pow(22) - ONE) -> "Exa III"
+    in (TEN.pow(22)..TEN.pow(23) - ONE) -> "Zetta"
+    in (TEN.pow(23)..TEN.pow(24) - ONE) -> "Zetta II"
+    in (TEN.pow(24)..TEN.pow(25) - ONE) -> "Zetta III"
+    in (TEN.pow(25)..TEN.pow(26) - ONE) -> "Yotta"
+    in (TEN.pow(26)..TEN.pow(27) - ONE) -> "Yotta II"
+    in (TEN.pow(27)..TEN.pow(28) - ONE) -> "Yotta III"
+    in (TEN.pow(28)..TEN.pow(29) - ONE) -> "Xenna"
+    in (TEN.pow(29)..TEN.pow(30) - ONE) -> "Xenna II"
+    in (TEN.pow(30)..TEN.pow(31) - ONE) -> "Xenna III"
+    in (TEN.pow(31)..TEN.pow(32) - ONE) -> "Wecca"
+    in (TEN.pow(32)..TEN.pow(33) - ONE) -> "Wecca II"
+    in (TEN.pow(33)..TEN.pow(34) - ONE) -> "Wecca III"
+    in (TEN.pow(34)..TEN.pow(35) - ONE) -> "Venda"
+    in (TEN.pow(35)..TEN.pow(36) - ONE) -> "Venda II"
+    in (TEN.pow(36)..TEN.pow(37) - ONE) -> "Venda III"
+    else -> "Unknown"
+}
+
 // Padding
 
 fun paddingCharacters(current: Any, longest: Any, character: String = " "): String {
