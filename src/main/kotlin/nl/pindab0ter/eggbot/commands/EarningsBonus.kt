@@ -15,8 +15,10 @@ import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.asIllions
 import nl.pindab0ter.eggbot.utilities.formatInteger
+import nl.pindab0ter.eggbot.utilities.nextPowerOfThousand
 import nl.pindab0ter.eggbot.utilities.paddingCharacters
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.math.BigDecimal
 import java.math.RoundingMode
 
 object EarningsBonus : EggBotCommand() {
@@ -68,7 +70,7 @@ object EarningsBonus : EggBotCommand() {
                     )
 
                     val roleLabel = "Role:  "
-                    val role = farmer.role?.name ?: "Unknown"
+                    val role = farmer.role
                     val earningsBonusLabel = "Earnings bonus:  "
                     val earningsBonus =
                         if (extended) farmer.earningsBonus.formatInteger()
@@ -89,11 +91,10 @@ object EarningsBonus : EggBotCommand() {
                     val prestigesLabel = "Prestiges: "
                     val prestiges = "${farmer.prestiges}"
                     val soulEggsToNextLabel = "SE to next rank:  "
-                    val soulEggsToNext = farmer.nextRole
-                        ?.lowerBound
-                        ?.minus(farmer.earningsBonus)
-                        ?.divide(farmer.bonusPerSoulEgg, RoundingMode.HALF_UP)
-                        ?.asIllions(false)
+                    val soulEggsToNext = nextPowerOfThousand(farmer.earningsBonus)
+                        .minus(farmer.earningsBonus)
+                        .divide(farmer.bonusPerSoulEgg, RoundingMode.HALF_UP)
+                        ?.asIllions(rounded = false, shortened = true)
                         ?.let { "+ $it" } ?: "Unknown"
 
                     append("Earnings bonus for **${farmer.inGameName}**:```\n")

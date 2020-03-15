@@ -5,10 +5,7 @@ import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.clientVersion
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.prophecyBonus
-import nl.pindab0ter.eggbot.utilities.soulBonus
-import nl.pindab0ter.eggbot.utilities.sumByBigDecimal
-import nl.pindab0ter.eggbot.utilities.toDateTime
+import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal
 import java.math.BigDecimal.*
@@ -49,39 +46,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     val isActive: Boolean get() = discordUser.isActive
 
-    val role: Role? get() = roles.find { earningsBonus in it.range }
-
-    val nextRole: Role? get() = roles.getOrNull(roles.indexOf(role) + 1)
-
-    private val roles = listOf(
-        Role(TEN.pow(0), TEN.pow(3) - ONE, "Farmer"),
-        Role(TEN.pow(3), TEN.pow(4) - ONE, "Farmer 2"),
-        Role(TEN.pow(4), TEN.pow(5) - ONE, "Farmer 3"),
-        Role(TEN.pow(5), TEN.pow(6) - ONE, "Kilofarmer"),
-        Role(TEN.pow(6), TEN.pow(7) - ONE, "Kilofarmer 2"),
-        Role(TEN.pow(7), TEN.pow(8) - ONE, "Kilofarmer 3"),
-        Role(TEN.pow(8), TEN.pow(9) - ONE, "Megafarmer"),
-        Role(TEN.pow(9), TEN.pow(10) - ONE, "Megafarmer 2"),
-        Role(TEN.pow(10), TEN.pow(11) - ONE, "Megafarmer 3"),
-        Role(TEN.pow(11), TEN.pow(12) - ONE, "Gigafarmer"),
-        Role(TEN.pow(12), TEN.pow(13) - ONE, "Gigafarmer 2"),
-        Role(TEN.pow(13), TEN.pow(14) - ONE, "Gigafarmer 3"),
-        Role(TEN.pow(14), TEN.pow(15) - ONE, "Terafarmer"),
-        Role(TEN.pow(15), TEN.pow(16) - ONE, "Terafarmer 2"),
-        Role(TEN.pow(16), TEN.pow(17) - ONE, "Terafarmer 3"),
-        Role(TEN.pow(17), TEN.pow(18) - ONE, "Petafarmer"),
-        Role(TEN.pow(18), TEN.pow(19) - ONE, "Petafarmer 2"),
-        Role(TEN.pow(19), TEN.pow(20) - ONE, "Petafarmer 3"),
-        Role(TEN.pow(20), TEN.pow(21) - ONE, "Exafarmer"),
-        Role(TEN.pow(21), TEN.pow(22) - ONE, "Exafarmer 2"),
-        Role(TEN.pow(22), TEN.pow(23) - ONE, "Exafarmer 3"),
-        Role(TEN.pow(23), TEN.pow(24) - ONE, "Zettafarmer"),
-        Role(TEN.pow(24), TEN.pow(25) - ONE, "Zettafarmer 2"),
-        Role(TEN.pow(25), TEN.pow(26) - ONE, "Zettafarmer 3"),
-        Role(TEN.pow(26), TEN.pow(27) - ONE, "Yodafarmer"),
-        Role(TEN.pow(27), TEN.pow(28) - ONE, "Yodafarmer 2"),
-        Role(TEN.pow(28), TEN.pow(29) - ONE, "Yodafarmer 3")
-    )
+    val role: String get() = earningsBonus.asFarmerRole()
 
     val bonusPerSoulEgg: BigDecimal
         get() {
@@ -110,14 +75,6 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         droneTakedowns = backup.stats.droneTakedowns
         eliteDroneTakedowns = backup.stats.droneTakedownsElite
         lastUpdated = backup.approxTime.toDateTime()
-    }
-
-    data class Role(
-        val lowerBound: BigDecimal,
-        val upperBound: BigDecimal,
-        val name: String
-    ) {
-        val range: ClosedRange<BigDecimal> = lowerBound..upperBound
     }
 
     companion object : EntityClass<String, Farmer>(Farmers)

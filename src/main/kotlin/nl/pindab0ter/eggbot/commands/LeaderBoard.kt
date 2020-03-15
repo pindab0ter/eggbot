@@ -57,6 +57,14 @@ object LeaderBoard : EggBotCommand() {
         category: Category,
         compact: Boolean = false
     ): List<String> = table {
+        val sortedFarmers = when (category) {
+            EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
+            SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
+            PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.prestiges }
+            DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
+            ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
+        }
+
         title = when (category) {
             EARNINGS_BONUS -> "__**💵 Earnings Bonus**__"
             SOUL_EGGS -> "__**${emoteSoulEgg ?: "🥚"} Soul Eggs**__"
@@ -69,7 +77,7 @@ object LeaderBoard : EggBotCommand() {
         column {
             header = "Name"
             leftPadding = 1
-            cells = farmers.map { farmer -> farmer.inGameName }
+            cells = sortedFarmers.map { farmer -> farmer.inGameName }
         }
         column {
             header = when (category) {
@@ -81,27 +89,16 @@ object LeaderBoard : EggBotCommand() {
             }
             alignment = RIGHT
             cells = when (category) {
-                EARNINGS_BONUS -> farmers
-                    .sortedBy { farmer -> farmer.earningsBonus }
-                    .map { farmer -> farmer.earningsBonus.asIllions(rounded = false) + "\u00A0%" }
-                SOUL_EGGS -> farmers
-                    .sortedBy { farmer -> farmer.soulEggs }
-                    .map { farmer -> farmer.soulEggs.formatInteger() }
-                PRESTIGES -> farmers
-                    .sortedBy { farmer -> farmer.prestiges }
-                    .map { farmer -> farmer.prestiges.formatInteger() }
-                DRONE_TAKEDOWNS -> farmers
-                    .sortedBy { farmer -> farmer.droneTakedowns }
-                    .map { farmer -> farmer.droneTakedowns.formatInteger() }
-                ELITE_DRONE_TAKEDOWNS -> farmers
-                    .sortedBy { farmer -> farmer.eliteDroneTakedowns }
-                    .map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
+                EARNINGS_BONUS -> farmers.map { farmer -> farmer.earningsBonus.asIllions(rounded = false) + "\u00A0%" }
+                SOUL_EGGS -> farmers.map { farmer -> farmer.soulEggs.formatInteger() }
+                PRESTIGES -> farmers.map { farmer -> farmer.prestiges.formatInteger() }
+                DRONE_TAKEDOWNS -> farmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
+                ELITE_DRONE_TAKEDOWNS -> farmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
             }
         }
         if (category == EARNINGS_BONUS) column {
-            header = "Farmer Role"
             leftPadding = 2
-            cells = farmers.map { farmer -> farmer.earningsBonus.asFarmerRole() }
+            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asFarmerRole() }
         }
     }.splitMessage(prefix = "```", postfix = "```")
 }
