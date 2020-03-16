@@ -49,6 +49,7 @@ val User.isAdmin: Boolean
     } == true
 
 fun JSAPResult.getIntOrNull(id: String) = if (contains(id)) getInt(id) else null
+fun JSAPResult.getStringOrNull(id: String) = if (contains(id)) getString(id) else null
 
 /**
  * Returns a string containing this char repeated [n] times.

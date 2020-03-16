@@ -1,7 +1,13 @@
 package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.martiansoftware.jsap.FlaggedOption
+import com.martiansoftware.jsap.JSAP
+import com.martiansoftware.jsap.JSAP.*
 import com.martiansoftware.jsap.JSAPResult
+import com.martiansoftware.jsap.QualifiedSwitch
+import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser
+import com.martiansoftware.jsap.stringparsers.IntegerStringParser
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.EggBot.emoteSoulEgg
@@ -23,7 +29,29 @@ object LeaderBoard : EggBotCommand() {
         aliases = arrayOf("lb")
         help = "Shows the Earnings Bonus leader board"
         parameters = listOf(
-            compactSwitch
+            FlaggedOption("amount of players")
+                .setShortFlag('t')
+                .setLongFlag("top")
+                .setStringParser(INTEGER_PARSER)
+                .setHelp("Specify the amount of players you want to display."),
+            FlaggedOption("category")
+                .setShortFlag('C')
+                .setLongFlag("category")
+                .setDefault("earnings-bonus")
+                .setStringParser(
+                    EnumeratedStringParser.getParser(
+                        Category.values().joinToString(";") { category ->
+                            "${category.longForm};${category.shortForm}"
+                        },
+                        false,
+                        false
+                    )
+                )
+                .setHelp(
+                    "Specify which category leader board you want to see. The categories are:\n${Category.values()
+                        .joinToString("\n") { category -> "    • `${category.longForm}` or `${category.shortForm}`" }}"
+                )
+            // , compactSwitch
         )
         init()
     }
@@ -39,7 +67,12 @@ object LeaderBoard : EggBotCommand() {
             return
         }
 
-        formatLeaderBoard(farmers, EARNINGS_BONUS).let { messages ->
+        val amount = parameters.getIntOrNull("amount of players")
+        val category = parameters.getStringOrNull("category")?.let { input ->
+            Category.getByString(input)
+        }
+
+        formatLeaderBoard(farmers, category ?: EARNINGS_BONUS, amount).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {
@@ -49,12 +82,27 @@ object LeaderBoard : EggBotCommand() {
     }
 
     enum class Category {
-        EARNINGS_BONUS, SOUL_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS
+        EARNINGS_BONUS, SOUL_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
+
+        companion object {
+            fun getByString(input: String): Category? =
+                getByLongForm(input) ?: getByShortForm(input)
+
+            private fun getByLongForm(input: String): Category? =
+                Category.values().find { category -> category.longForm == input }
+
+            private fun getByShortForm(input: String): Category? =
+                Category.values().find { category -> category.shortForm == input }
+        }
+
+        val longForm: String get() = name.toLowerCase().replace('_', '-')
+        val shortForm: String get() = name.toLowerCase().split('_').joinToString("") { "${it.first()}" }
     }
 
     fun formatLeaderBoard(
         farmers: List<Farmer>,
         category: Category,
+        amount: Int? = null,
         compact: Boolean = false
     ): List<String> = table {
         val sortedFarmers = when (category) {
@@ -63,20 +111,23 @@ object LeaderBoard : EggBotCommand() {
             PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.prestiges }
             DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
             ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
+        }.let { sortedFarmers ->
+            if (amount != null) sortedFarmers.take(amount) else sortedFarmers
         }
 
         title = when (category) {
-            EARNINGS_BONUS -> "__**💵 Earnings Bonus**__"
-            SOUL_EGGS -> "__**${emoteSoulEgg ?: "🥚"} Soul Eggs**__"
-            PRESTIGES -> "__**🥨 Prestiges**__"
-            DRONE_TAKEDOWNS -> "__**✈🚫 Drone Takedowns**__"
-            ELITE_DRONE_TAKEDOWNS -> "__**🎖✈🚫 Elite Drone Takedowns**__"
+            EARNINGS_BONUS -> "__**💵 Earnings Bonus Leader Board**__"
+            SOUL_EGGS -> "__**${emoteSoulEgg ?: "🥚"} Soul Eggs Leader Board**__"
+            PRESTIGES -> "__**🥨 Prestiges Leader Board**__"
+            DRONE_TAKEDOWNS -> "__**✈🚫 Drone Takedowns Leader Board**__"
+            ELITE_DRONE_TAKEDOWNS -> "__**🎖✈🚫 Elite Drone Takedowns Leader Board**__"
         }
         displayHeader = true
         incrementColumn(":")
         column {
             header = "Name"
             leftPadding = 1
+            rightPadding = 2
             cells = sortedFarmers.map { farmer -> farmer.inGameName }
         }
         column {
@@ -89,14 +140,15 @@ object LeaderBoard : EggBotCommand() {
             }
             alignment = RIGHT
             cells = when (category) {
-                EARNINGS_BONUS -> farmers.map { farmer -> farmer.earningsBonus.asIllions(rounded = false) + "\u00A0%" }
-                SOUL_EGGS -> farmers.map { farmer -> farmer.soulEggs.formatInteger() }
-                PRESTIGES -> farmers.map { farmer -> farmer.prestiges.formatInteger() }
-                DRONE_TAKEDOWNS -> farmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
-                ELITE_DRONE_TAKEDOWNS -> farmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
+                EARNINGS_BONUS -> sortedFarmers.map { farmer -> farmer.earningsBonus.asIllions(rounded = false) + "\u00A0%" }
+                SOUL_EGGS -> sortedFarmers.map { farmer -> farmer.soulEggs.formatInteger() }
+                PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
+                DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
+                ELITE_DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
             }
         }
         if (category == EARNINGS_BONUS) column {
+            header = "Farmer Role"
             leftPadding = 2
             cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asFarmerRole() }
         }
