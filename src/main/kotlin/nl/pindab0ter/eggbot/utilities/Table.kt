@@ -68,9 +68,12 @@ class Table {
         init {
             val (header, cells) = when {
                 left is AlignedColumn && left.alignment == LEFT && right is AlignedColumn && right.alignment == RIGHT ->
-                    left.cellLengths.zip(right.cellLengths).let { rows ->
-                        val widestPair = rows.map { (a, b) -> a + b }.max()!!
-                        ' '.repeat(widestPair - (left.headerLength + right.headerLength)) to rows.map { (a, b) ->
+                    left.cellLengths.zip(right.cellLengths).let { rowLengths ->
+                        val widestPair = rowLengths
+                            .plus(left.header.length to right.header.length)
+                            .map { (a, b) -> a + b }.max()!!
+
+                        ' '.repeat(widestPair - (left.headerLength + right.headerLength)) to rowLengths.map { (a, b) ->
                             ' '.repeat(widestPair - (a + b))
                         }
                     }
