@@ -16,6 +16,7 @@ import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
 import org.joda.time.Duration.*
+import kotlin.math.absoluteValue
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
@@ -87,6 +88,12 @@ object CoopInfo : EggBotCommand() {
         is CoopContractSimulationResult.InProgress -> StringBuilder().apply {
             result.simulation.apply {
                 val farms = farms
+                val shortenedNames = farms.map { farm ->
+                    farm.farmerName.let { name ->
+                        if (name.length <= 10) name
+                        else "${name.substring(0 until 9)}…"
+                    }
+                }
 
                 appendln("`${coopId}` vs. _${contractName}_:")
                 appendln()
@@ -198,51 +205,11 @@ object CoopInfo : EggBotCommand() {
 
                     append('\u200B')
 
-                    appendTable {
-                        title = "__**⚠ Bottlenecks**:__"
-                        displayHeader = false
-
-                        val bottleneckedFarmers = farms.filter { farm ->
-                            farm.habBottleneckReached != null || farm.transportBottleneckReached != null
-                        }
-
-                        column {
-                            rightPadding = 1
-                            cells = bottleneckedFarmers.map { farm -> "${farm.farmerName}:" }
-                        }
-                        column {
-                            cells = bottleneckedFarmers.map { farm ->
-                                val habs = farm.habBottleneckReached.let { duration ->
-                                    when (duration) {
-                                        null -> ""
-                                        ZERO -> "🏠Full! "
-                                        else -> "🏠${duration.asDaysHoursAndMinutes(true)} "
-                                    }
-                                }
-                                val transport = farm.transportBottleneckReached.let { duration ->
-                                    when (duration) {
-                                        null -> ""
-                                        ZERO -> "🚛Full! "
-                                        else -> "🚛${duration.asDaysHoursAndMinutes(true)} "
-                                    }
-                                }
-                                "$habs${if (habs.isNotEmpty()) " " else ""}$transport"
-                            }
-                        }
-                    }
-
                     // endregion Non-compact
 
                 } else {
 
                     // region Compact
-
-                    val shortenedNames = farms.map { farm ->
-                        farm.farmerName.let { name ->
-                            if (name.length <= 10) name
-                            else "${name.substring(0 until 9)}…"
-                        }
-                    }
 
                     appendTable {
                         title = "__**🚜 Members** (${farms.count()}/${maxCoopSize}):__"
@@ -290,40 +257,47 @@ object CoopInfo : EggBotCommand() {
 
                     append('\u200B')
 
-                    appendTable {
+                    // endregion Compact
+
+                    val bottleneckedFarmers = farms.zip(shortenedNames).filter { (farm, _) ->
+                        farm.habBottleneckReached != null || farm.transportBottleneckReached != null
+                    }
+
+                    if (bottleneckedFarmers.isNotEmpty()) appendTable {
                         title = "__**⚠ Bottlenecks**__"
                         displayHeader = false
-                        val bottleneckedFarmers = farms.zip(shortenedNames).filter { (farm, _) ->
-                            farm.habBottleneckReached != null || farm.transportBottleneckReached != null
-                        }
+
 
                         column {
                             rightPadding = 1
-                            cells = bottleneckedFarmers.map { (_, name) -> "$name:" }
+                            cells = bottleneckedFarmers.map { (farm, shortenedName) ->
+                                "${if (compact) farm.farmerName else shortenedName}:"
+                            }
                         }
                         column {
                             cells = bottleneckedFarmers.map { (farm, _) ->
                                 val habs = farm.habBottleneckReached.let { duration ->
                                     when (duration) {
                                         null -> ""
-                                        ZERO -> "🏠Full!"
-                                        else -> "🏠${duration.asHoursAndMinutes()}"
+                                        ZERO -> "🏠Full! "
+                                        else ->
+                                            if (compact) "🏠${duration.asHoursAndMinutes()}"
+                                            else "🏠${duration.asDaysHoursAndMinutes(true)} "
                                     }
                                 }
                                 val transport = farm.transportBottleneckReached.let { duration ->
                                     when (duration) {
                                         null -> ""
-                                        ZERO -> "🚛Full!"
-                                        else -> "🚛${duration.asHoursAndMinutes()}"
+                                        ZERO -> "🚛Full! "
+                                        else ->
+                                            if (compact) "🚛${duration.asHoursAndMinutes()}"
+                                            else "🚛${duration.asDaysHoursAndMinutes(true)} "
                                     }
                                 }
                                 "$habs${if (habs.isNotEmpty()) " " else ""}$transport"
                             }
                         }
                     }
-
-                    // endregion Compact
-
                 }
             }
         }.toString().splitMessage(separator = '\u200B')
