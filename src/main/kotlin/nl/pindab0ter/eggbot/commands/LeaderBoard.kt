@@ -23,20 +23,23 @@ object LeaderBoard : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
+    private const val TOP = "amount of players"
+    private const val CATEGORY = "category"
+
     init {
         category = FarmersCategory
         name = "leader-board"
         aliases = arrayOf("lb")
         help = "Shows the Earnings Bonus leader board"
         parameters = listOf(
-            FlaggedOption("amount of players")
+            FlaggedOption(TOP)
                 .setShortFlag('t')
                 .setLongFlag("top")
                 .setStringParser(INTEGER_PARSER)
                 .setHelp("Specify the amount of players you want to display."),
-            FlaggedOption("category")
+            FlaggedOption(CATEGORY)
                 .setShortFlag('C')
-                .setLongFlag("category")
+                .setLongFlag(CATEGORY)
                 .setDefault("earnings-bonus")
                 .setStringParser(
                     EnumeratedStringParser.getParser(
@@ -68,8 +71,8 @@ object LeaderBoard : EggBotCommand() {
             return
         }
 
-        val amount = parameters.getIntOrNull("amount of players")
-        val category = parameters.getStringOrNull("category")?.let { input ->
+        val amount = parameters.getIntOrNull(TOP)
+        val category = parameters.getStringOrNull(CATEGORY)?.let { input ->
             Category.getByString(input)
         }
 
