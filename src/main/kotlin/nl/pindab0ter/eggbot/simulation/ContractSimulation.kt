@@ -69,7 +69,7 @@ class ContractSimulation constructor(
     fun run() {
         do step() while (
             elapsed <= timeRemaining ||                                            // Time limit hasn't been reached or
-            (goalReachedMoments.any { it.moment == null } || elapsed <= ONE_YEAR) // either the goals haven't been reached or a year hasn't yet passed
+            (goalReachedMoments.any { it.moment == null } && elapsed <= ONE_YEAR) // the goals haven't been reached and a year hasn't yet passed
         )
     }
 
