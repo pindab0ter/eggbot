@@ -40,17 +40,28 @@ abstract class EggBotCommand : Command() {
     /** Child MUST call this method **/
     protected fun init() {
         parameters?.forEach { parser.registerParameter(it) }
-        arguments = parser.usage.replace("[<", "[").replace(">]", "]")
+        arguments = parser.cleanUsage
         commandHelp = generateCommandHelp()
         parser.registerParameter(helpFlag)
     }
+
+    private fun clean(syntax: String): String = syntax.replace(
+        Regex("""\(([-|\w]+)\)|(?:(\[)(?:<)([-|\w]+?)(?:>)(]))""")
+    ) { matchResult ->
+        matchResult.groupValues.drop(1).joinToString("")
+    }
+
+    val JSAP.cleanUsage
+        get() = clean(usage)
+    val Parameter.cleanSyntax
+        get() = clean(syntax)
 
     private fun generateCommandHelp() = StringBuilder().apply {
         append("ℹ️ **`${Config.prefix}$name")
         if (parameters != null) {
             append(" ")
             append(parameters?.joinToString(" ") { parameter ->
-                parameter.syntax.replace("[<", "[").replace(">]", "]")
+                parameter.cleanSyntax
             })
         }
         appendln("`**")
@@ -65,7 +76,7 @@ abstract class EggBotCommand : Command() {
         if (parameters != null) {
             appendln("__**Arguments**__")
             parameters?.forEach { parameter ->
-                appendln("`${parameter.syntax.replace("[<", "[").replace(">]", "]")}`")
+                appendln("`${parameter.cleanSyntax}`")
                 appendln("    ${parameter.help}")
             }
         }
@@ -91,7 +102,11 @@ abstract class EggBotCommand : Command() {
             result.getBoolean("help") -> event.reply(commandHelp)
             !result.success() -> {
                 val errorMessage = result.errorMessageIterator.next().toString().replace("'", "`")
-                "$errorMessage The syntax for this command is: `${Config.prefix}$name ${arguments}`.\nFor more information on this command, type `${Config.prefix}$name --\u200Dhelp` or `${Config.prefix}$name -\u200Dh`.".let {
+                """
+                $errorMessage
+                The syntax for this command is: `${Config.prefix}$name ${arguments}`.
+                For more information on this command, type `${Config.prefix}$name --‍help` or `${Config.prefix}$name -‍h`.
+                """.trimIndent().let {
                     log.debug { it }
                     event.replyWarning(it)
                 }
