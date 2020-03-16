@@ -37,6 +37,7 @@ object EarningsBonus : EggBotCommand() {
                 .setLongFlag("extended")
                 .setHelp("Show unshortened output.")
         )
+        sendTyping = true
         init()
     }
 

@@ -24,6 +24,7 @@ object CoopsInfo : EggBotCommand() {
         name = "coops"
         help = "Shows info on all known co-ops for the specified contract."
         parameters = listOf(contractIdOption)
+        sendTyping = true
         init()
     }
 

@@ -53,6 +53,7 @@ object LeaderBoard : EggBotCommand() {
                 )
             // , compactSwitch
         )
+        sendTyping = true
         init()
     }
 

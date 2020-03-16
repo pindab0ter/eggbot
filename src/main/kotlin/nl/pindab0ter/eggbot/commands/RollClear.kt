@@ -25,6 +25,7 @@ object RollClear : EggBotCommand() {
         adminRequired = true
         parameters = listOf(contractIdOption)
         botPermissions = arrayOf(MANAGE_ROLES)
+        sendTyping = true
         init()
     }
 
