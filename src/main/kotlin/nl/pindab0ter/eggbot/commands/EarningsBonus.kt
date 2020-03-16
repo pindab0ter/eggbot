@@ -65,18 +65,18 @@ object EarningsBonus : EggBotCommand() {
                 val rows = mutableListOf<Row>().apply {
                     add(Row("Role:", farmer.earningsBonus.asFarmerRole()))
                     add(Row("Earnings Bonus:", farmer.earningsBonus.asIllions(shortened = true), " %"))
-                    add(Row("Soul Eggs:", farmer.soulEggs.asIllions(shortened = true), " SE"))
-                    add(Row("Prophecy Eggs:", farmer.prophecyEggs.formatInteger(), " PE"))
+                    add(Row("Soul Eggs:", farmer.soulEggs.asIllions(shortened = true)))
+                    add(Row("Prophecy Eggs:", farmer.prophecyEggs.formatInteger()))
                     if (farmer.soulBonus < 140)
                         add(Row("Soul Bonus:", farmer.soulBonus.formatInteger(), "/140"))
                     if (farmer.prophecyBonus < 5)
                         add(Row("Prophecy Bonus:", farmer.prophecyBonus.formatInteger(), "/5"))
                     add(Row("Prestiges:", farmer.prestiges.formatInteger()))
                     add(
-                        Row("SE to next rank:", "+ ${farmer.seToNextRole.asIllions(shortened = true)}", " SE")
+                        Row("SE to next rank:", "+ ${farmer.seToNextRole.asIllions(shortened = true)}")
                     )
                     add(
-                        Row("PE to next rank:", "+ ${farmer.peToNextRole.formatInteger()}", " PE")
+                        Row("PE to next rank:", "+ ${farmer.peToNextRole.formatInteger()}")
                     )
                 }
 
