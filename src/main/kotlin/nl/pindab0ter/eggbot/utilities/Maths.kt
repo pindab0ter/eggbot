@@ -2,7 +2,10 @@ package nl.pindab0ter.eggbot.utilities
 
 import org.joda.time.Duration
 import java.math.BigDecimal
+import java.math.MathContext
 import java.math.RoundingMode.HALF_UP
+
+val mathContext = MathContext(6, HALF_UP)
 
 inline fun <T> Iterable<T>.sumByBigDecimal(selector: (T) -> BigDecimal): BigDecimal {
     var sum: BigDecimal = BigDecimal.ZERO
@@ -28,7 +31,7 @@ operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * ot
 operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Long): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())
-operator fun BigDecimal.div(other: BigDecimal): BigDecimal = this.divide(other, 6, HALF_UP)
+operator fun BigDecimal.div(other: BigDecimal): BigDecimal = this.divide(other, mathContext)
 fun BigDecimal.round(scale: Int = 0): BigDecimal = this.setScale(scale, HALF_UP)
 val Int.odd: Boolean get() = this % 2 == 1
 val Int.even: Boolean get() = this % 2 == 0

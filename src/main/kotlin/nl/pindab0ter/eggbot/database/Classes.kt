@@ -1,14 +1,17 @@
 package nl.pindab0ter.eggbot.database
 
+import ch.obermuhlner.math.big.BigDecimalMath.log
 import com.auxbrain.ei.EggInc
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.clientVersion
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
 import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal
-import java.math.BigDecimal.*
+import java.math.BigDecimal.ZERO
+import java.math.RoundingMode.HALF_UP
+import kotlin.math.ceil
+import kotlin.math.roundToInt
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val discordId: String get() = id.value
@@ -48,12 +51,21 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     val role: String get() = earningsBonus.asFarmerRole()
 
-    val bonusPerSoulEgg: BigDecimal
+    private val bonusPerProphecyEgg: BigDecimal
+        get() = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyBonus)
+    private val bonusPerSoulEgg: BigDecimal
         get() {
             val soulEggBonus = BigDecimal(10 + soulBonus)
-            val prophecyEggBonus = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyBonus)
+            val prophecyEggBonus = bonusPerProphecyEgg
             return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
         }
+    val seToNextRole: BigDecimal
+        get() = nextPowerOfThousand(earningsBonus)
+            .minus(earningsBonus)
+            .divide(bonusPerSoulEgg, HALF_UP)
+    val peToNextRole: Int
+        get() = ceil(log(nextPowerOfThousand(earningsBonus) / earningsBonus, mathContext)
+            .div(log(bonusPerProphecyEgg, mathContext)).toDouble()).roundToInt()
     val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
     val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
 
