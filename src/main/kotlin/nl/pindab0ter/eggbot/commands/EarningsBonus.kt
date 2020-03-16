@@ -13,10 +13,8 @@ import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.asIllions
-import nl.pindab0ter.eggbot.utilities.formatInteger
-import nl.pindab0ter.eggbot.utilities.nextPowerOfThousand
-import nl.pindab0ter.eggbot.utilities.paddingCharacters
+import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -61,82 +59,42 @@ object EarningsBonus : EggBotCommand() {
                     transaction { farmer.update(backup) }
                 }
 
-                StringBuilder().apply {
-                    data class Line(
-                        val label: String,
-                        val value: String,
-                        var padding: String = "",
-                        val suffix: String? = null
-                    )
+                data class Row(val label: String, val value: String, val suffix: String = "")
 
-                    val roleLabel = "Role:  "
-                    val role = farmer.role
-                    val earningsBonusLabel = "Earnings bonus:  "
-                    val earningsBonus =
-                        if (extended) farmer.earningsBonus.formatInteger()
-                        else farmer.earningsBonus.asIllions(false)
-                    val earningsBonusSuffix = " %"
-                    val soulEggsLabel = "Soul Eggs:  "
-                    val soulEggs =
-                        if (extended) farmer.soulEggs.formatInteger()
-                        else farmer.soulEggs.asIllions(false)
-                    val soulEggsSuffix = " SE"
-                    val prophecyEggsLabel = "Prophecy Eggs:  "
-                    val prophecyEggs = farmer.prophecyEggs.formatInteger()
-                    val prophecyEggsSuffix = " PE"
-                    val soulBonusLabel = "Soul Food:  "
-                    val soulBonus = "${farmer.soulBonus.formatInteger()}/140"
-                    val prophecyBonusLabel = "Prophecy Bonus:  "
-                    val prophecyBonus = "${farmer.prophecyBonus.formatInteger()}/5"
-                    val prestigesLabel = "Prestiges: "
-                    val prestiges = "${farmer.prestiges}"
-                    val soulEggsToNextLabel = "SE to next rank:  "
-                    val soulEggsToNext = nextPowerOfThousand(farmer.earningsBonus)
+                val rows = mutableListOf<Row>().apply {
+                    add(Row("Role:", farmer.earningsBonus.asFarmerRole()))
+                    add(Row("Earnings Bonus:", farmer.earningsBonus.asIllions(shortened = true), "%"))
+                    add(Row("Soul Eggs:", farmer.soulEggs.asIllions(shortened = true), "SE"))
+                    add(Row("Prophecy Eggs:", farmer.prophecyEggs.formatInteger(), "PE"))
+                    if (farmer.soulBonus < 140)
+                        add(Row("Soul Bonus:", farmer.soulBonus.formatInteger() + "/140"))
+                    if (farmer.prophecyBonus < 5)
+                        add(Row("Prophecy Bonus:", farmer.prophecyBonus.formatInteger() + "/5"))
+                    add(Row("Prestiges:", farmer.prestiges.formatInteger()))
+                    add(Row("To next rank:", nextPowerOfThousand(farmer.earningsBonus)
                         .minus(farmer.earningsBonus)
                         .divide(farmer.bonusPerSoulEgg, RoundingMode.HALF_UP)
-                        ?.asIllions(rounded = false, shortened = true)
-                        ?.let { "+ $it" } ?: "Unknown"
-
-                    append("Earnings bonus for **${farmer.inGameName}**:```\n")
-
-                    val labelsToValues: List<Line> = listOf(
-                        Line(roleLabel, role),
-                        Line(earningsBonusLabel, earningsBonus, suffix = earningsBonusSuffix),
-                        Line(soulEggsLabel, soulEggs, suffix = soulEggsSuffix),
-                        Line(prophecyEggsLabel, prophecyEggs, suffix = prophecyEggsSuffix)
-                    ).run {
-                        if (farmer.soulBonus < 140) this.plus(Line(soulBonusLabel, soulBonus))
-                        else this
-                    }.run {
-                        if (farmer.prophecyBonus < 5) this.plus(Line(prophecyBonusLabel, prophecyBonus))
-                        else this
-                    }.plus(
-                        arrayOf(
-                            Line(prestigesLabel, prestiges),
-                            Line(soulEggsToNextLabel, soulEggsToNext, suffix = soulEggsSuffix)
-                        )
+                        ?.asIllions(shortened = true)
+                        ?.let { "+ $it" } ?: "Unknown", "SE")
                     )
+                }
 
-                    // TODO: Clean up this code
-
-                    val lines = labelsToValues.map { (label, value, _, suffix) ->
-                        val padding = paddingCharacters(label, labelsToValues.map { it.label }) +
-                                paddingCharacters(value, labelsToValues.map { it.value })
-                        Line(label, value, padding, suffix)
-                    }.let { lines ->
-                        val shortestPadding = lines.map { it.padding }.minBy { it.length }?.length ?: 0
-                        lines.map { (label, value, padding, suffix) ->
-                            Line(label, value, padding.drop(shortestPadding), suffix)
-                        }
+                table {
+                    title = "Earnings bonus for **${farmer.inGameName}**"
+                    displayHeader = false
+                    column {
+                        rightPadding = 2
+                        cells = rows.map { row -> row.label }
                     }
-
-                    lines.forEach { (label, value, padding, suffix) ->
-                        appendln(label + padding + value + (suffix ?: ""))
+                    column {
+                        alignment = RIGHT
+                        cells = rows.map { row -> row.value }
                     }
-
-                    appendln("```")
-
-                }.toString().let {
+                    column {
+                        leftPadding = 1
+                        cells = rows.map { row -> row.suffix }
+                    }
+                }.let {
                     if (event.channel == botCommandsChannel) {
                         event.reply(it)
                     } else event.replyInDm(it) {
