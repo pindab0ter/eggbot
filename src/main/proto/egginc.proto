@@ -495,5 +495,6 @@ enum TrophyLevel {
 }
 
 enum League {
-    NOT_YET_KNOWN = 0;
+    NORMAL = 0; // Or "BEGINNER"?
+    ELITE = 1;
 }
