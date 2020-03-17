@@ -106,6 +106,7 @@ object CoopInfo : EggBotCommand() {
                 appendTable {
                     title = "__${egg.toEmote()} **Goals** (${goalsReached}/${goals.count()}):__"
                     displayHeader = false
+                    bottomPadding = 1
 
                     incrementColumn(suffix = ".")
                     column {
@@ -162,8 +163,9 @@ object CoopInfo : EggBotCommand() {
 
                     appendTable {
                         title = "__**🚜 Members** (${farms.count()}/${maxCoopSize}):__"
+                        bottomPadding = 1
 
-                        incrementColumn()
+                        incrementColumn(":")
                         column {
                             header = "Name"
                             leftPadding = 1

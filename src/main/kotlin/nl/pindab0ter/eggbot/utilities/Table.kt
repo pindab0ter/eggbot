@@ -17,6 +17,8 @@ class Table {
     private val amountOfRows: Int get() = (columns.first { it is ValueColumn } as? ValueColumn)?.cells?.size ?: 0
     var title: String? = null
     var displayHeader: Boolean = true
+    var topPadding: Int = 0
+    var bottomPadding: Int = 0
 
     // endregion
 
@@ -131,9 +133,11 @@ class Table {
         val Column.longest: Int get() = (cells.map { cell -> cell.length }).plus(header.length).max() ?: 0
     }
 
-    override fun toString(): String = StringBuilder().apply {
+    override fun toString(): String = '\n'.repeat(topPadding) + StringBuilder().apply {
         require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }
         require(columns.all { it.cells.size == amountOfRows }) { "All columns must be of equal size" }
+
+        repeat(topPadding) { appendln() }
 
         // Add SpacingColumns between adjacent left and right aligned columns and before and after the last column
         val spacedColumns: List<Column> = columns
@@ -181,7 +185,9 @@ class Table {
             appendRow(spacedColumns) { cells[row] }
         }
         appendln("```")
-    }.toString().trim()
+
+
+    }.toString().trim().plus('\n'.repeat(bottomPadding))
 }
 
 inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
