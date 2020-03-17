@@ -16,7 +16,6 @@ import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
 import org.joda.time.Duration.*
-import kotlin.math.absoluteValue
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
@@ -258,44 +257,44 @@ object CoopInfo : EggBotCommand() {
                     append('\u200B')
 
                     // endregion Compact
+                }
 
-                    val bottleneckedFarmers = farms.zip(shortenedNames).filter { (farm, _) ->
-                        farm.habBottleneckReached != null || farm.transportBottleneckReached != null
+                val bottleneckedFarmers = farms.zip(shortenedNames).filter { (farm, _) ->
+                    farm.habBottleneckReached != null || farm.transportBottleneckReached != null
+                }
+
+                if (bottleneckedFarmers.isNotEmpty()) appendTable {
+                    title = "__**⚠ Bottlenecks**__"
+                    displayHeader = false
+
+                    column {
+                        rightPadding = 1
+                        cells = bottleneckedFarmers.map { (farm, shortenedName) ->
+                            "${if (compact) shortenedName else farm.farmerName}:"
+                        }
                     }
 
-                    if (bottleneckedFarmers.isNotEmpty()) appendTable {
-                        title = "__**⚠ Bottlenecks**__"
-                        displayHeader = false
-
-
-                        column {
-                            rightPadding = 1
-                            cells = bottleneckedFarmers.map { (farm, shortenedName) ->
-                                "${if (compact) farm.farmerName else shortenedName}:"
-                            }
-                        }
-                        column {
-                            cells = bottleneckedFarmers.map { (farm, _) ->
-                                val habs = farm.habBottleneckReached.let { duration ->
-                                    when (duration) {
-                                        null -> ""
-                                        ZERO -> "🏠Full! "
-                                        else ->
-                                            if (compact) "🏠${duration.asHoursAndMinutes()}"
-                                            else "🏠${duration.asDaysHoursAndMinutes(true)} "
-                                    }
+                    column {
+                        cells = bottleneckedFarmers.map { (farm, _) ->
+                            val habs = farm.habBottleneckReached.let { duration ->
+                                when (duration) {
+                                    null -> ""
+                                    ZERO -> "🏠Full! "
+                                    else ->
+                                        if (compact) "🏠${duration.asHoursAndMinutes()}"
+                                        else "🏠${duration.asDaysHoursAndMinutes(true)} "
                                 }
-                                val transport = farm.transportBottleneckReached.let { duration ->
-                                    when (duration) {
-                                        null -> ""
-                                        ZERO -> "🚛Full! "
-                                        else ->
-                                            if (compact) "🚛${duration.asHoursAndMinutes()}"
-                                            else "🚛${duration.asDaysHoursAndMinutes(true)} "
-                                    }
-                                }
-                                "$habs${if (habs.isNotEmpty()) " " else ""}$transport"
                             }
+                            val transport = farm.transportBottleneckReached.let { duration ->
+                                when (duration) {
+                                    null -> ""
+                                    ZERO -> "🚛Full! "
+                                    else ->
+                                        if (compact) "🚛${duration.asHoursAndMinutes()}"
+                                        else "🚛${duration.asDaysHoursAndMinutes(true)} "
+                                }
+                            }
+                            "$habs${if (habs.isNotEmpty()) " " else ""}$transport"
                         }
                     }
                 }
