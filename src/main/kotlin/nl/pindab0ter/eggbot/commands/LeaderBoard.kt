@@ -2,16 +2,13 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.FlaggedOption
-import com.martiansoftware.jsap.JSAP
 import com.martiansoftware.jsap.JSAP.*
 import com.martiansoftware.jsap.JSAPResult
-import com.martiansoftware.jsap.QualifiedSwitch
 import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser
-import com.martiansoftware.jsap.stringparsers.IntegerStringParser
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.EggBot.emoteSoulEgg
-import nl.pindab0ter.eggbot.commands.LeaderBoard.Category.*
+import nl.pindab0ter.eggbot.commands.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.jda.EggBotCommand
@@ -24,7 +21,7 @@ object LeaderBoard : EggBotCommand() {
     private val log = KotlinLogging.logger { }
 
     private const val TOP = "amount of players"
-    private const val CATEGORY = "category"
+    private const val BOARD = "board"
 
     init {
         category = FarmersCategory
@@ -33,17 +30,17 @@ object LeaderBoard : EggBotCommand() {
         help = "Shows the Earnings Bonus leader board"
         parameters = listOf(
             FlaggedOption(TOP)
-                .setShortFlag('t')
-                .setLongFlag("top")
+                .setShortFlag('n')
+                .setLongFlag("amount")
                 .setStringParser(INTEGER_PARSER)
                 .setHelp("Specify the amount of players you want to display."),
-            FlaggedOption(CATEGORY)
-                .setShortFlag('C')
-                .setLongFlag(CATEGORY)
+            FlaggedOption(BOARD)
+                .setShortFlag('b')
+                .setLongFlag("board")
                 .setDefault("earnings-bonus")
                 .setStringParser(
                     EnumeratedStringParser.getParser(
-                        Category.values().joinToString(";") { category ->
+                        Board.values().joinToString(";") { category ->
                             "${category.longForm};${category.shortForm}"
                         },
                         false,
@@ -51,7 +48,7 @@ object LeaderBoard : EggBotCommand() {
                     )
                 )
                 .setHelp(
-                    "Specify which category leader board you want to see. The categories are:\n${Category.values()
+                    "Specify which category leader board you want to see. The categories are:\n${Board.values()
                         .joinToString("\n") { category -> "    • `${category.longForm}` or `${category.shortForm}`" }}"
                 )
             // , compactSwitch
@@ -72,8 +69,8 @@ object LeaderBoard : EggBotCommand() {
         }
 
         val amount = parameters.getIntOrNull(TOP)
-        val category = parameters.getStringOrNull(CATEGORY)?.let { input ->
-            Category.getByString(input)
+        val category = parameters.getStringOrNull(BOARD)?.let { input ->
+            Board.getByString(input)
         }
 
         formatLeaderBoard(farmers, category ?: EARNINGS_BONUS, amount).let { messages ->
@@ -85,18 +82,18 @@ object LeaderBoard : EggBotCommand() {
         }
     }
 
-    enum class Category {
+    enum class Board {
         EARNINGS_BONUS, SOUL_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
 
         companion object {
-            fun getByString(input: String): Category? =
+            fun getByString(input: String): Board? =
                 getByLongForm(input) ?: getByShortForm(input)
 
-            private fun getByLongForm(input: String): Category? =
-                Category.values().find { category -> category.longForm == input }
+            private fun getByLongForm(input: String): Board? =
+                Board.values().find { category -> category.longForm == input }
 
-            private fun getByShortForm(input: String): Category? =
-                Category.values().find { category -> category.shortForm == input }
+            private fun getByShortForm(input: String): Board? =
+                Board.values().find { category -> category.shortForm == input }
         }
 
         val longForm: String get() = name.toLowerCase().replace('_', '-')
@@ -105,11 +102,11 @@ object LeaderBoard : EggBotCommand() {
 
     fun formatLeaderBoard(
         farmers: List<Farmer>,
-        category: Category,
+        board: Board,
         amount: Int? = null,
         compact: Boolean = false
     ): List<String> = table {
-        val sortedFarmers = when (category) {
+        val sortedFarmers = when (board) {
             EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
             SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
             PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.prestiges }
@@ -119,7 +116,7 @@ object LeaderBoard : EggBotCommand() {
             if (amount != null) sortedFarmers.take(amount) else sortedFarmers
         }
 
-        title = when (category) {
+        title = when (board) {
             EARNINGS_BONUS -> "__**💵 Earnings Bonus Leader Board**__"
             SOUL_EGGS -> "__**${emoteSoulEgg ?: "🥚"} Soul Eggs Leader Board**__"
             PRESTIGES -> "__**🥨 Prestiges Leader Board**__"
@@ -135,7 +132,7 @@ object LeaderBoard : EggBotCommand() {
             cells = sortedFarmers.map { farmer -> farmer.inGameName }
         }
         column {
-            header = when (category) {
+            header = when (board) {
                 EARNINGS_BONUS -> "Earnings Bonus  "
                 SOUL_EGGS -> "Soul Eggs"
                 PRESTIGES -> "Prestiges"
@@ -143,7 +140,7 @@ object LeaderBoard : EggBotCommand() {
                 ELITE_DRONE_TAKEDOWNS -> "Elite Drone Takedowns"
             }
             alignment = RIGHT
-            cells = when (category) {
+            cells = when (board) {
                 EARNINGS_BONUS -> sortedFarmers.map { farmer -> farmer.earningsBonus.asIllions(rounded = false) + "\u00A0%" }
                 SOUL_EGGS -> sortedFarmers.map { farmer -> farmer.soulEggs.formatInteger() }
                 PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
@@ -151,7 +148,7 @@ object LeaderBoard : EggBotCommand() {
                 ELITE_DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
             }
         }
-        if (category == EARNINGS_BONUS) column {
+        if (board == EARNINGS_BONUS) column {
             header = "Farmer Role"
             leftPadding = 2
             cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asFarmerRole() }

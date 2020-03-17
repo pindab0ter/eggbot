@@ -7,7 +7,7 @@ import nl.pindab0ter.eggbot.EggBot.eliteDronesLeaderBoardChannel
 import nl.pindab0ter.eggbot.EggBot.prestigesLeaderBoardChannel
 import nl.pindab0ter.eggbot.EggBot.soulEggsLeaderBoardChannel
 import nl.pindab0ter.eggbot.commands.LeaderBoard
-import nl.pindab0ter.eggbot.commands.LeaderBoard.Category.*
+import nl.pindab0ter.eggbot.commands.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
