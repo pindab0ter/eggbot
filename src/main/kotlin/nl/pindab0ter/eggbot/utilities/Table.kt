@@ -181,7 +181,7 @@ class Table {
             appendRow(spacedColumns) { cells[row] }
         }
         appendln("```")
-    }.toString()
+    }.toString().trim()
 }
 
 inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
