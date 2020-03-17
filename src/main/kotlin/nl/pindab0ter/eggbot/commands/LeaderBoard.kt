@@ -7,6 +7,7 @@ import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
+import nl.pindab0ter.eggbot.EggBot.emoteProphecyEgg
 import nl.pindab0ter.eggbot.EggBot.emoteSoulEgg
 import nl.pindab0ter.eggbot.commands.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
@@ -90,7 +91,7 @@ object LeaderBoard : EggBotCommand() {
     }
 
     enum class Board {
-        EARNINGS_BONUS, SOUL_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
+        EARNINGS_BONUS, SOUL_EGGS, PROPHECY_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
 
         companion object {
             fun getByString(input: String): Board? =
@@ -116,6 +117,7 @@ object LeaderBoard : EggBotCommand() {
         val sortedFarmers = when (board) {
             EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
             SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
+            PROPHECY_EGGS -> farmers.sortedByDescending { farmer -> farmer.prophecyEggs }
             PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.prestiges }
             DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
             ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
@@ -126,6 +128,7 @@ object LeaderBoard : EggBotCommand() {
         title = when (board) {
             EARNINGS_BONUS -> "__**💵 Earnings Bonus Leader Board**__"
             SOUL_EGGS -> "__**${emoteSoulEgg ?: "🥚"} Soul Eggs Leader Board**__"
+            PROPHECY_EGGS -> "__**${emoteProphecyEgg ?: "🥚"} Prophecy Eggs Leader Board**__"
             PRESTIGES -> "__**🥨 Prestiges Leader Board**__"
             DRONE_TAKEDOWNS -> "__**✈🚫 Drone Takedowns Leader Board**__"
             ELITE_DRONE_TAKEDOWNS -> "__**🎖✈🚫 Elite Drone Takedowns Leader Board**__"
@@ -142,6 +145,7 @@ object LeaderBoard : EggBotCommand() {
             header = when (board) {
                 EARNINGS_BONUS -> "Earnings Bonus  "
                 SOUL_EGGS -> "Soul Eggs"
+                PROPHECY_EGGS -> "Prophecy Eggs"
                 PRESTIGES -> "Prestiges"
                 DRONE_TAKEDOWNS -> "Drone Takedowns"
                 ELITE_DRONE_TAKEDOWNS -> "Elite Drone Takedowns"
@@ -149,7 +153,8 @@ object LeaderBoard : EggBotCommand() {
             alignment = RIGHT
             cells = when (board) {
                 EARNINGS_BONUS -> sortedFarmers.map { farmer -> farmer.earningsBonus.asIllions(rounded = false) + "\u00A0%" }
-                SOUL_EGGS -> sortedFarmers.map { farmer -> farmer.soulEggs.formatInteger() }
+                SOUL_EGGS -> sortedFarmers.map { farmer -> farmer.soulEggs.asIllions() }
+                PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.prophecyEggs.formatInteger() }
                 PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
                 DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
                 ELITE_DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
