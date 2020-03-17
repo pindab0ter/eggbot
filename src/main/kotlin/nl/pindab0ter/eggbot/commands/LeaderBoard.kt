@@ -20,7 +20,7 @@ object LeaderBoard : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
-    private const val TOP = "amount of players"
+    private const val NUMBER = "number of players"
     private const val BOARD = "board"
 
     init {
@@ -29,11 +29,11 @@ object LeaderBoard : EggBotCommand() {
         aliases = arrayOf("lb")
         help = "Shows the Earnings Bonus leader board"
         parameters = listOf(
-            FlaggedOption(TOP)
+            FlaggedOption(NUMBER)
                 .setShortFlag('n')
-                .setLongFlag("amount")
+                .setLongFlag("number")
                 .setStringParser(INTEGER_PARSER)
-                .setHelp("Specify the amount of players you want to display."),
+                .setHelp("Specify the number of players you want to display."),
             FlaggedOption(BOARD)
                 .setShortFlag('b')
                 .setLongFlag("board")
@@ -68,9 +68,9 @@ object LeaderBoard : EggBotCommand() {
             return
         }
 
-        val amount = parameters.getIntOrNull(TOP)
+        val number = parameters.getIntOrNull(NUMBER)
 
-        if (amount != null && amount < 1) "Amount of players must be a positive number".let {
+        if (number != null && number < 1) "${NUMBER.capitalize()} must be a positive number".let {
             event.replyWarning(it)
             log.debug { it }
             return
@@ -80,7 +80,7 @@ object LeaderBoard : EggBotCommand() {
             Board.getByString(input)
         }
 
-        formatLeaderBoard(farmers, category ?: EARNINGS_BONUS, amount).let { messages ->
+        formatLeaderBoard(farmers, category ?: EARNINGS_BONUS, number).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {
