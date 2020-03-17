@@ -28,7 +28,11 @@ object CoopInfo : EggBotCommand() {
                 "simulation to estimate whether/when the goals will be reached and if people will reach their " +
                 "habitat or transport bottlenecks."
         category = ContractsCategory
-        parameters = listOf(contractIdOption, coopIdOption, compactSwitch)
+        parameters = listOf(
+            contractIdOption,
+            coopIdOption,
+            compactSwitch
+        )
         sendTyping = false
         init()
     }

@@ -25,7 +25,10 @@ object SoloInfo : EggBotCommand() {
         category = ContractsCategory
         name = "solo"
         help = "Shows the progress of a contract you're not in a co-op for."
-        parameters = listOf(contractIdOption, compactSwitch)
+        parameters = listOf(
+            contractIdOption,
+            compactSwitch
+        )
         sendTyping = true
         init()
     }

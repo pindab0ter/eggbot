@@ -11,6 +11,10 @@ import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.utilities.CONTRACT_ID
+import nl.pindab0ter.eggbot.utilities.COOP_ID
+import nl.pindab0ter.eggbot.utilities.contractIdOption
+import nl.pindab0ter.eggbot.utilities.coopIdOption
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 

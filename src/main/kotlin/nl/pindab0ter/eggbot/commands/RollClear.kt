@@ -10,6 +10,8 @@ import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.utilities.CONTRACT_ID
+import nl.pindab0ter.eggbot.utilities.contractIdOption
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object RollClear : EggBotCommand() {
