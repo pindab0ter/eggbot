@@ -69,6 +69,13 @@ object LeaderBoard : EggBotCommand() {
         }
 
         val amount = parameters.getIntOrNull(TOP)
+
+        if (amount != null && amount < 1) "Amount of players must be a positive number".let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
+        }
+
         val category = parameters.getStringOrNull(BOARD)?.let { input ->
             Board.getByString(input)
         }
