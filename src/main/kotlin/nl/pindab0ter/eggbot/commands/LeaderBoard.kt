@@ -21,7 +21,7 @@ object LeaderBoard : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
 
-    private const val NUMBER = "number of players"
+    private const val TOP = "number of players"
     private const val BOARD = "board"
 
     init {
@@ -30,27 +30,27 @@ object LeaderBoard : EggBotCommand() {
         aliases = arrayOf("lb")
         help = "Shows the Earnings Bonus leader board"
         parameters = listOf(
-            FlaggedOption(NUMBER)
-                .setShortFlag('n')
-                .setLongFlag("number")
+            FlaggedOption(TOP)
+                .setShortFlag('t')
+                .setLongFlag("top")
                 .setStringParser(INTEGER_PARSER)
-                .setHelp("Specify the number of players you want to display."),
+                .setHelp("Show only the top `<$TOP>`."),
             FlaggedOption(BOARD)
                 .setShortFlag('b')
                 .setLongFlag("board")
                 .setDefault("earnings-bonus")
                 .setStringParser(
                     EnumeratedStringParser.getParser(
-                        Board.values().joinToString(";") { category ->
-                            "${category.longForm};${category.shortForm}"
+                        Board.values().joinToString(";") { board ->
+                            "${board.longForm};${board.shortForm}"
                         },
                         false,
                         false
                     )
                 )
                 .setHelp(
-                    "Specify which category leader board you want to see. The categories are:\n${Board.values()
-                        .joinToString("\n") { category -> "    • `${category.longForm}` or `${category.shortForm}`" }}"
+                    "Show the specified `<$BOARD>`. The available boards are:\n${Board.values()
+                        .joinToString("\n") { board -> "    • `${board.longForm}` or `${board.shortForm}`" }}"
                 )
             // , compactSwitch
         )
@@ -63,25 +63,25 @@ object LeaderBoard : EggBotCommand() {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
         }
 
-        if (farmers.isEmpty()) "There are no registered farmers".let {
+        if (farmers.isEmpty()) "There are no registered farmers.".let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
-        val number = parameters.getIntOrNull(NUMBER)
+        val top = parameters.getIntOrNull(TOP)
 
-        if (number != null && number < 1) "${NUMBER.capitalize()} must be a positive number".let {
+        if (top != null && top < 1) "${TOP.capitalize()} must be a positive number.".let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
-        val category = parameters.getStringOrNull(BOARD)?.let { input ->
+        val board = parameters.getStringOrNull(BOARD)?.let { input ->
             Board.getByString(input)
         }
 
-        formatLeaderBoard(farmers, category ?: EARNINGS_BONUS, number).let { messages ->
+        formatLeaderBoard(farmers, board ?: EARNINGS_BONUS, top).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {
@@ -98,10 +98,10 @@ object LeaderBoard : EggBotCommand() {
                 getByLongForm(input) ?: getByShortForm(input)
 
             private fun getByLongForm(input: String): Board? =
-                Board.values().find { category -> category.longForm == input }
+                Board.values().find { board -> board.longForm == input }
 
             private fun getByShortForm(input: String): Board? =
-                Board.values().find { category -> category.shortForm == input }
+                Board.values().find { board -> board.shortForm == input }
         }
 
         val longForm: String get() = name.toLowerCase().replace('_', '-')
@@ -111,7 +111,7 @@ object LeaderBoard : EggBotCommand() {
     fun formatLeaderBoard(
         farmers: List<Farmer>,
         board: Board,
-        amount: Int? = null,
+        top: Int? = null,
         compact: Boolean = false
     ): List<String> = table {
         val sortedFarmers = when (board) {
@@ -122,7 +122,7 @@ object LeaderBoard : EggBotCommand() {
             DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
             ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
         }.let { sortedFarmers ->
-            if (amount != null) sortedFarmers.take(amount) else sortedFarmers
+            if (top != null) sortedFarmers.take(top) else sortedFarmers
         }
 
         title = when (board) {
