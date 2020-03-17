@@ -20,6 +20,7 @@ object Inactives : EggBotCommand() {
         category = FarmersCategory
         name = "inactives"
         help = "Display a list of who have set themselves as inactive and until when."
+        sendTyping = false
         init()
     }
 

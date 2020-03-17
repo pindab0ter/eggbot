@@ -6,7 +6,6 @@ import com.martiansoftware.jsap.Switch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -15,7 +14,7 @@ import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
-import nl.pindab0ter.eggbot.utilities.ProgressBar
+import nl.pindab0ter.eggbot.utilities.*
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -37,6 +36,7 @@ object CoopAdd : EggBotCommand() {
                 .setLongFlag("no-role")
                 .setHelp("Don't create a role for this co-op. Use this when tracking co-ops not part of ${guild.name}")
         )
+        sendTyping = false
         adminRequired = true
         botPermissions = arrayOf(MANAGE_ROLES)
         init()

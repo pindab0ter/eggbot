@@ -20,6 +20,7 @@ object ContractIDs : EggBotCommand() {
         name = "contract-ids"
         aliases = arrayOf("ids")
         help = "Shows the IDs of the currently active contracts"
+        sendTyping = false
         init()
     }
 

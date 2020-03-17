@@ -28,6 +28,7 @@ object Test : EggBotCommand() {
                 .setDefault("pindab0ter")
                 .setHelp("Name of the player.")
         )
+        sendTyping = false
         init()
     }
 

@@ -33,6 +33,7 @@ object Inactive : EggBotCommand() {
                 .setStringParser(INTEGER_PARSER)
                 .setHelp("The amount of days you want to be set as inactive for.")
         )
+        sendTyping = false
         init()
     }
 

@@ -13,6 +13,7 @@ object Active : EggBotCommand() {
         category = FarmersCategory
         name = "active"
         help = "Set yourself as active, taking part in co-ops again."
+        sendTyping = false
         init()
     }
 

@@ -30,7 +30,7 @@ object CoopInfo : EggBotCommand() {
                 "habitat or transport bottlenecks."
         category = ContractsCategory
         parameters = listOf(contractIdOption, coopIdOption, compactSwitch)
-        sendTyping = true
+        sendTyping = false
         init()
     }
 

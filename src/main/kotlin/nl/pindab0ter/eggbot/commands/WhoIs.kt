@@ -35,6 +35,7 @@ object WhoIs : EggBotCommand() {
                             "spaces, use quotation marks."
                 )
         )
+        sendTyping = false
         init()
     }
 

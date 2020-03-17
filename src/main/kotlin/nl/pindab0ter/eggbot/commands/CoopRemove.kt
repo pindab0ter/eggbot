@@ -4,7 +4,6 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop

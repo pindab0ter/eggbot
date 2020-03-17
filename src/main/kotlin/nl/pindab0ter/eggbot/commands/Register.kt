@@ -28,7 +28,6 @@ object Register : EggBotCommand() {
         name = "register"
         help = "Register on this server with your in-game name and in-game ID. **DM only!**"
         registrationRequired = false
-        sendTyping = false
         parameters = listOf(
             UnflaggedOption(IN_GAME_ID)
                 .setRequired(REQUIRED)
@@ -45,6 +44,7 @@ object Register : EggBotCommand() {
                             "Edit profile → Gamer ID."
                 )
         )
+        sendTyping = false
         botPermissions = arrayOf(
             MESSAGE_MANAGE
         )

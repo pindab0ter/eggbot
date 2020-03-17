@@ -34,6 +34,7 @@ object CoopReassign : EggBotCommand() {
         )
         adminRequired = true
         botPermissions = arrayOf(MANAGE_ROLES)
+        sendTyping = true
         init()
     }
 

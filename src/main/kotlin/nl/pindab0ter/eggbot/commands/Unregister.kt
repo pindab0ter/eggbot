@@ -30,11 +30,11 @@ object Unregister : EggBotCommand() {
                             "2-32 characters, followed by a `#`-sign and four digits. E.g.: \"`DiscordUser#1234`\""
                 )
         )
+        sendTyping = true
         init()
     }
 
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
-        event.channel.sendTyping().queue()
 
         // TODO: Enable @-mentions
         val tag = parameters.getString(DISCORD_USER)

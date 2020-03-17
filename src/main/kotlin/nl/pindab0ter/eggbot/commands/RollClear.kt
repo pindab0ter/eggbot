@@ -3,10 +3,8 @@ package nl.pindab0ter.eggbot.commands
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
-import net.dv8tion.jda.api.Permission
 import net.dv8tion.jda.api.Permission.*
 import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coop
@@ -25,7 +23,7 @@ object RollClear : EggBotCommand() {
         adminRequired = true
         parameters = listOf(contractIdOption)
         botPermissions = arrayOf(MANAGE_ROLES)
-        sendTyping = true
+        sendTyping = false
         init()
     }
 

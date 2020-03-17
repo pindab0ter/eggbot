@@ -63,7 +63,7 @@ object RollCall : EggBotCommand() {
                 .setHelp("Add a dash to the start of the base name.")
         )
         botPermissions = arrayOf(MANAGE_ROLES)
-        sendTyping = true
+        sendTyping = false
         init()
     }
 
