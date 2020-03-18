@@ -56,15 +56,14 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     private val bonusPerSoulEgg: BigDecimal
         get() {
             val soulEggBonus = BigDecimal(10 + soulBonus)
-            val prophecyEggBonus = bonusPerProphecyEgg
-            return prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
+            return bonusPerProphecyEgg.pow(prophecyEggs.toInt()) * soulEggBonus
         }
     val seToNextRole: BigDecimal
-        get() = nextPowerOfThousand(earningsBonus)
+        get() = earningsBonus.nextPowerOfTen()
             .minus(earningsBonus)
             .divide(bonusPerSoulEgg, HALF_UP)
     val peToNextRole: Int
-        get() = ceil(log(nextPowerOfThousand(earningsBonus) / earningsBonus, mathContext)
+        get() = ceil(log(earningsBonus.nextPowerOfTen() / earningsBonus, mathContext)
             .div(log(bonusPerProphecyEgg, mathContext)).toDouble()).roundToInt()
     val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
     val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
