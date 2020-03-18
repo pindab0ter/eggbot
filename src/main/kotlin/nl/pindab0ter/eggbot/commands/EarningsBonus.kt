@@ -28,7 +28,7 @@ object EarningsBonus : EggBotCommand() {
         category = FarmersCategory
         name = "earnings-bonus"
         aliases = arrayOf("eb")
-        help = "Shows your EB, EB rank and how much SE till your next rank."
+        help = "Shows your Farmer Role, EB and how much SE or PE till your next rank."
         parameters = listOf(
             compactSwitch,
             extendedSwitch
