@@ -32,9 +32,13 @@ object HelpConsumer : Consumer<CommandEvent> {
             ${jdaClient.selfUser.name} helps the members of ${guild.name} tackle Egg, Inc.'s multiplayer contracts by offering a range of commands that help make people's lives a little bit easier. It won't do your dishes, but it will tell you if you're going to make it to that final goal.
 
             __**Instructions**__
+            Type the command name, followed by a space and then it's arguments if there are any.
             Arguments in angled brackets (`<>`) are required, arguments in square brackets (`[]`) are optional.
-            When it says `[-h|--help]` that means either `-h` or `--help` will work.
             Type the arguments without the brackets. For example: `${Config.prefix}${CoopInfo.name} --compact contract coopname`
+            Arguments starting with one or two dashes (`[-h|--help]`) are called "flags" that allow you to specify options.
+            A flag with one dash is the short version of a flag with two dashes and using either `-h` or `--help` will work.
+            It doesn't matter if you place flags in front or behind unflagged arguments.
+            You can use short and long commands and arguments interchangeably.
             When an argument contains spaces, surround it with quotation marks (e.g.: `!whois "name with spaces"`) or it will assume each word is an argument.
             For more information on a specific command, type `${Config.prefix}command -h` or `${Config.prefix}command --help`""".trimIndent()
         )

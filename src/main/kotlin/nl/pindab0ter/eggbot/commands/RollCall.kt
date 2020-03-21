@@ -34,6 +34,27 @@ object RollCall : EggBotCommand() {
     private const val OVERWRITE = "overwrite"
     private const val DASH = "start with dash"
 
+    private val dashSwitch = Switch(DASH)
+        .setShortFlag('d')
+        .setLongFlag("dash")
+        .setHelp("Add a dash to the start of the base name.")
+
+    private val overwriteFlag = Switch(OVERWRITE)
+        .setShortFlag('o')
+        .setLongFlag("overwrite")
+        .setHelp(
+            "Force overwrite existing co-ops registered with ${jdaClient.selfUser.name}. This will also " +
+                    "delete any roles currently associated with that co-op and re-create those."
+        )
+
+    private val baseNameOption = UnflaggedOption(BASE_NAME)
+        .setRequired(REQUIRED)
+        .setHelp(
+            "The base name for the co-ops. Can only consist of letters, digits and dashes, cannot start " +
+                    "with a dash and cannot contain spaces. If you want the base name to start with a dash, " +
+                    "add `${dashSwitch.cleanSyntax}`."
+        )
+
     init {
         category = AdminCategory
         name = "roll-call"
@@ -43,24 +64,9 @@ object RollCall : EggBotCommand() {
         adminRequired = true
         parameters = listOf(
             contractIdOption,
-            UnflaggedOption(BASE_NAME)
-                .setRequired(REQUIRED)
-                .setHelp(
-                    "The base name for the co-ops. Can only consist of letters, digits and dashes, cannot start " +
-                            "with a dash and cannot contain spaces. If you want the base name to start with a dash, " +
-                            "use the "
-                ),
-            Switch(OVERWRITE)
-                .setShortFlag('o')
-                .setLongFlag("overwrite")
-                .setHelp(
-                    "Force overwrite existing co-ops registered with ${jdaClient.selfUser.name}. This will also " +
-                            "delete any roles currently associated with that co-op and re-create those."
-                ),
-            Switch(DASH)
-                .setShortFlag('d')
-                .setLongFlag("dash")
-                .setHelp("Add a dash to the start of the base name.")
+            baseNameOption,
+            overwriteFlag,
+            dashSwitch
         )
         botPermissions = arrayOf(MANAGE_ROLES)
         sendTyping = false
