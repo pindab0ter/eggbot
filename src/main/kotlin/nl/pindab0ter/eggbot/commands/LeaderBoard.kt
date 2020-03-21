@@ -51,8 +51,9 @@ object LeaderBoard : EggBotCommand() {
                 .setHelp(
                     "Show the specified `<$BOARD>`. The available boards are:\n${Board.values()
                         .joinToString("\n") { board -> "    • `${board.longForm}` or `${board.shortForm}`" }}"
-                )
-            // , compactSwitch
+                ),
+            compactSwitch,
+            extendedSwitch
         )
         sendTyping = true
         init()
@@ -81,7 +82,13 @@ object LeaderBoard : EggBotCommand() {
             Board.getByString(input)
         }
 
-        formatLeaderBoard(farmers, board ?: EARNINGS_BONUS, top).let { messages ->
+        formatLeaderBoard(
+            farmers,
+            board ?: EARNINGS_BONUS,
+            top,
+            parameters.getBoolean(COMPACT),
+            parameters.getBoolean(EXTENDED)
+        ).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {
@@ -111,8 +118,9 @@ object LeaderBoard : EggBotCommand() {
     fun formatLeaderBoard(
         farmers: List<Farmer>,
         board: Board,
-        top: Int? = null,
-        compact: Boolean = false
+        top: Int?,
+        compact: Boolean,
+        extended: Boolean
     ): List<String> = table {
         val sortedFarmers = when (board) {
             EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
@@ -124,26 +132,32 @@ object LeaderBoard : EggBotCommand() {
         }.let { sortedFarmers ->
             if (top != null) sortedFarmers.take(top) else sortedFarmers
         }
-
-        title = when (board) {
-            EARNINGS_BONUS -> "__**💵 Earnings Bonus Leader Board**__"
-            SOUL_EGGS -> "__**${emoteSoulEgg ?: "🥚"} Soul Eggs Leader Board**__"
-            PROPHECY_EGGS -> "__**${emoteProphecyEgg ?: "🥚"} Prophecy Eggs Leader Board**__"
-            PRESTIGES -> "__**🥨 Prestiges Leader Board**__"
-            DRONE_TAKEDOWNS -> "__**✈🚫 Drone Takedowns Leader Board**__"
-            ELITE_DRONE_TAKEDOWNS -> "__**🎖✈🚫 Elite Drone Takedowns Leader Board**__"
+        val shortenedNames = sortedFarmers.map { farmer ->
+            farmer.inGameName.let { name ->
+                if (name.length <= 10) name
+                else "${name.substring(0 until 9)}…"
+            }
         }
+
+        title = "__**${when (board) {
+            EARNINGS_BONUS -> "💵 Earnings Bonus"
+            SOUL_EGGS -> "${emoteSoulEgg ?: "🥚"} Soul Eggs"
+            PROPHECY_EGGS -> "${emoteProphecyEgg ?: "🥚"} Prophecy Eggs"
+            PRESTIGES -> "🥨 Prestiges"
+            DRONE_TAKEDOWNS -> "✈🚫 Drone Takedowns"
+            ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"
+        }}${if (!compact) " Leader Board" else ""}**__"
         displayHeader = true
-        incrementColumn(":")
+        if (compact) incrementColumn() else incrementColumn(":")
         column {
             header = "Name"
             leftPadding = 1
-            rightPadding = 2
-            cells = sortedFarmers.map { farmer -> farmer.inGameName }
+            rightPadding = if (compact) 1 else 2
+            cells = if (compact) shortenedNames else sortedFarmers.map { farmer -> farmer.inGameName }
         }
         column {
             header = when (board) {
-                EARNINGS_BONUS -> "Earnings Bonus  "
+                EARNINGS_BONUS -> "Earnings Bonus" + if (compact) "" else "  " // Added spacing for percent suffix
                 SOUL_EGGS -> "Soul Eggs"
                 PROPHECY_EGGS -> "Prophecy Eggs"
                 PRESTIGES -> "Prestiges"
@@ -152,8 +166,14 @@ object LeaderBoard : EggBotCommand() {
             }
             alignment = RIGHT
             cells = when (board) {
-                EARNINGS_BONUS -> sortedFarmers.map { farmer -> farmer.earningsBonus.asIllions(rounded = false) + "\u00A0%" }
-                SOUL_EGGS -> sortedFarmers.map { farmer -> farmer.soulEggs.asIllions() }
+                EARNINGS_BONUS -> sortedFarmers.map { farmer ->
+                    if (extended) farmer.earningsBonus.formatInteger() + "\u00A0%"
+                    else farmer.earningsBonus.asIllions(shortened = true) + if (compact) "" else "\u00A0%"
+                }
+                SOUL_EGGS -> sortedFarmers.map { farmer ->
+                    if (extended) farmer.soulEggs.formatInteger()
+                    else farmer.soulEggs.asIllions(shortened = compact)
+                }
                 PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.prophecyEggs.formatInteger() }
                 PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
                 DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
@@ -161,9 +181,9 @@ object LeaderBoard : EggBotCommand() {
             }
         }
         if (board == EARNINGS_BONUS) column {
-            header = "Farmer Role"
-            leftPadding = 2
-            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asFarmerRole() }
+            header = if (compact) "Role" else "Farmer Role"
+            leftPadding = if (compact) 1 else 2
+            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asFarmerRole(shortened = compact) }
         }
     }.splitMessage(prefix = "```", postfix = "```")
 }

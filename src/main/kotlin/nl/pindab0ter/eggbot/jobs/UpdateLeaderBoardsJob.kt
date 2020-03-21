@@ -42,7 +42,13 @@ class UpdateLeaderBoardsJob : Job {
                 channel.purgeMessages(messages)
             }
 
-            LeaderBoard.formatLeaderBoard(farmers, category).forEach { message ->
+            LeaderBoard.formatLeaderBoard(
+                farmers,
+                category,
+                top = null,
+                compact = false,
+                extended = true
+            ).forEach { message ->
                 channel.sendMessage(message).queue()
             }
         }
