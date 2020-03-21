@@ -14,8 +14,7 @@ import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.adminRole
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.Register
-import nl.pindab0ter.eggbot.utilities.isAdmin
-import nl.pindab0ter.eggbot.utilities.isRegistered
+import nl.pindab0ter.eggbot.utilities.*
 
 abstract class EggBotCommand : Command() {
 
@@ -98,6 +97,10 @@ abstract class EggBotCommand : Command() {
             dmOnly && event.channelType != PRIVATE -> "This command can only be used in DMs. Please try again by DMing ${jdaClient.selfUser.asMention}.".let {
                 log.debug { it }
                 event.replyError(it)
+            }
+            result.getBoolean(COMPACT, false) && result.getBoolean(EXTENDED, false) -> "Cannot use both `${compactSwitch.cleanSyntax}` and `${extendedSwitch.cleanSyntax}` at the same time.".let {
+                log.debug { it }
+                event.replyWarning(it)
             }
             result.getBoolean("help") -> event.reply(commandHelp)
             !result.success() -> {

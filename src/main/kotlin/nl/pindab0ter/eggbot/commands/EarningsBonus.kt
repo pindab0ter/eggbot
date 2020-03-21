@@ -24,24 +24,21 @@ object EarningsBonus : EggBotCommand() {
     private val log = KotlinLogging.logger { }
     private const val EXTENDED = "extended"
 
-    // TODO: Make non-compact by default (https://dynalist.io/d/UURDu2p-Y76LCBzfbxg7qhlI#z=Zu2QXVgzkeKlaQ4viifuDA_-)
-
     init {
         category = FarmersCategory
         name = "earnings-bonus"
         aliases = arrayOf("eb")
         help = "Shows your EB, EB rank and how much SE till your next rank."
         parameters = listOf(
-            Switch(EXTENDED)
-                .setShortFlag('e')
-                .setLongFlag("extended")
-                .setHelp("Show unshortened output.")
+            compactSwitch,
+            extendedSwitch
         )
         sendTyping = true
         init()
     }
 
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
+        val compact = parameters.getBoolean(COMPACT)
         val extended = parameters.getBoolean(EXTENDED)
 
         val farmers = transaction {
@@ -60,24 +57,35 @@ object EarningsBonus : EggBotCommand() {
                     transaction { farmer.update(backup) }
                 }
 
-                data class Row(val label: String, val value: String, val suffix: String = "")
+                data class Row(val label: String = "", val value: String = "", val suffix: String = "")
+
+                fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
+                    add(Row(label, value, suffix))
 
                 val rows = mutableListOf<Row>().apply {
-                    add(Row("Role:", farmer.earningsBonus.asFarmerRole()))
-                    add(Row("Earnings Bonus:", farmer.earningsBonus.asIllions(shortened = true), " %"))
-                    add(Row("Soul Eggs:", farmer.soulEggs.asIllions(shortened = true)))
-                    add(Row("Prophecy Eggs:", farmer.prophecyEggs.formatInteger()))
+                    addRow("Role:", farmer.earningsBonus.asFarmerRole(shortened = compact))
+                    addRow(
+                        "Earnings Bonus:",
+                        if (extended) farmer.earningsBonus.formatInteger()
+                        else farmer.earningsBonus.asIllions(shortened = compact), " %"
+                    )
+                    addRow(
+                        "Soul Eggs:",
+                        if (extended) farmer.soulEggs.formatInteger()
+                        else farmer.soulEggs.asIllions(shortened = compact)
+                    )
+                    addRow("Prophecy Eggs:", farmer.prophecyEggs.formatInteger())
                     if (farmer.soulBonus < 140)
-                        add(Row("Soul Bonus:", farmer.soulBonus.formatInteger(), "/140"))
+                        addRow("Soul Bonus:", farmer.soulBonus.formatInteger(), "/140")
                     if (farmer.prophecyBonus < 5)
-                        add(Row("Prophecy Bonus:", farmer.prophecyBonus.formatInteger(), "/5"))
-                    add(Row("Prestiges:", farmer.prestiges.formatInteger()))
-                    add(
-                        Row("SE to next rank:", "+ ${farmer.seToNextRole.asIllions(shortened = true)}")
+                        addRow("Prophecy Bonus:", farmer.prophecyBonus.formatInteger(), "/5")
+                    addRow("Prestiges:", farmer.prestiges.formatInteger())
+                    addRow(
+                        "SE to next rank:", "+ ${
+                        if (extended) farmer.seToNextRole.formatInteger()
+                        else farmer.seToNextRole.asIllions(shortened = compact)}"
                     )
-                    add(
-                        Row("PE to next rank:", "+ ${farmer.peToNextRole.formatInteger()}")
-                    )
+                    addRow("PE to next rank:", "+ ${farmer.peToNextRole.formatInteger()}")
                 }
 
                 table {
