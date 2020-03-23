@@ -261,7 +261,7 @@ object RollCall : EggBotCommand() {
             return coops
         }
 
-        fun coopNames(amount: Int, baseName: String): List<String> = when {
+        private fun coopNames(amount: Int, baseName: String): List<String> = when {
             amount <= 26 -> ('a' until 'a' + amount).map { char -> "$char$baseName" }
             else -> {
                 val chunks = ceil(amount.div(26.0)).toInt()

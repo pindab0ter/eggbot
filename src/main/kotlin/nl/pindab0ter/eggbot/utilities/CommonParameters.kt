@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.martiansoftware.jsap.JSAP.REQUIRED
-import com.martiansoftware.jsap.Parameter
 import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
 import nl.pindab0ter.eggbot.Config

@@ -5,7 +5,6 @@ import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers

@@ -10,7 +10,6 @@ import mu.KLogger
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType.PRIVATE
 import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.adminRole
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.commands.Register
@@ -50,7 +49,7 @@ abstract class EggBotCommand : Command() {
         matchResult.groupValues.drop(1).joinToString("")
     }
 
-    val JSAP.cleanUsage
+    private val JSAP.cleanUsage
         get() = clean(usage)
     val Parameter.cleanSyntax
         get() = clean(syntax)
@@ -86,22 +85,26 @@ abstract class EggBotCommand : Command() {
         val result: JSAPResult = parser.parse(event.args)
 
         when {
-            event.author.isRegistered < registrationRequired -> "You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.".let {
-                log.debug { it }
-                event.replyError(it)
-            }
-            event.author.isAdmin < adminRequired -> "You must have a role called `${adminRole.name}` or higher to use that!".let {
-                log.debug { it }
-                event.replyError(it)
-            }
-            dmOnly && event.channelType != PRIVATE -> "This command can only be used in DMs. Please try again by DMing ${jdaClient.selfUser.asMention}.".let {
-                log.debug { it }
-                event.replyError(it)
-            }
-            result.getBoolean(COMPACT, false) && result.getBoolean(EXTENDED, false) -> "Cannot use both `${compactSwitch.cleanSyntax}` and `${extendedSwitch.cleanSyntax}` at the same time.".let {
-                log.debug { it }
-                event.replyWarning(it)
-            }
+            event.author.isRegistered < registrationRequired ->
+                "You are not yet registered. Please register using `${commandClient.textualPrefix}${Register.name}`.".let {
+                    log.debug { it }
+                    event.replyError(it)
+                }
+            event.author.isAdmin < adminRequired ->
+                "You must have a role called `${adminRole.name}` or higher to use that!".let {
+                    log.debug { it }
+                    event.replyError(it)
+                }
+            dmOnly && event.channelType != PRIVATE ->
+                "This command can only be used in DMs. Please try again by DMing ${jdaClient.selfUser.asMention}.".let {
+                    log.debug { it }
+                    event.replyError(it)
+                }
+            result.getBoolean(COMPACT, false) && result.getBoolean(EXTENDED, false) ->
+                "Cannot use both `${compactSwitch.cleanSyntax}` and `${extendedSwitch.cleanSyntax}` at the same time.".let {
+                    log.debug { it }
+                    event.replyWarning(it)
+                }
             result.getBoolean("help") -> event.reply(commandHelp)
             !result.success() -> {
                 val errorMessage = result.errorMessageIterator.next().toString().replace("'", "`")

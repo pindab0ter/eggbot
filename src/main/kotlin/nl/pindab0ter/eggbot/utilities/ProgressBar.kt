@@ -4,7 +4,6 @@ import kotlinx.coroutines.*
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone.PUBLISH_FINAL_UPDATE
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone.STOP_IMMEDIATELY
-import java.util.concurrent.CompletableFuture
 import kotlin.coroutines.CoroutineContext
 
 class ProgressBar(

@@ -1,7 +1,8 @@
 package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.martiansoftware.jsap.JSAP.*
+import com.martiansoftware.jsap.JSAP.INTEGER_PARSER
+import com.martiansoftware.jsap.JSAP.NOT_REQUIRED
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging

@@ -1,8 +1,7 @@
 package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.martiansoftware.jsap.JSAP
-import com.martiansoftware.jsap.JSAP.*
+import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
@@ -13,7 +12,8 @@ import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.prophecyBonus
+import nl.pindab0ter.eggbot.utilities.soulBonus
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 

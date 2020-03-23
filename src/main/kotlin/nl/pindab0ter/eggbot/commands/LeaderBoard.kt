@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.FlaggedOption
-import com.martiansoftware.jsap.JSAP.*
+import com.martiansoftware.jsap.JSAP.INTEGER_PARSER
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser
 import mu.KotlinLogging
@@ -14,7 +14,7 @@ import nl.pindab0ter.eggbot.commands.categories.FarmersCategory
 import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.utilities.*
-import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
+import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.RIGHT
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : EggBotCommand() {
@@ -41,17 +41,15 @@ object LeaderBoard : EggBotCommand() {
                 .setDefault("earnings-bonus")
                 .setStringParser(
                     EnumeratedStringParser.getParser(
-                        Board.values().joinToString(";") { board ->
+                        values().joinToString(";") { board ->
                             "${board.longForm};${board.shortForm}"
                         },
                         false,
                         false
                     )
                 )
-                .setHelp(
-                    "Show the specified `<$BOARD>`. The available boards are:\n${Board.values()
-                        .joinToString("\n") { board -> "    • `${board.longForm}` or `${board.shortForm}`" }}"
-                ),
+                .setHelp("Show the specified `<$BOARD>`. The available boards are:\n" +
+                        values().joinToString("\n") { board -> "    • `${board.longForm}` or `${board.shortForm}`" }),
             compactSwitch,
             extendedSwitch
         )
@@ -105,10 +103,10 @@ object LeaderBoard : EggBotCommand() {
                 getByLongForm(input) ?: getByShortForm(input)
 
             private fun getByLongForm(input: String): Board? =
-                Board.values().find { board -> board.longForm == input }
+                values().find { board -> board.longForm == input }
 
             private fun getByShortForm(input: String): Board? =
-                Board.values().find { board -> board.shortForm == input }
+                values().find { board -> board.shortForm == input }
         }
 
         val longForm: String get() = name.toLowerCase().replace('_', '-')

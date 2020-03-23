@@ -6,16 +6,16 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
+import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
-import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
-import org.joda.time.Duration.*
+import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.RIGHT
+import org.joda.time.Duration.ZERO
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
@@ -161,6 +161,7 @@ object CoopInfo : EggBotCommand() {
 
                     // region Non-compact
 
+                    @Suppress("SpellCheckingInspection")
                     appendTable {
                         title = "__**🚜 Members** (${farms.count()}/${maxCoopSize}):__"
                         bottomPadding = 1

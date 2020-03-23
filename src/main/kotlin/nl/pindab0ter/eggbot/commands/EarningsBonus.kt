@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import com.martiansoftware.jsap.Switch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -14,10 +13,8 @@ import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
-import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
+import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.RIGHT
 import org.jetbrains.exposed.sql.transactions.transaction
-import java.math.BigDecimal
-import java.math.RoundingMode
 
 object EarningsBonus : EggBotCommand() {
 

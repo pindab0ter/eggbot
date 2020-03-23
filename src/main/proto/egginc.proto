@@ -274,14 +274,8 @@ message Contract {
         GoalType type = 1;
         double target_amount = 2;
         RewardType reward_type = 3;
-        // "subtype" for PE, SE, GE, +Piggy GE
-        // "transportation_lobbyist" etc for research
         string reward_sub_type = 4;
         double reward_amount = 5;
-        // I think this is how the "difficulty" is determined. Example values:
-        // Fusion Exclusion: 1000/50000/7000000000
-        // Back To School: 5000/80000000
-        // Operation: Habitapull: 35000/150000000/25000000000
         double target_soul_eggs = 6;
     }
 }

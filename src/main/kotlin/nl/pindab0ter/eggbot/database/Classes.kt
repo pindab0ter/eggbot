@@ -1,3 +1,5 @@
+@file:Suppress("SpellCheckingInspection")
+
 package nl.pindab0ter.eggbot.database
 
 import ch.obermuhlner.math.big.BigDecimalMath.log
@@ -63,8 +65,11 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             .minus(earningsBonus)
             .divide(bonusPerSoulEgg, HALF_UP)
     val peToNextRole: Int
-        get() = ceil(log(earningsBonus.nextPowerOfTen() / earningsBonus, mathContext)
-            .div(log(bonusPerProphecyEgg, mathContext)).toDouble()).roundToInt()
+        get() = ceil(
+            log(earningsBonus.nextPowerOfTen() / earningsBonus, mathContext)
+                .div(log(bonusPerProphecyEgg, mathContext))
+                .toDouble()
+        ).roundToInt()
     val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
     val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
 
@@ -76,7 +81,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     fun update(backup: EggInc.Backup) {
         if (backup.clientVersion > clientVersion) clientVersion = backup.clientVersion
         if (!backup.hasGame()) return
-        if (!backup.userName.matches(Regex("""\[(android-)?unknown\]"""))) inGameName = backup.userName
+        if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) inGameName = backup.userName
         prestiges = backup.stats.prestigeCount
         soulEggsLong = backup.game.soulEggsLong
         soulEggsDouble = backup.game.soulEggsDouble

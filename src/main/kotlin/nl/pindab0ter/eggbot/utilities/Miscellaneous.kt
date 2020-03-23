@@ -1,14 +1,11 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.github.kittinunf.fuel.core.Body
-import com.martiansoftware.jsap.JSAP
 import com.martiansoftware.jsap.JSAPResult
-import com.martiansoftware.jsap.Parameter
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import net.dv8tion.jda.api.entities.User
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.adminRole
 import nl.pindab0ter.eggbot.EggBot.botOwner
 import nl.pindab0ter.eggbot.EggBot.guild
@@ -23,7 +20,6 @@ val ONE_YEAR get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
 fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 
 fun <T> Iterable<T>.init() = take((count() - 1).coerceAtLeast(0))
-fun <T> Iterable<T>.tail() = drop(1)
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
 
 suspend fun <T, R> Iterable<T>.asyncMap(transform: suspend (T) -> R): List<R> = coroutineScope {

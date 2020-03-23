@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.auxbrain.ei.EggInc
-import nl.pindab0ter.eggbot.utilities.Table.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Period
@@ -13,7 +12,6 @@ import java.math.BigDecimal
 import java.math.BigDecimal.*
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
-import java.text.NumberFormat
 import java.util.Locale.ENGLISH
 import java.util.Locale.UK
 import kotlin.math.roundToInt
@@ -25,10 +23,8 @@ val EggInc.Egg.formattedName: String
         .split('_')
         .joinToString(" ", transform = String::capitalize)
 
-fun Long.toDuration(): Duration = Duration((this * 1000))
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
-fun Double.asPercentage(): String = NumberFormat.getPercentInstance().format(this)
 
 private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()

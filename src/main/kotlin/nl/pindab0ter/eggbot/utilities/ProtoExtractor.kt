@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.utilities
 
 import java.io.File
-import kotlin.text.RegexOption.*
+import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
 const val START = "/Users/auxbrain/dev/egginc/game/common/generated/protocol_buffers/ei.pb.cc"
 const val END = "\u000A\u0003Egg"

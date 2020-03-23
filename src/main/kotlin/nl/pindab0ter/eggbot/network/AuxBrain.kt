@@ -8,19 +8,14 @@ import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.fuel.util.encodeBase64ToString
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.clientVersion
 import nl.pindab0ter.eggbot.utilities.decodeBase64
 
 
 object AuxBrain {
-    private const val SALES_URL = "http://www.auxbrain.com/ei/get_sales"
-    private const val EVENTS_URL = "http://www.auxbrain.com/ei/get_events"
-    private const val CONTRACTS_URL = "http://www.auxbrain.com/ei/get_contracts" // Deprecated
     private const val PERIODICALS_URL = "http://www.auxbrain.com/ei/get_periodicals"
     private const val COOP_STATUS_URL = "http://www.auxbrain.com/ei/coop_status"
     private const val FIRST_CONTACT_URL = "http://www.auxbrain.com/ei/first_contact"
-    private const val DAILY_GIFT_URL = "http://www.auxbrain.com/ei/daily_gift_info"
 
     private fun periodicalsRequest(): Request = PERIODICALS_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")

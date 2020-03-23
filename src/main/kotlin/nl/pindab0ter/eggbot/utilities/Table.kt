@@ -1,7 +1,8 @@
 package nl.pindab0ter.eggbot.utilities
 
-import nl.pindab0ter.eggbot.utilities.Table.*
-import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.*
+import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.LEFT
+import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.RIGHT
+import nl.pindab0ter.eggbot.utilities.Table.Column
 
 @DslMarker
 annotation class TableMarker
@@ -121,8 +122,6 @@ class Table {
         this.border = border
         this.intersection = intersection
     })
-
-    fun divider(init: DividerColumn.() -> Unit): DividerColumn = initColumn(DividerColumn(), init)
 
     // endregion
 

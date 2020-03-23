@@ -5,7 +5,6 @@ import net.dv8tion.jda.api.entities.ChannelType.PRIVATE
 import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import net.dv8tion.jda.api.events.message.MessageReceivedEvent
 import net.dv8tion.jda.api.hooks.ListenerAdapter
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import javax.annotation.Nonnull
 

@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.simulation
 
+@Suppress("SpellCheckingInspection", "Unused")
 enum class EpicResearch(val id: String) {
     HOLD_TO_HATCH("hold_to_hatch"),
     EPIC_HATCHERY("epic_hatchery"),

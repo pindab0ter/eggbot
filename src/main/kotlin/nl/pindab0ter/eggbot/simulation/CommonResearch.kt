@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.simulation
 
+@Suppress("SpellCheckingInspection", "Unused")
 enum class CommonResearch(val id: String) {
     // Tier 1
     COMFORTABLE_NESTS("comfy_nests"),

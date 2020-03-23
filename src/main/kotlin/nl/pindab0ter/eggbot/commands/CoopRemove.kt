@@ -37,12 +37,11 @@ object CoopRemove : EggBotCommand() {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
         val coop = transaction { Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.firstOrNull() }
-
-        if (coop == null) "No co-op registered with that `contract id` and `co-op id`.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+            ?: "No co-op registered with that `contract id` and `co-op id`.".let {
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
 
         val role = transaction { coop.roleId?.let { guild.getRoleById(it) } }
 
