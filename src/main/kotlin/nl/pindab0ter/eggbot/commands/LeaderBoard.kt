@@ -141,8 +141,8 @@ object LeaderBoard : EggBotCommand() {
 
         title = "__**${when (board) {
             EARNINGS_BONUS -> "💵 Earnings Bonus"
-            SOUL_EGGS -> "${emoteSoulEgg ?: "🥚"} Soul Eggs"
-            PROPHECY_EGGS -> "${emoteProphecyEgg ?: "🥚"} Prophecy Eggs"
+            SOUL_EGGS -> "${emoteSoulEgg?.asMention ?: "🥚"} Soul Eggs"
+            PROPHECY_EGGS -> "${emoteProphecyEgg?.asMention ?: "🥚"} Prophecy Eggs"
             PRESTIGES -> "🥨 Prestiges"
             DRONE_TAKEDOWNS -> "✈🚫 Drone Takedowns"
             ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"
