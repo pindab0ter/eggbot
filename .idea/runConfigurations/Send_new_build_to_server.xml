@@ -3,13 +3,12 @@
     <module name="EggBot" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="INTERPRETER_PATH" value="/bin/bash" />
-    <option name="PROJECT_INTERPRETER" value="false" />
     <option name="WORKING_DIRECTORY" value="" />
     <option name="PARENT_ENVS" value="true" />
     <option name="SCRIPT_NAME" value="$PROJECT_DIR$/update_server.sh" />
     <option name="PARAMETERS" value="" />
     <method v="2">
-      <option name="RunConfigurationTask" enabled="true" />
+      <option name="Gradle.BeforeRunTask" enabled="true" tasks="installDist" externalProjectPath="$PROJECT_DIR$" vmOptions="" scriptParameters="" />
     </method>
   </configuration>
 </component>
