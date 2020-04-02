@@ -172,7 +172,7 @@ object CoopInfo : EggBotCommand() {
                             leftPadding = 1
                             rightPadding = 3
                             cells = farms.map { farm ->
-                                "${farm.farmerName}${if (farm.isActive) "" else " zZ"}"
+                                farm.farmerName + if (farm.isActive) "" else " zZ"
                             }
                         }
                         column {
@@ -244,6 +244,7 @@ object CoopInfo : EggBotCommand() {
 
                     appendTable {
                         title = "__**🎫 Tokens**__"
+                        topPadding = 1
                         column {
                             header = "Name"
                             rightPadding = 2
@@ -272,38 +273,71 @@ object CoopInfo : EggBotCommand() {
 
                 if (bottleneckedFarmers.isNotEmpty()) appendTable {
                     title = "__**⚠ Bottlenecks**__"
-                    displayHeader = false
+                    topPadding = 1
 
                     column {
-                        rightPadding = 1
+                        header = "Name"
+                        if (!compact) rightPadding = 2
                         cells = bottleneckedFarmers.map { (farm, shortenedName) ->
                             "${if (compact) shortenedName else farm.farmerName}:"
                         }
                     }
-
                     column {
+                        header = "Habs"
+                        leftPadding = 1
+                        alignment = RIGHT
                         cells = bottleneckedFarmers.map { (farm, _) ->
-                            val habs = farm.habBottleneckReached.let { duration ->
-                                when (duration) {
-                                    null -> ""
-                                    ZERO -> "🏠Full! "
-                                    else ->
-                                        if (compact) "🏠${duration.asHoursAndMinutes()}"
-                                        else "🏠${duration.asDaysHoursAndMinutes(true)} "
-                                }
+                            when (farm.habBottleneckReached) {
+                                null -> ""
+                                ZERO -> "Full!"
+                                else ->
+                                    if (compact) farm.habBottleneckReached!!.asHoursAndMinutes()
+                                    else farm.habBottleneckReached!!.asDaysHoursAndMinutes(true)
                             }
-                            val transport = farm.transportBottleneckReached.let { duration ->
-                                when (duration) {
-                                    null -> ""
-                                    ZERO -> "🚛Full! "
-                                    else ->
-                                        if (compact) "🚛${duration.asHoursAndMinutes()}"
-                                        else "🚛${duration.asDaysHoursAndMinutes(true)} "
-                                }
-                            }
-                            "$habs${if (habs.isNotEmpty()) " " else ""}$transport"
                         }
                     }
+                    emojiColumn {
+                        header = "🏘️"
+                        leftPadding = 1
+                        cells = bottleneckedFarmers.map { (farm, _) ->
+                            when (farm.habBottleneckReached) {
+                                // null -> "🆗"
+                                null -> "➖"
+                                ZERO -> "🛑"
+                                else -> "⚠️"
+                            }
+                        }
+                    }
+                    divider()
+                    column {
+                        header =
+                            if (compact) "Trspt"
+                            else "Transport"
+                        leftPadding = 1
+                        alignment = RIGHT
+                        cells = bottleneckedFarmers.map { (farm, _) ->
+                            when (farm.transportBottleneckReached) {
+                                null -> ""
+                                ZERO -> "Full!"
+                                else ->
+                                    if (compact) farm.transportBottleneckReached!!.asHoursAndMinutes()
+                                    else farm.transportBottleneckReached!!.asDaysHoursAndMinutes(true)
+                            }
+                        }
+                    }
+                    emojiColumn {
+                        header = "🚛"
+                        leftPadding = 1
+                        cells = bottleneckedFarmers.map { (farm, _) ->
+                            when (farm.transportBottleneckReached) {
+                                // null -> "🆗"
+                                null -> "➖"
+                                ZERO -> "🛑"
+                                else -> "⚠️"
+                            }
+                        }
+                    }
+                    if (!compact) divider(intersection = '╡')
                 }
             }
         }.toString().splitMessage(separator = '\u200B')
