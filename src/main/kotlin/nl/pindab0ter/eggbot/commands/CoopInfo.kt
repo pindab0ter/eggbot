@@ -99,13 +99,13 @@ object CoopInfo : EggBotCommand() {
                 }
 
                 appendln("`${coopId}` vs. _${contractName}_:")
-                appendln()
 
                 // region Goals
 
                 appendTable {
                     title = "__${egg.toEmote()} **Goals** (${goalsReached}/${goals.count()}):__"
                     displayHeader = false
+                    topPadding = 1
                     bottomPadding = 1
 
                     incrementColumn(suffix = ".")
@@ -164,7 +164,6 @@ object CoopInfo : EggBotCommand() {
                     @Suppress("SpellCheckingInspection")
                     appendTable {
                         title = "__**🚜 Members** (${farms.count()}/${maxCoopSize}):__"
-                        bottomPadding = 1
 
                         incrementColumn(":")
                         column {
@@ -330,7 +329,6 @@ object CoopInfo : EggBotCommand() {
                         leftPadding = 1
                         cells = bottleneckedFarmers.map { (farm, _) ->
                             when (farm.transportBottleneckReached) {
-                                // null -> "🆗"
                                 null -> "➖"
                                 ZERO -> "🛑"
                                 else -> "⚠️"

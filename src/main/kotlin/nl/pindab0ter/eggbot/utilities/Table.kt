@@ -132,7 +132,7 @@ class Table {
         val Column.longest: Int get() = (cells.map { cell -> cell.length }).plus(header.length).max() ?: 0
     }
 
-    override fun toString(): String = '\n'.repeat(topPadding) + StringBuilder().apply {
+    fun render(): String = StringBuilder().apply {
         require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }
         require(columns.all { it.cells.size == amountOfRows }) { "All columns must be of equal size" }
 
@@ -186,11 +186,17 @@ class Table {
         appendln("```")
 
 
-    }.toString().trim().plus('\n'.repeat(bottomPadding))
+    }.let { stringBuilder ->
+        "${'\n'.repeat(topPadding)}${stringBuilder.trim()}${'\n'.repeat(bottomPadding)}"
+    }
+
+    fun renderSplit(): List<String> = render().splitCodeBlock()
 }
 
-inline fun table(init: Table.() -> Unit): String = Table().also(init).toString()
-inline fun StringBuilder.appendTable(init: Table.() -> Unit): StringBuilder = append(Table().also(init).toString())
+inline fun table(init: Table.() -> Unit): String = Table().also(init).render()
+inline fun splitTable(init: Table.() -> Unit): List<String> = Table().also(init).renderSplit()
+inline fun StringBuilder.appendTable(init: Table.() -> Unit): StringBuilder = append(Table().also(init).render())
+inline fun StringBuilder.appendSplitTable(init: Table.() -> Unit): StringBuilder = append(Table().also(init).renderSplit())
 inline fun StringBuilder.appendRow(
     columns: List<Column>,
     spacingChar: Char = ' ',

@@ -150,9 +150,9 @@ object CoopsInfo : EggBotCommand() {
             appendln("```")
 
             // endregion Table
-        }.toString().let { messageBody ->
+        }.toString().splitCodeBlock().let { messages ->
             message.delete().queue()
-            event.reply(messageBody)
+            messages.forEach { message -> event.reply(message) }
         }
     }
 

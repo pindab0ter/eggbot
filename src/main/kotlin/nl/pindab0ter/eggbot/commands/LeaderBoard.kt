@@ -119,7 +119,7 @@ object LeaderBoard : EggBotCommand() {
         top: Int?,
         compact: Boolean,
         extended: Boolean
-    ): List<String> = table {
+    ): List<String> = splitTable {
         val sortedFarmers = when (board) {
             EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
             SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
@@ -183,5 +183,5 @@ object LeaderBoard : EggBotCommand() {
             leftPadding = if (compact) 1 else 2
             cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asFarmerRole(shortened = compact) }
         }
-    }.splitMessage(prefix = "```", postfix = "```")
+    }
 }
