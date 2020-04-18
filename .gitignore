@@ -150,3 +150,5 @@ gradle-app.setting
 ### Development resources ###
 /eggbot.properties
 /src/main/kotlin/nl/pindab0ter/eggbot/Scratch.kt
+
+.idea/misc.xml
