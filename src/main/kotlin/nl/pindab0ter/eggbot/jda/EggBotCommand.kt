@@ -82,7 +82,8 @@ abstract class EggBotCommand : Command() {
 
     final override fun execute(event: CommandEvent) {
         if (sendTyping) event.channel.sendTyping().queue()
-        val result: JSAPResult = parser.parse(event.args)
+        val cleanedArgs = event.args.replace(Regex("""[„“”]"""), "\"")
+        val result: JSAPResult = parser.parse(cleanedArgs)
 
         when {
             event.author.isRegistered < registrationRequired ->
