@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.auxbrain.ei.EggInc
+import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import org.joda.time.Period
@@ -135,57 +136,73 @@ fun DateTime.asDaysHoursAndMinutes(): String = DateTimeFormatterBuilder()
     .withLocale(UK)
     .print(this)
 
-val decimalFormat = DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(ENGLISH))
-val integerFormat = DecimalFormat(",##0", DecimalFormatSymbols.getInstance(ENGLISH))
+enum class NumberFormatter {
+    /** Format as integer */
+    INTEGER {
+        override fun format(number: Number): String =
+            DecimalFormat(",##0", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
+    },
+    /** Format to three decimal places */
+    DECIMALS {
+        override fun format(number: Number): String =
+            DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
+    },
+    /** Format to as little decimal places as needed, with a maximum of three */
+    OPTIONAL_DECIMALS {
+        override fun format(number: Number): String =
+            DecimalFormat(",##0.##", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
+    };
 
-fun Int.formatInteger(): String = integerFormat.format(this)
-fun Long.formatInteger(): String = integerFormat.format(this)
-fun BigDecimal.formatInteger(): String = integerFormat.format(this)
+    abstract fun format(number: Number): String
+}
 
-fun BigDecimal.asIllions(rounded: Boolean = false, shortened: Boolean = true): String {
-    val f = if (rounded) integerFormat else decimalFormat
+fun Int.formatInteger(): String = INTEGER.format(this)
+fun Long.formatInteger(): String = INTEGER.format(this)
+fun BigDecimal.formatInteger(): String = INTEGER.format(this)
+
+fun BigDecimal.asIllions(formatter: NumberFormatter = DECIMALS, shortened: Boolean = true): String {
     return when (this) {
-        in (TEN.pow(3)..TEN.pow(6) - ONE) -> f.format(this / TEN.pow(3)) + if (shortened) "k" else " Kilo"
-        in (TEN.pow(6)..TEN.pow(9) - ONE) -> f.format(this / TEN.pow(6)) + if (shortened) "M" else " Million"
-        in (TEN.pow(9)..TEN.pow(12) - ONE) -> f.format(this / TEN.pow(9)) + if (shortened) "B" else " Billion"
-        in (TEN.pow(12)..TEN.pow(15) - ONE) -> f.format(this / TEN.pow(12)) + if (shortened) "T" else " Trillion"
-        in (TEN.pow(15)..TEN.pow(18) - ONE) -> f.format(this / TEN.pow(15)) + if (shortened) "q" else " Quadrillion"
-        in (TEN.pow(18)..TEN.pow(21) - ONE) -> f.format(this / TEN.pow(18)) + if (shortened) "Q" else " Quintillion"
-        in (TEN.pow(21)..TEN.pow(24) - ONE) -> f.format(this / TEN.pow(21)) + if (shortened) "s" else " Sextillion"
-        in (TEN.pow(24)..TEN.pow(27) - ONE) -> f.format(this / TEN.pow(24)) + if (shortened) "S" else " Septillion"
-        in (TEN.pow(27)..TEN.pow(30) - ONE) -> f.format(this / TEN.pow(27)) + if (shortened) "O" else " Octillion"
-        in (TEN.pow(30)..TEN.pow(33) - ONE) -> f.format(this / TEN.pow(30)) + if (shortened) "N" else " Nonillion"
-        in (TEN.pow(33)..TEN.pow(36) - ONE) -> f.format(this / TEN.pow(33)) + if (shortened) "D" else " Decillion"
-        in (TEN.pow(36)..TEN.pow(39) - ONE) -> f.format(this / TEN.pow(36)) + if (shortened) "uD" else " Undecillion"
-        in (TEN.pow(39)..TEN.pow(42) - ONE) -> f.format(this / TEN.pow(39)) + if (shortened) "dD" else " Duodecillion"
-        in (TEN.pow(42)..TEN.pow(45) - ONE) -> f.format(this / TEN.pow(42)) + if (shortened) "tD" else " Tredecillion"
-        in (TEN.pow(45)..TEN.pow(48) - ONE) -> f.format(this / TEN.pow(45)) + if (shortened) "qD" else " Quattuordecillion"
-        in (TEN.pow(48)..TEN.pow(51) - ONE) -> f.format(this / TEN.pow(48)) + if (shortened) "QD" else " Quindecillion"
-        in (TEN.pow(51)..TEN.pow(54) - ONE) -> f.format(this / TEN.pow(51)) + if (shortened) "sD" else " Sexdecillion"
-        in (TEN.pow(54)..TEN.pow(57) - ONE) -> f.format(this / TEN.pow(54)) + if (shortened) "SD" else " Septdecillion"
-        in (TEN.pow(57)..TEN.pow(60) - ONE) -> f.format(this / TEN.pow(57)) + if (shortened) "OD" else " Octodecillion"
-        in (TEN.pow(60)..TEN.pow(63) - ONE) -> f.format(this / TEN.pow(60)) + if (shortened) "ND" else " Novemdecillion"
-        in (TEN.pow(63)..TEN.pow(66) - ONE) -> f.format(this / TEN.pow(63)) + if (shortened) "V" else " Vigintillion"
-        in (TEN.pow(66)..TEN.pow(69) - ONE) -> f.format(this / TEN.pow(66)) + if (shortened) "uV" else " Unvigintillion"
-        in (TEN.pow(69)..TEN.pow(72) - ONE) -> f.format(this / TEN.pow(69)) + if (shortened) "dV" else " Duovigintillion"
-        in (TEN.pow(72)..TEN.pow(75) - ONE) -> f.format(this / TEN.pow(72)) + if (shortened) "tV" else " Trevigintillion"
-        in (TEN.pow(75)..TEN.pow(78) - ONE) -> f.format(this / TEN.pow(75)) + if (shortened) "qV" else " Quattuorvigintillion"
-        in (TEN.pow(78)..TEN.pow(81) - ONE) -> f.format(this / TEN.pow(78)) + if (shortened) "QV" else " Quinvigintillion"
-        in (TEN.pow(81)..TEN.pow(84) - ONE) -> f.format(this / TEN.pow(81)) + if (shortened) "sV" else " Sexvigintillion"
-        in (TEN.pow(84)..TEN.pow(87) - ONE) -> f.format(this / TEN.pow(84)) + if (shortened) "SV" else " Septenvigintillion"
-        in (TEN.pow(87)..TEN.pow(90) - ONE) -> f.format(this / TEN.pow(87)) + if (shortened) "OV" else " Octovigintillion"
-        in (TEN.pow(90)..TEN.pow(93) - ONE) -> f.format(this / TEN.pow(90)) + if (shortened) "NV" else " Novemvigintillion"
-        in (TEN.pow(93)..TEN.pow(96) - ONE) -> f.format(this / TEN.pow(93)) + if (shortened) "Tg" else " Trigintillion"
-        in (TEN.pow(96)..TEN.pow(99) - ONE) -> f.format(this / TEN.pow(96)) + if (shortened) "uTG" else " Untrigintillion"
-        in (TEN.pow(99)..TEN.pow(102) - ONE) -> f.format(this / TEN.pow(99)) + if (shortened) "dTg" else " Duotrigintillion"
-        in (TEN.pow(102)..TEN.pow(105) - ONE) -> f.format(this / TEN.pow(102)) + if (shortened) "tTg" else " Tretrigintillion"
-        in (TEN.pow(105)..TEN.pow(108) - ONE) -> f.format(this / TEN.pow(105)) + if (shortened) "qTg" else " Quattuortrigintillion"
-        in (TEN.pow(108)..TEN.pow(111) - ONE) -> f.format(this / TEN.pow(108)) + if (shortened) "QTg" else " Quintrigintillion"
-        in (TEN.pow(111)..TEN.pow(114) - ONE) -> f.format(this / TEN.pow(111)) + if (shortened) "sTg" else " Sextrigintillion"
-        in (TEN.pow(114)..TEN.pow(117) - ONE) -> f.format(this / TEN.pow(114)) + if (shortened) "STg" else " Septentrigintillion"
-        in (TEN.pow(117)..TEN.pow(120) - ONE) -> f.format(this / TEN.pow(117)) + if (shortened) "OTg" else " Octotrigintillion"
-        in (TEN.pow(120)..TEN.pow(123) - ONE) -> f.format(this / TEN.pow(120)) + if (shortened) "NTg" else " Novemtrigintillion"
-        else -> integerFormat.format(this)
+        in (TEN.pow(3)..TEN.pow(6) - ONE) -> formatter.format(this / TEN.pow(3)) + if (shortened) "k" else " Kilo"
+        in (TEN.pow(6)..TEN.pow(9) - ONE) -> formatter.format(this / TEN.pow(6)) + if (shortened) "M" else " Million"
+        in (TEN.pow(9)..TEN.pow(12) - ONE) -> formatter.format(this / TEN.pow(9)) + if (shortened) "B" else " Billion"
+        in (TEN.pow(12)..TEN.pow(15) - ONE) -> formatter.format(this / TEN.pow(12)) + if (shortened) "T" else " Trillion"
+        in (TEN.pow(15)..TEN.pow(18) - ONE) -> formatter.format(this / TEN.pow(15)) + if (shortened) "q" else " Quadrillion"
+        in (TEN.pow(18)..TEN.pow(21) - ONE) -> formatter.format(this / TEN.pow(18)) + if (shortened) "Q" else " Quintillion"
+        in (TEN.pow(21)..TEN.pow(24) - ONE) -> formatter.format(this / TEN.pow(21)) + if (shortened) "s" else " Sextillion"
+        in (TEN.pow(24)..TEN.pow(27) - ONE) -> formatter.format(this / TEN.pow(24)) + if (shortened) "S" else " Septillion"
+        in (TEN.pow(27)..TEN.pow(30) - ONE) -> formatter.format(this / TEN.pow(27)) + if (shortened) "O" else " Octillion"
+        in (TEN.pow(30)..TEN.pow(33) - ONE) -> formatter.format(this / TEN.pow(30)) + if (shortened) "N" else " Nonillion"
+        in (TEN.pow(33)..TEN.pow(36) - ONE) -> formatter.format(this / TEN.pow(33)) + if (shortened) "D" else " Decillion"
+        in (TEN.pow(36)..TEN.pow(39) - ONE) -> formatter.format(this / TEN.pow(36)) + if (shortened) "uD" else " Undecillion"
+        in (TEN.pow(39)..TEN.pow(42) - ONE) -> formatter.format(this / TEN.pow(39)) + if (shortened) "dD" else " Duodecillion"
+        in (TEN.pow(42)..TEN.pow(45) - ONE) -> formatter.format(this / TEN.pow(42)) + if (shortened) "tD" else " Tredecillion"
+        in (TEN.pow(45)..TEN.pow(48) - ONE) -> formatter.format(this / TEN.pow(45)) + if (shortened) "qD" else " Quattuordecillion"
+        in (TEN.pow(48)..TEN.pow(51) - ONE) -> formatter.format(this / TEN.pow(48)) + if (shortened) "QD" else " Quindecillion"
+        in (TEN.pow(51)..TEN.pow(54) - ONE) -> formatter.format(this / TEN.pow(51)) + if (shortened) "sD" else " Sexdecillion"
+        in (TEN.pow(54)..TEN.pow(57) - ONE) -> formatter.format(this / TEN.pow(54)) + if (shortened) "SD" else " Septdecillion"
+        in (TEN.pow(57)..TEN.pow(60) - ONE) -> formatter.format(this / TEN.pow(57)) + if (shortened) "OD" else " Octodecillion"
+        in (TEN.pow(60)..TEN.pow(63) - ONE) -> formatter.format(this / TEN.pow(60)) + if (shortened) "ND" else " Novemdecillion"
+        in (TEN.pow(63)..TEN.pow(66) - ONE) -> formatter.format(this / TEN.pow(63)) + if (shortened) "V" else " Vigintillion"
+        in (TEN.pow(66)..TEN.pow(69) - ONE) -> formatter.format(this / TEN.pow(66)) + if (shortened) "uV" else " Unvigintillion"
+        in (TEN.pow(69)..TEN.pow(72) - ONE) -> formatter.format(this / TEN.pow(69)) + if (shortened) "dV" else " Duovigintillion"
+        in (TEN.pow(72)..TEN.pow(75) - ONE) -> formatter.format(this / TEN.pow(72)) + if (shortened) "tV" else " Trevigintillion"
+        in (TEN.pow(75)..TEN.pow(78) - ONE) -> formatter.format(this / TEN.pow(75)) + if (shortened) "qV" else " Quattuorvigintillion"
+        in (TEN.pow(78)..TEN.pow(81) - ONE) -> formatter.format(this / TEN.pow(78)) + if (shortened) "QV" else " Quinvigintillion"
+        in (TEN.pow(81)..TEN.pow(84) - ONE) -> formatter.format(this / TEN.pow(81)) + if (shortened) "sV" else " Sexvigintillion"
+        in (TEN.pow(84)..TEN.pow(87) - ONE) -> formatter.format(this / TEN.pow(84)) + if (shortened) "SV" else " Septenvigintillion"
+        in (TEN.pow(87)..TEN.pow(90) - ONE) -> formatter.format(this / TEN.pow(87)) + if (shortened) "OV" else " Octovigintillion"
+        in (TEN.pow(90)..TEN.pow(93) - ONE) -> formatter.format(this / TEN.pow(90)) + if (shortened) "NV" else " Novemvigintillion"
+        in (TEN.pow(93)..TEN.pow(96) - ONE) -> formatter.format(this / TEN.pow(93)) + if (shortened) "Tg" else " Trigintillion"
+        in (TEN.pow(96)..TEN.pow(99) - ONE) -> formatter.format(this / TEN.pow(96)) + if (shortened) "uTG" else " Untrigintillion"
+        in (TEN.pow(99)..TEN.pow(102) - ONE) -> formatter.format(this / TEN.pow(99)) + if (shortened) "dTg" else " Duotrigintillion"
+        in (TEN.pow(102)..TEN.pow(105) - ONE) -> formatter.format(this / TEN.pow(102)) + if (shortened) "tTg" else " Tretrigintillion"
+        in (TEN.pow(105)..TEN.pow(108) - ONE) -> formatter.format(this / TEN.pow(105)) + if (shortened) "qTg" else " Quattuortrigintillion"
+        in (TEN.pow(108)..TEN.pow(111) - ONE) -> formatter.format(this / TEN.pow(108)) + if (shortened) "QTg" else " Quintrigintillion"
+        in (TEN.pow(111)..TEN.pow(114) - ONE) -> formatter.format(this / TEN.pow(111)) + if (shortened) "sTg" else " Sextrigintillion"
+        in (TEN.pow(114)..TEN.pow(117) - ONE) -> formatter.format(this / TEN.pow(114)) + if (shortened) "STg" else " Septentrigintillion"
+        in (TEN.pow(117)..TEN.pow(120) - ONE) -> formatter.format(this / TEN.pow(117)) + if (shortened) "OTg" else " Octotrigintillion"
+        in (TEN.pow(120)..TEN.pow(123) - ONE) -> formatter.format(this / TEN.pow(120)) + if (shortened) "NTg" else " Novemtrigintillion"
+        else -> INTEGER.format(this)
     }
 }
 

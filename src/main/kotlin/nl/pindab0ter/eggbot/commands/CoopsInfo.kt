@@ -12,6 +12,7 @@ import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult.*
 import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -87,7 +88,7 @@ object CoopsInfo : EggBotCommand() {
             appendln()
             appendln("__🗒️ **Basic info**__ ```")
             appendln("Contract:         ${contract.name}")
-            appendln("Final goal:       ${contract.finalGoal.asIllions(true)}")
+            appendln("Final goal:       ${contract.finalGoal.asIllions(OPTIONAL_DECIMALS)}")
             appendln("Time to complete: ${contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true)}")
             appendln("Max size:         ${contract.maxCoopSize} farmers")
 

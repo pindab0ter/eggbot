@@ -14,6 +14,7 @@ import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
 import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.RIGHT
 import org.joda.time.Duration.ZERO
 
@@ -111,7 +112,7 @@ object CoopInfo : EggBotCommand() {
                     incrementColumn(suffix = ".")
                     column {
                         leftPadding = 1
-                        cells = goals.map { goal -> goal.asIllions(true) }
+                        cells = goals.map { goal -> goal.asIllions(OPTIONAL_DECIMALS) }
                     }
                     column {
                         leftPadding = 2

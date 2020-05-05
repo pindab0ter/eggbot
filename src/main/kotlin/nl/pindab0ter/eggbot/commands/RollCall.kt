@@ -18,6 +18,7 @@ import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
@@ -172,9 +173,9 @@ object RollCall : EggBotCommand() {
                     append(coop.farmers.count())
                     append("/${contractInfo.maxCoopSize} members): ")
                     appendPaddingCharacters(
-                        coop.activeEarningsBonus.asIllions(true),
-                        coops.map { it.activeEarningsBonus.asIllions(true) })
-                    append(coop.activeEarningsBonus.asIllions(true) + " %")
+                        coop.activeEarningsBonus.asIllions(INTEGER),
+                        coops.map { it.activeEarningsBonus.asIllions(INTEGER) })
+                    append(coop.activeEarningsBonus.asIllions(INTEGER) + " %")
                     appendln()
                 }
                 append("```")

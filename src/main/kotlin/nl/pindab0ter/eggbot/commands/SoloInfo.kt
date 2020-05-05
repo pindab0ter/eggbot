@@ -14,6 +14,7 @@ import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.simulation.ContractSimulation
 import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.Duration
 
@@ -100,10 +101,10 @@ object SoloInfo : EggBotCommand() {
         simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
             append("${index + 1}. ")
             appendPaddingCharacters(
-                goal.asIllions(true),
-                simulation.goalReachedMoments.map { it.target.asIllions(rounded = true) }
+                goal.asIllions(OPTIONAL_DECIMALS),
+                simulation.goalReachedMoments.map { it.target.asIllions(OPTIONAL_DECIMALS) }
             )
-            append(goal.asIllions(true))
+            append(goal.asIllions(OPTIONAL_DECIMALS))
             append(
                 when {
                     moment == null || moment > simulation.timeRemaining -> " 🔴 "
