@@ -41,6 +41,25 @@ dependencies {
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.32.3.2")
 }
 
+tasks.withType<Test> {
+    useJUnitPlatform()
+}
+
+dependencies {
+    testImplementation("org.junit.jupiter", "junit-jupiter", "5.6.2")
+    testImplementation("io.kotest", "kotest-runner-junit5-jvm", "4.0.5")
+    testImplementation("io.kotest", "kotest-assertions-core-jvm", "4.0.5")
+    testImplementation("io.kotest", "kotest-property-jvm", "4.0.5")
+}
+
+configurations.forEach { configuration ->
+    // Workaround the Gradle bug resolving multi platform dependencies.
+    // https://github.com/square/okio/issues/647
+    if (configuration.name.contains("proto", ignoreCase = true)) {
+        configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "java-runtime"))
+    }
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
