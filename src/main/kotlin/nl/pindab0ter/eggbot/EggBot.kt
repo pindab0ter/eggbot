@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Egg
 import mu.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
@@ -76,7 +76,7 @@ object EggBot {
         guild.getTextChannelById(Config.eliteDronesLeaderBoardChannelId)
             ?: throw Exception("Could not find channel with ID ${Config.eliteDronesLeaderBoardChannelId}")
     }
-    val eggsToEmotes: Map<EggInc.Egg, Emote?> by lazy {
+    val eggsToEmotes: Map<Egg, Emote?> by lazy {
         Config.eggsToEmoteIds.mapValues { (_, emoteId) ->
             emoteId?.let { guild.getEmoteById(it) }
         }
@@ -85,7 +85,7 @@ object EggBot {
     val emoteSoulEgg: Emote? by lazy { Config.emoteSoulEggId?.let { id -> guild.getEmoteById(id) } }
     val emoteProphecyEgg: Emote? by lazy { Config.emoteProphecyEggId?.let { id -> guild.getEmoteById(id) } }
 
-    fun EggInc.Egg.toEmote() = eggsToEmotes[this]?.asMention ?: "🥚"
+    fun Egg.toEmote() = eggsToEmotes[this]?.asMention ?: "🥚"
 
     // endregion
 

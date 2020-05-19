@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.simulation
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.CoopStatusResponse
 
 sealed class CoopContractSimulationResult {
     data class NotFound(
@@ -9,17 +9,17 @@ sealed class CoopContractSimulationResult {
     ) : CoopContractSimulationResult()
 
     data class Abandoned(
-        val coopStatus: EggInc.CoopStatusResponse,
+        val coopStatus: CoopStatusResponse,
         val contractName: String
     ) : CoopContractSimulationResult()
 
     data class Failed(
-        val coopStatus: EggInc.CoopStatusResponse,
+        val coopStatus: CoopStatusResponse,
         val contractName: String
     ) : CoopContractSimulationResult()
 
     data class Finished(
-        val coopStatus: EggInc.CoopStatusResponse,
+        val coopStatus: CoopStatusResponse,
         val contractName: String
     ) : CoopContractSimulationResult()
 

@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Contract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
@@ -8,7 +8,6 @@ import nl.pindab0ter.eggbot.commands.categories.ContractsCategory
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.asDaysHoursAndMinutes
-import nl.pindab0ter.eggbot.utilities.formattedName
 import nl.pindab0ter.eggbot.utilities.toDateTime
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -26,7 +25,7 @@ object ContractIDs : EggBotCommand() {
 
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         AuxBrain.getPeriodicals { periodicalsResponse ->
-            val (soloContracts, coopContracts) = periodicalsResponse.contracts.contractsList
+            val (soloContracts, coopContracts) = periodicalsResponse.contracts!!.contracts
                 .sortedBy { it.expirationTime }
                 .groupBy { it.coopAllowed }
                 .let { it[false].orEmpty() to it[true].orEmpty() }
@@ -47,11 +46,11 @@ object ContractIDs : EggBotCommand() {
     }
 
     // TODO: Add info about requirements
-    private fun List<EggInc.Contract>.printContracts(): String = StringBuilder().apply {
+    private fun List<Contract>.printContracts(): String = StringBuilder().apply {
         this@printContracts.forEach { contract ->
             append("**`${contract.id}`**: ")
             append("${contract.name} ")
-            append(eggsToEmotes[contract.egg]?.asMention ?: "(${contract.egg.formattedName})")
+            append(eggsToEmotes[contract.egg]?.asMention ?: "(${contract.egg.name})")
             append(", valid for ")
             append(
                 Duration(DateTime.now(), contract.expirationTime.toDateTime())

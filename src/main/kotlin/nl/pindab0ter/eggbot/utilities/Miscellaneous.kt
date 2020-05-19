@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.github.kittinunf.fuel.core.Body
+import com.github.kittinunf.fuel.util.encodeBase64
 import com.martiansoftware.jsap.JSAPResult
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -18,6 +19,7 @@ import java.util.*
 val ONE_YEAR get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
 
 fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
+fun ByteArray.encodeBase64ToString(): String = String(encodeBase64())
 
 fun <T> Iterable<T>.init() = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))

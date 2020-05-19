@@ -57,7 +57,7 @@ object CoopAdd : EggBotCommand() {
         }
 
         getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
-            if (status == null || !status.isInitialized) "Could not find an active co-op with that `contract id` and `co-op id`.".let {
+            if (status == null) "Could not find an active co-op with that `contract id` and `co-op id`.".let {
                 event.replyWarning(it)
                 log.debug { it }
                 return@getCoopStatus
@@ -78,12 +78,12 @@ object CoopAdd : EggBotCommand() {
 
             if (role != null) {
                 val message = event.channel.sendMessage("Assigning roles…").complete()
-                val progressBar = ProgressBar(status.contributorsList.count(), message, WhenDone.STOP_IMMEDIATELY)
+                val progressBar = ProgressBar(status.contributors.count(), message, WhenDone.STOP_IMMEDIATELY)
 
                 val successes = mutableListOf<DiscordUser>()
                 val failures = mutableListOf<String>()
 
-                status.contributorsList.mapNotNull { contributionInfo ->
+                status.contributors.map { contributionInfo ->
                     contributionInfo to transaction { Farmer.findById(contributionInfo.userId)?.discordUser }
                 }.forEachIndexed { i, (contributionInfo, discordUser) ->
                     log.debug { "${contributionInfo.userName}, ${discordUser?.discordTag}" }

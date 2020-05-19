@@ -1,5 +1,7 @@
 package nl.pindab0ter.eggbot.simulation
 
+import com.auxbrain.ei.Backup
+
 @Suppress("SpellCheckingInspection", "Unused")
 enum class EpicResearch(val id: String) {
     HOLD_TO_HATCH("hold_to_hatch"),
@@ -23,5 +25,14 @@ enum class EpicResearch(val id: String) {
     TRANSPORTATION_LOBBYISTS("transportation_lobb"),
     WARP_SHIFT("warp_shift"),
     PROPHECY_BONUS("prophecy_bonus"),
-    HOLD_TO_RESEARCH("hold_to_research")
+    HOLD_TO_RESEARCH("hold_to_research");
+
+    companion object {
+        fun toResearchItems(): List<Backup.ResearchItem> = values().map { item ->
+            Backup.ResearchItem {
+                id = item.id
+                level = 0
+            }
+        }
+    }
 }

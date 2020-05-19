@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot.simulation
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Egg
+import com.auxbrain.ei.LocalContract
 import nl.pindab0ter.eggbot.utilities.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -10,21 +12,19 @@ import java.math.BigDecimal
 import java.util.*
 
 class ContractSimulation constructor(
-    backup: EggInc.Backup,
-    override val farm: EggInc.Backup.Simulation,
-    localContract: EggInc.LocalContract
+    backup: Backup,
+    override val farm: Backup.Simulation,
+    localContract: LocalContract
 ) : Simulation(backup) {
-
     // region Basic info
-
-    val contractId: String = localContract.contract.id
-    val contractName: String = localContract.contract.name
-    val egg: EggInc.Egg = localContract.contract.egg
+    val contractId: String = localContract.contract!!.id
+    val contractName: String = localContract.contract!!.name
+    val egg: Egg = localContract.contract!!.egg
     var isActive: Boolean = true
     val finished: Boolean = localContract.finished
-    val timeRemaining: Duration = localContract.contract.lengthSeconds.toDuration()
+    val timeRemaining: Duration = localContract.contract!!.lengthSeconds.toDuration()
         .minus(Duration(localContract.timeAccepted.toDateTime(), DateTime.now()))
-    val goals: SortedSet<BigDecimal> = localContract.contract.goalsList.map { goal ->
+    val goals: SortedSet<BigDecimal> = localContract.contract!!.goals.map { goal ->
         goal.targetAmount.toBigDecimal()
     }.toSortedSet()
 
@@ -35,7 +35,7 @@ class ContractSimulation constructor(
     override var elapsed: Duration = ZERO
     override val currentEggs: BigDecimal = farm.eggsLaid.toBigDecimal()
     override var projectedEggs: BigDecimal = currentEggs
-    override val currentPopulation: BigDecimal = farm.habPopulation.sum()
+    override val currentPopulation: BigDecimal = farm.habPopulation.sum().toBigDecimal()
     override var projectedPopulation: BigDecimal = currentPopulation
     override lateinit var eggspected: BigDecimal
     var habBottleneckReached: Duration? = null
@@ -77,13 +77,13 @@ class ContractSimulation constructor(
 
     companion object {
         operator fun invoke(
-            backup: EggInc.Backup,
+            backup: Backup,
             contractId: String
         ): ContractSimulation? {
-            val contract = backup.contracts.contractsList.find { localContract ->
-                localContract.contract.id == contractId
+            val contract = backup.contracts?.contracts?.find { localContract ->
+                localContract.contract?.id == contractId
             }
-            val farm = backup.farmsList.find { it.contractId == contract?.contract?.id }
+            val farm = backup.farms.find { it.contractId == contract?.contract?.id }
             return if (contract != null && farm != null) ContractSimulation(backup, farm, contract)
             else null
         }

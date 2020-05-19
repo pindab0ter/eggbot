@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Egg
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.Activity
 import java.io.FileInputStream
@@ -34,7 +34,7 @@ object Config {
     val dronesLeaderBoardChannelId: String
     val eliteDronesLeaderBoardChannelId: String
 
-    val eggsToEmoteIds: Map<EggInc.Egg, String?>
+    val eggsToEmoteIds: Map<Egg, String?>
     val emoteGoldenEggId: String?
     val emoteSoulEggId: String?
     val emoteProphecyEggId: String?
@@ -75,31 +75,31 @@ object Config {
 
             // @formatter:off
                 eggsToEmoteIds = mapOf (
-                    EggInc.Egg.UNKNOWN_EGG    to getOptional("emote.default"),
-                    EggInc.Egg.EDIBLE         to getOptional("emote.edible"),
-                    EggInc.Egg.SUPERFOOD      to getOptional("emote.superfood"),
-                    EggInc.Egg.MEDICAL        to getOptional("emote.medical"),
-                    EggInc.Egg.ROCKET_FUEL    to getOptional("emote.rocket_fuel"),
-                    EggInc.Egg.SUPER_MATERIAL to getOptional("emote.super_material"),
-                    EggInc.Egg.FUSION         to getOptional("emote.fusion"),
-                    EggInc.Egg.QUANTUM        to getOptional("emote.quantum"),
-                    EggInc.Egg.IMMORTALITY    to getOptional("emote.immortality"),
-                    EggInc.Egg.TACHYON        to getOptional("emote.tachyon"),
-                    EggInc.Egg.GRAVITON       to getOptional("emote.graviton"),
-                    EggInc.Egg.DILITHIUM      to getOptional("emote.dilithium"),
-                    EggInc.Egg.PRODIGY        to getOptional("emote.prodigy"),
-                    EggInc.Egg.TERRAFORM      to getOptional("emote.terraform"),
-                    EggInc.Egg.ANTIMATTER     to getOptional("emote.antimatter"),
-                    EggInc.Egg.DARK_MATTER    to getOptional("emote.dark_matter"),
-                    EggInc.Egg.AI             to getOptional("emote.ai"),
-                    EggInc.Egg.NEBULA         to getOptional("emote.nebula"),
-                    EggInc.Egg.UNIVERSE       to getOptional("emote.universe"),
-                    EggInc.Egg.ENLIGHTENMENT  to getOptional("emote.enlightenment"),
-                    EggInc.Egg.CHOCOLATE      to getOptional("emote.chocolate"),
-                    EggInc.Egg.EASTER         to getOptional("emote.easter"),
-                    EggInc.Egg.WATER_BALLOON  to getOptional("emote.water_balloon"),
-                    EggInc.Egg.FIREWORK       to getOptional("emote.firework"),
-                    EggInc.Egg.PUMPKIN        to getOptional("emote.pumpkin")
+                    Egg.UNKNOWN_EGG    to getOptional("emote.default"),
+                    Egg.EDIBLE         to getOptional("emote.edible"),
+                    Egg.SUPERFOOD      to getOptional("emote.superfood"),
+                    Egg.MEDICAL        to getOptional("emote.medical"),
+                    Egg.ROCKET_FUEL    to getOptional("emote.rocket_fuel"),
+                    Egg.SUPER_MATERIAL to getOptional("emote.super_material"),
+                    Egg.FUSION         to getOptional("emote.fusion"),
+                    Egg.QUANTUM        to getOptional("emote.quantum"),
+                    Egg.IMMORTALITY    to getOptional("emote.immortality"),
+                    Egg.TACHYON        to getOptional("emote.tachyon"),
+                    Egg.GRAVITON       to getOptional("emote.graviton"),
+                    Egg.DILITHIUM      to getOptional("emote.dilithium"),
+                    Egg.PRODIGY        to getOptional("emote.prodigy"),
+                    Egg.TERRAFORM      to getOptional("emote.terraform"),
+                    Egg.ANTIMATTER     to getOptional("emote.antimatter"),
+                    Egg.DARK_MATTER    to getOptional("emote.dark_matter"),
+                    Egg.AI             to getOptional("emote.ai"),
+                    Egg.NEBULA         to getOptional("emote.nebula"),
+                    Egg.UNIVERSE       to getOptional("emote.universe"),
+                    Egg.ENLIGHTENMENT  to getOptional("emote.enlightenment"),
+                    Egg.CHOCOLATE      to getOptional("emote.chocolate"),
+                    Egg.EASTER         to getOptional("emote.easter"),
+                    Egg.WATER_BALLOON  to getOptional("emote.water_balloon"),
+                    Egg.FIREWORK       to getOptional("emote.firework"),
+                    Egg.PUMPKIN        to getOptional("emote.pumpkin")
                 )
                 // @formatter:on
 

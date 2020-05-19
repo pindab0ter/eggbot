@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Contract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
@@ -18,7 +18,7 @@ import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.network.AuxBrain
 import nl.pindab0ter.eggbot.utilities.*
-import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
+import nl.pindab0ter.eggbot.utilities.NumberFormatter.INTEGER
 import nl.pindab0ter.eggbot.utilities.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
@@ -87,7 +87,7 @@ object RollCall : EggBotCommand() {
             return
         }
 
-        val contractInfo: EggInc.Contract? = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find {
+        val contractInfo: Contract? = AuxBrain.getPeriodicals()?.contracts?.contracts?.find {
             it.id == contractId
         }
 
@@ -206,7 +206,7 @@ object RollCall : EggBotCommand() {
 
         private fun createCoops(
             farmers: List<Farmer>,
-            contract: EggInc.Contract,
+            contract: Contract,
             preferredCoopSize: Int,
             baseName: String
         ): List<Coop> = transaction {
@@ -228,7 +228,7 @@ object RollCall : EggBotCommand() {
 
         fun createRollCall(
             farmers: List<Farmer>,
-            contract: EggInc.Contract,
+            contract: Contract,
             baseName: String
         ): List<Coop> {
             val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }

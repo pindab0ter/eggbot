@@ -1,6 +1,9 @@
 package nl.pindab0ter.eggbot.simulation
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Backup
+import com.auxbrain.ei.CoopStatusResponse
+import com.auxbrain.ei.Egg
+import com.auxbrain.ei.LocalContract
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -15,33 +18,33 @@ import java.math.BigDecimal
 import java.util.*
 
 class CoopContractSimulation private constructor(
-    backups: List<EggInc.Backup>,
-    val coopStatus: EggInc.CoopStatusResponse
+    backups: List<Backup>,
+    val coopStatus: CoopStatusResponse
 ) {
 
     val log = KotlinLogging.logger { }
 
     // region Basic info
 
-    private val localContract: EggInc.LocalContract = backups.findContract(coopStatus.contractId)!!
+    private val localContract: LocalContract = backups.findContract(coopStatus.contractId)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
-        backup.farmsList.any { farm -> farm.contractId == coopStatus.contractId }
+        backup.farms.any { farm -> farm.contractId == coopStatus.contractId }
     }.mapNotNull { backup ->
-        ContractSimulation(backup, localContract.contract.id).also {
+        ContractSimulation(backup, localContract.contract!!.id).also {
             // TODO: Save this information somewhere else
-            it?.isActive = coopStatus.contributorsList.find { contributor ->
+            it?.isActive = coopStatus.contributors.find { contributor ->
                 contributor.userId == backup.userId
             }?.active == true
         }
     }
-    val contractId: String get() = localContract.contract.id
-    val contractName: String get() = localContract.contract.name
+    val contractId: String get() = localContract.contract!!.id
+    val contractName: String get() = localContract.contract!!.name
     val coopId: String get() = localContract.coopId
-    val egg: EggInc.Egg get() = localContract.contract.egg
-    val maxCoopSize: Int get() = localContract.contract.maxCoopSize
+    val egg: Egg get() = localContract.contract!!.egg
+    val maxCoopSize: Int get() = localContract.contract!!.maxCoopSize
     val timeRemaining: Duration get() = coopStatus.secondsRemaining.toDuration()
-    val goals: SortedSet<BigDecimal> = localContract.contract.goalsList.map { goal ->
+    val goals: SortedSet<BigDecimal> = localContract.contract!!.goals.map { goal ->
         goal.targetAmount.toBigDecimal()
     }.toSortedSet()
     val tokensAvailable: Int = farms.sumBy { it.farm.boostTokensReceived - it.farm.boostTokensGiven - it.farm.boostTokensSpent }
@@ -94,7 +97,7 @@ class CoopContractSimulation private constructor(
         ): CoopContractSimulationResult {
             val coopStatus = AuxBrain.getCoopStatus(contractId, coopId)
             val contractName: String? =
-                AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { contract ->
+                AuxBrain.getPeriodicals()?.contracts?.contracts?.find { contract ->
                     contract.id == contractId
                 }?.name
 
@@ -103,14 +106,14 @@ class CoopContractSimulation private constructor(
                 return NotFound(contractId, coopId)
 
             // Is co-op abandoned?
-            if (coopStatus.contributorsList.isEmpty())
+            if (coopStatus.contributors.isEmpty())
                 return Abandoned(coopStatus, contractName)
 
             message?.editMessage("Fetching backups…")?.complete()
             message?.channel?.sendTyping()?.complete()
 
-            val backups: List<EggInc.Backup> = runBlocking(Dispatchers.IO) {
-                coopStatus.contributorsList.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
+            val backups: List<Backup> = runBlocking(Dispatchers.IO) {
+                coopStatus.contributors.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
             }.filterNotNull()
 
             val contract = backups.findContract(contractId)!!
@@ -129,10 +132,10 @@ class CoopContractSimulation private constructor(
             // and that contract has reached its final goal
             // for any of the contributors
             if (coopStatus.eggsLaid >= contract.finalGoal || backups.any { contributor ->
-                    contributor.farmsList.none { farm ->
+                    contributor.farms.none { farm ->
                         farm.contractId == coopStatus.contractId
-                    } && contributor.contracts.archiveList.find { contract ->
-                        contract.contract.id == coopStatus.contractId
+                    } && contributor.contracts!!.archive.find { contract ->
+                        contract.contract!!.id == coopStatus.contractId
                     }?.finished == true
                 }
             ) return Finished(coopStatus, contractName)

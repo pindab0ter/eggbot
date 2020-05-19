@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.utilities
 
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Egg
 import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -17,12 +17,6 @@ import java.util.Locale.ENGLISH
 import java.util.Locale.UK
 import kotlin.math.roundToInt
 import kotlin.math.roundToLong
-
-val EggInc.Egg.formattedName: String
-    get() = name
-        .toLowerCase()
-        .split('_')
-        .joinToString(" ", transform = String::capitalize)
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
@@ -142,11 +136,13 @@ enum class NumberFormatter {
         override fun format(number: Number): String =
             DecimalFormat(",##0", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
     },
+
     /** Format to three decimal places */
     DECIMALS {
         override fun format(number: Number): String =
             DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
     },
+
     /** Format to as little decimal places as needed, with a maximum of three */
     OPTIONAL_DECIMALS {
         override fun format(number: Number): String =

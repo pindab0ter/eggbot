@@ -1,22 +1,22 @@
 package nl.pindab0ter.eggbot.utilities
 
-import com.auxbrain.ei.EggInc.*
+import com.auxbrain.ei.*
 import java.math.BigDecimal
 
-val Backup.Game.soulBonus: Int get() = epicResearchList.find { it.id == "soul_eggs" }!!.level
-val Backup.Game.prophecyBonus: Int get() = epicResearchList.find { it.id == "prophecy_bonus" }!!.level
-val Backup.Simulation.habPopulation: List<BigDecimal> get() = habPopulationList.map { it.toBigDecimal() }
-val Contract.finalGoal: BigDecimal get() = BigDecimal(goalsList.maxBy { it.targetAmount }!!.targetAmount)
-val LocalContract.finalGoal: BigDecimal get() = contract.finalGoal
-val LocalContract.finished: Boolean get() = BigDecimal(lastAmountWhenRewardGiven) > contract.finalGoal
+val Backup.Game.soulBonus: Int get() = epicResearch.find { it.id == "soul_eggs" }!!.level
+val Backup.Game.prophecyBonus: Int get() = epicResearch.find { it.id == "prophecy_bonus" }!!.level
+val Backup.Simulation.habPopulation: List<BigDecimal> get() = habPopulation.map { it.toBigDecimal() }
+val Contract.finalGoal: BigDecimal get() = BigDecimal(goals.maxBy { it.targetAmount }!!.targetAmount)
+val LocalContract.finalGoal: BigDecimal get() = contract!!.finalGoal
+val LocalContract.finished: Boolean get() = BigDecimal(lastAmountWhenRewardGiven) > contract?.finalGoal
 val CoopStatusResponse.eggsLaid: BigDecimal get() = BigDecimal(totalAmount)
 fun List<Backup>.findContract(contractId: String): LocalContract? = filter { backup ->
-    backup.contracts.contractsList.plus(backup.contracts.archiveList).any { contract ->
-        contract.contract.id == contractId
-    }
+    backup.contracts?.contracts?.plus(backup.contracts.archive)?.any { contract ->
+        contract.contract?.id == contractId
+    } == true
 }.maxBy { backup -> backup.approxTime }?.let { backup ->
-    backup.contracts.contractsList.plus(backup.contracts.archiveList).find { contract ->
-        contract.contract.id == contractId
+    backup.contracts?.contracts?.plus(backup.contracts.archive)?.find { contract ->
+        contract.contract?.id == contractId
     }
 }
 
@@ -42,11 +42,10 @@ val HabLevel.capacity: BigDecimal get() = when(this) {
     HabLevel.MONOLITH ->          BigDecimal(50_000_000)
     HabLevel.PLANET_PORTAL ->    BigDecimal(100_000_000)
     HabLevel.CHICKEN_UNIVERSE -> BigDecimal(600_000_000)
-    HabLevel.UNRECOGNIZED ->             BigDecimal.ZERO
+    else ->                              BigDecimal.ZERO
 }
 
 val VehicleType.capacity: BigDecimal get() = when (this) {
-    VehicleType.UNRECOGNIZED ->               BigDecimal.ZERO
     VehicleType.TRIKE ->                    BigDecimal(5_000)
     VehicleType.TRANSIT ->                 BigDecimal(15_000)
     VehicleType.PICKUP ->                  BigDecimal(50_000)
@@ -59,6 +58,7 @@ val VehicleType.capacity: BigDecimal get() = when (this) {
     VehicleType.HOVER_SEMI ->          BigDecimal(30_000_000)
     VehicleType.QUANTUM_TRANSPORTER -> BigDecimal(50_000_000)
     VehicleType.HYPERLOOP_TRAIN ->     BigDecimal(50_000_000)
+    else ->                                   BigDecimal.ZERO
 }
 
 // @formatter:on

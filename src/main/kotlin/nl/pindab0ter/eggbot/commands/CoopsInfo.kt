@@ -50,7 +50,7 @@ object CoopsInfo : EggBotCommand() {
             return
         }
 
-        val contract = AuxBrain.getPeriodicals()?.contracts?.contractsList?.find { it.id == contractId }!!
+        val contract = AuxBrain.getPeriodicals()?.contracts?.contracts?.find { it.id == contractId }!!
 
         val resultRows = results.map { result ->
             when (result) {
@@ -62,14 +62,14 @@ object CoopsInfo : EggBotCommand() {
                         "🟢",
                         "On track",
                         result.simulation.eggspected.asIllions(),
-                        result.simulation.coopStatus.contributorsCount.toString()
+                        result.simulation.coopStatus.contributors.count().toString()
                     )
                     else -> ResultRow(
                         result.simulation.coopId,
                         "🔴",
                         "Not on track",
                         result.simulation.eggspected.asIllions(),
-                        result.simulation.coopStatus.contributorsCount.toString()
+                        result.simulation.coopStatus.contributors.count().toString()
                     )
                 }
                 is Failed -> ResultRow(result.coopStatus.coopId, "🔴", "Failed")

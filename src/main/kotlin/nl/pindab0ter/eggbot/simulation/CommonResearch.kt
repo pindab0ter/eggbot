@@ -1,5 +1,7 @@
 package nl.pindab0ter.eggbot.simulation
 
+import com.auxbrain.ei.Backup
+
 @Suppress("SpellCheckingInspection", "Unused")
 enum class CommonResearch(val id: String) {
     // Tier 1
@@ -82,5 +84,14 @@ enum class CommonResearch(val id: String) {
     MATTER_RECONFIGURATION("matter_reconfig"),
     TIMELINE_SPLICING("timeline_splicing"),
     HYPER_PORTALLING("hyper_portalling"),
-    RELATIVITY_OPTIMIZATION("relativity_optimization")
+    RELATIVITY_OPTIMIZATION("relativity_optimization");
+
+    companion object {
+        fun toResearchItems(): List<Backup.ResearchItem> = values().map { item ->
+            Backup.ResearchItem {
+                id = item.id
+                level = 0
+            }
+        }
+    }
 }

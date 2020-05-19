@@ -3,7 +3,8 @@
 package nl.pindab0ter.eggbot.database
 
 import ch.obermuhlner.math.big.BigDecimalMath.log
-import com.auxbrain.ei.EggInc
+import com.auxbrain.ei.Backup
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.clientVersion
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.network.AuxBrain
@@ -32,6 +33,7 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
 }
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
+    private val log = KotlinLogging.logger {}
     val inGameId: String get() = id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
@@ -73,14 +75,15 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
     val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
 
-    fun update() = AuxBrain.getFarmerBackup(inGameId).let { backup ->
-        if (backup == null || !backup.hasGame()) return@let
-        update(backup)
-    }
+    fun update() = AuxBrain.getFarmerBackup(inGameId)?.let { update(it) }
+        ?: log.warn { "Tried to update from backup but failed." }
 
-    fun update(backup: EggInc.Backup) {
+    fun update(backup: Backup) {
         if (backup.clientVersion > clientVersion) clientVersion = backup.clientVersion
-        if (!backup.hasGame()) return
+        if (backup.game == null || backup.stats == null) {
+            log.warn { "Tried to update from backup but failed." }
+            return
+        }
         if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) inGameName = backup.userName
         prestiges = backup.stats.prestigeCount
         soulEggsLong = backup.game.soulEggsLong

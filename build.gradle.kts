@@ -11,8 +11,9 @@ plugins {
     idea
     application
     kotlin("jvm") version "1.3.61"
-    id("com.google.protobuf") version "0.8.11"
+    id("com.google.protobuf") version "0.8.12"
     id("com.github.ben-manes.versions") version "0.28.0"
+    id("com.toasttab.protokt") version "0.4.1"
 }
 
 repositories {
@@ -23,9 +24,6 @@ repositories {
 dependencies {
     compileOnly(kotlin("stdlib-jdk8"))
     compileOnly("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.2-1.3.60")
-    compileOnly("com.google.protobuf", "protobuf-gradle-plugin", "0.8.11")
-
-    implementation("com.jagrosh", "jda-utilities-commons", "3.0.2")
     implementation("com.jagrosh", "jda-utilities-command", "3.0.2")
     implementation("net.dv8tion", "JDA", "4.1.1_109") {
         exclude("club.minnced", "opus-java")
@@ -45,4 +43,8 @@ dependencies {
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
+}
+
+tasks.withType<JavaCompile> {
+    enabled = false
 }

@@ -41,21 +41,21 @@ object SoloInfo : EggBotCommand() {
         val compact: Boolean = parameters.getBoolean(COMPACT)
 
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
-            val contract = if (backup.hasGame()) backup.contracts.contractsList.find {
-                it.contract.id == contractId
+            val localContract = if (backup.game != null) backup.contracts?.contracts?.find {
+                it.contract?.id == contractId
             } else "No data found for `${farmer.inGameName}`.".let {
                 log.warn { it }
                 event.reply(it)
                 return
             }
 
-            if (contract == null)
+            if (localContract == null)
                 "No contract found with ID `$contractId` for `${farmer.inGameName}`. Try using `${event.client.textualPrefix}${ContractIDs.name}`".let {
                     log.debug { it }
                     event.reply(it)
                     return
                 }
-            if (contract.contract.coopAllowed && contract.coopId.isNotBlank())
+            if (localContract.contract?.coopAllowed == true && localContract.coopId.isNotBlank())
                 "The contract with ID `$contractId` is not a solo contract.".let {
                     log.debug { it }
                     event.reply(it)

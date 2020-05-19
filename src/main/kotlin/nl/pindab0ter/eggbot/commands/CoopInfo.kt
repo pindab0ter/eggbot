@@ -46,7 +46,7 @@ object CoopInfo : EggBotCommand() {
         val message: Message = event.channel.sendMessage("Fetching contract information…").complete()
 
         getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
-            if (status == null || !status.isInitialized) "Could not get co-op status. Are the `contract id` and `co-op id` correct?.".let {
+            if (status == null) "Could not get co-op status. Are the `contract id` and `co-op id` correct?.".let {
                 event.replyWarning(it)
                 log.debug { it }
                 return@getCoopStatus
