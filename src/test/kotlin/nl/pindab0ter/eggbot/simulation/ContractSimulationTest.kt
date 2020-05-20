@@ -1,51 +1,51 @@
 package nl.pindab0ter.eggbot.simulation
 
-import com.auxbrain.ei.EggInc.*
-import com.auxbrain.ei.EggInc.Egg.*
-import com.auxbrain.ei.EggInc.HabLevel.*
-import com.auxbrain.ei.EggInc.VehicleType.*
+import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Contract
+import com.auxbrain.ei.HabLevel.NO_HAB
+import com.auxbrain.ei.HabLevel.SHACK
+import com.auxbrain.ei.LocalContract
+import com.auxbrain.ei.MyContracts
+import com.auxbrain.ei.VehicleType.TRIKE
 import io.kotest.core.spec.style.DescribeSpec
 import io.kotest.matchers.comparables.shouldBeEqualComparingTo
 import java.math.BigDecimal
 
 class ContractSimulationTest : DescribeSpec({
 
-    val researchBuilder = Backup.ResearchItem.newBuilder()
-    val farm = Backup.Simulation.newBuilder()
-        .addAllCommonResearch(CommonResearch.values().map { commonResearch ->
-            researchBuilder.setId(commonResearch.id).setLevel(0).build()
-        })
-        .addAllHabs(listOf(SHACK, NO_HAB, NO_HAB, NO_HAB))
-        .addAllHabPopulation(listOf(0L, 0L, 0L, 0L))
-        .addAllVehicles(listOf(TRIKE))
-        .build()
-    val goal = Contract.Goal.newBuilder().setTargetAmount(1000.0).build()
-    val contract = Contract.newBuilder().setEgg(EDIBLE).addGoals(goal).build()
-    val localContract = LocalContract.newBuilder().setContract(contract).build()
-    val myContracts = MyContracts.newBuilder().addContracts(localContract).build()
-    val game = Backup.Game.newBuilder()
-        .addAllEpicResearch(EpicResearch.values().map { epicResearch ->
-            researchBuilder.setId(epicResearch.id).setLevel(0).build()
-        }).build()
-    val backup = Backup.newBuilder()
-        .setContracts(myContracts)
-        .addFarms(farm)
-        .setGame(game)
-        .build()
+    val farm = Backup.Simulation {
+        commonResearch = CommonResearch.toResearchItems()
+        habs = listOf(SHACK, NO_HAB, NO_HAB, NO_HAB)
+        habPopulation = listOf(0L, 0L, 0L, 0L)
+        vehicles = listOf(TRIKE)
+    }
 
+    val localContract = LocalContract {
+        contract = Contract {
+            goals = listOf(
+                Contract.Goal { targetAmount = 1000.0 }
+            )
+        }
+    }
+
+    val backup = Backup {
+        contracts = MyContracts { contracts = listOf(localContract) }
+        farms = listOf(farm)
+        game = Backup.Game { epicResearch = EpicResearch.toResearchItems() }
+    }
     lateinit var simulation: ContractSimulation
 
-    describe("Contract simulation") {
+    describe("A Contract Simulation") {
         context("with one chicken") {
-            val oneChickenBackup = backup.toBuilder().apply {
-                farmsBuilderList.first().addAllHabPopulation(listOf(1L, 0L, 0L, 0L))
-            }.build()
+            val oneChickenBackup = backup.copy {
+                farms = listOf(farm.copy { habPopulation = listOf(1L, 0L, 0L, 0L) })
+            }
 
             beforeTest {
                 simulation = ContractSimulation(
                     oneChickenBackup,
-                    oneChickenBackup.getFarms(0),
-                    oneChickenBackup.contracts.getContracts(0)
+                    oneChickenBackup.farms.first(),
+                    oneChickenBackup.contracts!!.contracts.first()
                 )
             }
 
@@ -53,7 +53,7 @@ class ContractSimulationTest : DescribeSpec({
                 simulation.currentPopulation.shouldBeEqualComparingTo(BigDecimal.ONE)
             }
 
-            it("lays a certain amount of eggs per minute") {
+            it("produces two eggs per minute") {
                 simulation.step()
                 simulation.projectedEggs.shouldBeEqualComparingTo(BigDecimal("2"))
             }
