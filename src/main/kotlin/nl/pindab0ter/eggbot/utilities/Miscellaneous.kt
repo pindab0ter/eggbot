@@ -21,8 +21,13 @@ val ONE_YEAR get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
 fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 fun ByteArray.encodeBase64ToString(): String = String(encodeBase64())
 
-fun <T> Iterable<T>.init() = take((count() - 1).coerceAtLeast(0))
+fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
+fun <T> Iterable<T>.replace(newValue: T, predicate: (T) -> Boolean): Iterable<T> {
+    return map { element ->
+        if (predicate(element)) newValue else element
+    }
+}
 
 suspend fun <T, R> Iterable<T>.asyncMap(transform: suspend (T) -> R): List<R> = coroutineScope {
     map { async { transform(it) } }.awaitAll()

@@ -21,7 +21,7 @@ class ContractSimulation constructor(
     val contractName: String = localContract.contract!!.name
     val egg: Egg = localContract.contract!!.egg
     var isActive: Boolean = true
-    val finished: Boolean = localContract.finished
+    val isFinished: Boolean = localContract.finished
     val timeRemaining: Duration = localContract.contract!!.lengthSeconds.toDuration()
         .minus(Duration(localContract.timeAccepted.toDateTime(), DateTime.now()))
     val goals: SortedSet<BigDecimal> = localContract.contract!!.goals.map { goal ->

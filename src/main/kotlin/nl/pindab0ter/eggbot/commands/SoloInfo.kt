@@ -90,7 +90,7 @@ object SoloInfo : EggBotCommand() {
         appendLine("`${simulation.farmerName}` vs. _${simulation.contractName}_:")
         appendLine()
 
-        if (simulation.finished) {
+        if (simulation.isFinished) {
             appendLine("**You have successfully finished this contract! ${Config.emojiSuccess}**")
             return@stringBuilder
         }

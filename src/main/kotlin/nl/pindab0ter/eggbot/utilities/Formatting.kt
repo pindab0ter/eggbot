@@ -20,6 +20,7 @@ import kotlin.math.roundToLong
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
+fun DateTime.toDouble(): Double = (millis / 1000).toDouble()
 
 private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()

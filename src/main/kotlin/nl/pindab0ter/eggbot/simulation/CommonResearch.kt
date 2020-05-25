@@ -87,11 +87,12 @@ enum class CommonResearch(val id: String) {
     RELATIVITY_OPTIMIZATION("relativity_optimization");
 
     companion object {
-        fun toResearchItems(): List<Backup.ResearchItem> = values().map { item ->
-            Backup.ResearchItem {
-                id = item.id
-                level = 0
+        fun toResearchItems(levels: Map<CommonResearch, Int> = emptyMap()): List<Backup.ResearchItem> =
+            values().map { researchItem ->
+                Backup.ResearchItem {
+                    id = researchItem.id
+                    level = levels[researchItem] ?: 0
+                }
             }
-        }
     }
 }
