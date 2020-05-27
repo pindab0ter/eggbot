@@ -119,7 +119,7 @@ object LeaderBoard : EggBotCommand() {
         top: Int?,
         compact: Boolean,
         extended: Boolean
-    ): List<String> = splitTable {
+    ): List<String> = table {
         val sortedFarmers = when (board) {
             EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
             SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }

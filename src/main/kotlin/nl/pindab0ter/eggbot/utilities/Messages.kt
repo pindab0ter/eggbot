@@ -20,8 +20,8 @@ fun String.splitMessage(
     postfix: String = "",
     separator: Char = '\n'
 ): List<String> = split(separator)
-    .also { lines ->
-        require(lines.none { it.length >= 2000 - prefix.length - postfix.length }) { "Any block cannot be larger than 2000 characters." }
+    .also { blocks ->
+        require(blocks.none { it.length >= 2000 - prefix.length - postfix.length }) { "Any block cannot be larger than 2000 characters." }
     }
     .fold(listOf("")) { acc, section ->
         if ("${acc.last()}$section$postfix$separator".length < 2000) acc.replaceLast { "$it$section$separator" }
@@ -33,7 +33,7 @@ fun String.splitMessage(
  *
  * The string will be split at newlines, never exceeding 2000 characters per element.
  */
-fun String.splitCodeBlock(): List<String> = splitMessage("```", "```")
+fun String.splitCodeBlock(separator: Char = '\n'): List<String> = splitMessage("```", "```", separator)
 
 fun CommandEvent.replyInDms(messages: List<String>) {
     var successful: Boolean? = null

@@ -132,80 +132,99 @@ class Table {
         val Column.longest: Int get() = (cells.map { cell -> cell.length }).plus(header.length).max() ?: 0
     }
 
-    fun render(): String = StringBuilder().apply {
-        require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }
-        require(columns.all { it.cells.size == amountOfRows }) { "All columns must be of equal size" }
+    fun render(): List<String> {
+        // TODO: Refactor
+        val blocks = mutableListOf<String>()
+        blocks.add(StringBuilder().apply {
+            require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }
+            require(columns.all { it.cells.size == amountOfRows }) { "All columns must be of equal size" }
 
-        repeat(topPadding) { appendln() }
+            repeat(topPadding) { appendln() }
 
-        // Add SpacingColumns between adjacent left and right aligned columns and before and after the last column
-        val spacedColumns: List<Column> = columns
-            .interleave(columns.zipWithNext { left, right ->
-                if ((left is AlignedColumn && left.alignment == LEFT) || (right is AlignedColumn && right.alignment == RIGHT))
-                    SpacingColumn(left, right)
-                else
-                    null
-            })
-            .run {
-                val first = first()
-                if (first is AlignedColumn && first.alignment == RIGHT)
-                    listOf(SpacingColumn(null, first)).plus(this) else this
+            val spacedColumns: List<Column> = calculateSpacing(columns)
+
+            if (title != null) appendln("$title ```")
+            else appendln("```")
+
+            if (displayHeader) {
+                // Draw table header
+                appendln(spacedColumns.renderRow {
+                    when (this) {
+                        is DividerColumn -> "$border"
+                        else -> header
+                    }
+                })
+
+                // Draw header border
+                appendln(spacedColumns.renderRow('═') {
+                    when (this) {
+                        is EmojiColumn -> borderEmoji
+                        is DividerColumn -> "$intersection"
+                        else -> '═'.repeat(headerLength)
+                    }
+                })
             }
-            .run {
-                val last = last()
-                if (last is AlignedColumn && last.alignment == LEFT)
-                    plus(SpacingColumn(last, null)) else this
-            }.filterNotNull()
 
-        if (title != null) appendln("$title ```")
-        else appendln("```")
-
-        if (displayHeader) {
-            // Draw table header
-            appendRow(spacedColumns) {
-                when (this) {
-                    is DividerColumn -> "$border"
-                    else -> header
+            // Draw table body
+            (0 until amountOfRows).forEach { rowIndex ->
+                val renderedRow = spacedColumns.renderRow { cells[rowIndex] }
+                if (length + renderedRow.length + 3 > 2000) {
+                    append("```\u200B")
+                    blocks.add(toString())
+                    clear()
+                    appendln("```")
                 }
+                appendln(renderedRow)
             }
+            append("```")
 
-            // Draw header border
-            appendRow(spacedColumns, '═') {
-                when (this) {
-                    is EmojiColumn -> borderEmoji
-                    is DividerColumn -> "$intersection"
-                    else -> '═'.repeat(headerLength)
-                }
-            }
-        }
+            repeat(bottomPadding) { appendln() }
 
-        // Draw table body
-        (0 until amountOfRows).forEach { row ->
-            appendRow(spacedColumns) { cells[row] }
-        }
-        appendln("```")
-
-
-    }.let { stringBuilder ->
-        "${'\n'.repeat(topPadding)}${stringBuilder.trim()}${'\n'.repeat(bottomPadding)}"
+        }.toString())
+        return blocks
     }
 
-    fun renderSplit(): List<String> = render().splitCodeBlock()
+    /** Add SpacingColumns between adjacent left and right aligned columns and before and after the last column **/
+    private fun calculateSpacing(columns: List<Column>): List<Column> = columns
+        .interleave(columns.zipWithNext { left, right ->
+            if ((left is AlignedColumn && left.alignment == LEFT) || (right is AlignedColumn && right.alignment == RIGHT))
+                SpacingColumn(left, right)
+            else
+                null
+        })
+        .run {
+            val first = first()
+            if (first is AlignedColumn && first.alignment == RIGHT)
+                listOf(SpacingColumn(null, first)).plus(this) else this
+        }
+        .run {
+            val last = last()
+            if (last is AlignedColumn && last.alignment == LEFT)
+                plus(SpacingColumn(last, null)) else this
+        }
+        .filterNotNull()
 }
 
-inline fun table(init: Table.() -> Unit): String = Table().also(init).render()
-inline fun splitTable(init: Table.() -> Unit): List<String> = Table().also(init).renderSplit()
-inline fun StringBuilder.appendTable(init: Table.() -> Unit): StringBuilder = append(Table().also(init).render())
-inline fun StringBuilder.appendSplitTable(init: Table.() -> Unit): StringBuilder = append(Table().also(init).renderSplit())
-inline fun StringBuilder.appendRow(
-    columns: List<Column>,
-    spacingChar: Char = ' ',
-    transform: Column.() -> String
-) {
-    columns.forEach { column ->
+inline fun table(init: Table.() -> Unit): List<String> =
+    Table().also(init).render()
+
+inline fun StringBuilder.appendTable(
+    init: Table.() -> Unit
+): StringBuilder = also {
+    Table().also(init).render().let { blocks ->
+        blocks.forEach { block ->
+            append(block)
+            if (block != blocks.last()) appendln()
+        }
+    }
+}
+
+inline fun List<Column>.renderRow(spacingChar: Char = ' ', transform: Column.() -> String) = StringBuilder().apply {
+    this@renderRow.forEach { column ->
         append(spacingChar.repeat(column.leftPadding))
         append(column.transform())
-        if (column != columns.last()) append(spacingChar.repeat(column.rightPadding))
+        if (column != this@renderRow.last()) {
+            append(spacingChar.repeat(column.rightPadding))
+        }
     }
-    appendln()
 }

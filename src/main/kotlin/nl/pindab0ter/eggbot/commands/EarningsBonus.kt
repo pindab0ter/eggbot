@@ -99,11 +99,19 @@ object EarningsBonus : EggBotCommand() {
                     column {
                         cells = rows.map { row -> row.suffix }
                     }
-                }.let {
+                }.let { blocks ->
                     if (event.channel == botCommandsChannel) {
-                        event.reply(it)
-                    } else event.replyInDm(it) {
-                        if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+                        blocks.forEach { block -> event.reply(block) }
+                    } else {
+                        var firstResponse = true
+                        blocks.forEach { block ->
+                            event.replyInDm(block) {
+                                if (event.isFromType(ChannelType.TEXT) && firstResponse) {
+                                    event.reactSuccess()
+                                    firstResponse = false
+                                }
+                            }
+                        }
                     }
                 }
             }

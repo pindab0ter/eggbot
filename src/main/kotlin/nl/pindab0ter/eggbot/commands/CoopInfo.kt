@@ -14,7 +14,7 @@ import nl.pindab0ter.eggbot.network.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulation
 import nl.pindab0ter.eggbot.simulation.CoopContractSimulationResult
 import nl.pindab0ter.eggbot.utilities.*
-import nl.pindab0ter.eggbot.utilities.NumberFormatter.*
+import nl.pindab0ter.eggbot.utilities.NumberFormatter.OPTIONAL_DECIMALS
 import nl.pindab0ter.eggbot.utilities.Table.AlignedColumn.Alignment.RIGHT
 import org.joda.time.Duration.ZERO
 
@@ -152,9 +152,7 @@ object CoopInfo : EggBotCommand() {
                 appendln("Tokens available: $tokensAvailable")
                 appendln("Tokens spent:     $tokensSpent")
                 if (coopStatus.public) appendln("Access:           This co-op is PUBLIC")
-                appendln("```")
-
-                append('\u200B')
+                appendln("```\u200B")
 
                 // endregion Basic info and totals
 
