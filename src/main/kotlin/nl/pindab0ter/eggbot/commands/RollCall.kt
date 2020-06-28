@@ -150,12 +150,12 @@ object RollCall : EggBotCommand() {
                     coopFarmers.map { farmer ->
                         val discordId = farmer.discordUser.discordId
                         val discordTag = farmer.discordUser.discordTag
-                        guild.addRoleToMember(discordId, role!!).submit().handle { _, exception ->
+                        guild.addRoleToMember(discordId, role!!).queue({}, { exception ->
                             if (exception == null) log.info("Added $discordTag to ${role.name}")
                             else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
-                        }.join()
+                        })
                         progressBar.update(++i)
-                        event.channel.sendTyping().complete()
+                        event.channel.sendTyping().queue()
                     }
                 }
             }
