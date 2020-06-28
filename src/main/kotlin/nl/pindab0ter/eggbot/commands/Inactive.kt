@@ -58,7 +58,7 @@ object Inactive : EggBotCommand() {
                 log.debug { it }
                 return
             }
-            else -> DateTime.now().plusDays(days).let { inactiveUntil ->
+            else -> DateTime.now().plusDays(days.coerceAtMost(356)).let { inactiveUntil ->
                 log.info { "User ${discordUser.discordTag} will be inactive for $days days" }
                 transaction { discordUser.inactiveUntil = inactiveUntil }
                 event.replySuccess("You will be inactive until **${inactiveUntil.asMonthAndDay()}** or until you use `${event.client.textualPrefix}${Active.name}`.")
