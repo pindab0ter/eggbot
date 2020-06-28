@@ -62,12 +62,12 @@ object RollClear : EggBotCommand() {
                 } else {
                     transaction { coop.delete() }
                     successes.add(coopNameToRoleName)
-                    log.debug { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
+                    log.info { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
                 }
             }.join() else {
                 transaction { coop.delete() }
                 successes.add(coopNameToRoleName)
-                log.debug { "Co-op ${coopNameToRoleName.first} successfully removed." }
+                log.info { "Co-op ${coopNameToRoleName.first} successfully removed." }
             }
         }
 
