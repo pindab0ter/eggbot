@@ -53,6 +53,7 @@ class ContractSimulation constructor(
         get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
 
     fun step() {
+        elapsed += standardMinutes(1)
         if (habBottleneckReached == null && projectedPopulation >= habsMaxCapacity)
             habBottleneckReached = elapsed
         if (transportBottleneckReached == null && projectedEggsPerMinute >= shippingRatePerMinute)
@@ -61,7 +62,6 @@ class ContractSimulation constructor(
             currentGoal!!.moment = elapsed
         if (!this::eggspected.isInitialized && elapsed >= timeRemaining)
             eggspected = projectedEggs
-        elapsed += standardMinutes(1)
         projectedEggs += projectedEggsPerMinute.coerceAtMost(shippingRatePerMinute)
         projectedPopulation = projectedPopulation.plus(populationIncreasePerMinute).coerceAtMost(habsMaxCapacity)
     }
