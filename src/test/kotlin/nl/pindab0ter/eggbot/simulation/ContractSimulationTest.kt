@@ -14,9 +14,7 @@ import io.kotest.matchers.ints.shouldBeZero
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
-import io.mockk.mockkConstructor
 import io.mockk.mockkStatic
-import nl.pindab0ter.eggbot.utilities.replace
 import nl.pindab0ter.eggbot.utilities.toDouble
 import org.joda.time.DateTime
 import org.joda.time.Duration

@@ -51,6 +51,8 @@ object WhoIs : EggBotCommand() {
                     ?.let { nickname -> " ($nickname)" } ?: ""
                 val farmerNames = discordUser.farmers.joinToString("`, `") { it.inGameName }
 
+                // TODO: No farmers or discord users found by the name of <@!444983923777339407>.
+
                 "`@$discordUserName$nickname` is registered with: `$farmerNames`".let {
                     event.reply(it)
                     return@transaction

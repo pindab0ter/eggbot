@@ -18,7 +18,7 @@ import java.math.BigDecimal
 import java.util.*
 
 class CoopContractSimulation private constructor(
-    backups: List<Backup>,
+    val backups: List<Backup>,
     val coopStatus: CoopStatusResponse
 ) {
 

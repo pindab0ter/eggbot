@@ -52,6 +52,7 @@ object RollClear : EggBotCommand() {
         val successes = mutableListOf<Pair<String, String?>>()
         val failures = mutableListOf<Pair<String, String?>>()
 
+        // TODO: Move this responsibility to somewhere else
         coopsToRoles.forEach { (coop, role) ->
             val coopNameToRoleName = coop.name to role?.name
             if (role != null) role.delete().submit().handle { _, exception ->
