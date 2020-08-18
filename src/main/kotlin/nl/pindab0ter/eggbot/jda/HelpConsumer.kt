@@ -20,12 +20,12 @@ object HelpConsumer : Consumer<CommandEvent> {
                 append(Config.prefix)
                 append(command.name)
                 append(if (command.arguments == null) "`" else " ${command.arguments}`")
-                appendln()
+                appendLine()
                 append("    ${command.help}")
             }
         }
 
-        appendln(
+        appendLine(
             """
             ℹ️ **Help:**
             __**Description**__

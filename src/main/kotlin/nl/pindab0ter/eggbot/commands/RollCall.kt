@@ -163,7 +163,7 @@ object RollCall : EggBotCommand() {
             // TODO: Replace with table
 
             message.delete().complete()
-            event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendln().apply {
+            event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendLine().apply {
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
@@ -176,7 +176,7 @@ object RollCall : EggBotCommand() {
                         coop.activeEarningsBonus.asIllions(INTEGER),
                         coops.map { it.activeEarningsBonus.asIllions(INTEGER) })
                     append(coop.activeEarningsBonus.asIllions(INTEGER) + " %")
-                    appendln()
+                    appendLine()
                 }
                 append("```")
             }.toString())
@@ -184,7 +184,7 @@ object RollCall : EggBotCommand() {
             coops.map { coop ->
                 val role = coop.roleId?.let { guild.getRoleById(it) }
                 StringBuilder().apply {
-                    appendln("__**Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)**__")
+                    appendLine("__**Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)**__")
                     coop.farmers.forEach { farmer ->
                         append(
                             guild.getMemberById(farmer.discordUser.discordId)?.asMention
@@ -192,7 +192,7 @@ object RollCall : EggBotCommand() {
                         )
                         append(" (`${farmer.inGameName}`)")
                         if (farmer.isActive.not()) append(" _Inactive_")
-                        appendln()
+                        appendLine()
                     }
                 }.toString()
             }.forEach {
@@ -247,15 +247,15 @@ object RollCall : EggBotCommand() {
                 // With the remaining active farmers keep adding the next highest rated to the lowest rated co-op
                 activeFarmers.drop(coops.size).forEach { activeFarmer ->
                     coops.filter { coop -> coop.farmers.count() <= preferredCoopSize }
-                        .filter { coop -> coop.farmers.count() == coops.map { it.farmers.count() }.min() }
-                        .minBy { coop -> coop.farmers.sumByBigDecimal { it.earningsBonus } }!!
+                        .filter { coop -> coop.farmers.count() == coops.map { it.farmers.count() }.minOrNull() }
+                        .minByOrNull { coop -> coop.farmers.sumByBigDecimal { it.earningsBonus } }!!
                         .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(activeFarmer)) }
                 }
 
                 // Finally spread inactive farmers over the coops
                 inactiveFarmers.forEach { inactiveFarmer ->
                     coops.sortedBy { coop -> coop.farmers.count() }
-                        .minBy { coop -> coop.farmers.count { farmer -> !farmer.isActive } }!!
+                        .minByOrNull { coop -> coop.farmers.count { farmer -> !farmer.isActive } }!!
                         .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(inactiveFarmer)) }
                 }
             }

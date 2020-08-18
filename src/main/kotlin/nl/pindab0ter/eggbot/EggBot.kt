@@ -5,6 +5,8 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.*
+import net.dv8tion.jda.api.requests.GatewayIntent.*
+import net.dv8tion.jda.api.utils.cache.CacheFlag.*
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
@@ -35,7 +37,18 @@ object EggBot {
 
     // region Public values
 
-    val jdaClient: JDA = JDABuilder(Config.botToken)
+    val jdaClient: JDA = JDABuilder
+        .create(
+            Config.botToken,
+            DIRECT_MESSAGES,
+            DIRECT_MESSAGE_REACTIONS,
+            DIRECT_MESSAGE_TYPING,
+            GUILD_MEMBERS,
+            GUILD_MESSAGES,
+            GUILD_MESSAGE_REACTIONS,
+            GUILD_MESSAGE_TYPING,
+        )
+        .disableCache(ACTIVITY, CLIENT_STATUS, EMOTE, MEMBER_OVERRIDES, VOICE_STATE)
         .addEventListeners(CommandLogger)
         .build()
     val guild: Guild by lazy {

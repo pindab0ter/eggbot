@@ -102,18 +102,18 @@ object CoopAdd : EggBotCommand() {
                 }
 
                 StringBuilder().apply {
-                    appendln("${Config.emojiSuccess} Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
+                    appendLine("${Config.emojiSuccess} Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
                     if (successes.isNotEmpty()) {
-                        appendln()
-                        appendln("The following players have been assigned the role ${role.asMention}:")
-                        successes.forEach { discordUser -> appendln(guild.getMemberById(discordUser.discordId)?.asMention) }
+                        appendLine()
+                        appendLine("The following players have been assigned the role ${role.asMention}:")
+                        successes.forEach { discordUser -> appendLine(guild.getMemberById(discordUser.discordId)?.asMention) }
                     }
                     if (failures.isNotEmpty()) {
-                        appendln()
-                        appendln("Unable to assign the following players their role:")
-                        appendln("```")
-                        failures.forEach { userName -> appendln(userName) }
-                        appendln("```")
+                        appendLine()
+                        appendLine("Unable to assign the following players their role:")
+                        appendLine("```")
+                        failures.forEach { userName -> appendLine(userName) }
+                        appendLine("```")
                     }
                 }.toString().let { messageBody ->
                     message.delete().complete()

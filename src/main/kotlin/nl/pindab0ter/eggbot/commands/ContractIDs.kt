@@ -58,7 +58,7 @@ object ContractIDs : EggBotCommand() {
                     .normalizedStandard()
                     .asDaysHoursAndMinutes()
             )
-            appendln()
+            appendLine()
         }
     }.toString()
 }

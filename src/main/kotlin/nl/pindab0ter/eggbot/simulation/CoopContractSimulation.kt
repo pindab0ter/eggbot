@@ -62,11 +62,16 @@ class CoopContractSimulation private constructor(
     val goalReachedMoments: SortedSet<GoalReachedMoment> = goals.map { goal ->
         GoalReachedMoment(goal, if (currentEggs >= goal) ZERO else null)
     }.toSortedSet()
-    private val currentGoal: GoalReachedMoment? get() = goalReachedMoments.filter { it.moment == null }.minBy { it.target }
-    val willFinish: Boolean get() = goalReachedMoments.maxBy { it.target }?.moment?.let { it < timeRemaining } == true
-    val goalsReached: Int get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
-    val populationIncreasePerHour: BigDecimal get() = farms.sumByBigDecimal { it.populationIncreasePerHour }
-    val eggsPerHour: BigDecimal get() = farms.sumByBigDecimal { it.currentEggsPerHour }
+    private val currentGoal: GoalReachedMoment?
+        get() = goalReachedMoments.filter { it.moment == null }.minByOrNull { it.target }
+    val willFinish: Boolean
+        get() = goalReachedMoments.maxByOrNull { it.target }?.moment?.let { it < timeRemaining } == true
+    val goalsReached: Int
+        get() = goalReachedMoments.count { (_, moment) -> moment?.let { it < timeRemaining } == true }
+    val populationIncreasePerHour: BigDecimal
+        get() = farms.sumByBigDecimal { it.populationIncreasePerHour }
+    val eggsPerHour: BigDecimal
+        get() = farms.sumByBigDecimal { it.currentEggsPerHour }
 
     private fun step() {
         farms.forEach { it.step() }

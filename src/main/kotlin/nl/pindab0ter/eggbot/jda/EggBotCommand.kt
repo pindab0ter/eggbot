@@ -62,20 +62,20 @@ abstract class EggBotCommand : Command() {
                 parameter.cleanSyntax
             })
         }
-        appendln("`**")
+        appendLine("`**")
         when (aliases.size) {
             0 -> Unit
-            1 -> appendln(aliases.joinToString(prefix = "    Alias: ") { "`${Config.prefix}$it`" })
-            else -> appendln(aliases.joinToString(prefix = "    Aliases: ") { "`${Config.prefix}$it`" })
+            1 -> appendLine(aliases.joinToString(prefix = "    Alias: ") { "`${Config.prefix}$it`" })
+            else -> appendLine(aliases.joinToString(prefix = "    Aliases: ") { "`${Config.prefix}$it`" })
         }
-        if (adminRequired) appendln("Admin only.")
-        appendln("__**Description**__")
-        appendln("    $help")
+        if (adminRequired) appendLine("Admin only.")
+        appendLine("__**Description**__")
+        appendLine("    $help")
         if (parameters != null) {
-            appendln("__**Arguments**__")
+            appendLine("__**Arguments**__")
             parameters?.forEach { parameter ->
-                appendln("`${parameter.cleanSyntax}`")
-                appendln("    ${parameter.help}")
+                appendLine("`${parameter.cleanSyntax}`")
+                appendLine("    ${parameter.help}")
             }
         }
     }.toString()

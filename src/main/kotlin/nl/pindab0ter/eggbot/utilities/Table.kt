@@ -74,7 +74,7 @@ class Table {
                     left.cellLengths.zip(right.cellLengths).let { rowLengths ->
                         val widestPair = rowLengths
                             .plus(left.header.length to right.header.length)
-                            .map { (a, b) -> a + b }.max()!!
+                            .map { (a, b) -> a + b }.maxOrNull()!!
 
                         ' '.repeat(widestPair - (left.headerLength + right.headerLength)) to rowLengths.map { (a, b) ->
                             ' '.repeat(widestPair - (a + b))
@@ -129,7 +129,7 @@ class Table {
         // Moved here to prevent visibility from constructor lambda
         val Column.headerLength: Int get() = header.length
         val Column.cellLengths: List<Int> get() = cells.map { cell -> cell.length }
-        val Column.longest: Int get() = (cells.map { cell -> cell.length }).plus(header.length).max() ?: 0
+        val Column.longest: Int get() = (cells.map { cell -> cell.length }).plus(header.length).maxOrNull() ?: 0
     }
 
     fun render(): List<String> {
@@ -139,16 +139,16 @@ class Table {
             require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }
             require(columns.all { it.cells.size == amountOfRows }) { "All columns must be of equal size" }
 
-            repeat(topPadding) { appendln() }
+            repeat(topPadding) { appendLine() }
 
             val spacedColumns: List<Column> = calculateSpacing(columns)
 
-            if (title != null) appendln("$title ```")
-            else appendln("```")
+            if (title != null) appendLine("$title ```")
+            else appendLine("```")
 
             if (displayHeader) {
                 // Draw table header
-                appendln(spacedColumns.renderRow {
+                appendLine(spacedColumns.renderRow {
                     when (this) {
                         is DividerColumn -> "$border"
                         else -> header
@@ -156,7 +156,7 @@ class Table {
                 })
 
                 // Draw header border
-                appendln(spacedColumns.renderRow('═') {
+                appendLine(spacedColumns.renderRow('═') {
                     when (this) {
                         is EmojiColumn -> borderEmoji
                         is DividerColumn -> "$intersection"
@@ -172,13 +172,13 @@ class Table {
                     append("```\u200B")
                     blocks.add(toString())
                     clear()
-                    appendln("```")
+                    appendLine("```")
                 }
-                appendln(renderedRow)
+                appendLine(renderedRow)
             }
             append("```")
 
-            repeat(bottomPadding) { appendln() }
+            repeat(bottomPadding) { appendLine() }
 
         }.toString())
         return blocks
@@ -214,7 +214,7 @@ inline fun StringBuilder.appendTable(
     Table().also(init).render().let { blocks ->
         blocks.forEach { block ->
             append(block)
-            if (block != blocks.last()) appendln()
+            if (block != blocks.last()) appendLine()
         }
     }
 }

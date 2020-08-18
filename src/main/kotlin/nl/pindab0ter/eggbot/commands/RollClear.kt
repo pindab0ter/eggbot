@@ -73,16 +73,16 @@ object RollClear : EggBotCommand() {
 
         StringBuilder().apply {
             if (successes.isNotEmpty()) {
-                appendln("${Config.emojiSuccess} The following coops for `$contractId` have been deleted:")
-                appendln("```")
-                successes.forEach { appendln("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
-                appendln("```")
+                appendLine("${Config.emojiSuccess} The following coops for `$contractId` have been deleted:")
+                appendLine("```")
+                successes.forEach { appendLine("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
+                appendLine("```")
             }
             if (failures.isNotEmpty()) {
-                appendln("${Config.emojiWarning} The following coops for `$contractId` could not be deleted:")
-                appendln("```")
-                successes.forEach { appendln("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
-                appendln("```")
+                appendLine("${Config.emojiWarning} The following coops for `$contractId` could not be deleted:")
+                appendLine("```")
+                successes.forEach { appendLine("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
+                appendLine("```")
             }
         }.toString().let { messageBody ->
             message.delete().complete()

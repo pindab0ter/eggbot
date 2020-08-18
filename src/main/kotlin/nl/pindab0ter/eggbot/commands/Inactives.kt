@@ -45,19 +45,19 @@ object Inactives : EggBotCommand() {
     }
 
     fun message(inactiveDiscordUsers: List<DiscordUser>): String = StringBuilder().apply {
-        val longestName = inactiveDiscordUsers.maxBy { it.discordName.length }!!.discordName
+        val longestName = inactiveDiscordUsers.maxByOrNull { it.discordName.length }!!.discordName
         val now = DateTime.now()
 
-        if (inactiveDiscordUsers.size == 1) appendln("One user has set themselves as inactive: ```")
-        else appendln("${inactiveDiscordUsers.size} users have set themselves as inactive: ```")
+        if (inactiveDiscordUsers.size == 1) appendLine("One user has set themselves as inactive: ```")
+        else appendLine("${inactiveDiscordUsers.size} users have set themselves as inactive: ```")
 
         inactiveDiscordUsers.forEach { inactiveDiscordUser ->
             append("${inactiveDiscordUser.discordName} ")
             appendPaddingCharacters(inactiveDiscordUser.discordName, longestName)
             append("${inactiveDiscordUser.inactiveUntil!!.asCompact()} ")
             append("(${Duration(now, inactiveDiscordUser.inactiveUntil!!).asDays()})")
-            appendln()
+            appendLine()
         }
-        appendln("```")
+        appendLine("```")
     }.toString()
 }

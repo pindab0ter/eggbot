@@ -259,7 +259,7 @@ fun <T : Any> paddingCharacters(
     current: T,
     containsLongest: Iterable<T>,
     character: String = " "
-): String = paddingCharacters(current, containsLongest.maxBy { it.toString().length }!!, character)
+): String = paddingCharacters(current, containsLongest.maxByOrNull { it.toString().length }!!, character)
 
 fun <T : Any> StringBuilder.appendPaddingCharacters(
     current: T,

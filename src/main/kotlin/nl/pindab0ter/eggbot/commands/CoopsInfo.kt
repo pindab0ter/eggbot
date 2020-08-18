@@ -76,29 +76,29 @@ object CoopsInfo : EggBotCommand() {
                 is Finished -> ResultRow(result.coopStatus.coopId, "🏁", "Finished")
             }
         }
-        val longestName = resultRows.map { it.name }.plus("Name").maxBy { it.length }!!
-        val longestStatusMessage = resultRows.map { it.statusMessage }.plus("Status").maxBy { it.length }!!
-        val longestEggspected = resultRows.map { it.eggspected }.plus("Eggspected").maxBy { it.length }!!
-        val longestMembers = resultRows.map { it.members }.maxBy { it.length }!!
+        val longestName = resultRows.map { it.name }.plus("Name").maxByOrNull { it.length }!!
+        val longestStatusMessage = resultRows.map { it.statusMessage }.plus("Status").maxByOrNull { it.length }!!
+        val longestEggspected = resultRows.map { it.eggspected }.plus("Eggspected").maxByOrNull { it.length }!!
+        val longestMembers = resultRows.map { it.members }.maxByOrNull { it.length }!!
 
         StringBuilder("`${guild.name}` vs _${contractId}_:\n").apply {
 
             // region Basic info
 
-            appendln()
-            appendln("__🗒️ **Basic info**__ ```")
-            appendln("Contract:         ${contract.name}")
-            appendln("Final goal:       ${contract.finalGoal.asIllions(OPTIONAL_DECIMALS)}")
-            appendln("Time to complete: ${contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true)}")
-            appendln("Max size:         ${contract.maxCoopSize} farmers")
+            appendLine()
+            appendLine("__🗒️ **Basic info**__ ```")
+            appendLine("Contract:         ${contract.name}")
+            appendLine("Final goal:       ${contract.finalGoal.asIllions(OPTIONAL_DECIMALS)}")
+            appendLine("Time to complete: ${contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true)}")
+            appendLine("Max size:         ${contract.maxCoopSize} farmers")
 
-            appendln("```")
+            appendLine("```")
 
             // endregion Basic info
 
             // region Table
 
-            appendln("__**🤝 Co-ops**__```")
+            appendLine("__**🤝 Co-ops**__```")
 
             // region Table header
 
@@ -111,7 +111,7 @@ object CoopsInfo : EggBotCommand() {
             append("| ")
             appendPaddingCharacters("", longestMembers, "#")
             append("/${contract.maxCoopSize}")
-            appendln()
+            appendLine()
 
             appendPaddingCharacters("", longestName, "═")
             append("═╪═➖═╪═")
@@ -121,7 +121,7 @@ object CoopsInfo : EggBotCommand() {
             append("═╪══")
             appendPaddingCharacters("", longestMembers, "═")
             appendPaddingCharacters("", contract.maxCoopSize, "═")
-            appendln()
+            appendLine()
 
             // endregion Table header
 
@@ -143,12 +143,12 @@ object CoopsInfo : EggBotCommand() {
                     append(" ")
                     appendPaddingCharacters("", contract.maxCoopSize)
                 }
-                appendln()
+                appendLine()
             }
 
             // endregion Table body
 
-            appendln("```")
+            appendLine("```")
 
             // endregion Table
         }.toString().splitCodeBlock().let { messages ->

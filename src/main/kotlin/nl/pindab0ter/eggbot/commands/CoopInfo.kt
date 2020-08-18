@@ -89,7 +89,7 @@ object CoopInfo : EggBotCommand() {
                 
                 This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent()
         )
-        is CoopContractSimulationResult.InProgress -> StringBuilder().apply {
+        is CoopContractSimulationResult.InProgress -> StringBuilder().apply stringBuilder@{
             result.simulation.apply {
                 val farms = farms
                 val shortenedNames = farms.map { farm ->
@@ -99,7 +99,7 @@ object CoopInfo : EggBotCommand() {
                     }
                 }
 
-                appendln("`${coopId}` vs. _${contractName}_:")
+                this@stringBuilder.appendLine("`${coopId}` vs. _${contractName}_:")
 
                 // region Goals
 
@@ -140,19 +140,19 @@ object CoopInfo : EggBotCommand() {
 
                 // region Basic info and totals
 
-                appendln("__🗒️ **Basic info**__ ```")
-                appendln("Eggspected:       ${eggspected.asIllions()}")
-                appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
+                this@stringBuilder.appendLine("__🗒️ **Basic info**__ ```")
+                this@stringBuilder.appendLine("Eggspected:       ${eggspected.asIllions()}")
+                this@stringBuilder.appendLine("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
                 append("Current chickens: ${currentPopulation.asIllions()} ")
                 if (!compact) append("(${populationIncreasePerHour.asIllions()}/hr)")
-                appendln()
+                this@stringBuilder.appendLine()
                 append("Current eggs:     ${currentEggs.asIllions()} ")
                 if (!compact) append("(${eggsPerHour.asIllions()}/hr) ")
-                appendln()
-                appendln("Tokens available: $tokensAvailable")
-                appendln("Tokens spent:     $tokensSpent")
-                if (coopStatus.public) appendln("Access:           This co-op is PUBLIC")
-                appendln("```\u200B")
+                this@stringBuilder.appendLine()
+                this@stringBuilder.appendLine("Tokens available: $tokensAvailable")
+                this@stringBuilder.appendLine("Tokens spent:     $tokensSpent")
+                if (coopStatus.public) this@stringBuilder.appendLine("Access:           This co-op is PUBLIC")
+                this@stringBuilder.appendLine("```\u200B")
 
                 // endregion Basic info and totals
 

@@ -38,7 +38,7 @@ fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
 
 val User.isRegistered: Boolean
     get() = transaction {
-        DiscordUser.findById(id)?.farmers?.toList()?.sortedBy { it.inGameName }?.isNotEmpty() == true
+        DiscordUser.findById(id)?.farmers?.sortedBy { it.inGameName }?.isNotEmpty() == true
     }
 
 val User.isAdmin: Boolean

@@ -84,20 +84,20 @@ object SoloInfo : EggBotCommand() {
     fun message(
         simulation: ContractSimulation,
         compact: Boolean = false
-    ): String = StringBuilder().apply {
+    ): String = StringBuilder().apply stringBuilder@{
         val eggEmote = eggsToEmotes[simulation.egg]?.asMention ?: "🥚"
 
-        appendln("`${simulation.farmerName}` vs. _${simulation.contractName}_:")
-        appendln()
+        appendLine("`${simulation.farmerName}` vs. _${simulation.contractName}_:")
+        appendLine()
 
         if (simulation.finished) {
-            appendln("**You have successfully finished this contract! ${Config.emojiSuccess}**")
-            return@apply
+            appendLine("**You have successfully finished this contract! ${Config.emojiSuccess}**")
+            return@stringBuilder
         }
 
         // region Goals
 
-        appendln("__$eggEmote **Goals** (${simulation.goalsReached}/${simulation.goals.count()}):__ ```")
+        appendLine("__$eggEmote **Goals** (${simulation.goalsReached}/${simulation.goals.count()}):__ ```")
         simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
             append("${index + 1}. ")
             appendPaddingCharacters(
@@ -117,26 +117,26 @@ object SoloInfo : EggBotCommand() {
                 Duration.ZERO -> append("Goal reached!")
                 else -> append(moment.asDaysHoursAndMinutes(compact))
             }
-            if (index + 1 < simulation.goals.count()) appendln()
+            if (index + 1 < simulation.goals.count()) appendLine()
         }
-        appendln("```")
+        appendLine("```")
 
         // endregion Goals
 
         // region Basic info and totals
 
-        appendln("__🗒️ **Basic info**__ ```")
+        appendLine("__🗒️ **Basic info**__ ```")
         simulation.apply {
-            appendln("Eggspected:       ${eggspected.asIllions()}")
-            appendln("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
+            this@stringBuilder.appendLine("Eggspected:       ${eggspected.asIllions()}")
+            this@stringBuilder.appendLine("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
             append("Current chickens: ${currentPopulation.asIllions()} ")
             if (!compact) append("(${populationIncreasePerHour.asIllions()}/hr)")
-            appendln()
+            this@stringBuilder.appendLine()
             append("Current eggs:     ${currentEggs.asIllions()} ")
             if (!compact) append("(${(eggsPerChickenPerMinute * currentPopulation * 60).asIllions()}/hr) ")
-            appendln()
-            appendln("Last update:      ${timeSinceLastUpdate.asDaysHoursAndMinutes(compact)} ago")
-            appendln("```")
+            this@stringBuilder.appendLine()
+            this@stringBuilder.appendLine("Last update:      ${timeSinceLastUpdate.asDaysHoursAndMinutes(compact)} ago")
+            this@stringBuilder.appendLine("```")
         }
 
         // endregion Basic info and totals
@@ -145,7 +145,7 @@ object SoloInfo : EggBotCommand() {
 
         simulation.apply {
             if (habBottleneckReached != null || transportBottleneckReached != null) {
-                appendln("__**⚠ Bottlenecks**__ ```")
+                this@stringBuilder.appendLine("__**⚠ Bottlenecks**__ ```")
                 habBottleneckReached?.let {
                     if (it == Duration.ZERO) append("🏠Full! ")
                     else append("🏠${it.asDaysHoursAndMinutes(true)} ")
@@ -154,7 +154,7 @@ object SoloInfo : EggBotCommand() {
                     if (it == Duration.ZERO) append("🚛Full! ")
                     else append("🚛${it.asDaysHoursAndMinutes(true)} ")
                 }
-                appendln("```")
+                this@stringBuilder.appendLine("```")
             }
         }
 

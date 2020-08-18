@@ -102,7 +102,7 @@ object Register : EggBotCommand() {
                 }
 
             // Check if any back-up was found with the in-game ID
-            if (backup?.game == null || backup?.stats == null)
+            if (backup?.game == null || backup.stats == null)
                 ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID (not name!) correctly?\n" +
                         "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
                     event.replyError(it)
