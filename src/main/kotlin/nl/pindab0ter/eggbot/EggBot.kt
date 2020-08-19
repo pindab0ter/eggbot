@@ -13,7 +13,7 @@ import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.jda.CommandLogger
 import nl.pindab0ter.eggbot.jda.commandClient
-import nl.pindab0ter.eggbot.jobs.JobLogger
+import nl.pindab0ter.eggbot.utilities.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
 import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
