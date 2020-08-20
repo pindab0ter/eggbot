@@ -15,7 +15,7 @@ fun simulation(
     backups: List<Backup>,
     contractId: String,
     catchUp: Boolean = true
-): SimulationResult {
+): ContractState {
     val localContract: LocalContract? = backups.map { backup ->
         backup.contracts?.contracts?.find { contract ->
             contract.contract?.id == contractId
@@ -26,18 +26,6 @@ fun simulation(
     requireNotNull(localContract.contract) { "Contract information not found" }
 
     val farms: List<Backup.Simulation> = backups.mapNotNull { backup -> backup.farmFor(contractId) }
-
-    val contract = Contract(
-        id = localContract.contract.id,
-        name = localContract.contract.name,
-        goals = localContract.contract.goals.map { goal: Contract.Goal ->
-            Goal(
-                target = goal.targetAmount.toBigDecimal(),
-                moment = if (farms.any { farm -> farm.eggsLaid >= goal.targetAmount }) Duration.ZERO else null
-            )
-        },
-        timeRemaining = Duration(DateTime.now(), localContract.coopSharedEndTime.toDateTime()),
-    )
 
     val contributors = backups.map { backup ->
         val farm = backup.farmFor(contractId)!!
@@ -67,24 +55,31 @@ fun simulation(
         )
         val timeSinceLastBackup = Duration(backup.approxTime.toDateTime(), DateTime.now())
 
-        // TODO: Calculate finalState at a later time in a loop with the Contract containing .elapsed
         Contributor(
             name = backup.userName,
-            initialState = initialState,
-            finalState = simulate(
-                state = if (catchUp) catchUp(initialState, timeSinceLastBackup) else initialState,
-                contract = contract
-            )
+            initialState = if (catchUp) catchUp(initialState, timeSinceLastBackup) else initialState,
+            finalState = if (catchUp) catchUp(initialState, timeSinceLastBackup) else initialState,
         )
     }
 
-    var result: SimulationResult
+    val contractState = ContractState(
+        id = localContract.contract.id,
+        name = localContract.contract.name,
+        goals = localContract.contract.goals.map { goal: Contract.Goal ->
+            Goal(
+                target = goal.targetAmount.toBigDecimal(),
+                moment = if (farms.any { farm -> farm.eggsLaid >= goal.targetAmount }) Duration.ZERO else null
+            )
+        },
+        timeRemaining = Duration(DateTime.now(), localContract.coopSharedEndTime.toDateTime()),
+        contributors = contributors
+    )
+
+
+    var result: ContractState
 
     val timeTaken = measureTimeMillis {
-        result = SimulationResult(
-            contract = contract,
-            contributors = contributors
-        )
+        result = simulate(contractState)
     }
 
     println("${timeTaken}ms")
@@ -103,24 +98,29 @@ private tailrec fun catchUp(
 }
 
 private tailrec fun simulate(
-    state: FarmState,
-    contract: nl.pindab0ter.eggbot.simulation.rework.Contract,
-    elapsed: Duration = Duration.ZERO
-): FarmState {
-    return if (elapsed >= contract.timeRemaining) state
-    else simulate(
-        state = state.advanceOneMinute(),
-        // TODO: Skip if no new goals reached
-        contract = contract.copy(goals = contract.goals.map { goal ->
-            if (goal.moment == null && state.eggsLaid >= goal.target) {
-                goal.copy(moment = state.elapsed)
-            } else goal
-        }),
-        elapsed = elapsed + ONE_MINUTE
+    state: ContractState,
+): ContractState = when {
+    state.elapsed >= ONE_YEAR -> state
+    state.goals.all { goal -> goal.moment != null } -> state
+    else -> simulate(
+        state.copy(
+            contributors = state.contributors.map { contributor ->
+                contributor.copy(
+                    finalState = contributor.finalState.advanceOneMinute(state.elapsed)
+                )
+            },
+            // TODO: Skip if no new goals reached
+            goals = state.goals.map { goal ->
+                if (goal.moment == null && state.contributors.sumByBigDecimal { it.finalState.eggsLaid } >= goal.target) {
+                    goal.copy(moment = state.elapsed)
+                } else goal
+            },
+            elapsed = state.elapsed + ONE_MINUTE
+        )
     )
 }
 
-private fun FarmState.advanceOneMinute(): FarmState = copy(
+private fun FarmState.advanceOneMinute(elapsed: Duration = Duration.ZERO): FarmState = copy(
     eggsLaid = eggsLaid + minOf(
         habs.sumByBigDecimal(Hab::population)
             .multiply(EGG_LAYING_BASE_RATE_PER_MINUTE)
@@ -128,9 +128,10 @@ private fun FarmState.advanceOneMinute(): FarmState = copy(
         constants.transportRate
     ),
     habs = habs.map { hab ->
-        val internalHatcherySharingMultiplier = habs.fold(BigDecimal.ZERO) { acc, (population, capacity) ->
+        val internalHatcherySharingMultiplier = habs.fold(BigDecimal.ONE) { acc, (population, capacity) ->
             if (population == capacity) acc + BigDecimal.ONE else acc
         }.multiply(constants.internalHatcherySharing)
+
         hab.copy(
             population = minOf(
                 hab.population + constants.internalHatcheryRate.multiply(internalHatcherySharingMultiplier),
@@ -141,19 +142,23 @@ private fun FarmState.advanceOneMinute(): FarmState = copy(
     habBottleneckReached = habBottleneckReached ?: when {
         habs.all { (population, capacity) -> population == capacity } -> elapsed
         else -> null
-    }
+    },
+    // TODO
+    transportBottleneckReached = null
 )
 
-data class Contract(
+data class ContractState(
     val id: String,
     val name: String,
     val goals: List<Goal>,
     val timeRemaining: Duration,
+    val elapsed: Duration = Duration.ZERO,
+    val contributors: List<Contributor>,
 )
 
 data class Contributor(
     val name: String,
-    val initialState: FarmState,
+    val initialState: FarmState, // TODO: Remove?
     val finalState: FarmState,
 )
 
@@ -170,18 +175,12 @@ data class Hab(
     val capacity: BigDecimal,
 )
 
-data class SimulationResult(
-    val contract: nl.pindab0ter.eggbot.simulation.rework.Contract,
-    val contributors: List<Contributor>,
-)
-
 data class Goal(
     val target: BigDecimal,
     val moment: Duration? = null,
 )
 
 data class FarmState(
-    val elapsed: Duration = Duration.ZERO,
     val habs: List<Hab>,
     val eggsLaid: BigDecimal = BigDecimal.ZERO,
     val constants: Constants,
@@ -190,7 +189,7 @@ data class FarmState(
 )
 
 fun main() {
-    val coopStatus = AuxBrain.getCoopStatus("video-games", "pebbles")
+    val coopStatus = AuxBrain.getCoopStatus("ion-drive", "trains")
     val backups = coopStatus?.contributors?.map { contributor ->
         AuxBrain.getFarmerBackup(contributor.userId)!!
     }!!
@@ -198,4 +197,5 @@ fun main() {
     val result = simulation(backups, coopStatus.contractId, false)
 
     println(result)
+    result.contributors.forEach(::println)
 }
