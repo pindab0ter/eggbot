@@ -16,8 +16,8 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.util.*
 
-val ONE_YEAR get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
-val ONE_MINUTE = Duration.standardMinutes(1)!!
+val ONE_YEAR: Duration get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
+val ONE_MINUTE: Duration = Duration.standardMinutes(1L)
 
 fun Body.decodeBase64(): ByteArray = Base64.getDecoder().decode(toByteArray())
 fun ByteArray.encodeBase64ToString(): String = String(encodeBase64())

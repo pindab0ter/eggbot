@@ -9,7 +9,10 @@ import org.joda.time.Duration
 import java.math.BigDecimal
 import kotlin.system.measureTimeMillis
 
-private val EGG_LAYING_BASE_RATE_PER_MINUTE = BigDecimal.ONE / BigDecimal(30)
+/** Base egg laying rate per chicken per minute.
+ *
+ * A chicken lays 1/30 of an egg per second, so 2 per minute */
+private val EGG_LAYING_BASE_RATE = BigDecimal(2)
 
 fun simulation(
     backups: List<Backup>,
@@ -27,8 +30,9 @@ fun simulation(
 
     val farms: List<Backup.Simulation> = backups.mapNotNull { backup -> backup.farmFor(contractId) }
 
-    val contributors = backups.map { backup ->
-        val farm = backup.farmFor(contractId)!!
+    val contributors = backups.mapNotNull { backup ->
+        val farm = backup.farmFor(contractId) ?: return@mapNotNull null
+
         val constants = Constants(
             internalHatcherySharing = backup.internalHatcherySharing,
             internalHatcheryRate = farm.internalHatcheryFlatIncreases.sum()
@@ -43,15 +47,24 @@ fun simulation(
                     .product()
             )
         )
+        val habs = (0..3).map { index ->
+            Hab(
+                population = farm.habPopulation[index].toBigDecimal(),
+                capacity = farm.habs[index].capacity.multiply(farm.habCapacityMultipliers.product())
+            )
+        }
         val initialState = FarmState(
-            habs = (0..3).map { index ->
-                Hab(
-                    population = farm.habPopulation[index].toBigDecimal(),
-                    capacity = farm.habs[index].capacity.multiply(farm.habCapacityMultipliers.product())
-                )
-            },
+            habs = habs,
             eggsLaid = farm.eggsLaid.toBigDecimal(),
-            constants = constants
+            constants = constants,
+            habBottleneck = when {
+                habs.sumByBigDecimal(Hab::population) >= habs.sumByBigDecimal(Hab::capacity) -> Duration.ZERO
+                else -> null
+            },
+            transportBottleneck = when {
+                eggIncrease(habs, constants) >= constants.transportRate -> Duration.ZERO
+                else -> null
+            }
         )
         val timeSinceLastBackup = Duration(backup.approxTime.toDateTime(), DateTime.now())
 
@@ -63,8 +76,9 @@ fun simulation(
     }
 
     val contractState = ContractState(
-        id = localContract.contract.id,
-        name = localContract.contract.name,
+        contractId = localContract.contract.id,
+        contractName = localContract.contract.name,
+        coopId = localContract.coopId,
         goals = localContract.contract.goals.map { goal: Contract.Goal ->
             Goal(
                 target = goal.targetAmount.toBigDecimal(),
@@ -92,7 +106,7 @@ private tailrec fun catchUp(
 ): FarmState = when {
     timeSinceLastBackup >= Duration.ZERO -> state
     else -> catchUp(
-        state = state.advanceOneMinute(),
+        state = advanceOneMinute(state),
         timeSinceLastBackup = timeSinceLastBackup - ONE_MINUTE
     )
 }
@@ -106,55 +120,76 @@ private tailrec fun simulate(
         state.copy(
             contributors = state.contributors.map { contributor ->
                 contributor.copy(
-                    finalState = contributor.finalState.advanceOneMinute(state.elapsed)
+                    finalState = advanceOneMinute(contributor.finalState, state.elapsed)
                 )
             },
-            // TODO: Skip if no new goals reached
-            goals = state.goals.map { goal ->
-                if (goal.moment == null && state.contributors.sumByBigDecimal { it.finalState.eggsLaid } >= goal.target) {
-                    goal.copy(moment = state.elapsed)
-                } else goal
+            goals = when {
+                state.goals.filter { it.moment != null }.none { state.eggsLaid >= it.target } -> state.goals
+                else -> state.goals.map { goal ->
+                    if (goal.moment == null && state.contributors.sumByBigDecimal { it.finalState.eggsLaid } >= goal.target) {
+                        goal.copy(moment = state.elapsed)
+                    } else goal
+                }
             },
             elapsed = state.elapsed + ONE_MINUTE
         )
     )
 }
 
-private fun FarmState.advanceOneMinute(elapsed: Duration = Duration.ZERO): FarmState = copy(
-    eggsLaid = eggsLaid + minOf(
-        habs.sumByBigDecimal(Hab::population)
-            .multiply(EGG_LAYING_BASE_RATE_PER_MINUTE)
-            .multiply(constants.eggLayingBonus),
-        constants.transportRate
-    ),
-    habs = habs.map { hab ->
-        val internalHatcherySharingMultiplier = habs.fold(BigDecimal.ONE) { acc, (population, capacity) ->
+private fun advanceOneMinute(state: FarmState, elapsed: Duration = Duration.ZERO): FarmState = state.copy(
+    eggsLaid = state.eggsLaid + minOf(eggIncrease(state.habs, state.constants), state.constants.transportRate),
+    habs = state.habs.map { hab ->
+        val internalHatcherySharingMultiplier = state.habs.fold(BigDecimal.ONE) { acc, (population, capacity) ->
             if (population == capacity) acc + BigDecimal.ONE else acc
-        }.multiply(constants.internalHatcherySharing)
-
+        }.multiply(state.constants.internalHatcherySharing)
         hab.copy(
             population = minOf(
-                hab.population + constants.internalHatcheryRate.multiply(internalHatcherySharingMultiplier),
+                hab.population + state.constants.internalHatcheryRate.multiply(internalHatcherySharingMultiplier),
                 hab.capacity
             )
         )
     },
-    habBottleneckReached = habBottleneckReached ?: when {
-        habs.all { (population, capacity) -> population == capacity } -> elapsed
-        else -> null
-    },
-    // TODO
-    transportBottleneckReached = null
+    habBottleneck = state.habBottleneck ?: habBottleneck(state.habs, elapsed),
+    transportBottleneck = state.transportBottleneck ?: transportBottleneck(state.habs, state.constants, elapsed)
 )
 
+private fun transportBottleneck(habs: List<Hab>, constants: Constants, elapsed: Duration): Duration? {
+    return when {
+        eggIncrease(habs, constants) >= constants.transportRate -> elapsed
+        else -> null
+    }
+}
+
+private fun habBottleneck(habs: List<Hab>, elapsed: Duration): Duration? {
+    return when {
+        habs.all { (population, capacity) -> population == capacity } -> elapsed
+        else -> null
+    }
+}
+
+private fun eggIncrease(habs: List<Hab>, constants: Constants) =
+    habs.sumByBigDecimal(Hab::population).multiply(EGG_LAYING_BASE_RATE).multiply(constants.eggLayingBonus)
+
 data class ContractState(
-    val id: String,
-    val name: String,
+    val contractId: String,
+    val contractName: String,
+    val coopId: String,
     val goals: List<Goal>,
     val timeRemaining: Duration,
     val elapsed: Duration = Duration.ZERO,
     val contributors: List<Contributor>,
-)
+) {
+    val eggsLaid: BigDecimal get() = contributors.sumByBigDecimal { contributor -> contributor.finalState.eggsLaid }
+
+    override fun toString(): String = "${this::class.simpleName}(" +
+            "contractId=${contractId}, " +
+            "contractName=${contractName}, " +
+            "coopId=${coopId}, " +
+            "goals=${goals}, " +
+            "timeRemaining=${timeRemaining.asDaysHoursAndMinutes()}, " +
+            "elapsed=${elapsed.asDaysHoursAndMinutes()}" +
+            ")"
+}
 
 data class Contributor(
     val name: String,
@@ -178,24 +213,40 @@ data class Hab(
 data class Goal(
     val target: BigDecimal,
     val moment: Duration? = null,
-)
+) {
+    override fun toString(): String = "${this::class.simpleName}(" +
+            "target=${target.asIllions()}, " +
+            "moment=${moment?.asDaysHoursAndMinutes()}" +
+            ")"
+}
 
 data class FarmState(
     val habs: List<Hab>,
     val eggsLaid: BigDecimal = BigDecimal.ZERO,
     val constants: Constants,
-    val habBottleneckReached: Duration? = null,
-    val transportBottleneckReached: Duration? = null,
-)
+    val habBottleneck: Duration? = null,
+    val transportBottleneck: Duration? = null,
+) {
+    override fun toString(): String = "${this::class.simpleName}(" +
+            "population=${habs.sumByBigDecimal(Hab::population).asIllions()}, " +
+            "capacity=${habs.sumByBigDecimal(Hab::capacity).asIllions()}, " +
+            "eggsLaid=${eggsLaid.asIllions()}, " +
+            "habBottleneckReached=${habBottleneck?.asDaysHoursAndMinutes()}, " +
+            "transportBottleneckReached=${transportBottleneck?.asDaysHoursAndMinutes()}" +
+            ")"
+}
 
 fun main() {
-    val coopStatus = AuxBrain.getCoopStatus("ion-drive", "trains")
+    val coopStatus = AuxBrain.getCoopStatus(contractId = "heat-wave-2020", coopId = "jaj")
     val backups = coopStatus?.contributors?.map { contributor ->
         AuxBrain.getFarmerBackup(contributor.userId)!!
     }!!
 
-    val result = simulation(backups, coopStatus.contractId, false)
-
-    println(result)
-    result.contributors.forEach(::println)
+    simulation(backups, coopStatus.contractId, catchUp = true).apply {
+        println(this)
+        contributors.forEach(::println)
+        println("Before=${contributors.sumByBigDecimal { it.initialState.eggsLaid }.asIllions()}")
+        println("Goal=${goals.last().target.asIllions()}")
+        println("After=${contributors.sumByBigDecimal { it.finalState.eggsLaid }.asIllions()}")
+    }
 }
