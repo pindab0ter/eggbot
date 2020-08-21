@@ -11,16 +11,14 @@ import java.math.BigDecimal
  * A chicken lays 1/30 of an egg per second, so 2 per minute */
 private val EGG_LAYING_BASE_RATE = BigDecimal(2)
 
-// TODO: Add silos check
-// TODO: Add max away time
 tailrec fun catchUp(
     state: FarmState,
-    timeSinceLastBackup: Duration
+    catchupTimeLeft: Duration
 ): FarmState = when {
-    timeSinceLastBackup <= Duration.ZERO -> state
+    catchupTimeLeft <= Duration.ZERO -> state
     else -> catchUp(
         state = advanceOneMinute(state),
-        timeSinceLastBackup = timeSinceLastBackup - ONE_MINUTE
+        catchupTimeLeft = catchupTimeLeft - ONE_MINUTE
     )
 }
 

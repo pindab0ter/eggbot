@@ -25,16 +25,16 @@ fun simulateCoopContract(
     val farmers = backups.mapNotNull farmers@{ backup ->
         val farm: Backup.Simulation = backup.farmFor(contractId) ?: return@farmers null
         val constants = Constants(backup, farm)
-        val initialState = FarmState(farm, constants)
-        val timeSinceLastBackup = Duration(backup.approxTime.toDateTime(), DateTime.now())
+        val reportedState = FarmState(farm, constants)
 
-        when {
-            catchUp -> catchUp(initialState, timeSinceLastBackup).let { caughtUpState ->
-                Farmer(backup.userName, caughtUpState, caughtUpState)
+        when (catchUp) {
+            true -> catchUp(reportedState, minOf(backup.timeSinceBackup, constants.maxAwayTime)).let { adjustedState ->
+                Farmer(backup.userName, adjustedState, adjustedState)
             }
-            else -> Farmer(backup.userName, initialState, initialState)
+            false -> Farmer(backup.userName, reportedState, reportedState)
         }
     }
+
     val contractState = CoopContractState(
         contractId = localContract.contract.id,
         contractName = localContract.contract.name,

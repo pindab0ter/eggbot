@@ -22,19 +22,18 @@ fun simulateSoloContract(
     requireNotNull(farm) { "Farm not found" }
 
     val constants = Constants(backup, farm)
-    val initialState = FarmState(farm, constants)
-    val timeSinceLastBackup = Duration(backup.approxTime.toDateTime(), DateTime.now())
-    val goals = Goal.fromContract(localContract, farm.eggsLaid)
-    val farmer = when {
-        catchUp -> catchUp(initialState, timeSinceLastBackup).let { caughtUpState ->
-            Farmer(backup.userName, caughtUpState, caughtUpState)
+    val reportedState = FarmState(farm, constants)
+    val farmer = when (catchUp) {
+        true -> catchUp(reportedState, minOf(backup.timeSinceBackup, constants.maxAwayTime)).let { adjustedState ->
+            Farmer(backup.userName, adjustedState, adjustedState)
         }
-        else -> Farmer(backup.userName, initialState, initialState)
+        false -> Farmer(backup.userName, reportedState, reportedState)
     }
+
     val contractState = SoloContractState(
         contractId = localContract.contract.id,
         contractName = localContract.contract.name,
-        goals = goals,
+        goals = Goal.fromContract(localContract, farm.eggsLaid),
         timeRemaining = Duration(DateTime.now(), localContract.coopSharedEndTime.toDateTime()),
         farmer = farmer
     )

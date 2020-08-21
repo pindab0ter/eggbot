@@ -3,6 +3,8 @@ package nl.pindab0ter.eggbot.helpers
 import com.auxbrain.ei.*
 import nl.pindab0ter.eggbot.helpers.auxbrain.CommonResearch
 import nl.pindab0ter.eggbot.helpers.auxbrain.EpicResearch
+import org.joda.time.DateTime
+import org.joda.time.Duration
 import java.math.BigDecimal
 
 val Backup.Game.soulBonus: Int get() = epicResearch.find { it.id == "soul_eggs" }!!.level
@@ -21,6 +23,8 @@ fun List<Backup>.findContract(contractId: String): LocalContract? = filter { bac
         contract.contract?.id == contractId
     }
 }
+
+val Backup.timeSinceBackup: Duration get() = Duration(approxTime.toDateTime(), DateTime.now())
 
 val Backup.internalHatcheryMultiplier: BigDecimal
     get() = BigDecimal.ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
@@ -82,6 +86,10 @@ val Backup.Simulation.baseShippingRate: BigDecimal
             else -> acc + vehicleType.capacity
         }
     }
+
+val Backup.extraAwayTimePerSilo: Duration
+    get() = Duration.ZERO.withDurationAdded(Duration.standardMinutes(6L),
+        game!!.epicResearch[EpicResearch.SILO_CAPACITY.ordinal].level)
 
 // @formatter:off
 val HabLevel.capacity: BigDecimal get() = when(this) {

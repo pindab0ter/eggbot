@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.model.simulation.new
 
 import com.auxbrain.ei.Backup
 import nl.pindab0ter.eggbot.helpers.*
+import org.joda.time.Duration
 import java.math.BigDecimal
 
 data class Constants(
@@ -10,6 +11,7 @@ data class Constants(
     val habCapacityMultiplier: BigDecimal,
     val eggLayingBonus: BigDecimal,
     val transportRate: BigDecimal,
+    val maxAwayTime: Duration,
 ) {
     constructor(backup: Backup, farm: Backup.Simulation) : this(
         internalHatcherySharing = backup.internalHatcherySharing,
@@ -23,6 +25,9 @@ data class Constants(
             farm.shippingRateCommonResearchMultipliers
                 .plus(backup.shippingRateEpicResearchMultiplier)
                 .product()
-        )
+        ),
+        maxAwayTime = Duration.standardHours(1L)
+            .plus(backup.extraAwayTimePerSilo)
+            .multipliedBy(farm.silosOwned.toLong())
     )
 }
