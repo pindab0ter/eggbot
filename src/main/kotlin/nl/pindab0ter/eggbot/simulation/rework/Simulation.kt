@@ -47,7 +47,7 @@ fun simulateSoloContract(
 fun simulateCoopContract(
     backups: List<Backup>,
     contractId: String,
-    catchUp: Boolean = true // TODO: Doesn't make a difference yet
+    catchUp: Boolean = true
 ): CoopContractState {
     val localContract: LocalContract? = backups.map { backup ->
         backup.contracts?.contracts?.find { contract ->
@@ -88,7 +88,7 @@ private tailrec fun catchUp(
     state: FarmState,
     timeSinceLastBackup: Duration
 ): FarmState = when {
-    timeSinceLastBackup >= Duration.ZERO -> state
+    timeSinceLastBackup <= Duration.ZERO -> state
     else -> catchUp(
         state = advanceOneMinute(state),
         timeSinceLastBackup = timeSinceLastBackup - ONE_MINUTE
