@@ -3,16 +3,20 @@
     <words>
       <w>auxbrain</w>
       <w>bottlenecked</w>
+      <w>coopname</w>
       <w>decillion</w>
       <w>dilithium</w>
       <w>duodecillion</w>
       <w>duotrigintillion</w>
       <w>duovigintillion</w>
       <w>eggbot</w>
+      <w>egginc</w>
       <w>eggspected</w>
       <w>habs</w>
       <w>illions</w>
+      <w>inactives</w>
       <w>leafsprings</w>
+      <w>libegginc</w>
       <w>nonillion</w>
       <w>novemdecillion</w>
       <w>novemtrigintillion</w>
@@ -44,7 +48,10 @@
       <w>tretrigintillion</w>
       <w>trevigintillion</w>
       <w>trigintillion</w>
+      <w>trspt</w>
+      <w>uint</w>
       <w>undecillion</w>
+      <w>unflagged</w>
       <w>unshortened</w>
       <w>untrigintillion</w>
       <w>unvigintillion</w>

@@ -2,8 +2,8 @@ package nl.pindab0ter.eggbot.jda
 
 import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
-import nl.pindab0ter.eggbot.Config
-import nl.pindab0ter.eggbot.commands.*
+import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.controller.*
 
 val commandClient: CommandClient = CommandClientBuilder().apply {
     setOwnerId(Config.botOwnerId)

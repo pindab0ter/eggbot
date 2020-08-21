@@ -2,11 +2,11 @@ package nl.pindab0ter.eggbot.jda
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import nl.pindab0ter.eggbot.Config
+import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
-import nl.pindab0ter.eggbot.commands.CoopInfo
-import nl.pindab0ter.eggbot.utilities.splitMessage
+import nl.pindab0ter.eggbot.controller.CoopInfo
+import nl.pindab0ter.eggbot.helpers.splitMessage
 import java.util.function.Consumer
 
 

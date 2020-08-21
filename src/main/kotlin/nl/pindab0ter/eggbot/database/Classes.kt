@@ -7,12 +7,13 @@ import com.auxbrain.ei.Backup
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.clientVersion
 import nl.pindab0ter.eggbot.EggBot.guild
-import nl.pindab0ter.eggbot.network.AuxBrain
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.model.AuxBrain
 import org.jetbrains.exposed.dao.*
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import java.math.RoundingMode.HALF_UP
+import kotlin.div
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 
@@ -106,7 +107,6 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
 
     var farmers by Farmer via CoopFarmers
 
-    val earningsBonus: BigDecimal get() = farmers.sumByBigDecimal { it.earningsBonus }
     val activeEarningsBonus: BigDecimal get() = farmers.sumByBigDecimal { it.activeEarningsBonus }
 
     companion object : IntEntityClass<Coop>(Coops)

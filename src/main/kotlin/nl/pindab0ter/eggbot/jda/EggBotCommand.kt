@@ -9,11 +9,11 @@ import com.martiansoftware.jsap.Switch
 import mu.KLogger
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType.PRIVATE
-import nl.pindab0ter.eggbot.Config
 import nl.pindab0ter.eggbot.EggBot.adminRole
 import nl.pindab0ter.eggbot.EggBot.jdaClient
-import nl.pindab0ter.eggbot.commands.Register
-import nl.pindab0ter.eggbot.utilities.*
+import nl.pindab0ter.eggbot.controller.Register
+import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.model.Config
 
 abstract class EggBotCommand : Command() {
 
@@ -23,7 +23,7 @@ abstract class EggBotCommand : Command() {
     protected var parameters: List<Parameter>? = null
     var adminRequired: Boolean = false
     var registrationRequired: Boolean = true
-    var dmOnly: Boolean = false
+    private var dmOnly: Boolean = false
     var sendTyping: Boolean = false
 
     init {

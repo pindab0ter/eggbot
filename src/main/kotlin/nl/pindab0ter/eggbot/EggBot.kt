@@ -17,6 +17,7 @@ import nl.pindab0ter.eggbot.utilities.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
 import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
+import nl.pindab0ter.eggbot.model.Config
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager

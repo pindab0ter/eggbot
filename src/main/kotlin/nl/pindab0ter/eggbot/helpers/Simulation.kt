@@ -1,9 +1,8 @@
 package nl.pindab0ter.eggbot.helpers
 
-import nl.pindab0ter.eggbot.model.simulation.Constants
-import nl.pindab0ter.eggbot.model.simulation.FarmState
-import nl.pindab0ter.eggbot.model.simulation.Hab
-import nl.pindab0ter.eggbot.utilities.sumByBigDecimal
+import nl.pindab0ter.eggbot.model.simulation.new.Constants
+import nl.pindab0ter.eggbot.model.simulation.new.FarmState
+import nl.pindab0ter.eggbot.model.simulation.new.Hab
 import org.joda.time.Duration
 import java.math.BigDecimal
 
@@ -12,6 +11,20 @@ import java.math.BigDecimal
  * A chicken lays 1/30 of an egg per second, so 2 per minute */
 private val EGG_LAYING_BASE_RATE = BigDecimal(2)
 
+// TODO: Add silos check
+// TODO: Add max away time
+tailrec fun catchUp(
+    state: FarmState,
+    timeSinceLastBackup: Duration
+): FarmState = when {
+    timeSinceLastBackup <= Duration.ZERO -> state
+    else -> catchUp(
+        state = advanceOneMinute(state),
+        timeSinceLastBackup = timeSinceLastBackup - ONE_MINUTE
+    )
+}
+
+// TODO: Add boosts
 fun advanceOneMinute(state: FarmState, elapsed: Duration = Duration.ZERO): FarmState = state.copy(
     eggsLaid = state.eggsLaid + minOf(eggIncrease(state.habs, state.constants), state.constants.transportRate),
     habs = state.habs.map { hab ->
