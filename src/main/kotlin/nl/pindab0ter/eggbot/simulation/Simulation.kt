@@ -22,7 +22,7 @@ abstract class Simulation(val backup: Backup) {
 
     // region Research
 
-    private val habCapacityMultipliers: List<BigDecimal>
+    internal val habCapacityMultipliers: List<BigDecimal>
         get() = listOf(
             ONE + BigDecimal(".05") * farm.commonResearch[HEN_HOUSE_REMODEL.ordinal].level,
             ONE + BigDecimal(".05") * farm.commonResearch[MICROLUX_CHICKEN_SUITES.ordinal].level,
@@ -30,7 +30,7 @@ abstract class Simulation(val backup: Backup) {
             ONE + BigDecimal(".02") * farm.commonResearch[WORMHOLE_DAMPENING.ordinal].level
         )
 
-    private val internalHatcheryFlatIncreases: List<BigDecimal>
+    internal val internalHatcheryFlatIncreases: List<BigDecimal>
         get() = listOf(
             BigDecimal(2 * farm.commonResearch[INTERNAL_HATCHERY1.ordinal].level),
             BigDecimal(5 * farm.commonResearch[INTERNAL_HATCHERY2.ordinal].level),
