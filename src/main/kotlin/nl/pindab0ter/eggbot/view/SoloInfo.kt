@@ -54,14 +54,16 @@ fun soloInfoResponse(
     appendLine("__🗒️ **Basic info**:__ ```")
     contract.farmer.finalState.apply {
         this@message.append("Eggspected:       ${contract.eggspected.asIllions()} ")
-        if (!compact) append("(${contract.farmer.finalState.let { eggIncrease(it.habs, it.constants) }.asIllions()}/hr) ")
+        if (!compact) append("(${eggIncrease(habs, constants).asIllions()}/hr) ")
         this@message.appendLine()
         this@message.appendLine("Time remaining:   ${contract.timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("Current chickens: ${population.asIllions()} ")
         if (!compact) append("(${constants.internalHatcheryRate.asIllions()}/hr)")
         this@message.appendLine()
         append("Current eggs:     ${contract.farmer.initialState.eggsLaid.asIllions()} ")
-        if (!compact) append("(${contract.farmer.initialState.let { eggIncrease(it.habs, it.constants) }.asIllions()}/hr) ")
+        if (!compact) append("(${
+            contract.farmer.initialState.let { eggIncrease(it.habs, it.constants) }.asIllions()
+        }/hr) ")
         this@message.appendLine()
         this@message.appendLine("Last update:      ${contract.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
         this@message.appendLine("```")
@@ -72,7 +74,7 @@ fun soloInfoResponse(
     // region Bottlenecks
 
     contract.farmer.finalState.apply {
-        if (habBottleneck != null || transportBottleneck != null) {
+        if (willReachBottlenecks(contract.farmer.finalState, contract.goals.last().moment)) {
             this@message.appendLine("__**⚠ Bottlenecks**__ ```")
             habBottleneck?.let {
                 if (it == Duration.ZERO) append("🏠Full! ")

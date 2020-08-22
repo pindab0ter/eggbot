@@ -13,7 +13,7 @@ private val EGG_LAYING_BASE_RATE = BigDecimal(2)
 
 tailrec fun catchUp(
     state: FarmState,
-    catchupTimeLeft: Duration
+    catchupTimeLeft: Duration,
 ): FarmState = when {
     catchupTimeLeft <= Duration.ZERO -> state
     else -> catchUp(
@@ -58,3 +58,14 @@ fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
     habs.sumByBigDecimal(Hab::population).multiply(EGG_LAYING_BASE_RATE).multiply(constants.eggLayingBonus),
     constants.transportRate
 )
+
+fun willReachBottlenecks(state: FarmState, finalGoalReachedAt: Duration?): Boolean {
+    val bottlenecks = listOf(state.habBottleneck, state.transportBottleneck)
+    val reachesBottlenecks = bottlenecks.filterNotNull().any()
+    return when {
+        state.habBottleneck == null && state.transportBottleneck == null -> false
+        reachesBottlenecks && finalGoalReachedAt == null -> true
+        reachesBottlenecks && bottlenecks.any { it?.isShorterThan(finalGoalReachedAt) == true } -> true
+        else -> false
+    }
+}
