@@ -24,7 +24,7 @@ tailrec fun catchUp(
 
 // TODO: Add boosts
 fun advanceOneMinute(state: FarmState, elapsed: Duration = Duration.ZERO): FarmState = state.copy(
-    eggsLaid = state.eggsLaid + minOf(eggIncrease(state.habs, state.constants), state.constants.transportRate),
+    eggsLaid = state.eggsLaid + eggIncrease(state.habs, state.constants),
     habs = state.habs.map { hab ->
         val internalHatcherySharingMultiplier = state.habs.fold(BigDecimal.ONE) { acc, (population, capacity) ->
             if (population == capacity) acc + BigDecimal.ONE else acc
@@ -54,5 +54,7 @@ fun habBottleneck(habs: List<Hab>, elapsed: Duration): Duration? {
     }
 }
 
-fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal =
-    habs.sumByBigDecimal(Hab::population).multiply(EGG_LAYING_BASE_RATE).multiply(constants.eggLayingBonus)
+fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
+    habs.sumByBigDecimal(Hab::population).multiply(EGG_LAYING_BASE_RATE).multiply(constants.eggLayingBonus),
+    constants.transportRate
+)

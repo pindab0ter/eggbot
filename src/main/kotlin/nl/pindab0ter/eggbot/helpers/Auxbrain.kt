@@ -7,13 +7,28 @@ import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
 
-val Backup.Game.soulBonus: Int get() = epicResearch.find { it.id == "soul_eggs" }!!.level
-val Backup.Game.prophecyBonus: Int get() = epicResearch.find { it.id == "prophecy_bonus" }!!.level
+val Backup.timeSinceBackup: Duration
+    get() = Duration(approxTime.toDateTime(), DateTime.now())
+val Backup.internalHatcheryMultiplier: BigDecimal
+    get() = BigDecimal.ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
+val Backup.internalHatcherySharing: BigDecimal
+    get() = BigDecimal.ONE + BigDecimal(".10") * game!!.epicResearch[EpicResearch.INTERNAL_HATCH_SHARING.ordinal].level
+val Backup.Game.soulBonus: Int
+    get() = epicResearch.find { it.id == "soul_eggs" }!!.level
+val Backup.Game.prophecyBonus: Int
+    get() = epicResearch.find { it.id == "prophecy_bonus" }!!.level
+val Contract.finalGoal: BigDecimal
+    get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
+val LocalContract.finalGoal: BigDecimal
+    get() = contract!!.finalGoal
+val LocalContract.finished: Boolean
+    get() = BigDecimal(lastAmountWhenRewardGiven) > contract?.finalGoal
+val LocalContract.timeRemaining: Duration
+    get() = contract!!.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), DateTime.now()))
+val CoopStatusResponse.eggsLaid: BigDecimal
+    get() = BigDecimal(totalAmount)
+
 fun Backup.farmFor(contractId: String): Backup.Simulation? = farms.firstOrNull { farm -> farm.contractId == contractId }
-val Contract.finalGoal: BigDecimal get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
-val LocalContract.finalGoal: BigDecimal get() = contract!!.finalGoal
-val LocalContract.finished: Boolean get() = BigDecimal(lastAmountWhenRewardGiven) > contract?.finalGoal
-val CoopStatusResponse.eggsLaid: BigDecimal get() = BigDecimal(totalAmount)
 fun List<Backup>.findContract(contractId: String): LocalContract? = filter { backup ->
     backup.contracts?.contracts?.plus(backup.contracts.archive)?.any { contract ->
         contract.contract?.id == contractId
@@ -23,14 +38,6 @@ fun List<Backup>.findContract(contractId: String): LocalContract? = filter { bac
         contract.contract?.id == contractId
     }
 }
-
-val Backup.timeSinceBackup: Duration get() = Duration(approxTime.toDateTime(), DateTime.now())
-
-val Backup.internalHatcheryMultiplier: BigDecimal
-    get() = BigDecimal.ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
-
-val Backup.internalHatcherySharing: BigDecimal
-    get() = BigDecimal.ONE + BigDecimal(".10") * game!!.epicResearch[EpicResearch.INTERNAL_HATCH_SHARING.ordinal].level
 
 val Backup.Simulation.internalHatcheryFlatIncreases: List<BigDecimal>
     get() = listOf(

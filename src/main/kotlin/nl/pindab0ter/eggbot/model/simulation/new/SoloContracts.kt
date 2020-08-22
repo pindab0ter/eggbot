@@ -3,8 +3,6 @@ package nl.pindab0ter.eggbot.model.simulation.new
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.LocalContract
 import nl.pindab0ter.eggbot.helpers.*
-import org.joda.time.DateTime
-import org.joda.time.Duration
 
 
 fun simulateSoloContract(
@@ -25,16 +23,17 @@ fun simulateSoloContract(
     val reportedState = FarmState(farm, constants)
     val farmer = when (catchUp) {
         true -> catchUp(reportedState, minOf(backup.timeSinceBackup, constants.maxAwayTime)).let { adjustedState ->
-            Farmer(backup.userName, adjustedState, adjustedState)
+            Farmer(backup.userName, adjustedState, adjustedState, backup.timeSinceBackup)
         }
-        false -> Farmer(backup.userName, reportedState, reportedState)
+        false -> Farmer(backup.userName, reportedState, reportedState, backup.timeSinceBackup)
     }
 
     val contractState = SoloContractState(
         contractId = localContract.contract.id,
         contractName = localContract.contract.name,
+        egg = localContract.contract.egg,
         goals = Goal.fromContract(localContract, farm.eggsLaid),
-        timeRemaining = Duration(DateTime.now(), localContract.coopSharedEndTime.toDateTime()),
+        timeRemaining = localContract.timeRemaining,
         farmer = farmer
     )
 
@@ -42,26 +41,30 @@ fun simulateSoloContract(
 }
 
 private tailrec fun simulate(
-    contractState: SoloContractState,
+    contract: SoloContractState,
 ): SoloContractState = when {
-    contractState.elapsed >= ONE_YEAR -> contractState
-    contractState.goals.all { goal -> goal.moment != null } -> contractState
+    contract.elapsed >= ONE_YEAR -> contract
+    contract.goals.all { goal -> goal.moment != null } -> contract
     else -> simulate(
-        contractState.copy(
-            farmer = contractState.farmer.copy(
-                finalState = advanceOneMinute(contractState.farmer.finalState, contractState.elapsed)
+        contract.copy(
+            farmer = contract.farmer.copy(
+                finalState = advanceOneMinute(contract.farmer.finalState, contract.elapsed)
             ),
             goals = when {
-                contractState.goals
+                contract.goals
                     .filter { it.moment != null }
-                    .none { contractState.farmer.finalState.eggsLaid >= it.target } -> contractState.goals
-                else -> contractState.goals.map { goal ->
-                    if (goal.moment == null && contractState.farmer.finalState.eggsLaid >= goal.target) {
-                        goal.copy(moment = contractState.elapsed)
+                    .none { contract.farmer.finalState.eggsLaid >= it.target } -> contract.goals
+                else -> contract.goals.map { goal ->
+                    if (goal.moment == null && contract.farmer.finalState.eggsLaid >= goal.target) {
+                        goal.copy(moment = contract.elapsed)
                     } else goal
                 }
             },
-            elapsed = contractState.elapsed + ONE_MINUTE
+            eggspected = when {
+                contract.elapsed < contract.timeRemaining -> contract.farmer.finalState.eggsLaid
+                else -> contract.eggspected
+            },
+            elapsed = contract.elapsed + ONE_MINUTE
         )
     )
 }

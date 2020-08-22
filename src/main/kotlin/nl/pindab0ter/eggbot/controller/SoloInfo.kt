@@ -4,23 +4,25 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
-import nl.pindab0ter.eggbot.EggBot.eggsToEmotes
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.DiscordUser
 import nl.pindab0ter.eggbot.database.Farmer
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.COMPACT
+import nl.pindab0ter.eggbot.helpers.CONTRACT_ID
+import nl.pindab0ter.eggbot.helpers.compactSwitch
+import nl.pindab0ter.eggbot.helpers.contractIdOption
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.simulation.old.ContractSimulation
-import nl.pindab0ter.eggbot.helpers.NumberFormatter.*
+import nl.pindab0ter.eggbot.model.simulation.new.simulateSoloContract
+import nl.pindab0ter.eggbot.view.soloInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.Duration
 
 object SoloInfo : EggBotCommand() {
 
     private val log = KotlinLogging.logger { }
+
+    // TODO: Add option to opt out of catching up (simulating from reported data)
 
     init {
         category = ContractsCategory
@@ -61,16 +63,10 @@ object SoloInfo : EggBotCommand() {
                     event.reply(it)
                     return
                 }
-            val simulation = ContractSimulation(backup, contractId)
-                ?: "You haven't started this contract yet.".let {
-                    log.debug { it }
-                    event.reply(it)
-                    return
-                }
 
-            simulation.run()
+            val soloContractState = simulateSoloContract(backup, contractId)
 
-            message(simulation, compact).let { message ->
+            soloInfoResponse(soloContractState, compact).let { message ->
                 if (event.channel == botCommandsChannel) {
                     event.reply(message)
                 } else {
@@ -80,85 +76,4 @@ object SoloInfo : EggBotCommand() {
             }
         }
     }
-
-    fun message(
-        simulation: ContractSimulation,
-        compact: Boolean = false
-    ): String = StringBuilder().apply stringBuilder@{
-        val eggEmote = eggsToEmotes[simulation.egg]?.asMention ?: "🥚"
-
-        appendLine("`${simulation.farmerName}` vs. _${simulation.contractName}_:")
-        appendLine()
-
-        if (simulation.isFinished) {
-            appendLine("**You have successfully finished this contract! ${Config.emojiSuccess}**")
-            return@stringBuilder
-        }
-
-        // region Goals
-
-        appendLine("__$eggEmote **Goals** (${simulation.goalsReached}/${simulation.goals.count()}):__ ```")
-        simulation.goalReachedMoments.forEachIndexed { index, (goal, moment) ->
-            append("${index + 1}. ")
-            appendPaddingCharacters(
-                goal.asIllions(OPTIONAL_DECIMALS),
-                simulation.goalReachedMoments.map { it.target.asIllions(OPTIONAL_DECIMALS) }
-            )
-            append(goal.asIllions(OPTIONAL_DECIMALS))
-            append(
-                when {
-                    moment == null || moment > simulation.timeRemaining -> " 🔴 "
-                    moment == Duration.ZERO -> " 🏁 "
-                    else -> " 🟢 "
-                }
-            )
-            when (moment) {
-                null -> append("More than a year")
-                Duration.ZERO -> append("Goal reached!")
-                else -> append(moment.asDaysHoursAndMinutes(compact))
-            }
-            if (index + 1 < simulation.goals.count()) appendLine()
-        }
-        appendLine("```")
-
-        // endregion Goals
-
-        // region Basic info and totals
-
-        appendLine("__🗒️ **Basic info**__ ```")
-        simulation.apply {
-            this@stringBuilder.appendLine("Eggspected:       ${eggspected.asIllions()}")
-            this@stringBuilder.appendLine("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
-            append("Current chickens: ${currentPopulation.asIllions()} ")
-            if (!compact) append("(${populationIncreasePerHour.asIllions()}/hr)")
-            this@stringBuilder.appendLine()
-            append("Current eggs:     ${currentEggs.asIllions()} ")
-            if (!compact) append("(${(eggsPerChickenPerMinute * currentPopulation * 60).asIllions()}/hr) ")
-            this@stringBuilder.appendLine()
-            this@stringBuilder.appendLine("Last update:      ${timeSinceLastUpdate.asDaysHoursAndMinutes(compact)} ago")
-            this@stringBuilder.appendLine("```")
-        }
-
-        // endregion Basic info and totals
-
-        // region Bottlenecks
-
-        simulation.apply {
-            if (habBottleneckReached != null || transportBottleneckReached != null) {
-                this@stringBuilder.appendLine("__**⚠ Bottlenecks**__ ```")
-                habBottleneckReached?.let {
-                    if (it == Duration.ZERO) append("🏠Full! ")
-                    else append("🏠${it.asDaysHoursAndMinutes(true)} ")
-                }
-                transportBottleneckReached?.let {
-                    if (it == Duration.ZERO) append("🚛Full! ")
-                    else append("🚛${it.asDaysHoursAndMinutes(true)} ")
-                }
-                this@stringBuilder.appendLine("```")
-            }
-        }
-
-        // endregion Bottlenecks
-
-    }.toString()
 }

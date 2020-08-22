@@ -32,6 +32,8 @@ data class FarmState(
         )
     }
 
+    val population: BigDecimal get() = habs.sumByBigDecimal(Hab::population)
+
     override fun toString(): String = "${this::class.simpleName}(" +
             "population=${habs.sumByBigDecimal(Hab::population).asIllions()}, " +
             "capacity=${habs.sumByBigDecimal(Hab::capacity).asIllions()}, " +

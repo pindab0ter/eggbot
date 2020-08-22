@@ -29,9 +29,9 @@ fun simulateCoopContract(
 
         when (catchUp) {
             true -> catchUp(reportedState, minOf(backup.timeSinceBackup, constants.maxAwayTime)).let { adjustedState ->
-                Farmer(backup.userName, adjustedState, adjustedState)
+                Farmer(backup.userName, adjustedState, adjustedState, backup.timeSinceBackup)
             }
-            false -> Farmer(backup.userName, reportedState, reportedState)
+            false -> Farmer(backup.userName, reportedState, reportedState, backup.timeSinceBackup)
         }
     }
 
