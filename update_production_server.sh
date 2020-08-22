@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit -o nounset -o pipefail
+gradle installDist
+cd build/install/EggBot
 rsync \
   --recursive \
   --checksum \
