@@ -43,8 +43,7 @@ fun simulateSoloContract(
 private tailrec fun simulate(
     contract: SoloContractState,
 ): SoloContractState = when {
-    contract.elapsed >= ONE_YEAR -> contract
-    contract.goals.all { goal -> goal.moment != null } -> contract
+    contract.elapsed >= minOf(contract.timeRemaining, ONE_YEAR) -> contract
     else -> simulate(
         contract.copy(
             farmer = contract.farmer.copy(
@@ -52,8 +51,8 @@ private tailrec fun simulate(
             ),
             goals = when {
                 contract.goals
-                    .filter { it.moment != null }
-                    .none { contract.farmer.finalState.eggsLaid >= it.target } -> contract.goals
+                    .filter { (_, moment) -> moment == null }
+                    .none { (target, _) -> contract.farmer.finalState.eggsLaid >= target } -> contract.goals
                 else -> contract.goals.map { goal ->
                     if (goal.moment == null && contract.farmer.finalState.eggsLaid >= goal.target) {
                         goal.copy(moment = contract.elapsed)

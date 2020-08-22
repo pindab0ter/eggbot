@@ -48,27 +48,25 @@ fun simulateCoopContract(
 }
 
 private tailrec fun simulate(
-    contractState: CoopContractState,
+    contract: CoopContractState,
 ): CoopContractState = when {
-    contractState.elapsed >= ONE_YEAR -> contractState
-    contractState.goals.all { goal -> goal.moment != null } -> contractState
+    contract.elapsed >= minOf(contract.timeRemaining, ONE_YEAR) -> contract
     else -> simulate(
-        contractState.copy(
-            farmers = contractState.farmers.map { farmer ->
-                farmer.copy(
-                    finalState = advanceOneMinute(farmer.finalState, contractState.elapsed)
-                )
+        contract.copy(
+            farmers = contract.farmers.map { farmer ->
+                farmer.copy(finalState = advanceOneMinute(farmer.finalState, contract.elapsed))
             },
             goals = when {
-                contractState.goals.filter { it.moment != null }
-                    .none { contractState.eggsLaid >= it.target } -> contractState.goals
-                else -> contractState.goals.map { goal ->
-                    if (goal.moment == null && contractState.farmers.sumByBigDecimal { it.finalState.eggsLaid } >= goal.target) {
-                        goal.copy(moment = contractState.elapsed)
+                contract.goals
+                    .filter { (_, moment) -> moment == null }
+                    .none { (target, _) -> contract.eggsLaid >= target } -> contract.goals
+                else -> contract.goals.map { goal ->
+                    if (goal.moment == null && contract.eggsLaid >= goal.target) {
+                        goal.copy(moment = contract.elapsed)
                     } else goal
                 }
             },
-            elapsed = contractState.elapsed + ONE_MINUTE
+            elapsed = contract.elapsed + ONE_MINUTE
         )
     )
 }
