@@ -27,7 +27,8 @@ fun simulateCoopContract(
 private tailrec fun simulate(
     contract: CoopContractState,
 ): CoopContractState = when {
-    contract.elapsed >= minOf(contract.timeRemaining, ONE_YEAR) -> contract
+    contract.goals.last().moment != null -> contract
+    contract.elapsed >= ONE_YEAR -> contract
     else -> simulate(
         contract.copy(
             farmers = contract.farmers.map { farmer ->
@@ -44,7 +45,7 @@ private tailrec fun simulate(
                 }
             }.toSet(),
             eggspected = when {
-                contract.elapsed < contract.timeRemaining ->
+                contract.elapsed <= contract.timeRemaining ->
                     contract.farmers.sumByBigDecimal { farmer -> farmer.finalState.eggsLaid }
                 else -> contract.eggspected
             },
