@@ -8,7 +8,7 @@ import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.helpers.asMonthAndDay
 import nl.pindab0ter.eggbot.helpers.getIntOrNull

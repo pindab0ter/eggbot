@@ -8,7 +8,7 @@ import nl.pindab0ter.eggbot.EggBot.prestigesLeaderBoardChannel
 import nl.pindab0ter.eggbot.EggBot.soulEggsLeaderBoardChannel
 import nl.pindab0ter.eggbot.controller.LeaderBoard
 import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.*
-import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
 import org.quartz.JobExecutionContext

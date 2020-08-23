@@ -5,7 +5,7 @@ import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
-import nl.pindab0ter.eggbot.database.Coop
+import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand

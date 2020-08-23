@@ -11,7 +11,7 @@ import nl.pindab0ter.eggbot.EggBot.emoteProphecyEgg
 import nl.pindab0ter.eggbot.EggBot.emoteSoulEgg
 import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT

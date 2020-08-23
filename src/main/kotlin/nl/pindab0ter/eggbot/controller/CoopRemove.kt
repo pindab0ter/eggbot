@@ -6,13 +6,13 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
-import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.helpers.CONTRACT_ID
 import nl.pindab0ter.eggbot.helpers.COOP_ID
 import nl.pindab0ter.eggbot.helpers.contractIdOption
 import nl.pindab0ter.eggbot.helpers.coopIdOption
+import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.database.Coop
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 

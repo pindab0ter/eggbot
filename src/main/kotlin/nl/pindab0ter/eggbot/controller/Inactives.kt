@@ -3,7 +3,7 @@ package nl.pindab0ter.eggbot.controller
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters

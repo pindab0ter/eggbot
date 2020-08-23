@@ -3,7 +3,7 @@ package nl.pindab0ter.eggbot.jobs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.helpers.asyncMap
 import org.jetbrains.exposed.sql.transactions.transaction

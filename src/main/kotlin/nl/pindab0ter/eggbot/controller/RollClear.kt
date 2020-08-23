@@ -7,7 +7,7 @@ import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
-import nl.pindab0ter.eggbot.database.Coop
+import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.helpers.CONTRACT_ID

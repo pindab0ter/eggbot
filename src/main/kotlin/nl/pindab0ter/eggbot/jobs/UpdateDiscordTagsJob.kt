@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.jobs
 
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
 import org.quartz.JobExecutionContext

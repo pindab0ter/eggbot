@@ -5,18 +5,18 @@ import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
-import nl.pindab0ter.eggbot.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.database.Farmer
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
-import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.AuxBrain.getCoopStatus
+import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
+import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 

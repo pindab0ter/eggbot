@@ -6,8 +6,8 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
-import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.model.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.helpers.COMPACT
 import nl.pindab0ter.eggbot.helpers.CONTRACT_ID
 import nl.pindab0ter.eggbot.helpers.compactSwitch

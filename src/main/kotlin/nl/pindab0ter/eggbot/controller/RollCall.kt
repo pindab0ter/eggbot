@@ -12,9 +12,9 @@ import nl.pindab0ter.eggbot.EggBot.botOwner
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
-import nl.pindab0ter.eggbot.database.Coop
+import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.ProgressBar

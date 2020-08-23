@@ -9,7 +9,7 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain

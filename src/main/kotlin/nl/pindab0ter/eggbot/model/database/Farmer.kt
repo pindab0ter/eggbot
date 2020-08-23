@@ -1,37 +1,21 @@
-@file:Suppress("SpellCheckingInspection")
+package nl.pindab0ter.eggbot.model.database
 
-package nl.pindab0ter.eggbot.database
-
-import ch.obermuhlner.math.big.BigDecimalMath.log
+import ch.obermuhlner.math.big.BigDecimalMath
 import com.auxbrain.ei.Backup
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.EggBot.clientVersion
-import nl.pindab0ter.eggbot.EggBot.guild
+import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.database.CoopFarmers
+import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.AuxBrain
-import org.jetbrains.exposed.dao.*
+import org.jetbrains.exposed.dao.Entity
+import org.jetbrains.exposed.dao.EntityClass
+import org.jetbrains.exposed.dao.EntityID
 import java.math.BigDecimal
-import java.math.BigDecimal.ZERO
-import java.math.RoundingMode.HALF_UP
+import java.math.RoundingMode
 import kotlin.div
 import kotlin.math.ceil
 import kotlin.math.roundToInt
-
-class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
-    val discordId: String get() = id.value
-    var discordTag by DiscordUsers.discordTag
-    val discordName: String get() = discordTag.substring(0, discordTag.length - 5)
-    var inactiveUntil by DiscordUsers.inactiveUntil
-    val farmers by Farmer referrersOn Farmers.discordId
-
-    val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
-
-    fun updateTag() = guild.getMemberById(discordId)?.user?.asTag.takeIf { it != discordTag }?.let { tag ->
-        discordTag = tag
-    }
-
-    companion object : EntityClass<String, DiscordUser>(DiscordUsers)
-}
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
     private val log = KotlinLogging.logger {}
@@ -66,21 +50,21 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val seToNextRole: BigDecimal
         get() = earningsBonus.nextPowerOfTen()
             .minus(earningsBonus)
-            .divide(bonusPerSoulEgg, HALF_UP)
+            .divide(bonusPerSoulEgg, RoundingMode.HALF_UP)
     val peToNextRole: Int
         get() = ceil(
-            log(earningsBonus.nextPowerOfTen() / earningsBonus, mathContext)
-                .div(log(bonusPerProphecyEgg, mathContext))
+            BigDecimalMath.log(earningsBonus.nextPowerOfTen() / earningsBonus, mathContext)
+                .div(BigDecimalMath.log(bonusPerProphecyEgg, mathContext))
                 .toDouble()
         ).roundToInt()
     val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
-    val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else ZERO
+    val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else BigDecimal.ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId)?.let { update(it) }
         ?: log.warn { "Tried to update from backup but failed." }
 
     fun update(backup: Backup) {
-        if (backup.clientVersion > clientVersion) clientVersion = backup.clientVersion
+        if (backup.clientVersion > EggBot.clientVersion) EggBot.clientVersion = backup.clientVersion
         if (backup.game == null || backup.stats == null) {
             log.warn { "Tried to update from backup but failed." }
             return
@@ -98,16 +82,4 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     }
 
     companion object : EntityClass<String, Farmer>(Farmers)
-}
-
-class Coop(id: EntityID<Int>) : IntEntity(id) {
-    var name by Coops.name
-    var contract by Coops.contract
-    var roleId by Coops.role_id
-
-    var farmers by Farmer via CoopFarmers
-
-    val activeEarningsBonus: BigDecimal get() = farmers.sumByBigDecimal { it.activeEarningsBonus }
-
-    companion object : IntEntityClass<Coop>(Coops)
 }

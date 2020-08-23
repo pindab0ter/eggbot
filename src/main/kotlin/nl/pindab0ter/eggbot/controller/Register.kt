@@ -8,8 +8,8 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.database.DiscordUser
-import nl.pindab0ter.eggbot.database.Farmer
+import nl.pindab0ter.eggbot.model.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.helpers.prophecyBonus

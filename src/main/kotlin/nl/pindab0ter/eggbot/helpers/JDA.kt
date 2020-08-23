@@ -4,7 +4,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.User
 import nl.pindab0ter.eggbot.EggBot
-import nl.pindab0ter.eggbot.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 
 val User.isRegistered: Boolean
