@@ -21,27 +21,9 @@ fun simulateCoopContract(
     requireNotNull(localContract) { "Local contract information not found" }
     requireNotNull(localContract.contract) { "Contract information not found" }
 
-    val farms: List<Backup.Simulation> = backups.mapNotNull { backup -> backup.farmFor(contractId) }
-    val farmers = backups.mapNotNull farmers@{ backup ->
-        val farm: Backup.Simulation = backup.farmFor(contractId) ?: return@farmers null
-        val constants = Constants(backup, farm)
-        val reportedState = FarmState(farm, constants)
-
-        when (catchUp) {
-            true -> catchUp(reportedState, minOf(backup.timeSinceBackup, constants.maxAwayTime)).let { adjustedState ->
-                Farmer(backup.userName, adjustedState, adjustedState, backup.timeSinceBackup)
-            }
-            false -> Farmer(backup.userName, reportedState, reportedState, backup.timeSinceBackup)
-        }
-    }
-
+    val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, catchUp) }
     val contractState = CoopContractState(
-        contractId = localContract.contract.id,
-        contractName = localContract.contract.name,
-        coopId = localContract.coopId,
-        goals = Goal.fromContract(localContract, farms.sumByDouble(Backup.Simulation::eggsLaid)),
-        timeRemaining = Duration(DateTime.now(), localContract.coopSharedEndTime.toDateTime()),
-        farmers = farmers
+        localContract, false, farmers
     )
 
     return simulate(contractState)
@@ -65,7 +47,7 @@ private tailrec fun simulate(
                         goal.copy(moment = contract.elapsed)
                     } else goal
                 }
-            },
+            }.toSet(),
             elapsed = contract.elapsed + ONE_MINUTE
         )
     )

@@ -2,7 +2,10 @@ package nl.pindab0ter.eggbot.model.simulation.new
 
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.LocalContract
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.ONE_MINUTE
+import nl.pindab0ter.eggbot.helpers.ONE_YEAR
+import nl.pindab0ter.eggbot.helpers.advanceOneMinute
+import nl.pindab0ter.eggbot.helpers.timeRemaining
 
 
 fun simulateSoloContract(
@@ -13,27 +16,18 @@ fun simulateSoloContract(
     val localContract: LocalContract? = backup.contracts?.contracts?.find { contract ->
         contract.contract?.id == contractId
     }
-    val farm = backup.farmFor(contractId)
+    val farmer = Farmer(backup, contractId, catchUp)
 
+    // TODO: Are these errors caught and handled?
     requireNotNull(localContract) { "Local contract information not found" }
     requireNotNull(localContract.contract) { "Contract information not found" }
-    requireNotNull(farm) { "Farm not found" }
-
-    val constants = Constants(backup, farm)
-    val reportedState = FarmState(farm, constants)
-    val farmer = when (catchUp) {
-        true -> catchUp(reportedState, constants, minOf(backup.timeSinceBackup, constants.maxAwayTime))
-            .let { adjustedState ->
-                Farmer(backup.userName, adjustedState, adjustedState, constants, backup.timeSinceBackup)
-            }
-        false -> Farmer(backup.userName, reportedState, reportedState, constants, backup.timeSinceBackup)
-    }
+    requireNotNull(farmer) { "Farm not found" }
 
     val contractState = SoloContractState(
         contractId = localContract.contract.id,
         contractName = localContract.contract.name,
         egg = localContract.contract.egg,
-        goals = Goal.fromContract(localContract, farm.eggsLaid),
+        goals = Goal.fromContract(localContract, farmer.initialState.eggsLaid),
         timeRemaining = localContract.timeRemaining,
         farmer = farmer
     )
@@ -59,7 +53,7 @@ private tailrec fun simulate(
                         goal.copy(moment = contract.elapsed)
                     } else goal
                 }
-            },
+            }.toSet(),
             eggspected = when {
                 contract.elapsed < contract.timeRemaining -> contract.farmer.finalState.eggsLaid
                 else -> contract.eggspected

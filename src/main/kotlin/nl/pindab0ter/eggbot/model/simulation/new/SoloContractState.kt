@@ -9,7 +9,7 @@ data class SoloContractState(
     val contractId: String,
     val contractName: String,
     val egg: Egg,
-    val goals: List<Goal>,
+    val goals: Set<Goal>,
     val timeRemaining: Duration,
     val elapsed: Duration = Duration.ZERO,
     val eggspected: BigDecimal = BigDecimal.ZERO,

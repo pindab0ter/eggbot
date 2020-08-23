@@ -16,11 +16,15 @@ data class Goal(
             ")"
 
     companion object {
-        fun fromContract(localContract: LocalContract, eggsLaid: Double) = localContract.contract!!.goals.map { goal ->
-            Goal(
-                target = goal.targetAmount.toBigDecimal(),
-                moment = if (eggsLaid >= goal.targetAmount) Duration.ZERO else null
-            )
-        }
+        fun fromContract(localContract: LocalContract, eggsLaid: BigDecimal): Set<Goal> =
+            localContract.contract!!.goals.map { goal ->
+                Goal(
+                    target = goal.targetAmount.toBigDecimal(),
+                    moment = if (eggsLaid >= goal.targetAmount.toBigDecimal()) Duration.ZERO else null
+                )
+            }.toSet()
+
+        fun fromContract(localContract: LocalContract, eggsLaid: Double): Set<Goal> =
+            fromContract(localContract, eggsLaid.toBigDecimal())
     }
 }
