@@ -11,26 +11,23 @@ import java.math.BigDecimal
 data class FarmState(
     val habs: List<Hab>,
     val eggsLaid: BigDecimal = BigDecimal.ZERO,
-    val constants: Constants,
     val habBottleneck: Duration? = null,
     val transportBottleneck: Duration? = null,
 ) {
     constructor(farm: Backup.Simulation, constants: Constants) : this(
         habs = Hab.fromFarm(farm),
         eggsLaid = farm.eggsLaid.toBigDecimal(),
-        constants = constants,
-    ) {
-        copy(
-            habBottleneck = when {
-                habs.sumByBigDecimal(Hab::population) >= habs.sumByBigDecimal(Hab::capacity) -> Duration.ZERO
-                else -> null
-            },
-            transportBottleneck = when {
-                eggIncrease(habs, constants) >= constants.transportRate -> Duration.ZERO
-                else -> null
-            }
-        )
-    }
+        habBottleneck = when {
+            Hab.fromFarm(farm).let { habs ->
+                habs.sumByBigDecimal(Hab::population) >= habs.sumByBigDecimal(Hab::capacity)
+            } -> Duration.ZERO
+            else -> null
+        },
+        transportBottleneck = when {
+            eggIncrease(Hab.fromFarm(farm), constants) >= constants.transportRate -> Duration.ZERO
+            else -> null
+        }
+    )
 
     val population: BigDecimal get() = habs.sumByBigDecimal(Hab::population)
 

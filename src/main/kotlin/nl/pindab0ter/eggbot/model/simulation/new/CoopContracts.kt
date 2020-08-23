@@ -2,9 +2,9 @@ package nl.pindab0ter.eggbot.model.simulation.new
 
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.LocalContract
-import nl.pindab0ter.eggbot.helpers.*
-import org.joda.time.DateTime
-import org.joda.time.Duration
+import nl.pindab0ter.eggbot.helpers.ONE_MINUTE
+import nl.pindab0ter.eggbot.helpers.ONE_YEAR
+import nl.pindab0ter.eggbot.helpers.advanceOneMinute
 
 
 fun simulateCoopContract(
@@ -54,7 +54,7 @@ private tailrec fun simulate(
     else -> simulate(
         contract.copy(
             farmers = contract.farmers.map { farmer ->
-                farmer.copy(finalState = advanceOneMinute(farmer.finalState, contract.elapsed))
+                farmer.copy(finalState = advanceOneMinute(farmer.finalState, farmer.constants, contract.elapsed))
             },
             goals = when {
                 contract.goals

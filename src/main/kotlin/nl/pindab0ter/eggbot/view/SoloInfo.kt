@@ -54,15 +54,15 @@ fun soloInfoResponse(
     appendLine("__🗒️ **Basic info**:__ ```")
     contract.farmer.finalState.apply {
         this@message.append("Eggspected:       ${contract.eggspected.asIllions()} ")
-        if (!compact) append("(${eggIncrease(habs, constants).asIllions()}/hr) ")
+        if (!compact) append("(${eggIncrease(habs, contract.farmer.constants).asIllions()}/hr) ")
         this@message.appendLine()
         this@message.appendLine("Time remaining:   ${contract.timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("Current chickens: ${population.asIllions()} ")
-        if (!compact) append("(${constants.internalHatcheryRate.asIllions()}/hr)")
+        if (!compact) append("(${contract.farmer.constants.internalHatcheryRate.asIllions()}/hr)")
         this@message.appendLine()
         append("Current eggs:     ${contract.farmer.initialState.eggsLaid.asIllions()} ")
         if (!compact) append("(${
-            contract.farmer.initialState.let { eggIncrease(it.habs, it.constants) }.asIllions()
+            contract.farmer.initialState.let { eggIncrease(it.habs, contract.farmer.constants) }.asIllions()
         }/hr) ")
         this@message.appendLine()
         this@message.appendLine("Last update:      ${contract.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")

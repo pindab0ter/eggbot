@@ -40,7 +40,7 @@ object SoloInfo : EggBotCommand() {
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList()!! }
         val contractId: String = parameters.getString(CONTRACT_ID)
-        val compact: Boolean = parameters.getBoolean(COMPACT)
+        val compact: Boolean = parameters.getBoolean(COMPACT, false)
 
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
             val localContract = if (backup.game != null) backup.contracts?.contracts?.find {
@@ -50,7 +50,6 @@ object SoloInfo : EggBotCommand() {
                 event.reply(it)
                 return
             }
-
             if (localContract == null)
                 "No contract found with ID `$contractId` for `${farmer.inGameName}`. Try using `${event.client.textualPrefix}${ContractIDs.name}`".let {
                     log.debug { it }

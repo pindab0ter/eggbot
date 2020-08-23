@@ -4,7 +4,8 @@ import org.joda.time.Duration
 
 data class Farmer(
     val name: String,
-    val initialState: FarmState, // TODO: Remove?
+    val initialState: FarmState,
     val finalState: FarmState,
+    val constants: Constants,
     val timeSinceBackup: Duration,
 )

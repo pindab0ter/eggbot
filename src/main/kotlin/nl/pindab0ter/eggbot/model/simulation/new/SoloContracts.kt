@@ -22,10 +22,11 @@ fun simulateSoloContract(
     val constants = Constants(backup, farm)
     val reportedState = FarmState(farm, constants)
     val farmer = when (catchUp) {
-        true -> catchUp(reportedState, minOf(backup.timeSinceBackup, constants.maxAwayTime)).let { adjustedState ->
-            Farmer(backup.userName, adjustedState, adjustedState, backup.timeSinceBackup)
-        }
-        false -> Farmer(backup.userName, reportedState, reportedState, backup.timeSinceBackup)
+        true -> catchUp(reportedState, constants, minOf(backup.timeSinceBackup, constants.maxAwayTime))
+            .let { adjustedState ->
+                Farmer(backup.userName, adjustedState, adjustedState, constants, backup.timeSinceBackup)
+            }
+        false -> Farmer(backup.userName, reportedState, reportedState, constants, backup.timeSinceBackup)
     }
 
     val contractState = SoloContractState(
@@ -47,7 +48,7 @@ private tailrec fun simulate(
     else -> simulate(
         contract.copy(
             farmer = contract.farmer.copy(
-                finalState = advanceOneMinute(contract.farmer.finalState, contract.elapsed)
+                finalState = advanceOneMinute(contract.farmer.finalState, contract.farmer.constants, contract.elapsed)
             ),
             goals = when {
                 contract.goals

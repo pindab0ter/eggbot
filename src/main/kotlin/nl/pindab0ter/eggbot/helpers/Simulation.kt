@@ -13,31 +13,33 @@ private val EGG_LAYING_BASE_RATE = BigDecimal(2)
 
 tailrec fun catchUp(
     state: FarmState,
+    constants: Constants,
     catchupTimeLeft: Duration,
 ): FarmState = when {
     catchupTimeLeft <= Duration.ZERO -> state
     else -> catchUp(
-        state = advanceOneMinute(state),
+        state = advanceOneMinute(state, constants),
+        constants = constants,
         catchupTimeLeft = catchupTimeLeft - ONE_MINUTE
     )
 }
 
 // TODO: Add boosts
-fun advanceOneMinute(state: FarmState, elapsed: Duration = Duration.ZERO): FarmState = state.copy(
-    eggsLaid = state.eggsLaid + eggIncrease(state.habs, state.constants),
+fun advanceOneMinute(state: FarmState, constants: Constants, elapsed: Duration = Duration.ZERO): FarmState = state.copy(
+    eggsLaid = state.eggsLaid + eggIncrease(state.habs, constants),
     habs = state.habs.map { hab ->
         val internalHatcherySharingMultiplier = state.habs.fold(BigDecimal.ONE) { acc, (population, capacity) ->
             if (population == capacity) acc + BigDecimal.ONE else acc
-        }.multiply(state.constants.internalHatcherySharing)
+        }.multiply(constants.internalHatcherySharing)
         hab.copy(
             population = minOf(
-                hab.population + state.constants.internalHatcheryRate.multiply(internalHatcherySharingMultiplier),
+                hab.population + constants.internalHatcheryRate.multiply(internalHatcherySharingMultiplier),
                 hab.capacity
             )
         )
     },
     habBottleneck = state.habBottleneck ?: habBottleneck(state.habs, elapsed),
-    transportBottleneck = state.transportBottleneck ?: transportBottleneck(state.habs, state.constants, elapsed)
+    transportBottleneck = state.transportBottleneck ?: transportBottleneck(state.habs, constants, elapsed)
 )
 
 fun transportBottleneck(habs: List<Hab>, constants: Constants, elapsed: Duration): Duration? {
