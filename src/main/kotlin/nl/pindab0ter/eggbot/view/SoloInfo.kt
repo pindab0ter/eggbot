@@ -33,9 +33,9 @@ fun soloInfoResponse(
         )
         append(goal.asIllions(NumberFormatter.OPTIONAL_DECIMALS))
         append(
-            when (moment) {
-                null -> " 🔴 "
-                Duration.ZERO -> " 🏁 "
+            when {
+                moment == null || moment > contract.timeRemaining -> " 🔴 "
+                moment == Duration.ZERO -> " 🏁 "
                 else -> " 🟢 "
             }
         )
@@ -53,6 +53,7 @@ fun soloInfoResponse(
     // region Basic info and totals
 
     appendLine("__🗒️ **Basic info**:__ ```")
+    appendLine("Time remaining:   ${contract.timeRemaining.asDaysHoursAndMinutes(compact)}")
     append("Eggspected:       ${contract.eggspected.asIllions()} ")
     if (!compact) append("(${
         minOf(
@@ -61,18 +62,17 @@ fun soloInfoResponse(
         ).multiply(BigDecimal(60L)).asIllions()
     }/hr) ")
     appendLine()
-    appendLine("Time remaining:   ${contract.timeRemaining.asDaysHoursAndMinutes(compact)}")
+    append("Current eggs:     ${contract.farmer.initialState.eggsLaid.asIllions()} ")
+    if (!compact) append("(${
+        eggIncrease(contract.farmer.initialState.habs, contract.farmer.constants).multiply(BigDecimal(60L)).asIllions()
+    }/hr) ")
+    appendLine()
     append("Current chickens: ${contract.farmer.initialState.population.asIllions()} ")
     if (!compact) append("(${
         chickenIncrease(contract.farmer.initialState.habs, contract.farmer.constants)
             .multiply(BigDecimal(4L) - contract.farmer.initialState.habs.fullCount())
             .multiply(BigDecimal(60L)).asIllions()
     }/hr)")
-    appendLine()
-    append("Current eggs:     ${contract.farmer.initialState.eggsLaid.asIllions()} ")
-    if (!compact) append("(${
-        eggIncrease(contract.farmer.initialState.habs, contract.farmer.constants).multiply(BigDecimal(60L)).asIllions()
-    }/hr) ")
     appendLine()
     appendLine("Last update:      ${contract.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
     appendLine("```")

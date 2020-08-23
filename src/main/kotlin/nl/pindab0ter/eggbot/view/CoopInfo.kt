@@ -62,20 +62,12 @@ fun coopInfoResponseNew(
         // region Basic info and totals
 
         appendLine("__🗒️ **Basic info**__ ```")
+        appendLine("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("Eggspected:       ${eggspected.asIllions()} ")
         if (!compact) append("(${
             farmers.sumByBigDecimal { farmer -> eggIncrease(farmer.finalState.habs, farmer.constants) }
                 .multiply(BigDecimal(60L)).asIllions()
         })")
-        appendLine()
-        appendLine("Time remaining:   ${timeRemaining.asDaysHoursAndMinutes(compact)}")
-        append("Current chickens: ${farmers.sumByBigDecimal { farmer -> farmer.initialState.population }.asIllions()} ")
-        if (!compact) append("(${
-            farmers.sumByBigDecimal { farmer ->
-                        chickenIncrease(farmer.initialState.habs, farmer.constants)
-                            .multiply(BigDecimal(4L) - farmer.initialState.habs.fullCount())
-                    }.multiply(BigDecimal(60L)).asIllions()
-        }/hr)")
         appendLine()
         append("Current eggs:     ${
             farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }.asIllions()
@@ -85,6 +77,14 @@ fun coopInfoResponseNew(
                         eggIncrease(farmer.initialState.habs, farmer.constants)
                     }.multiply(BigDecimal(60L)).asIllions()
         })")
+        appendLine()
+        append("Current chickens: ${farmers.sumByBigDecimal { farmer -> farmer.initialState.population }.asIllions()} ")
+        if (!compact) append("(${
+            farmers.sumByBigDecimal { farmer ->
+                chickenIncrease(farmer.initialState.habs, farmer.constants)
+                    .multiply(BigDecimal(4L) - farmer.initialState.habs.fullCount())
+            }.multiply(BigDecimal(60L)).asIllions()
+        }/hr)")
         appendLine()
         appendLine("Tokens available: $tokensAvailable")
         appendLine("Tokens spent:     $tokensSpent")
