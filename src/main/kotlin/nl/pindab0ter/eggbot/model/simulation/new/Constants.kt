@@ -11,6 +11,8 @@ data class Constants(
     val habCapacityMultiplier: BigDecimal,
     val eggLayingBonus: BigDecimal,
     val transportRate: BigDecimal,
+    val tokensAvailable: Int,
+    val tokensSpent: Int,
     val maxAwayTime: Duration,
 ) {
     constructor(backup: Backup, farm: Backup.Simulation) : this(
@@ -26,6 +28,8 @@ data class Constants(
                 .plus(backup.shippingRateEpicResearchMultiplier)
                 .product()
         ),
+        tokensAvailable = farm.boostTokensReceived - farm.boostTokensGiven - farm.boostTokensSpent,
+        tokensSpent = farm.boostTokensSpent,
         maxAwayTime = Duration.standardHours(1L)
             .plus(backup.extraAwayTimePerSilo)
             .multipliedBy(farm.silosOwned.toLong())

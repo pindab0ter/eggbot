@@ -5,6 +5,7 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.simulation.new.SoloContractState
 import org.joda.time.Duration
+import java.math.BigDecimal
 
 
 fun soloInfoResponse(
@@ -52,37 +53,56 @@ fun soloInfoResponse(
     // region Basic info and totals
 
     appendLine("__🗒️ **Basic info**:__ ```")
-    contract.farmer.finalState.apply {
-        this@message.append("Eggspected:       ${contract.eggspected.asIllions()} ")
-        if (!compact) append("(${eggIncrease(habs, contract.farmer.constants).asIllions()}/hr) ")
-        this@message.appendLine()
-        this@message.appendLine("Time remaining:   ${contract.timeRemaining.asDaysHoursAndMinutes(compact)}")
-        append("Current chickens: ${population.asIllions()} ")
-        if (!compact) append("(${contract.farmer.constants.internalHatcheryRate.asIllions()}/hr)")
-        this@message.appendLine()
-        append("Current eggs:     ${contract.farmer.initialState.eggsLaid.asIllions()} ")
-        if (!compact) append("(${
-            contract.farmer.initialState.let { eggIncrease(it.habs, contract.farmer.constants) }.asIllions()
-        }/hr) ")
-        this@message.appendLine()
-        this@message.appendLine("Last update:      ${contract.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
-        this@message.appendLine("```")
-    }
+    append("Eggspected:       ${contract.eggspected.asIllions()} ")
+    if (!compact) append("(${
+        minOf(
+            eggIncrease(contract.farmer.finalState.habs, contract.farmer.constants),
+            contract.farmer.constants.transportRate
+        ).multiply(BigDecimal(60L)).asIllions()
+    }/hr) ")
+    appendLine()
+    appendLine("Time remaining:   ${contract.timeRemaining.asDaysHoursAndMinutes(compact)}")
+    append("Current chickens: ${contract.farmer.initialState.population.asIllions()} ")
+    if (!compact) append("(${
+        chickenIncrease(contract.farmer.initialState.habs, contract.farmer.constants)
+            .multiply(BigDecimal(4L) - contract.farmer.initialState.habs.fullCount())
+            .multiply(BigDecimal(60L)).asIllions()
+    }/hr)")
+    appendLine()
+    append("Current eggs:     ${contract.farmer.initialState.eggsLaid.asIllions()} ")
+    if (!compact) append("(${
+        eggIncrease(contract.farmer.initialState.habs, contract.farmer.constants).multiply(BigDecimal(60L)).asIllions()
+    }/hr) ")
+    appendLine()
+    appendLine("Last update:      ${contract.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
+    appendLine("```")
 
     // endregion Basic info and totals
 
     // region Bottlenecks
 
-    contract.farmer.finalState.apply {
-        if (willReachBottlenecks(contract.farmer.finalState, contract.goals.last().moment)) {
+    contract.apply {
+        if (willReachBottlenecks(farmer, contract.goals.last().moment)) {
             this@message.appendLine("__**⚠ Bottlenecks**__ ```")
-            habBottleneck?.let {
-                if (it == Duration.ZERO) append("🏠Full! ")
-                else append("🏠${it.asDaysHoursAndMinutes(true)} ")
+            when {
+                farmer.finalState.habBottleneck == null -> Unit
+                farmer.finalState.habBottleneck == Duration.ZERO ->
+                    appendLine("🏠 Full! ")
+                farmer.finalState.habBottleneck > Duration.ZERO ->
+                    appendLine("🏠 ${farmer.finalState.habBottleneck.asDaysHoursAndMinutes(compact)} ")
             }
-            transportBottleneck?.let {
-                if (it == Duration.ZERO) append("🚛Full! ")
-                else append("🚛${it.asDaysHoursAndMinutes(true)} ")
+            when {
+                farmer.finalState.transportBottleneck == null -> Unit
+                farmer.finalState.transportBottleneck == Duration.ZERO ->
+                    appendLine("🚛 Full! ")
+                farmer.finalState.transportBottleneck > Duration.ZERO ->
+                    appendLine("🚛 ${farmer.finalState.transportBottleneck.asDaysHoursAndMinutes(compact)} ")
+            }
+            when {
+                farmer.awayTimeRemaining < Duration.ZERO ->
+                    appendLine("💤 Sleeping!")
+                farmer.awayTimeRemaining < Duration.standardHours(12L) ->
+                    appendLine("💤 ${farmer.awayTimeRemaining.asDaysHoursAndMinutes(compact)}")
             }
             this@message.appendLine("```")
         }

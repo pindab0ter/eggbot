@@ -26,6 +26,9 @@ data class Farmer(
         timeSinceBackup = timeSinceBackup
     )
 
+    val awayTimeRemaining: Duration get() = constants.maxAwayTime - timeSinceBackup
+    val isSleeping: Boolean get() = awayTimeRemaining <= Duration.ZERO
+
     companion object {
         operator fun invoke(backup: Backup, contractId: String, catchUp: Boolean): Farmer? {
             val farm = backup.farmFor(contractId) ?: return null

@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.helpers
 
 import nl.pindab0ter.eggbot.model.simulation.new.Constants
 import nl.pindab0ter.eggbot.model.simulation.new.FarmState
+import nl.pindab0ter.eggbot.model.simulation.new.Farmer
 import nl.pindab0ter.eggbot.model.simulation.new.Hab
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -28,15 +29,7 @@ tailrec fun catchUp(
 fun advanceOneMinute(state: FarmState, constants: Constants, elapsed: Duration = Duration.ZERO): FarmState = state.copy(
     eggsLaid = state.eggsLaid + eggIncrease(state.habs, constants),
     habs = state.habs.map { hab ->
-        val internalHatcherySharingMultiplier = state.habs.fold(BigDecimal.ONE) { acc, (population, capacity) ->
-            if (population == capacity) acc + BigDecimal.ONE else acc
-        }.multiply(constants.internalHatcherySharing)
-        hab.copy(
-            population = minOf(
-                hab.population + constants.internalHatcheryRate.multiply(internalHatcherySharingMultiplier),
-                hab.capacity
-            )
-        )
+        hab.copy(population = minOf(hab.population + chickenIncrease(state.habs, constants), hab.capacity))
     },
     habBottleneck = state.habBottleneck ?: habBottleneck(state.habs, elapsed),
     transportBottleneck = state.transportBottleneck ?: transportBottleneck(state.habs, constants, elapsed)
@@ -56,16 +49,29 @@ fun habBottleneck(habs: List<Hab>, elapsed: Duration): Duration? {
     }
 }
 
+fun chickenIncrease(habs: List<Hab>, constants: Constants): BigDecimal =
+    constants.internalHatcheryRate.multiply(
+        BigDecimal.ONE + habs.fullCount().multiply(constants.internalHatcherySharing)
+    )
+
+fun List<Hab>.fullCount(): BigDecimal {
+    return sumByBigDecimal { (population, capacity) ->
+        if (population >= capacity) BigDecimal.ONE
+        else BigDecimal.ZERO
+    }
+}
+
 fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
     habs.sumByBigDecimal(Hab::population).multiply(EGG_LAYING_BASE_RATE).multiply(constants.eggLayingBonus),
     constants.transportRate
 )
 
-fun willReachBottlenecks(state: FarmState, finalGoalReachedAt: Duration?): Boolean {
-    val bottlenecks = listOf(state.habBottleneck, state.transportBottleneck)
-    val reachesBottlenecks = bottlenecks.filterNotNull().any()
+fun willReachBottlenecks(farmer: Farmer, finalGoalReachedAt: Duration?): Boolean {
+    val bottlenecks = listOf(farmer.finalState.habBottleneck, farmer.finalState.transportBottleneck)
+    val reachesBottlenecks = farmer.finalState.habBottleneck != null
+            || farmer.finalState.transportBottleneck != null
+            || farmer.awayTimeRemaining < Duration.standardHours(12L)
     return when {
-        state.habBottleneck == null && state.transportBottleneck == null -> false
         reachesBottlenecks && finalGoalReachedAt == null -> true
         reachesBottlenecks && bottlenecks.any { it?.isShorterThan(finalGoalReachedAt) == true } -> true
         else -> false

@@ -29,14 +29,11 @@ val CoopStatusResponse.eggsLaid: BigDecimal
     get() = BigDecimal(totalAmount)
 
 fun Backup.farmFor(contractId: String): Backup.Simulation? = farms.firstOrNull { farm -> farm.contractId == contractId }
-fun List<Backup>.findContract(contractId: String): LocalContract? = filter { backup ->
-    backup.contracts?.contracts?.plus(backup.contracts.archive)?.any { contract ->
-        contract.contract?.id == contractId
-    } == true
-}.maxByOrNull { backup -> backup.approxTime }?.let { backup ->
-    backup.contracts?.contracts?.plus(backup.contracts.archive)?.find { contract ->
-        contract.contract?.id == contractId
-    }
+
+fun List<Backup>.findContract(contractId: String, creatorId: String): LocalContract? = find { backup ->
+    backup.userId == creatorId
+}?.contracts?.contracts?.find { localContract ->
+    localContract.contract?.id == contractId
 }
 
 val Backup.Simulation.internalHatcheryFlatIncreases: List<BigDecimal>

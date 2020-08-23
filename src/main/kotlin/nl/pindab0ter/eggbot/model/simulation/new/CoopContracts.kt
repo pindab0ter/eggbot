@@ -1,29 +1,24 @@
 package nl.pindab0ter.eggbot.model.simulation.new
 
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.CoopStatusResponse
 import com.auxbrain.ei.LocalContract
-import nl.pindab0ter.eggbot.helpers.ONE_MINUTE
-import nl.pindab0ter.eggbot.helpers.ONE_YEAR
-import nl.pindab0ter.eggbot.helpers.advanceOneMinute
+import nl.pindab0ter.eggbot.helpers.*
 
 
 fun simulateCoopContract(
     backups: List<Backup>,
     contractId: String,
+    coopStatus: CoopStatusResponse,
     catchUp: Boolean = true,
 ): CoopContractState {
-    val localContract: LocalContract? = backups.map { backup ->
-        backup.contracts?.contracts?.find { contract ->
-            contract.contract?.id == contractId
-        }
-    }.first()
-
+    val localContract: LocalContract? = backups.findContract(contractId, coopStatus.creatorId)
     requireNotNull(localContract) { "Local contract information not found" }
     requireNotNull(localContract.contract) { "Contract information not found" }
 
     val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, catchUp) }
     val contractState = CoopContractState(
-        localContract, false, farmers
+        localContract, coopStatus.public, farmers
     )
 
     return simulate(contractState)
@@ -48,6 +43,11 @@ private tailrec fun simulate(
                     } else goal
                 }
             }.toSet(),
+            eggspected = when {
+                contract.elapsed < contract.timeRemaining ->
+                    contract.farmers.sumByBigDecimal { farmer -> farmer.finalState.eggsLaid }
+                else -> contract.eggspected
+            },
             elapsed = contract.elapsed + ONE_MINUTE
         )
     )
