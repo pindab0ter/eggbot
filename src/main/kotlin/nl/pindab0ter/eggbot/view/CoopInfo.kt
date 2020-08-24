@@ -213,7 +213,7 @@ fun coopInfoResponseNew(
         }
 
         val bottleneckedFarmers = farmers.zip(shortenedNames).filter { (farmer, _) ->
-            willReachBottlenecks(farmer, goals.last().moment)
+            willReachBottleneckBeforeDone(farmer, timeRemaining, goals.last().moment)
         }
 
         if (bottleneckedFarmers.isNotEmpty()) appendTable {

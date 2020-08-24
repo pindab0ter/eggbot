@@ -82,7 +82,7 @@ fun soloInfoResponse(
     // region Bottlenecks
 
     contract.apply {
-        if (willReachBottlenecks(farmer, contract.goals.last().moment)) {
+        if (willReachBottleneckBeforeDone(farmer, timeRemaining, contract.goals.last().moment)) {
             this@message.appendLine("__**⚠ Bottlenecks**__ ```")
             when {
                 farmer.finalState.habBottleneck == null -> Unit

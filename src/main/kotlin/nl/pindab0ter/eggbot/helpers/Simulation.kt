@@ -66,14 +66,13 @@ fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
     constants.transportRate
 )
 
-fun willReachBottlenecks(farmer: Farmer, finalGoalReachedAt: Duration?): Boolean {
-    val bottlenecks = listOf(farmer.finalState.habBottleneck, farmer.finalState.transportBottleneck)
-    val reachesBottlenecks = farmer.finalState.habBottleneck != null
-            || farmer.finalState.transportBottleneck != null
-            || farmer.awayTimeRemaining < Duration.standardHours(12L)
-    return when {
-        reachesBottlenecks && finalGoalReachedAt == null -> true
-        reachesBottlenecks && bottlenecks.any { it?.isShorterThan(finalGoalReachedAt) == true } -> true
-        else -> false
-    }
+fun willReachBottleneckBeforeDone(farmer: Farmer, timeRemaining: Duration, finalGoalReachedAt: Duration?): Boolean {
+    val firstBottleneckReachedAt: List<Duration> = listOfNotNull(
+        farmer.finalState.habBottleneck,
+        farmer.finalState.transportBottleneck,
+        farmer.awayTimeRemaining.let { moment -> if (moment < Duration.standardHours(12)) moment else null }
+    )
+
+    return if (firstBottleneckReachedAt.isEmpty()) return false
+    else firstBottleneckReachedAt.minOrNull()!! < listOfNotNull(timeRemaining, finalGoalReachedAt).minOrNull()!!
 }
