@@ -16,7 +16,11 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
 
     var farmers by Farmer via CoopFarmers
 
-    val activeEarningsBonus: BigDecimal get() = farmers.sumByBigDecimal { it.activeEarningsBonus }
+    val activeEarningsBonus: BigDecimal
+        get() = farmers.sumByBigDecimal { farmer ->
+            if (farmer.isActive) farmer.earningsBonus
+            else BigDecimal.ZERO
+        }
 
     companion object : IntEntityClass<Coop>(Coops)
 }

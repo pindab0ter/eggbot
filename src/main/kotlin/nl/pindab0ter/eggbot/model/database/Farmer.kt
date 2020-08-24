@@ -58,7 +58,6 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
                 .toDouble()
         ).roundToInt()
     val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
-    val activeEarningsBonus: BigDecimal get() = if (isActive) earningsBonus else BigDecimal.ZERO
 
     fun update() = AuxBrain.getFarmerBackup(inGameId)?.let { update(it) }
         ?: log.warn { "Tried to update from backup but failed." }
