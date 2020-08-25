@@ -100,9 +100,9 @@ fun soloInfoResponse(
             }
             when {
                 farmer.awayTimeRemaining < Duration.ZERO ->
-                    appendLine("💤 Sleeping!")
+                    appendLine("⌛ Empty!")
                 farmer.awayTimeRemaining < Duration.standardHours(12L) ->
-                    appendLine("💤 ${farmer.awayTimeRemaining.asDaysHoursAndMinutes(compact)}")
+                    appendLine("⌛ ${farmer.awayTimeRemaining.asDaysHoursAndMinutes(compact)}")
             }
             this@message.appendLine("```")
         }

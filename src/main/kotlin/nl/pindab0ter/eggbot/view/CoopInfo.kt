@@ -278,13 +278,13 @@ fun coopInfoResponseNew(
             }
             divider()
             column {
-                header = "Sleep"
+                header = "Silos"
                 leftPadding = 1
                 alignment = RIGHT
                 cells = bottleneckedFarmers.map { (farmer, _) ->
                     when {
                         farmer.awayTimeRemaining < Duration.ZERO ->
-                            "Sleeping!"
+                            "Empty!"
                         farmer.awayTimeRemaining < Duration.standardHours(12L) ->
                             farmer.awayTimeRemaining.asDaysHoursAndMinutes(true)
                         else -> ""
@@ -292,7 +292,7 @@ fun coopInfoResponseNew(
                 }
             }
             emojiColumn {
-                header = "💤"
+                header = "⌛"
                 leftPadding = 1
                 cells = bottleneckedFarmers.map { (farmer, _) ->
                     when {
