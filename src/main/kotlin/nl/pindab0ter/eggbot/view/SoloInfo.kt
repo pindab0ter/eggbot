@@ -54,6 +54,7 @@ fun soloInfoResponse(
 
     appendLine("__🗒️ **Basic info**:__ ```")
     appendLine("Time remaining:   ${contract.timeRemaining.asDaysHoursAndMinutes(compact)}")
+
     append("Eggspected:       ${contract.eggspected.asIllions()} ")
     if (!compact) append("(${
         minOf(
@@ -62,11 +63,15 @@ fun soloInfoResponse(
         ).multiply(BigDecimal(60L)).asIllions()
     }/hr) ")
     appendLine()
+
     append("Current eggs:     ${contract.farmer.initialState.eggsLaid.asIllions()} ")
     if (!compact) append("(${
-        eggIncrease(contract.farmer.initialState.habs, contract.farmer.constants).multiply(BigDecimal(60L)).asIllions()
+        if (contract.farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
+        else eggIncrease(contract.farmer.initialState.habs, contract.farmer.constants)
+            .multiply(BigDecimal(60L)).asIllions()
     }/hr) ")
     appendLine()
+
     append("Current chickens: ${contract.farmer.initialState.population.asIllions()} ")
     if (!compact) append("(${
         chickenIncrease(contract.farmer.initialState.habs, contract.farmer.constants)
@@ -74,6 +79,7 @@ fun soloInfoResponse(
             .multiply(BigDecimal(60L)).asIllions()
     }/hr)")
     appendLine()
+
     appendLine("Last update:      ${contract.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
     appendLine("```")
 
@@ -84,13 +90,19 @@ fun soloInfoResponse(
     contract.apply {
         if (willReachBottleneckBeforeDone(farmer, timeRemaining, contract.goals.last().moment)) {
             this@message.appendLine("__**⚠ Bottlenecks**__ ```")
-            when {
-                farmer.finalState.habBottleneck == null -> Unit
-                farmer.finalState.habBottleneck == Duration.ZERO ->
-                    appendLine("🏠 Full! ")
-                farmer.finalState.habBottleneck > Duration.ZERO ->
-                    appendLine("🏠 ${farmer.finalState.habBottleneck.asDaysHoursAndMinutes(compact)} ")
+
+            when (farmer.finalState.habsStatus) {
+                is HabsStatus.BottleneckReached -> when (farmer.finalState.habsStatus.moment) {
+                    Duration.ZERO -> appendLine("🏠 Full! ")
+                    else -> appendLine("🏠 ${farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+                }
+                is HabsStatus.MaxedOut -> when (farmer.finalState.habsStatus.moment) {
+                    Duration.ZERO -> appendLine("🏠 Maxed! ")
+                    else -> appendLine("🏠 ${farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+                }
+                else -> Unit
             }
+
             when {
                 farmer.finalState.transportBottleneck == null -> Unit
                 farmer.finalState.transportBottleneck == Duration.ZERO ->
@@ -98,6 +110,7 @@ fun soloInfoResponse(
                 farmer.finalState.transportBottleneck > Duration.ZERO ->
                     appendLine("🚛 ${farmer.finalState.transportBottleneck.asDaysHoursAndMinutes(compact)} ")
             }
+
             when {
                 farmer.awayTimeRemaining < Duration.ZERO ->
                     appendLine("⌛ Empty!")

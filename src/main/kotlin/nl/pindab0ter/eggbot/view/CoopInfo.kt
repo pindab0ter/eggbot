@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.view
 
 import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
+import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.simulation.new.CoopContractState
 import org.joda.time.Duration
@@ -74,8 +76,8 @@ fun coopInfoResponseNew(
         } ")
         if (!compact) append("(${
             farmers.sumByBigDecimal { farmer ->
-                        eggIncrease(farmer.initialState.habs, farmer.constants)
-                    }.multiply(BigDecimal(60L)).asIllions()
+                eggIncrease(farmer.initialState.habs, farmer.constants)
+            }.multiply(BigDecimal(60L)).asIllions()
         })")
         appendLine()
         append("Current chickens: ${farmers.sumByBigDecimal { farmer -> farmer.initialState.population }.asIllions()} ")
@@ -99,7 +101,7 @@ fun coopInfoResponseNew(
 
             @Suppress("SpellCheckingInspection")
             appendTable {
-                title = "__**🚜 Members** (${farmers.count()}/${maxCoopSize}):__"
+                title = "__**👨‍🌾 Members** (${farmers.count()}/${maxCoopSize}):__"
 
                 incrementColumn(":")
                 column {
@@ -118,7 +120,9 @@ fun coopInfoResponseNew(
                     header = "/hr"
                     rightPadding = 3
                     cells = farmers.map { farmer ->
-                        eggIncrease(farmer.initialState.habs, farmer.constants).multiply(BigDecimal(60L)).asIllions()
+                        if (farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
+                        else eggIncrease(farmer.initialState.habs, farmer.constants)
+                            .multiply(BigDecimal(60L)).asIllions()
                     }
                 }
                 column {
@@ -132,7 +136,7 @@ fun coopInfoResponseNew(
                     rightPadding = 3
                     cells = farmers.map { farmer ->
                         chickenIncrease(farmer.initialState.habs, farmer.constants)
-                                                .multiply(BigDecimal(4L) - farmer.initialState.habs.fullCount())
+                            .multiply(BigDecimal(4L) - farmer.initialState.habs.fullCount())
                             .multiply(BigDecimal(60L)).asIllions()
                     }
                 }
@@ -227,31 +231,40 @@ fun coopInfoResponseNew(
                     "${if (compact) shortenedName else farmer.name}:"
                 }
             }
+
             column {
                 header = "Habs"
                 leftPadding = 1
                 alignment = RIGHT
                 cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when (farmer.finalState.habBottleneck) {
-                        null -> ""
-                        Duration.ZERO -> "Full!"
-                        else -> farmer.finalState.habBottleneck.asDaysHoursAndMinutes(true)
+                    when (farmer.finalState.habsStatus) {
+                        is BottleneckReached -> when (farmer.finalState.habsStatus.moment) {
+                            Duration.ZERO -> "Full!"
+                            else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+                        }
+                        is MaxedOut -> when (farmer.finalState.habsStatus.moment) {
+                            Duration.ZERO -> "Maxed!"
+                            else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+                        }
+                        else -> ""
                     }
                 }
             }
+
             emojiColumn {
                 header = "🏘️"
                 leftPadding = 1
                 cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when (farmer.finalState.habBottleneck) {
-                        // null -> "🆗"
-                        null -> "➖"
-                        Duration.ZERO -> "🛑"
-                        else -> "⚠️"
+                    when (farmer.finalState.habsStatus) {
+                        is BottleneckReached -> if (farmer.finalState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
+                        is MaxedOut -> "🟢"
+                        else -> "➖"
                     }
                 }
             }
+
             divider()
+
             column {
                 header = if (compact) "Trspt" else "Transport"
                 leftPadding = 1
@@ -264,33 +277,35 @@ fun coopInfoResponseNew(
                     }
                 }
             }
+
             emojiColumn {
                 header = "🚛"
                 leftPadding = 1
                 cells = bottleneckedFarmers.map { (farmer, _) ->
                     when (farmer.finalState.transportBottleneck) {
-                        // TODO: Show green if habs are maxed out
                         null -> "➖"
                         Duration.ZERO -> "🛑"
                         else -> "⚠️"
                     }
                 }
             }
+
             divider()
+
             column {
                 header = "Silos"
                 leftPadding = 1
                 alignment = RIGHT
                 cells = bottleneckedFarmers.map { (farmer, _) ->
                     when {
-                        farmer.awayTimeRemaining < Duration.ZERO ->
-                            "Empty!"
+                        farmer.awayTimeRemaining <= Duration.ZERO -> "Empty!"
                         farmer.awayTimeRemaining < Duration.standardHours(12L) ->
                             farmer.awayTimeRemaining.asDaysHoursAndMinutes(true)
                         else -> ""
                     }
                 }
             }
+
             emojiColumn {
                 header = "⌛"
                 leftPadding = 1
@@ -304,6 +319,7 @@ fun coopInfoResponseNew(
                     }
                 }
             }
+
             if (!compact) divider(intersection = '╡')
         }
     }

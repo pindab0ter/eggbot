@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.helpers
 
+import nl.pindab0ter.eggbot.helpers.HabsStatus.*
 import nl.pindab0ter.eggbot.model.simulation.new.Constants
 import nl.pindab0ter.eggbot.model.simulation.new.FarmState
 import nl.pindab0ter.eggbot.model.simulation.new.Farmer
@@ -31,7 +32,10 @@ fun advanceOneMinute(state: FarmState, constants: Constants, elapsed: Duration =
     habs = state.habs.map { hab ->
         hab.copy(population = minOf(hab.population + chickenIncrease(state.habs, constants), hab.capacity))
     },
-    habBottleneck = state.habBottleneck ?: habBottleneck(state.habs, elapsed),
+    habsStatus = when (state.habsStatus) {
+        Free -> habsStatus(state.habs, elapsed)
+        else -> state.habsStatus
+    },
     transportBottleneck = state.transportBottleneck ?: transportBottleneck(state.habs, constants, elapsed)
 )
 
@@ -42,10 +46,11 @@ fun transportBottleneck(habs: List<Hab>, constants: Constants, elapsed: Duration
     }
 }
 
-fun habBottleneck(habs: List<Hab>, elapsed: Duration): Duration? {
+fun habsStatus(habs: List<Hab>, elapsed: Duration): HabsStatus {
     return when {
-        habs.all { (population, capacity) -> population == capacity } -> elapsed
-        else -> null
+        habs.all { (population, _) -> population == BigDecimal(2835000000L) } -> MaxedOut(elapsed)
+        habs.all { (population, capacity) -> population == capacity } -> BottleneckReached(elapsed)
+        else -> Free
     }
 }
 
@@ -54,11 +59,9 @@ fun chickenIncrease(habs: List<Hab>, constants: Constants): BigDecimal =
         BigDecimal.ONE + habs.fullCount().multiply(constants.internalHatcherySharing)
     )
 
-fun List<Hab>.fullCount(): BigDecimal {
-    return sumByBigDecimal { (population, capacity) ->
-        if (population >= capacity) BigDecimal.ONE
-        else BigDecimal.ZERO
-    }
+fun List<Hab>.fullCount(): BigDecimal = sumByBigDecimal { (population, capacity) ->
+    if (population == capacity) BigDecimal.ONE
+    else BigDecimal.ZERO
 }
 
 fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
@@ -68,11 +71,20 @@ fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
 
 fun willReachBottleneckBeforeDone(farmer: Farmer, timeRemaining: Duration, finalGoalReachedAt: Duration?): Boolean {
     val firstBottleneckReachedAt: List<Duration> = listOfNotNull(
-        farmer.finalState.habBottleneck,
+        if (farmer.finalState.habsStatus is BottleneckReached) farmer.finalState.habsStatus.moment else null,
         farmer.finalState.transportBottleneck,
         farmer.awayTimeRemaining.let { moment -> if (moment < Duration.standardHours(12)) moment else null }
     )
 
-    return if (firstBottleneckReachedAt.isEmpty()) return false
-    else firstBottleneckReachedAt.minOrNull()!! < listOfNotNull(timeRemaining, finalGoalReachedAt).minOrNull()!!
+    return when {
+        farmer.finalState.habsStatus is MaxedOut -> true
+        firstBottleneckReachedAt.isEmpty() -> false
+        else -> firstBottleneckReachedAt.minOrNull()!! < listOfNotNull(timeRemaining, finalGoalReachedAt).minOrNull()!!
+    }
+}
+
+interface HabsStatus {
+    object Free : HabsStatus
+    class BottleneckReached(val moment: Duration) : HabsStatus
+    class MaxedOut(val moment: Duration) : HabsStatus
 }
