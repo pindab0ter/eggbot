@@ -30,7 +30,7 @@ val CoopStatusResponse.eggsLaid: BigDecimal
 
 fun Backup.farmFor(contractId: String): Backup.Simulation? = farms.firstOrNull { farm -> farm.contractId == contractId }
 
-fun List<Backup>.findContract(contractId: String, creatorId: String): LocalContract? = find { backup ->
+fun List<Backup>.findCreatorLocalContract(contractId: String, creatorId: String): LocalContract? = find { backup ->
     backup.userId == creatorId
 }?.contracts?.contracts?.find { localContract ->
     localContract.contract?.id == contractId

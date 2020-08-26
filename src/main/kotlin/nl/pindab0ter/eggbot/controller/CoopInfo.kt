@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.controller
 
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.CoopStatusResponse
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import kotlinx.coroutines.Dispatchers
@@ -14,8 +15,11 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.model.database.Contract
 import nl.pindab0ter.eggbot.model.simulation.new.simulateCoopContract
 import nl.pindab0ter.eggbot.view.coopInfoResponseNew
+import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
@@ -42,22 +46,62 @@ object CoopInfo : EggBotCommand() {
         val coopId: String = parameters.getString(COOP_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
         val message: Message = event.channel.sendMessage("Fetching contract information…").complete()
-        val coopStatus = AuxBrain.getCoopStatus(contractId, coopId)
-        val contractName = AuxBrain.getPeriodicals()?.contracts?.contracts?.find { it.id == contractId }?.name
-            ?: "Unknown"
+        val coopStatus: CoopStatusResponse = AuxBrain.getCoopStatus(contractId, coopId)
+            ?: "No co-op found for contract `${contractId}` with name `${coopId}`".let {
+                message.delete().queue()
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
 
-        if (coopStatus == null) "No co-op found for contract `${contractId}` with name `${coopId}`".let {
+        val contract: Contract = transaction {
+            Contract.findById(coopStatus.contractId) ?: AuxBrain.getFarmerBackup(coopStatus.creatorId)?.let { backup ->
+                val contract = backup.contracts?.contracts?.find { localContract ->
+                    localContract.contract?.id == coopStatus.contractId
+                } ?: backup.contracts?.archive?.last { localContract ->
+                    localContract.contract?.id == coopStatus.contractId
+                }
+                if (contract == null) null
+                else Contract.new(contract.contract!!.id) {
+                    name = contract.contract.name
+                    finalGoal = contract.contract.finalGoal
+                }
+            }
+        } ?: "Could not find contract information".let {
             message.delete().queue()
             event.replyWarning(it)
             log.debug { it }
             return
         }
-        if (coopStatus.contributors.isEmpty()) """ `${coopStatus.coopId}` vs. __${contractName}__:
+
+        if (coopStatus.contributors.isEmpty()) """
+            `${coopStatus.coopId}` vs. __${contract.name}__:
                 
-                This co-op has no members.""".let {
+            This co-op has no members.""".trimIndent().let {
             message.delete().queue()
             event.replyWarning(it)
-            log.debug { it }
+            log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
+            return
+        }
+
+        if (coopStatus.eggsLaid >= contract.finalGoal) """
+            `${coopStatus.coopId}` vs. __${contract.name}__:
+                
+            This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent().let {
+            message.delete().queue()
+            event.reply(it)
+            log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
+            return
+        }
+
+        // TODO: Incorporate grace period
+        if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal) """
+            `${coopStatus.coopId}` vs. __${contract.name}__:
+                
+            This co-op has not reached their final goal.""".trimIndent().let {
+            message.delete().queue()
+            event.replyWarning(it)
+            log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
             return
         }
 
@@ -67,54 +111,6 @@ object CoopInfo : EggBotCommand() {
         val backups: List<Backup> = runBlocking(Dispatchers.IO) {
             coopStatus.contributors.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
         }.filterNotNull()
-
-        val localContract = backups.findContract(contractId, coopStatus.creatorId)
-            ?: "Could not find contract information".let {
-                message.delete().queue()
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-
-        // Has the co-op failed?
-        // TODO: Incorporate grace period
-        if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < localContract.finalGoal)
-            """ `${coopStatus.coopId}` vs. __${contractName}__:
-                
-                This co-op has not reached their final goal.""".trimIndent().let {
-                message.delete().queue()
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-
-        // TODO: Check whether co-op is finished before finding the local backup, which can fail
-        // TODO: Save final goal in DB?
-        //
-        // Co-op finished?
-        //
-        // The amount of eggs laid according to the co-op status is higher than the final goal
-        // or
-        // There is no active farm with this contract
-        // and the contract archive contains this contract
-        // and that contract has reached its final goal
-        // for any of the contributors
-        if (coopStatus.eggsLaid >= localContract.finalGoal || backups.any { contributor ->
-                contributor.farms.none { farm ->
-                    farm.contractId == coopStatus.contractId
-                } && contributor.contracts!!.archive.find { contract ->
-                    contract.contract!!.id == coopStatus.contractId
-                }?.finished == true
-            }
-        ) """ `${coopStatus.coopId}` vs. __${contractName}__:
-                
-                This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent().let {
-            message.delete().queue()
-            event.reply(it)
-            log.debug { it }
-            return
-        }
-
 
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()

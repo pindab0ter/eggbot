@@ -23,7 +23,7 @@ class CoopContractSimulation private constructor(
 
     // region Basic info
 
-    private val localContract: LocalContract = backups.findContract(coopStatus.contractId, coopStatus.creatorId)!!
+    private val localContract: LocalContract = backups.findCreatorLocalContract(coopStatus.contractId, coopStatus.creatorId)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
         backup.farms.any { farm -> farm.contractId == coopStatus.contractId }
@@ -118,7 +118,7 @@ class CoopContractSimulation private constructor(
                 coopStatus.contributors.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
             }.filterNotNull()
 
-            val contract = backups.findContract(contractId, coopStatus.creatorId)!!
+            val contract = backups.findCreatorLocalContract(contractId, coopStatus.creatorId)!!
 
             // Has the co-op failed?
             if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal)

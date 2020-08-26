@@ -24,12 +24,7 @@ object ProjectConfig : AbstractProjectConfig() {
             })
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
 
-        transaction {
-            SchemaUtils.create(DiscordUsers)
-            SchemaUtils.create(Farmers)
-            SchemaUtils.create(Coops)
-            SchemaUtils.create(CoopFarmers)
-        }
+        EggBot.initializeDatabase()
     }
 
     override fun afterAll() = transaction {

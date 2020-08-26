@@ -7,17 +7,14 @@ import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.*
 import net.dv8tion.jda.api.requests.GatewayIntent.*
 import net.dv8tion.jda.api.utils.cache.CacheFlag.*
-import nl.pindab0ter.eggbot.database.CoopFarmers
-import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.database.DiscordUsers
-import nl.pindab0ter.eggbot.database.Farmers
+import nl.pindab0ter.eggbot.database.*
 import nl.pindab0ter.eggbot.jda.CommandLogger
 import nl.pindab0ter.eggbot.jda.commandClient
-import nl.pindab0ter.eggbot.utilities.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
-import nl.pindab0ter.eggbot.jobs.UpdateFarmersJob
+import nl.pindab0ter.eggbot.jobs.UpdateFarmersAndContractsJob
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
 import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.utilities.JobLogger
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -124,11 +121,12 @@ object EggBot {
         KotlinLogging.logger("Exposed").info { "Connected to database" }
     }
 
-    private fun initializeDatabase() = transaction {
+    fun initializeDatabase() = transaction {
         SchemaUtils.create(DiscordUsers)
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
         SchemaUtils.create(CoopFarmers)
+        SchemaUtils.create(Contracts)
     }
 
     private fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply {
@@ -138,7 +136,7 @@ object EggBot {
         log.info { "Starting scheduler…" }
 
         if (!Config.devMode) scheduleJob(
-            newJob(UpdateFarmersJob::class.java)
+            newJob(UpdateFarmersAndContractsJob::class.java)
                 .withIdentity("update_farmers")
                 .build(),
             newTrigger()

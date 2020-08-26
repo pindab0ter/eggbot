@@ -12,7 +12,7 @@ fun simulateCoopContract(
     coopStatus: CoopStatusResponse,
     catchUp: Boolean = true,
 ): CoopContractState {
-    val localContract: LocalContract? = backups.findContract(contractId, coopStatus.creatorId)
+    val localContract: LocalContract? = backups.findCreatorLocalContract(contractId, coopStatus.creatorId)
     requireNotNull(localContract) { "Local contract information not found" }
     requireNotNull(localContract.contract) { "Contract information not found" }
 
