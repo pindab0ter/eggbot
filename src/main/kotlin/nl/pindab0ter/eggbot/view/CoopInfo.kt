@@ -166,6 +166,111 @@ fun coopInfoResponseNew(
 
             append('\u200B')
 
+            val bottleneckedFarmers = farmers.filter { farmer ->
+                willReachBottleneckBeforeDone(farmer, timeRemaining, goals.last().moment)
+            }
+
+            if (bottleneckedFarmers.isNotEmpty()) appendTable {
+                title = "__**⚠ Bottlenecks**__"
+                topPadding = 1
+
+                column {
+                    header = "Name"
+                    if (!compact) rightPadding = 2
+                    cells = bottleneckedFarmers.map { farmer -> farmer.name }
+                }
+
+                column {
+                    header = "Habs"
+                    leftPadding = 1
+                    alignment = RIGHT
+                    cells = bottleneckedFarmers.map { farmer ->
+                        when (farmer.finalState.habsStatus) {
+                            is BottleneckReached -> when (farmer.finalState.habsStatus.moment) {
+                                Duration.ZERO -> "Full!"
+                                else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+                            }
+                            is MaxedOut -> when (farmer.finalState.habsStatus.moment) {
+                                Duration.ZERO -> "Maxed!"
+                                else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+                            }
+                            else -> ""
+                        }
+                    }
+                }
+
+                emojiColumn {
+                    header = "🏘️"
+                    leftPadding = 1
+                    cells = bottleneckedFarmers.map { farmer ->
+                        when (farmer.finalState.habsStatus) {
+                            is BottleneckReached -> if (farmer.finalState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
+                            is MaxedOut -> "🟢"
+                            else -> "➖"
+                        }
+                    }
+                }
+
+                divider()
+
+                column {
+                    header = "Transport"
+                    leftPadding = 1
+                    alignment = RIGHT
+                    cells = bottleneckedFarmers.map { farmer ->
+                        when (farmer.finalState.transportBottleneck) {
+                            null -> ""
+                            Duration.ZERO -> "Full!"
+                            else -> farmer.finalState.transportBottleneck.asDaysHoursAndMinutes(true)
+                        }
+                    }
+                }
+
+                emojiColumn {
+                    header = "🚛"
+                    leftPadding = 1
+                    cells = bottleneckedFarmers.map { farmer ->
+                        when (farmer.finalState.transportBottleneck) {
+                            null -> "➖"
+                            Duration.ZERO -> "🛑"
+                            else -> "⚠️"
+                        }
+                    }
+                }
+
+                divider()
+
+                column {
+                    header = "Silos"
+                    leftPadding = 1
+                    alignment = RIGHT
+                    cells = bottleneckedFarmers.map { farmer ->
+                        when {
+                            farmer.awayTimeRemaining <= Duration.ZERO -> "Empty!"
+                            farmer.awayTimeRemaining < Duration.standardHours(12L) ->
+                                farmer.awayTimeRemaining.asDaysHoursAndMinutes(true)
+                            else -> ""
+                        }
+                    }
+                }
+
+                emojiColumn {
+                    header = "⌛"
+                    leftPadding = 1
+                    cells = bottleneckedFarmers.map { farmer ->
+                        when {
+                            farmer.awayTimeRemaining <= Duration.ZERO ->
+                                "🛑"
+                            farmer.awayTimeRemaining < Duration.standardHours(12L) ->
+                                "⚠️"
+                            else -> "➖"
+                        }
+                    }
+                }
+
+                divider(intersection = '╡')
+            }
+
             // endregion Non-compact
 
         } else {
@@ -221,114 +326,60 @@ fun coopInfoResponseNew(
 
             append('\u200B')
 
-            // endregion Compact
-        }
-
-        val bottleneckedFarmers = farmers.zip(shortenedNames).filter { (farmer, _) ->
-            willReachBottleneckBeforeDone(farmer, timeRemaining, goals.last().moment)
-        }
-
-        if (bottleneckedFarmers.isNotEmpty()) appendTable {
-            title = "__**⚠ Bottlenecks**__"
-            topPadding = 1
-
-            column {
-                header = "Name"
-                if (!compact) rightPadding = 2
-                cells = bottleneckedFarmers.map { (farmer, shortenedName) ->
-                    "${if (compact) shortenedName else farmer.name}:"
-                }
+            val bottleneckedFarmers = farmers.zip(shortenedNames).filter { (farmer, _) ->
+                willReachBottleneckBeforeDone(farmer, timeRemaining, goals.last().moment)
             }
 
-            column {
-                header = "Habs"
-                leftPadding = 1
-                alignment = RIGHT
-                cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when (farmer.finalState.habsStatus) {
-                        is BottleneckReached -> when (farmer.finalState.habsStatus.moment) {
-                            Duration.ZERO -> "Full!"
-                            else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+            if (bottleneckedFarmers.isNotEmpty()) appendTable {
+                title = "__**⚠ Bottlenecks**__"
+                topPadding = 1
+
+                column {
+                    header = "Name"
+                    cells = bottleneckedFarmers.map { (_, shortenedName) -> shortenedName }
+                }
+
+                emojiColumn {
+                    header = "🏘️"
+                    leftPadding = 1
+                    cells = bottleneckedFarmers.map { (farmer, _) ->
+                        when (farmer.finalState.habsStatus) {
+                            is BottleneckReached -> if (farmer.finalState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
+                            is MaxedOut -> "🟢"
+                            else -> "➖"
                         }
-                        is MaxedOut -> when (farmer.finalState.habsStatus.moment) {
-                            Duration.ZERO -> "Maxed!"
-                            else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+                    }
+                }
+
+                divider()
+
+                emojiColumn {
+                    header = "🚛"
+                    cells = bottleneckedFarmers.map { (farmer, _) ->
+                        when (farmer.finalState.transportBottleneck) {
+                            null -> "➖"
+                            Duration.ZERO -> "🛑"
+                            else -> "⚠️"
                         }
-                        else -> ""
                     }
                 }
-            }
 
-            emojiColumn {
-                header = "🏘️"
-                leftPadding = 1
-                cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when (farmer.finalState.habsStatus) {
-                        is BottleneckReached -> if (farmer.finalState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
-                        is MaxedOut -> "🟢"
-                        else -> "➖"
+                divider()
+
+                emojiColumn {
+                    header = "⌛"
+                    cells = bottleneckedFarmers.map { (farmer, _) ->
+                        when {
+                            farmer.awayTimeRemaining <= Duration.ZERO ->
+                                "🛑"
+                            farmer.awayTimeRemaining < Duration.standardHours(12L) ->
+                                "⚠️"
+                            else -> "➖"
+                        }
                     }
                 }
+                // endregion Compact
             }
-
-            divider()
-
-            column {
-                header = if (compact) "Trspt" else "Transport"
-                leftPadding = 1
-                alignment = RIGHT
-                cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when (farmer.finalState.transportBottleneck) {
-                        null -> ""
-                        Duration.ZERO -> "Full!"
-                        else -> farmer.finalState.transportBottleneck.asDaysHoursAndMinutes(true)
-                    }
-                }
-            }
-
-            emojiColumn {
-                header = "🚛"
-                leftPadding = 1
-                cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when (farmer.finalState.transportBottleneck) {
-                        null -> "➖"
-                        Duration.ZERO -> "🛑"
-                        else -> "⚠️"
-                    }
-                }
-            }
-
-            divider()
-
-            column {
-                header = "Silos"
-                leftPadding = 1
-                alignment = RIGHT
-                cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when {
-                        farmer.awayTimeRemaining <= Duration.ZERO -> "Empty!"
-                        farmer.awayTimeRemaining < Duration.standardHours(12L) ->
-                            farmer.awayTimeRemaining.asDaysHoursAndMinutes(true)
-                        else -> ""
-                    }
-                }
-            }
-
-            emojiColumn {
-                header = "⌛"
-                leftPadding = 1
-                cells = bottleneckedFarmers.map { (farmer, _) ->
-                    when {
-                        farmer.awayTimeRemaining <= Duration.ZERO ->
-                            "🛑"
-                        farmer.awayTimeRemaining < Duration.standardHours(12L) ->
-                            "⚠️"
-                        else -> "➖"
-                    }
-                }
-            }
-
-            if (!compact) divider(intersection = '╡')
         }
     }
 }.splitMessage(separator = '\u200B')

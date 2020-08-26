@@ -58,18 +58,6 @@ fun Period.asDaysHoursAndMinutes(compact: Boolean = false): String = when (compa
         else longDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
 }
 
-fun Period.asHoursAndMinutes(): String = PeriodFormatterBuilder()
-    .printZeroNever()
-    .appendSeparator(" ")
-    .appendHours()
-    .appendSuffix("h")
-    .appendSeparator(" ")
-    .appendMinutes()
-    .appendSuffix("m")
-    .toFormatter()
-    .withLocale(Locale.UK)
-    .print(this.toStandardHours())
-
 private val longDaysFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
     .appendDays()
@@ -97,8 +85,6 @@ fun Period.asDays(compact: Boolean = false): String = when (compact) {
 fun Duration.asDaysHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDaysHoursAndMinutes(compact)
 
 fun Duration.asDays(compact: Boolean = false): String = this.toPeriod().asDays(compact)
-
-fun Duration.asHoursAndMinutes(): String = this.toPeriod().asHoursAndMinutes()
 
 fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
