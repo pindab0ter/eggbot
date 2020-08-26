@@ -94,7 +94,7 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-        // TODO: Incorporate grace period
+        // TODO: Incorporate grace period; if simulation says they'll make it if everyone checks in, don't show this
         if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
                 
@@ -118,6 +118,15 @@ object CoopInfo : EggBotCommand() {
         val coopContractState = simulateCoopContract(backups, contractId, coopStatus)
 
         message.delete().queue()
+
+        if (coopContractState == null) """
+            `${coopStatus.coopId}` vs. __${contract.name}__:
+                
+            Everyone has left this coop.""".trimIndent().let {
+            event.replyWarning(it)
+            log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
+            return
+        }
 
         coopInfoResponseNew(coopContractState, compact).let { messages ->
             if (event.channel == botCommandsChannel) {
