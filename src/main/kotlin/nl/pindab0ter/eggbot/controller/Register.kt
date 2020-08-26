@@ -8,12 +8,12 @@ import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.model.database.DiscordUser
-import nl.pindab0ter.eggbot.model.database.Farmer
+import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
+import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.helpers.prophecyBonus
-import nl.pindab0ter.eggbot.helpers.soulBonus
+import nl.pindab0ter.eggbot.model.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 
@@ -128,8 +128,8 @@ object Register : EggBotCommand() {
                 this.soulEggsLong = backup.game.soulEggsLong
                 this.soulEggsDouble = backup.game.soulEggsDouble
                 this.prophecyEggs = backup.game.prophecyEggs
-                this.soulBonus = backup.game.soulBonus
-                this.prophecyBonus = backup.game.prophecyBonus
+                this.soulEggResearchLevel = backup.game.soulEggResearchLevel
+                this.prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
                 this.prestiges = backup.stats.prestigeCount
                 this.droneTakedowns = backup.stats.droneTakedowns
                 this.eliteDroneTakedowns = backup.stats.droneTakedownsElite

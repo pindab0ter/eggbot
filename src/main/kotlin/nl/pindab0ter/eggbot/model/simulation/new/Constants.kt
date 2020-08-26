@@ -29,6 +29,9 @@ data class Constants(
                 .product()
         ),
         tokensAvailable = farm.boostTokensReceived - farm.boostTokensGiven - farm.boostTokensSpent,
+        // TODO: Is this always right?
+        // It seems like bock counted the 18 tokens that I sent Zman as tokens I spent when I ran the coop command
+        // https://discordapp.com/channels/485162044652388384/717043294659543133/747909593346211923
         tokensSpent = farm.boostTokensSpent,
         maxAwayTime = Duration.standardHours(1L)
             .plus(backup.extraAwayTimePerSilo)

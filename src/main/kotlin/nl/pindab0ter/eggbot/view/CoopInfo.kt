@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.view
 
 import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
+import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
@@ -68,7 +70,7 @@ fun coopInfoResponseNew(
         append("Eggspected:       ${eggspected.asIllions()} ")
         if (!compact) append("(${
             farmers.sumByBigDecimal { farmer -> eggIncrease(farmer.finalState.habs, farmer.constants) }
-                .multiply(BigDecimal(60L)).asIllions()
+                .multiply(SIXTY).asIllions()
         })")
         appendLine()
         append("Current eggs:     ${
@@ -77,15 +79,15 @@ fun coopInfoResponseNew(
         if (!compact) append("(${
             farmers.sumByBigDecimal { farmer ->
                 eggIncrease(farmer.initialState.habs, farmer.constants)
-            }.multiply(BigDecimal(60L)).asIllions()
+            }.multiply(SIXTY).asIllions()
         })")
         appendLine()
         append("Current chickens: ${farmers.sumByBigDecimal { farmer -> farmer.initialState.population }.asIllions()} ")
         if (!compact) append("(${
             farmers.sumByBigDecimal { farmer ->
                 chickenIncrease(farmer.initialState.habs, farmer.constants)
-                    .multiply(BigDecimal(4L) - farmer.initialState.habs.fullCount())
-            }.multiply(BigDecimal(60L)).asIllions()
+                    .multiply(FOUR - farmer.initialState.habs.fullCount())
+            }.multiply(SIXTY).asIllions()
         }/hr)")
         appendLine()
         appendLine("Tokens available: $tokensAvailable")
@@ -122,7 +124,7 @@ fun coopInfoResponseNew(
                     cells = farmers.map { farmer ->
                         if (farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
                         else eggIncrease(farmer.initialState.habs, farmer.constants)
-                            .multiply(BigDecimal(60L)).asIllions()
+                            .multiply(SIXTY).asIllions()
                     }
                 }
                 column {
@@ -136,8 +138,8 @@ fun coopInfoResponseNew(
                     rightPadding = 3
                     cells = farmers.map { farmer ->
                         chickenIncrease(farmer.initialState.habs, farmer.constants)
-                            .multiply(BigDecimal(4L) - farmer.initialState.habs.fullCount())
-                            .multiply(BigDecimal(60L)).asIllions()
+                            .multiply(FOUR - farmer.initialState.habs.fullCount())
+                            .multiply(SIXTY).asIllions()
                     }
                 }
                 column {
@@ -184,7 +186,7 @@ fun coopInfoResponseNew(
                     header = "/hr"
                     rightPadding = 2
                     cells = farmers.map { farmer ->
-                        eggIncrease(farmer.initialState.habs, farmer.constants).multiply(BigDecimal(60L)).asIllions()
+                        eggIncrease(farmer.initialState.habs, farmer.constants).multiply(SIXTY).asIllions()
                     }
                 }
             }

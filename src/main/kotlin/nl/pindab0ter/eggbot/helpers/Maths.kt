@@ -8,6 +8,19 @@ import java.math.RoundingMode.HALF_UP
 
 val mathContext = MathContext(6, HALF_UP)
 
+class BigDecimal {
+    companion object {
+        val FOUR = BigDecimal(4L)
+        val FIVE = BigDecimal(5L)
+        val SIXTY = BigDecimal(60L)
+        val HUNDRED = BigDecimal(100L)
+        val ONE_HUNDRED_FOURTY = BigDecimal(140L)
+        val FIFTY = BigDecimal(50L)
+        val THOUSAND = BigDecimal(1000L)
+        val FIVE_HUNDRED_QUINTILLION = BigDecimal("500000000000000000000")
+    }
+}
+
 inline fun <T> Iterable<T>.sumByBigDecimal(selector: (T) -> BigDecimal): BigDecimal {
     var sum: BigDecimal = BigDecimal.ZERO
     for (element in this) {

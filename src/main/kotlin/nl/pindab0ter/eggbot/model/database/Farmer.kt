@@ -27,9 +27,9 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     internal var soulEggsDouble by Farmers.soulEggsDouble
     val soulEggs: BigDecimal
         get() = if (soulEggsLong > 0) BigDecimal(soulEggsLong) else BigDecimal(soulEggsDouble)
+    var soulEggResearchLevel by Farmers.soulBonus
     var prophecyEggs by Farmers.prophecyEggs
-    var soulBonus by Farmers.soulBonus
-    var prophecyBonus by Farmers.prophecyBonus
+    var prophecyEggResearchLevel by Farmers.prophecyBonus
     var prestiges by Farmers.prestiges
     var droneTakedowns by Farmers.droneTakedowns
     var eliteDroneTakedowns by Farmers.eliteDroneTakedowns
@@ -41,17 +41,17 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val role: String get() = earningsBonus.asFarmerRole()
 
     private val bonusPerProphecyEgg: BigDecimal
-        get() = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyBonus)
+        get() = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyEggResearchLevel)
     private val bonusPerSoulEgg: BigDecimal
         get() {
-            val soulEggBonus = BigDecimal(10 + soulBonus)
+            val soulEggBonus = BigDecimal(10 + soulEggResearchLevel)
             return bonusPerProphecyEgg.pow(prophecyEggs.toInt()) * soulEggBonus
         }
-    val seToNextRole: BigDecimal
+    val seToNextRank: BigDecimal
         get() = earningsBonus.nextPowerOfTen()
             .minus(earningsBonus)
             .divide(bonusPerSoulEgg, RoundingMode.HALF_UP)
-    val peToNextRole: Int
+    val peToNextRank: Int
         get() = ceil(
             BigDecimalMath.log(earningsBonus.nextPowerOfTen() / earningsBonus, mathContext)
                 .div(BigDecimalMath.log(bonusPerProphecyEgg, mathContext))
@@ -73,8 +73,8 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         soulEggsLong = backup.game.soulEggsLong
         soulEggsDouble = backup.game.soulEggsDouble
         prophecyEggs = backup.game.prophecyEggs
-        soulBonus = backup.game.soulBonus
-        prophecyBonus = backup.game.prophecyBonus
+        soulEggResearchLevel = backup.game.soulEggResearchLevel
+        prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
         droneTakedowns = backup.stats.droneTakedowns
         eliteDroneTakedowns = backup.stats.droneTakedownsElite
         lastUpdated = backup.approxTime.toDateTime()

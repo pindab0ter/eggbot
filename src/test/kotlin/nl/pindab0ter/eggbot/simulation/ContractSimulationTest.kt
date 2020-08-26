@@ -16,9 +16,9 @@ import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkStatic
 import nl.pindab0ter.eggbot.helpers.auxbrain.CommonResearch
-import nl.pindab0ter.eggbot.model.simulation.old.ContractSimulation
 import nl.pindab0ter.eggbot.helpers.auxbrain.EpicResearch
 import nl.pindab0ter.eggbot.helpers.toDouble
+import nl.pindab0ter.eggbot.model.simulation.old.ContractSimulation
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -58,7 +58,7 @@ class ContractSimulationTest : DescribeSpec({
 
     lateinit var simulation: ContractSimulation
 
-    describe("A Contract Simulation") {
+    xdescribe("A Contract Simulation") {
 
         beforeTest {
             simulation = ContractSimulation(

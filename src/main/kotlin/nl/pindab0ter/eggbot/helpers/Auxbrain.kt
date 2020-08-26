@@ -13,9 +13,9 @@ val Backup.internalHatcheryMultiplier: BigDecimal
     get() = BigDecimal.ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
 val Backup.internalHatcherySharing: BigDecimal
     get() = BigDecimal.ONE + BigDecimal(".10") * game!!.epicResearch[EpicResearch.INTERNAL_HATCH_SHARING.ordinal].level
-val Backup.Game.soulBonus: Int
+val Backup.Game.soulEggResearchLevel: Int
     get() = epicResearch.find { it.id == "soul_eggs" }!!.level
-val Backup.Game.prophecyBonus: Int
+val Backup.Game.prophecyEggResearchLevel: Int
     get() = epicResearch.find { it.id == "prophecy_bonus" }!!.level
 val Contract.finalGoal: BigDecimal
     get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)

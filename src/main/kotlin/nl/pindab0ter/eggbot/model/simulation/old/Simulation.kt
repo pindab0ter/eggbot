@@ -4,6 +4,7 @@ import com.auxbrain.ei.Backup
 import com.auxbrain.ei.HabLevel
 import com.auxbrain.ei.VehicleType
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.auxbrain.CommonResearch.*
 import nl.pindab0ter.eggbot.helpers.auxbrain.EpicResearch.*
 import org.joda.time.DateTime
@@ -97,7 +98,7 @@ abstract class Simulation(val backup: Backup) {
     }
 
     val populationIncreasePerHour: BigDecimal by lazy {
-        populationIncreasePerMinute * BigDecimal(60)
+        populationIncreasePerMinute * SIXTY
     }
 
     // endregion

@@ -89,6 +89,7 @@ object CoopInfo : EggBotCommand() {
             }
 
         // TODO: Check whether co-op is finished before finding the local backup, which can fail
+        // TODO: Save final goal in DB?
         //
         // Co-op finished?
         //

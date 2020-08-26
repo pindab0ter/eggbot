@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.view
 
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
+import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.simulation.new.SoloContractState
 import org.joda.time.Duration
@@ -60,7 +62,7 @@ fun soloInfoResponse(
         minOf(
             eggIncrease(contract.farmer.finalState.habs, contract.farmer.constants),
             contract.farmer.constants.transportRate
-        ).multiply(BigDecimal(60L)).asIllions()
+        ).multiply(SIXTY).asIllions()
     }/hr) ")
     appendLine()
 
@@ -68,15 +70,15 @@ fun soloInfoResponse(
     if (!compact) append("(${
         if (contract.farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
         else eggIncrease(contract.farmer.initialState.habs, contract.farmer.constants)
-            .multiply(BigDecimal(60L)).asIllions()
+            .multiply(SIXTY).asIllions()
     }/hr) ")
     appendLine()
 
     append("Current chickens: ${contract.farmer.initialState.population.asIllions()} ")
     if (!compact) append("(${
         chickenIncrease(contract.farmer.initialState.habs, contract.farmer.constants)
-            .multiply(BigDecimal(4L) - contract.farmer.initialState.habs.fullCount())
-            .multiply(BigDecimal(60L)).asIllions()
+            .multiply(FOUR - contract.farmer.initialState.habs.fullCount())
+            .multiply(SIXTY).asIllions()
     }/hr)")
     appendLine()
 

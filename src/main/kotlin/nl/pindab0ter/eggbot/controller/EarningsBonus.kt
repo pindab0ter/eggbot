@@ -7,13 +7,15 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.model.database.DiscordUser
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.COMPACT
+import nl.pindab0ter.eggbot.helpers.compactSwitch
+import nl.pindab0ter.eggbot.helpers.extendedSwitch
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.*
+import nl.pindab0ter.eggbot.model.database.DiscordUser
+import nl.pindab0ter.eggbot.view.earningsBonusResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object EarningsBonus : EggBotCommand() {
@@ -53,64 +55,15 @@ object EarningsBonus : EggBotCommand() {
                 GlobalScope.launch(Dispatchers.IO) {
                     transaction { farmer.update(backup) }
                 }
+            }
 
-                data class Row(val label: String = "", val value: String = "", val suffix: String = "")
-
-                fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
-                    add(Row(label, value, suffix))
-
-                val rows = mutableListOf<Row>().apply {
-                    addRow("Role:", farmer.earningsBonus.asFarmerRole(shortened = compact))
-                    addRow(
-                        "Earnings Bonus:",
-                        if (extended) farmer.earningsBonus.formatInteger()
-                        else farmer.earningsBonus.asIllions(shortened = compact), " %"
-                    )
-                    addRow(
-                        "Soul Eggs:",
-                        if (extended) farmer.soulEggs.formatInteger()
-                        else farmer.soulEggs.asIllions(shortened = compact)
-                    )
-                    addRow("Prophecy Eggs:", farmer.prophecyEggs.formatInteger())
-                    if (farmer.soulBonus < 140)
-                        addRow("Soul Bonus:", farmer.soulBonus.formatInteger(), "/140")
-                    if (farmer.prophecyBonus < 5)
-                        addRow("Prophecy Bonus:", farmer.prophecyBonus.formatInteger(), "/5")
-                    addRow("Prestiges:", farmer.prestiges.formatInteger())
-                    addRow(
-                        "SE to next rank:", "+ ${
-                        if (extended) farmer.seToNextRole.formatInteger()
-                        else farmer.seToNextRole.asIllions(shortened = compact)}"
-                    )
-                    addRow("PE to next rank:", "+ ${farmer.peToNextRole.formatInteger()}")
-                }
-
-                table {
-                    title = "Earnings bonus for **${farmer.inGameName}**"
-                    displayHeader = false
-                    column {
-                        rightPadding = 2
-                        cells = rows.map { row -> row.label }
-                    }
-                    column {
-                        alignment = RIGHT
-                        cells = rows.map { row -> row.value }
-                    }
-                    column {
-                        cells = rows.map { row -> row.suffix }
-                    }
-                }.let { blocks ->
-                    if (event.channel == botCommandsChannel) {
-                        blocks.forEach { block -> event.reply(block) }
-                    } else {
-                        var firstResponse = true
-                        blocks.forEach { block ->
-                            event.replyInDm(block) {
-                                if (event.isFromType(ChannelType.TEXT) && firstResponse) {
-                                    event.reactSuccess()
-                                    firstResponse = false
-                                }
-                            }
+            earningsBonusResponse(farmer, compact, extended).forEachIndexed { index, block ->
+                if (event.channel == EggBot.botCommandsChannel) {
+                    event.reply(block)
+                } else {
+                    event.replyInDm(block) {
+                        if (event.isFromType(ChannelType.TEXT) && index == 0) {
+                            event.reactSuccess()
                         }
                     }
                 }
