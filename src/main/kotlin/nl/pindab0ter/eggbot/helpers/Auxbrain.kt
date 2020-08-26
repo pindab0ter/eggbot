@@ -34,8 +34,12 @@ fun Backup.farmFor(contractId: String): Backup.Simulation? = farms.firstOrNull {
 
 fun List<Backup>.findCreatorLocalContract(contractId: String, creatorId: String): LocalContract? = find { backup ->
     backup.userId == creatorId
-}?.contracts?.contracts?.find { localContract ->
-    localContract.contract?.id == contractId
+}?.contracts?.run {
+    contracts.find { localContract ->
+        localContract.contract?.id == contractId
+    } ?: archive.find { localContract ->
+        localContract.contract?.id == contractId
+    }
 }
 
 val Backup.Simulation.internalHatcheryFlatIncreases: List<BigDecimal>

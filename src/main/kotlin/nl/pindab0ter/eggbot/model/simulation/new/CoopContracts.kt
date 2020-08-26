@@ -12,12 +12,12 @@ fun simulateCoopContract(
     coopStatus: CoopStatusResponse,
     catchUp: Boolean = true,
 ): CoopContractState? {
-    val localContract: LocalContract = backups.findCreatorLocalContract(contractId, coopStatus.creatorId)
-        ?: backups.flatMap { backup ->
-            backup.contracts?.contracts.orEmpty()
-        }.sortedBy { it.timeAccepted }.firstOrNull { it.contract?.id == contractId } ?: return null
+    val localContract: LocalContract = backups.findCreatorLocalContract(contractId, coopStatus.creatorId) ?: return null
 
     val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, catchUp) }
+
+    if (farmers.isEmpty()) return null
+
     val contractState = CoopContractState(
         localContract, coopStatus.timeRemaining, coopStatus.public, farmers
     )

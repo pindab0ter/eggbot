@@ -51,6 +51,9 @@ object CoopsInfo : EggBotCommand() {
             return
         }
 
+        // TODO: Show ELR
+        // TODO: Show ↑ and ↓ for people overtaking/being overtaken
+
         val contract = AuxBrain.getPeriodicals()?.contracts?.contracts?.find { it.id == contractId }!!
 
         val resultRows = results.map { result ->

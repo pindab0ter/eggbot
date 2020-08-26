@@ -134,6 +134,7 @@ class Table {
 
     fun render(): List<String> {
         // TODO: Refactor
+        // TODO: Show ↑ and ↓ for people overtaking/being overtaken
         val blocks = mutableListOf<String>()
         blocks.add(buildString {
             require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }

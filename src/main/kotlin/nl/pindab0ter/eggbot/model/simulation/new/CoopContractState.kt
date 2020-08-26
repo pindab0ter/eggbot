@@ -25,6 +25,7 @@ data class CoopContractState(
     val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
     val tokensAvailable: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
     val tokensSpent: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
+    val finished: Boolean get() = farmers.all { farmer -> farmer.initialState == farmer.finalState }
 
     constructor(
         localContract: LocalContract,

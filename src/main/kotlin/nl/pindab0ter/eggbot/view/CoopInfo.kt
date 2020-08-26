@@ -25,7 +25,7 @@ fun coopInfoResponse(
 
     drawGoals(state, compact)
 
-    drawBasicInfo(state, compact)
+    drawBasicInfo(state, compact = compact)
 
     append('\u200B')
 
@@ -46,47 +46,40 @@ fun coopInfoResponse(
     }
 }.splitMessage(separator = '\u200B')
 
-fun coopFinishedIfCheckedInResponse(state: CoopContractState, compact: Boolean): String = buildString {
+fun coopFinishedResponse(
+    state: CoopContractState,
+    compact: Boolean,
+    ifCheckedIn: Boolean = false,
+): List<String> = buildString {
     appendLine("`${state.coopId}` vs. _${state.contractName}_:")
 
     drawGoals(state, compact)
 
-    drawBasicInfo(state, compact, finishedIfCheckedIn = true)
+    drawBasicInfo(state, finished = true, ifCheckedIn, compact)
+
+    append('\u200B')
 
     if (!compact) {
-        drawMembers(state)
-        drawTimeSinceLastBackup(state)
+        drawMembers(state, finished = true)
+
+        if (ifCheckedIn) {
+            append('\u200B')
+            drawTimeSinceLastBackup(state)
+        }
     } else {
         drawCompactMembers(state)
-        drawCompactTimeSinceLastBackup(state)
+
+        if (ifCheckedIn) {
+            append('\u200B')
+            drawCompactTimeSinceLastBackup(state)
+        }
     }
-}
+}.splitMessage(separator = '\u200B')
 
 private fun List<Farmer>.shortenedNames(): List<String> = map { farmer ->
     farmer.name.let { name ->
         if (name.length <= 10) name
         else "${name.substring(0 until 9)}…"
-    }
-}
-
-private fun StringBuilder.drawCompactTimeSinceLastBackup(
-    state: CoopContractState,
-): StringBuilder = appendTable {
-    title = "__**🎉 Completed if everyone checks in**:__"
-
-    column {
-        header = "Name"
-        rightPadding = 1
-        cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.shortenedNames()
-    }
-
-    column {
-        header = "Last update"
-        leftPadding = 1
-        alignment = RIGHT
-        cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.map { farmer ->
-            "${farmer.timeSinceBackup.asDaysHoursAndMinutes(true)} ago"
-        }
     }
 }
 
@@ -128,20 +121,21 @@ private fun StringBuilder.drawGoals(
 
 private fun StringBuilder.drawBasicInfo(
     coopContractState: CoopContractState,
-    compact: Boolean,
+    finished: Boolean = false,
     finishedIfCheckedIn: Boolean = false,
+    compact: Boolean,
 ): StringBuilder = apply {
-    appendLine("__🗒️ **Basic info**:__ ```")
 
-    if (!finishedIfCheckedIn) {
+    if (!finished) appendLine("__🗒️ **Basic info**:__ ```")
+    else appendLine("__**🎉 This contract was successfully completed!**:__ ```")
+
+    if (!finished && !finishedIfCheckedIn) {
         appendLine("Time remaining:   ${coopContractState.timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("Eggspected:       ${coopContractState.eggspected.asIllions()} ")
         if (!compact) append("(${
             coopContractState.farmers.sumByBigDecimal { farmer ->
-                eggIncrease(farmer.finalState.habs,
-                    farmer.constants)
-            }
-                .multiply(SIXTY).asIllions()
+                eggIncrease(farmer.finalState.habs, farmer.constants)
+            }.multiply(SIXTY).asIllions()
         })")
         appendLine()
     }
@@ -155,6 +149,7 @@ private fun StringBuilder.drawBasicInfo(
         }.multiply(SIXTY).asIllions()
     })")
     appendLine()
+
     append("Current chickens: ${
         coopContractState.farmers.sumByBigDecimal { farmer -> farmer.initialState.population }.asIllions()
     } ")
@@ -165,6 +160,7 @@ private fun StringBuilder.drawBasicInfo(
         }.multiply(SIXTY).asIllions()
     }/hr)")
     appendLine()
+
     appendLine("Tokens available: ${coopContractState.tokensAvailable}")
     appendLine("Tokens spent:     ${coopContractState.tokensSpent}")
     if (coopContractState.public) appendLine("Access:           This co-op is PUBLIC")
@@ -173,27 +169,33 @@ private fun StringBuilder.drawBasicInfo(
 
 private fun StringBuilder.drawMembers(
     state: CoopContractState,
+    finished: Boolean = false,
 ): StringBuilder = appendTable {
     val memberEmoji = when (Random.nextBoolean()) {
         true -> "👨‍🌾"
         false -> "👩‍🌾"
     }
     title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize}):__"
-    bottomPadding = 1
+    bottomPadding = if (!finished) 1 else 0
 
     incrementColumn(":")
+
+    // TODO: Show ↑ and ↓ for people overtaking/being overtaken
     column {
         header = "Name"
         leftPadding = 1
         rightPadding = 3
         cells = state.farmers.map { farmer -> farmer.name + if (!farmer.isSleeping) "" else " zZ" }
     }
+
     column {
         header = "Eggs"
         alignment = RIGHT
         cells = state.farmers.map { farmer -> farmer.initialState.eggsLaid.asIllions() }
     }
+
     divider()
+
     column {
         header = "/hr"
         rightPadding = 3
@@ -208,7 +210,9 @@ private fun StringBuilder.drawMembers(
         alignment = RIGHT
         cells = state.farmers.map { farmer -> farmer.initialState.population.asIllions() }
     }
+
     divider()
+
     column {
         header = "/hr"
         rightPadding = 3
@@ -218,6 +222,7 @@ private fun StringBuilder.drawMembers(
                 .multiply(SIXTY).asIllions()
         }
     }
+
     column {
         header = "Tkns"
         alignment = RIGHT
@@ -225,7 +230,9 @@ private fun StringBuilder.drawMembers(
             if (farmer.constants.tokensAvailable > 0) "${farmer.constants.tokensAvailable}" else ""
         }
     }
+
     divider()
+
     column {
         header = "Spent"
         cells = state.farmers.map { farmer ->
@@ -251,12 +258,15 @@ private fun StringBuilder.drawCompactMembers(
             "$name${if (!farmer.isSleeping) "" else " zZ"}"
         }
     }
+
     column {
         header = "Eggs"
         alignment = RIGHT
         cells = coopContractState.farmers.map { farmer -> farmer.initialState.eggsLaid.asIllions() }
     }
+
     divider()
+
     column {
         header = "/hr"
         rightPadding = 2
@@ -442,8 +452,9 @@ private fun StringBuilder.drawCompactTokens(
     }
 }
 
-private fun StringBuilder.drawTimeSinceLastBackup(state: CoopContractState): StringBuilder =
-    appendTable {
+private fun StringBuilder.drawTimeSinceLastBackup(
+    state: CoopContractState,
+): StringBuilder = appendTable {
         title = "__**🎉 Completed if everyone checks in**:__"
 
         column {
@@ -465,3 +476,24 @@ private fun StringBuilder.drawTimeSinceLastBackup(state: CoopContractState): Str
             }
         }
     }
+
+private fun StringBuilder.drawCompactTimeSinceLastBackup(
+    state: CoopContractState,
+): StringBuilder = appendTable {
+    title = "__**🎉 Completed if everyone checks in**:__"
+
+    column {
+        header = "Name"
+        rightPadding = 1
+        cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.shortenedNames()
+    }
+
+    column {
+        header = "Last update"
+        leftPadding = 1
+        alignment = RIGHT
+        cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.map { farmer ->
+            "${farmer.timeSinceBackup.asDaysHoursAndMinutes(true)} ago"
+        }
+    }
+}

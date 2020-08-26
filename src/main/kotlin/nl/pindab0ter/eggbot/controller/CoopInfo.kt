@@ -17,7 +17,7 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.Contract
 import nl.pindab0ter.eggbot.model.simulation.new.simulateCoopContract
-import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
+import nl.pindab0ter.eggbot.view.coopFinishedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.text.RegexOption.DOT_MATCHES_ALL
@@ -87,15 +87,6 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-        if (coopStatus.eggsLaid >= contract.finalGoal) """
-            `${coopStatus.coopId}` vs. __${contract.name}__:
-                
-            This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent().let {
-            message.delete().queue()
-            event.reply(it)
-            log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
-            return
-        }
 
         // TODO: Incorporate grace period; if simulation says they'll make it if everyone checks in, don't show this
         if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal) """
@@ -118,6 +109,30 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
+        if (coopStatus.eggsLaid >= contract.finalGoal) {
+            val state = simulateCoopContract(backups, contractId, coopStatus, catchUp = false) ?: """
+            `${coopStatus.coopId}` vs. __${contract.name}__:
+
+            This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent().let {
+                message.delete().queue()
+                event.reply(it)
+                log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
+                return
+            }
+
+            message.delete().queue()
+
+            coopFinishedResponse(state, compact).let { messages ->
+                if (event.channel == botCommandsChannel) {
+                    messages.forEach { message -> event.reply(message) }
+                } else {
+                    event.replyInDms(messages)
+                    if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+                }
+                return
+            }
+        }
+
         val coopContractState = simulateCoopContract(backups, contractId, coopStatus, catchUp = !forceReportedOnly)
 
         message.delete().queue()
@@ -131,14 +146,15 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-        if (!forceReportedOnly && coopContractState.farmers.all { farmer -> farmer.initialState == farmer.finalState }) {
-            if (event.channel == botCommandsChannel) {
-                event.reply(coopFinishedIfCheckedInResponse(coopContractState, compact))
-            } else {
-                event.replyInDm(coopFinishedIfCheckedInResponse(coopContractState, compact))
-                if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
-            }
-        } else coopInfoResponse(coopContractState, compact).let { messages ->
+        // TODO: Create sorting flag
+        // TODO: Sort by other things, e.g. chickens
+
+        (when {
+            !forceReportedOnly && coopContractState.finished ->
+                coopFinishedResponse(coopContractState, compact, ifCheckedIn = true)
+            else ->
+                coopInfoResponse(coopContractState, compact)
+        }).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {

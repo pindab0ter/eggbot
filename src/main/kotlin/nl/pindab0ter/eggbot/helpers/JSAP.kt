@@ -31,7 +31,7 @@ val coopIdOption: UnflaggedOption = UnflaggedOption(COOP_ID)
 val forceReportedOnlySwitch: Switch = Switch(FORCE_REPORTED_ONLY)
     .setShortFlag('r')
     .setLongFlag("force-reported-only")
-    .setHelp("Force working strictly with reported data instead of simulating everyone as if they were always recently updated") as Switch
+    .setHelp("Force working strictly with reported data instead of simulating everyone as if they are always recently updated.") as Switch
 
 fun JSAPResult.getIntOrNull(id: String) = if (contains(id)) getInt(id) else null
 fun JSAPResult.getStringOrNull(id: String) = if (contains(id)) getString(id) else null
