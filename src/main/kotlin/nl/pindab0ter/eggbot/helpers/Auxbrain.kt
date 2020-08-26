@@ -22,7 +22,7 @@ val Contract.finalGoal: BigDecimal
 val LocalContract.finalGoal: BigDecimal
     get() = contract!!.finalGoal
 val LocalContract.finished: Boolean
-    get() = BigDecimal(lastAmountWhenRewardGiven) > contract?.finalGoal
+    get() = lastAmountWhenRewardGiven.toBigDecimal() >= contract?.finalGoal
 val LocalContract.timeRemaining: Duration
     get() = contract!!.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), DateTime.now()))
 val CoopStatusResponse.eggsLaid: BigDecimal
