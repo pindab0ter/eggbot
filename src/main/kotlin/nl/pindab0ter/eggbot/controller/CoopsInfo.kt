@@ -5,16 +5,16 @@ import com.martiansoftware.jsap.JSAPResult
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
-import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
 import nl.pindab0ter.eggbot.jda.EggBotCommand
-import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.AuxBrain
+import nl.pindab0ter.eggbot.model.ProgressBar
+import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
+import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulation
 import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulationResult.*
-import nl.pindab0ter.eggbot.helpers.NumberFormatter.*
-import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object CoopsInfo : EggBotCommand() {
@@ -82,7 +82,9 @@ object CoopsInfo : EggBotCommand() {
         val longestEggspected = resultRows.map { it.eggspected }.plus("Eggspected").maxByOrNull { it.length }!!
         val longestMembers = resultRows.map { it.members }.maxByOrNull { it.length }!!
 
-        StringBuilder("`${guild.name}` vs _${contractId}_:\n").apply {
+        buildString {
+
+            appendLine("`${guild.name}` vs _${contractId}_:\n")
 
             // region Basic info
 
@@ -152,7 +154,7 @@ object CoopsInfo : EggBotCommand() {
             appendLine("```")
 
             // endregion Table
-        }.toString().splitCodeBlock().let { messages ->
+        }.splitCodeBlock().let { messages ->
             message.delete().queue()
             messages.forEach { message -> event.reply(message) }
         }

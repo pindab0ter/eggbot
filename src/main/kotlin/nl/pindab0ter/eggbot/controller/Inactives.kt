@@ -3,12 +3,12 @@ package nl.pindab0ter.eggbot.controller
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
-import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
 import nl.pindab0ter.eggbot.helpers.asCompact
 import nl.pindab0ter.eggbot.helpers.asDays
+import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -44,7 +44,7 @@ object Inactives : EggBotCommand() {
         }
     }
 
-    fun message(inactiveDiscordUsers: List<DiscordUser>): String = StringBuilder().apply {
+    fun message(inactiveDiscordUsers: List<DiscordUser>): String = buildString {
         val longestName = inactiveDiscordUsers.maxByOrNull { it.discordName.length }!!.discordName
         val now = DateTime.now()
 
@@ -59,5 +59,5 @@ object Inactives : EggBotCommand() {
             appendLine()
         }
         appendLine("```")
-    }.toString()
+    }
 }

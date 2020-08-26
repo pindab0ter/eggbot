@@ -2,17 +2,17 @@ package nl.pindab0ter.eggbot.jda
 
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.controller.CoopInfo
 import nl.pindab0ter.eggbot.helpers.splitMessage
+import nl.pindab0ter.eggbot.model.Config
 import java.util.function.Consumer
 
 
 object HelpConsumer : Consumer<CommandEvent> {
 
-    override fun accept(event: CommandEvent) = StringBuilder().apply {
+    override fun accept(event: CommandEvent) = buildString {
 
         fun append(commands: List<Command>) = commands.forEach { command ->
             if (!command.isHidden && (!command.isOwnerCommand || event.isOwner)) {
@@ -54,7 +54,7 @@ object HelpConsumer : Consumer<CommandEvent> {
                     }
             } else append(commands)
         }
-    }.toString().splitMessage(prefix = "Continued…\n", separator = '\u200B').forEach { section ->
+    }.splitMessage(prefix = "Continued…\n", separator = '\u200B').forEach { section ->
         event.reply(section)
     }
 }

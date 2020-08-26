@@ -6,9 +6,9 @@ import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
-import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Unregister : EggBotCommand() {
@@ -53,7 +53,7 @@ object Unregister : EggBotCommand() {
                     return@transaction
                 }
 
-            StringBuilder().apply {
+            buildString {
 
                 append("`${discordUser.discordTag}` has been unregistered")
                 when {
@@ -63,7 +63,7 @@ object Unregister : EggBotCommand() {
                         append(", along with the farmers `${discordUser.farmers.joinToString(", ") { it.inGameName }}`")
                 }
                 append(".")
-            }.toString().let {
+            }.let {
                 event.replySuccess(it)
                 log.debug { it }
             }

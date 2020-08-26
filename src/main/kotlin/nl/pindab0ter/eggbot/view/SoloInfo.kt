@@ -13,7 +13,7 @@ import java.math.BigDecimal
 fun soloInfoResponse(
     contract: SoloContractState,
     compact: Boolean = false,
-): String = StringBuilder().apply message@{
+): String = buildString message@{
     val eggEmote = EggBot.eggsToEmotes[contract.egg]?.asMention ?: "🥚"
 
     appendLine("`${contract.farmer.name}` vs. _${contract.contractName}_:")
@@ -125,4 +125,4 @@ fun soloInfoResponse(
 
     // endregion Bottlenecks
 
-}.toString()
+}

@@ -66,13 +66,13 @@ class ProgressBar(
         val full = (current.toDouble() / total.toDouble() * width.toDouble()).roundToInt()
         val empty = width - full
 
-        return StringBuilder().apply {
+        return buildString {
             append("`")
             append("▓".repeat(full))
             append("░".repeat(empty))
             if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
             if (showPercentage) append(" ($percentage%)")
             append("`")
-        }.toString()
+        }
     }
 }

@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.helpers
 
 import nl.pindab0ter.eggbot.model.Table
-import nl.pindab0ter.eggbot.model.Table.*
+import nl.pindab0ter.eggbot.model.Table.Column
 
 @DslMarker
 annotation class TableMarker
@@ -20,7 +20,7 @@ inline fun StringBuilder.appendTable(
     }
 }
 
-inline fun List<Column>.renderRow(spacingChar: Char = ' ', transform: Column.() -> String) = StringBuilder().apply {
+inline fun List<Column>.renderRow(spacingChar: Char = ' ', transform: Column.() -> String) = buildString {
     this@renderRow.forEach { column ->
         append(spacingChar.repeat(column.leftPadding))
         append(column.transform())

@@ -20,8 +20,8 @@ object CommandLogger : ListenerAdapter() {
                 jdaClient.selfUser.asMention
             ).any { event.message.contentRaw.startsWith(it) }
         ) log.trace {
-            StringBuilder(event.author.name).apply {
-                append(" (")
+            buildString {
+                append("${event.author.name} (")
                 when (event.channelType) {
                     PRIVATE -> append("DM")
                     TEXT -> append("#${event.channel.name}")

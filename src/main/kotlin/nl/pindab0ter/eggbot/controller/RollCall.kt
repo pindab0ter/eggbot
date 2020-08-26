@@ -12,15 +12,15 @@ import nl.pindab0ter.eggbot.EggBot.botOwner
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
-import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.database.Coops
-import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.jda.EggBotCommand
-import nl.pindab0ter.eggbot.model.ProgressBar
-import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
+import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.AuxBrain
+import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
+import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -121,8 +121,10 @@ object RollCall : EggBotCommand() {
                         role.delete().submit()
                     }
 
-                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${botOwner?.asMention
-                        ?: "the bot maintainer"}".let {
+                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${
+                        botOwner?.asMention
+                            ?: "the bot maintainer"
+                    }".let {
                         event.replyWarning(it)
                         log.error { it }
                     }
@@ -164,7 +166,10 @@ object RollCall : EggBotCommand() {
             // TODO: Replace with table
 
             message.delete().complete()
-            event.reply(StringBuilder("Co-ops generated for `${contractInfo.id}`:").appendLine().apply {
+            event.reply(buildString {
+                appendLine("Co-ops generated for `${contractInfo.id}`:")
+                appendLine()
+
                 append("```")
                 coops.forEach { coop ->
                     append(coop.name)
@@ -180,11 +185,11 @@ object RollCall : EggBotCommand() {
                     appendLine()
                 }
                 append("```")
-            }.toString())
+            })
 
             coops.map { coop ->
                 val role = coop.roleId?.let { guild.getRoleById(it) }
-                StringBuilder().apply {
+                buildString {
                     appendLine("__**Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)**__")
                     coop.farmers.forEach { farmer ->
                         append(
@@ -195,7 +200,7 @@ object RollCall : EggBotCommand() {
                         if (farmer.isActive.not()) append(" _Inactive_")
                         appendLine()
                     }
-                }.toString()
+                }
             }.forEach {
                 event.reply(it)
             }
@@ -209,7 +214,7 @@ object RollCall : EggBotCommand() {
             farmers: List<Farmer>,
             contract: Contract,
             preferredCoopSize: Int,
-            baseName: String
+            baseName: String,
         ): List<Coop> = transaction {
             val amountOfCoops = (farmers.size / preferredCoopSize) + 1
             val coopNames = coopNames(amountOfCoops, baseName)
@@ -230,7 +235,7 @@ object RollCall : EggBotCommand() {
         fun createRollCall(
             farmers: List<Farmer>,
             contract: Contract,
-            baseName: String
+            baseName: String,
         ): List<Coop> {
             val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
             val inactiveFarmers = farmers.filter { !it.isActive }.sortedBy { it.earningsBonus }

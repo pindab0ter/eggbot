@@ -11,7 +11,7 @@ import org.joda.time.Duration
 fun contractIDsResponse(soloContracts: List<Contract>, coopContracts: List<Contract>): String = buildString {
     appendLine("IDs for currently active contracts:")
 
-    fun List<Contract>.printContracts(): String = StringBuilder().apply {
+    fun List<Contract>.printContracts(): String = buildString {
         this@printContracts.forEach { contract ->
             append("**`${contract.id}`**: ")
             append("${contract.name} ")
@@ -25,7 +25,7 @@ fun contractIDsResponse(soloContracts: List<Contract>, coopContracts: List<Contr
             )
             appendLine("_")
         }
-    }.toString()
+    }
 
     if (soloContracts.isNotEmpty()) {
         append("\n  __Solo contracts__:\n")

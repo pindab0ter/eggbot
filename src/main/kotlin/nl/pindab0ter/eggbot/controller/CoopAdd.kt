@@ -102,7 +102,7 @@ object CoopAdd : EggBotCommand() {
                     progressBar.update(i + 1)
                 }
 
-                StringBuilder().apply {
+                buildString {
                     appendLine("${Config.emojiSuccess} Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
                     if (successes.isNotEmpty()) {
                         appendLine()
@@ -116,7 +116,7 @@ object CoopAdd : EggBotCommand() {
                         failures.forEach { userName -> appendLine(userName) }
                         appendLine("```")
                     }
-                }.toString().let { messageBody ->
+                }.let { messageBody ->
                     message.delete().complete()
                     event.reply(messageBody)
                 }

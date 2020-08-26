@@ -54,7 +54,7 @@ abstract class EggBotCommand : Command() {
     val Parameter.cleanSyntax
         get() = clean(syntax)
 
-    private fun generateCommandHelp() = StringBuilder().apply {
+    private fun generateCommandHelp() = buildString {
         append("ℹ️ **`${Config.prefix}$name")
         if (parameters != null) {
             append(" ")
@@ -78,7 +78,7 @@ abstract class EggBotCommand : Command() {
                 appendLine("    ${parameter.help}")
             }
         }
-    }.toString()
+    }
 
     final override fun execute(event: CommandEvent) {
         if (sendTyping) event.channel.sendTyping().queue()

@@ -1,10 +1,11 @@
 package nl.pindab0ter.eggbot.model
 
-import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.*
 import nl.pindab0ter.eggbot.helpers.TableMarker
 import nl.pindab0ter.eggbot.helpers.interleave
 import nl.pindab0ter.eggbot.helpers.renderRow
 import nl.pindab0ter.eggbot.helpers.repeat
+import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
+import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 
 @TableMarker
 @Suppress("SuspiciousVarProperty")
@@ -134,7 +135,7 @@ class Table {
     fun render(): List<String> {
         // TODO: Refactor
         val blocks = mutableListOf<String>()
-        blocks.add(StringBuilder().apply {
+        blocks.add(buildString {
             require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }
             require(columns.all { it.cells.size == amountOfRows }) { "All columns must be of equal size" }
 
@@ -179,7 +180,8 @@ class Table {
 
             repeat(bottomPadding) { appendLine() }
 
-        }.toString())
+        })
+
         return blocks
     }
 
