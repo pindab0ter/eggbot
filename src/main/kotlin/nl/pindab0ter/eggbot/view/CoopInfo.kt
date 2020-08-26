@@ -10,6 +10,7 @@ import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.simulation.new.CoopContractState
 import org.joda.time.Duration
 import java.math.BigDecimal
+import kotlin.random.Random
 
 
 fun coopInfoResponseNew(
@@ -97,13 +98,18 @@ fun coopInfoResponseNew(
 
         // endregion Basic info and totals
 
+        val memberEmoji = when (Random.nextBoolean()) {
+            true -> "👨‍🌾"
+            false -> "👩‍🌾"
+        }
+
         if (!compact) {
 
             // region Non-compact
 
             @Suppress("SpellCheckingInspection")
             appendTable {
-                title = "__**👨‍🌾 Members** (${farmers.count()}/${maxCoopSize}):__"
+                title = "__**${memberEmoji} Members** (${farmers.count()}/${maxCoopSize}):__"
 
                 incrementColumn(":")
                 column {
@@ -167,7 +173,7 @@ fun coopInfoResponseNew(
             // region Compact
 
             appendTable {
-                title = "__**🚜 Members** (${farmers.count()}/${maxCoopSize}):__"
+                title = "__**${memberEmoji} Members** (${farmers.count()}/${maxCoopSize}):__"
 
                 column {
                     header = "Name"
