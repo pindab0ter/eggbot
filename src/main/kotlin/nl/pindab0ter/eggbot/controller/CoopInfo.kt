@@ -128,6 +128,10 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
+        if (coopContractState.farmers.all { farmer -> farmer.initialState == farmer.finalState }) {
+            // TODO: Contract is finished if everyone checks in
+        }
+
         coopInfoResponseNew(coopContractState, compact).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }

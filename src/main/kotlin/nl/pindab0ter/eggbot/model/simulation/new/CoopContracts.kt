@@ -19,7 +19,7 @@ fun simulateCoopContract(
 
     val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, catchUp) }
     val contractState = CoopContractState(
-        localContract, coopStatus.public, farmers
+        localContract, coopStatus.timeRemaining, coopStatus.public, farmers
     )
 
     return simulate(contractState)

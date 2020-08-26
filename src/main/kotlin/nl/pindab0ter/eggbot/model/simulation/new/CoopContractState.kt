@@ -26,7 +26,12 @@ data class CoopContractState(
     val tokensAvailable: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
     val tokensSpent: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
 
-    constructor(localContract: LocalContract, public: Boolean, farmers: List<Farmer>) : this(
+    constructor(
+        localContract: LocalContract,
+        timeRemaining: Duration? = null,
+        public: Boolean,
+        farmers: List<Farmer>,
+    ) : this(
         contractId = localContract.contract!!.id,
         contractName = localContract.contract.name,
         coopId = localContract.coopId,
@@ -34,7 +39,8 @@ data class CoopContractState(
         maxCoopSize = localContract.contract.maxCoopSize,
         public = public,
         goals = Goal.fromContract(localContract, farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }),
-        timeRemaining = localContract.timeRemaining,
+        timeRemaining = timeRemaining ?: localContract.timeRemaining,
+        eggspected = farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid },
         farmers = farmers
     )
 
