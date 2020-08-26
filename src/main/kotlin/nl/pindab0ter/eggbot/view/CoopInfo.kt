@@ -51,7 +51,7 @@ fun coopFinishedIfCheckedInResponse(state: CoopContractState, compact: Boolean):
 
     drawGoals(state, compact)
 
-    drawBasicInfo(state, compact)
+    drawBasicInfo(state, compact, finishedIfCheckedIn = true)
 
     if (!compact) {
         drawMembers(state)
@@ -129,15 +129,23 @@ private fun StringBuilder.drawGoals(
 private fun StringBuilder.drawBasicInfo(
     coopContractState: CoopContractState,
     compact: Boolean,
+    finishedIfCheckedIn: Boolean = false,
 ): StringBuilder = apply {
     appendLine("__🗒️ **Basic info**:__ ```")
-    appendLine("Time remaining:   ${coopContractState.timeRemaining.asDaysHoursAndMinutes(compact)}")
-    append("Eggspected:       ${coopContractState.eggspected.asIllions()} ")
-    if (!compact) append("(${
-        coopContractState.farmers.sumByBigDecimal { farmer -> eggIncrease(farmer.finalState.habs, farmer.constants) }
-            .multiply(SIXTY).asIllions()
-    })")
-    appendLine()
+
+    if (!finishedIfCheckedIn) {
+        appendLine("Time remaining:   ${coopContractState.timeRemaining.asDaysHoursAndMinutes(compact)}")
+        append("Eggspected:       ${coopContractState.eggspected.asIllions()} ")
+        if (!compact) append("(${
+            coopContractState.farmers.sumByBigDecimal { farmer ->
+                eggIncrease(farmer.finalState.habs,
+                    farmer.constants)
+            }
+                .multiply(SIXTY).asIllions()
+        })")
+        appendLine()
+    }
+
     append("Current eggs:     ${
         coopContractState.farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }.asIllions()
     } ")
@@ -442,7 +450,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(state: CoopContractState): Str
             header = "Name"
             leftPadding = 1
             rightPadding = 3
-            cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.map { farmer ->
+            cells = state.farmers.sortedBy { farmer -> farmer.timeSinceBackup }.map { farmer ->
                 farmer.name
             }
         }
@@ -452,7 +460,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(state: CoopContractState): Str
         column {
             header = "Last update"
             leftPadding = 1
-            cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.map { farmer ->
+            cells = state.farmers.sortedByDescending { farmer -> farmer.timeSinceBackup }.map { farmer ->
                 "${farmer.timeSinceBackup.asDaysHoursAndMinutes()} ago"
             }
         }
