@@ -17,7 +17,8 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.Contract
 import nl.pindab0ter.eggbot.model.simulation.new.simulateCoopContract
-import nl.pindab0ter.eggbot.view.coopInfoResponseNew
+import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
+import nl.pindab0ter.eggbot.view.coopInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
@@ -35,7 +36,8 @@ object CoopInfo : EggBotCommand() {
         parameters = listOf(
             contractIdOption,
             coopIdOption,
-            compactSwitch
+            compactSwitch,
+            forceReportedOnlySwitch
         )
         sendTyping = false
         init()
@@ -45,6 +47,7 @@ object CoopInfo : EggBotCommand() {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
+        val forceReportedOnly: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false)
         val message: Message = event.channel.sendMessage("Fetching contract information…").complete()
         val coopStatus: CoopStatusResponse = AuxBrain.getCoopStatus(contractId, coopId)
             ?: "No co-op found for contract `${contractId}` with name `${coopId}`".let {
@@ -115,7 +118,7 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
-        val coopContractState = simulateCoopContract(backups, contractId, coopStatus)
+        val coopContractState = simulateCoopContract(backups, contractId, coopStatus, catchUp = !forceReportedOnly)
 
         message.delete().queue()
 
@@ -128,11 +131,14 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-        if (coopContractState.farmers.all { farmer -> farmer.initialState == farmer.finalState }) {
-            // TODO: Contract is finished if everyone checks in
-        }
-
-        coopInfoResponseNew(coopContractState, compact).let { messages ->
+        if (!forceReportedOnly && coopContractState.farmers.all { farmer -> farmer.initialState == farmer.finalState }) {
+            if (event.channel == botCommandsChannel) {
+                event.reply(coopFinishedIfCheckedInResponse(coopContractState, compact))
+            } else {
+                event.replyInDm(coopFinishedIfCheckedInResponse(coopContractState, compact))
+                if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+            }
+        } else coopInfoResponse(coopContractState, compact).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
             } else {
