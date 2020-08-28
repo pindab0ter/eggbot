@@ -30,7 +30,7 @@ data class EarningsBonus(
         BASE_SOUL_EGG_RESEARCH_BONUS + (SOUL_EGG_RESEARCH_BONUS_PER_LEVEL * soulEggsResearchLevel)
 
     val earningsBonusPerSoulEgg: BigDecimal =
-        prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus
+        prophecyEggBonus.pow(prophecyEggs.toInt()) * soulEggBonus * BigDecimal("100")
 
     val earningsBonus: BigDecimal =
         soulEggs * earningsBonusPerSoulEgg
