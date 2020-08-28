@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.simulation
 
+/*
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.HabLevel.NO_HAB
@@ -134,3 +135,4 @@ class ContractSimulationTest : DescribeSpec({
         }
     }
 })
+*/

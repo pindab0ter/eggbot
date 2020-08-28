@@ -183,7 +183,7 @@ object LeaderBoard : EggBotCommand() {
         if (board == EARNINGS_BONUS) column {
             header = if (compact) "Role" else "Farmer Role"
             leftPadding = if (compact) 1 else 2
-            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asFarmerRole(shortened = compact) }
+            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asRank(shortened = compact) }
         }
     }
 }

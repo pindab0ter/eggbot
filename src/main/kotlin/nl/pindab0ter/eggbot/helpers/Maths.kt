@@ -14,7 +14,7 @@ class BigDecimal {
         val FIVE = BigDecimal(5L)
         val SIXTY = BigDecimal(60L)
         val HUNDRED = BigDecimal(100L)
-        val ONE_HUNDRED_FOURTY = BigDecimal(140L)
+        val ONE_HUNDRED_FORTY = BigDecimal(140L)
         val FIFTY = BigDecimal(50L)
         val THOUSAND = BigDecimal(1000L)
         val FIVE_HUNDRED_QUINTILLION = BigDecimal("500000000000000000000")

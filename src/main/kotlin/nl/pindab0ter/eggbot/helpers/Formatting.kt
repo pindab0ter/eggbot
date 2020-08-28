@@ -81,7 +81,7 @@ fun BigDecimal.asIllions(formatter: NumberFormatter = DECIMALS, shortened: Boole
     }
 }
 
-fun BigDecimal.asFarmerRole(shortened: Boolean = false): String = when (this) {
+fun BigDecimal.asRank(shortened: Boolean = false): String = when (this) {
     in (ZERO..TEN.pow(3) - ONE) -> "Farmer"
     in (TEN.pow(3)..TEN.pow(4) - ONE) -> "Farmer II"
     in (TEN.pow(4)..TEN.pow(5) - ONE) -> "Farmer III"

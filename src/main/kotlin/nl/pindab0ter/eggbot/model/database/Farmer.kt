@@ -38,7 +38,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     val isActive: Boolean get() = discordUser.isActive
 
-    val role: String get() = earningsBonus.asFarmerRole()
+    val rank: String get() = earningsBonus.asRank()
 
     private val bonusPerProphecyEgg: BigDecimal
         get() = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyEggResearchLevel)

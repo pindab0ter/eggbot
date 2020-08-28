@@ -40,9 +40,8 @@ dependencies {
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.13.3")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.32.3.2")
 
-    // testImplementation("org.junit.jupiter", "junit-jupiter", "5.6.2")
     testImplementation("io.kotest", "kotest-runner-junit5-jvm", "4.2.0")
-    testImplementation("io.kotest", "kotest-assertions-core-jvm", "4.2.0")
+    implementation("io.kotest", "kotest-assertions-core-jvm", "4.2.0")
     testImplementation("io.kotest", "kotest-property-jvm", "4.2.0")
     testImplementation("io.mockk", "mockk", "1.10.0")
 }

@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.view
 
-import nl.pindab0ter.eggbot.helpers.asFarmerRole
+import nl.pindab0ter.eggbot.helpers.asRank
 import nl.pindab0ter.eggbot.helpers.asIllions
 import nl.pindab0ter.eggbot.helpers.formatInteger
 import nl.pindab0ter.eggbot.helpers.table
@@ -15,7 +15,7 @@ fun earningsBonusResponse(farmer: Farmer, compact: Boolean, extended: Boolean): 
         add(Row(label, value, suffix))
 
     val rows = mutableListOf<Row>().apply {
-        addRow("Role:", farmer.earningsBonus.asFarmerRole(shortened = compact))
+        addRow("Role:", farmer.earningsBonus.asRank(shortened = compact))
         addRow(
             "Earnings Bonus:",
             if (extended) farmer.earningsBonus.formatInteger()
