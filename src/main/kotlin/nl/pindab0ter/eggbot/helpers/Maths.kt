@@ -3,8 +3,7 @@ package nl.pindab0ter.eggbot.helpers
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.MathContext
-import java.math.RoundingMode.FLOOR
-import java.math.RoundingMode.HALF_UP
+import java.math.RoundingMode.*
 
 val mathContext = MathContext(6, HALF_UP)
 
@@ -30,6 +29,8 @@ inline fun <T> Iterable<T>.sumByBigDecimal(selector: (T) -> BigDecimal): BigDeci
 }
 
 fun BigDecimal.nextPowerOfTen(): BigDecimal = BigDecimal("1".padEnd(setScale(0, FLOOR).toPlainString().length + 1, '0'))
+fun BigDecimal.floor(): BigDecimal = setScale(0, FLOOR)
+fun BigDecimal.ceiling(): BigDecimal = setScale(0, CEILING)
 
 fun Iterable<BigDecimal>.product(): BigDecimal = reduce { acc, bonus -> acc * bonus }
 fun List<BigDecimal>.sum(): BigDecimal = this.reduce { acc, duration -> acc + duration }
