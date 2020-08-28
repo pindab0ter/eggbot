@@ -180,12 +180,17 @@ private fun StringBuilder.drawMembers(
 
     incrementColumn(":")
 
-    // TODO: Show ↑ and ↓ for people overtaking/being overtaken
     column {
         header = "Name"
         leftPadding = 1
         rightPadding = 3
-        cells = state.farmers.map { farmer -> farmer.name + if (!farmer.isSleeping) "" else " zZ" }
+        cells = state.farmers.map { farmer ->
+            buildString {
+                append(farmer.name)
+                appendOvertakingArrow(farmer, state)
+                if (farmer.isSleeping) append(" zZ")
+            }
+        }
     }
 
     column {
@@ -242,27 +247,33 @@ private fun StringBuilder.drawMembers(
 }
 
 private fun StringBuilder.drawCompactMembers(
-    coopContractState: CoopContractState,
+    state: CoopContractState,
 ): StringBuilder = appendTable {
     val memberEmoji = when (Random.nextBoolean()) {
         true -> "👨‍🌾"
         false -> "👩‍🌾"
     }
-    title = "__**${memberEmoji} Members** (${coopContractState.farmers.count()}/${coopContractState.maxCoopSize}):__"
+    title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize}):__"
     bottomPadding = 1
 
     column {
         header = "Name"
         rightPadding = 2
-        cells = coopContractState.farmers.zip(coopContractState.farmers.shortenedNames()).map { (farmer, name) ->
-            "$name${if (!farmer.isSleeping) "" else " zZ"}"
+        cells = state.farmers.zip(state.farmers.shortenedNames()).map { (farmer, name) ->
+            buildString {
+                append(name)
+
+                appendOvertakingArrow(farmer, state)
+
+                if (farmer.isSleeping) append(" zZ")
+            }
         }
     }
 
     column {
         header = "Eggs"
         alignment = RIGHT
-        cells = coopContractState.farmers.map { farmer -> farmer.initialState.eggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.initialState.eggsLaid.asIllions() }
     }
 
     divider()
@@ -270,10 +281,27 @@ private fun StringBuilder.drawCompactMembers(
     column {
         header = "/hr"
         rightPadding = 2
-        cells = coopContractState.farmers.map { farmer ->
+        cells = state.farmers.map { farmer ->
             eggIncrease(farmer.initialState.habs, farmer.constants).multiply(SIXTY).asIllions()
         }
     }
+}
+
+private fun StringBuilder.appendOvertakingArrow(
+    farmer: Farmer,
+    state: CoopContractState,
+) = when {
+    state.farmers.any { other ->
+        eggIncrease(farmer.finalState.habs, farmer.constants) >
+                eggIncrease(other.finalState.habs, other.constants) &&
+                farmer.finalState.eggsLaid < other.finalState.eggsLaid
+    } -> append(" ↑")
+    state.farmers.any { other ->
+        eggIncrease(farmer.finalState.habs, farmer.constants) <
+                eggIncrease(other.finalState.habs, other.constants) &&
+                farmer.finalState.eggsLaid > other.finalState.eggsLaid
+    } -> append(" ↓")
+    else -> this
 }
 
 private fun StringBuilder.drawBottleNecks(
@@ -455,27 +483,27 @@ private fun StringBuilder.drawCompactTokens(
 private fun StringBuilder.drawTimeSinceLastBackup(
     state: CoopContractState,
 ): StringBuilder = appendTable {
-        title = "__**🎉 Completed if everyone checks in**:__"
+    title = "__**🎉 Completed if everyone checks in**:__"
 
-        column {
-            header = "Name"
-            leftPadding = 1
-            rightPadding = 3
-            cells = state.farmers.sortedBy { farmer -> farmer.timeSinceBackup }.map { farmer ->
-                farmer.name
-            }
-        }
-
-        divider()
-
-        column {
-            header = "Last update"
-            leftPadding = 1
-            cells = state.farmers.sortedByDescending { farmer -> farmer.timeSinceBackup }.map { farmer ->
-                "${farmer.timeSinceBackup.asDaysHoursAndMinutes()} ago"
-            }
+    column {
+        header = "Name"
+        leftPadding = 1
+        rightPadding = 3
+        cells = state.farmers.sortedBy { farmer -> farmer.timeSinceBackup }.map { farmer ->
+            farmer.name
         }
     }
+
+    divider()
+
+    column {
+        header = "Last update"
+        leftPadding = 1
+        cells = state.farmers.sortedByDescending { farmer -> farmer.timeSinceBackup }.map { farmer ->
+            "${farmer.timeSinceBackup.asDaysHoursAndMinutes()} ago"
+        }
+    }
+}
 
 private fun StringBuilder.drawCompactTimeSinceLastBackup(
     state: CoopContractState,
