@@ -54,9 +54,9 @@ data class EarningsBonus(
     companion object {
         private val BASE_SOUL_EGG_RESEARCH_BONUS = BigDecimal("0.1")
         private val SOUL_EGG_RESEARCH_BONUS_PER_LEVEL = BigDecimal("0.01")
-        private val MAX_SOUL_EGG_RESEARCH_LEVEL = BigDecimal("140")
+        val MAX_SOUL_EGG_RESEARCH_LEVEL = BigDecimal("140")
         private val BASE_PROPHECY_EGG_RESEARCH_BONUS = BigDecimal("0.05")
         private val PROPHECY_EGG_RESEARCH_BONUS_PER_LEVEL = BigDecimal("0.01")
-        private val MAX_PROPHECY_EGG_RESEARCH_LEVEL = BigDecimal("5")
+        val MAX_PROPHECY_EGG_RESEARCH_LEVEL = BigDecimal("5")
     }
 }

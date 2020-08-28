@@ -1,44 +1,52 @@
 package nl.pindab0ter.eggbot.view
 
-import nl.pindab0ter.eggbot.helpers.asRank
 import nl.pindab0ter.eggbot.helpers.asIllions
+import nl.pindab0ter.eggbot.helpers.asRank
 import nl.pindab0ter.eggbot.helpers.formatInteger
 import nl.pindab0ter.eggbot.helpers.table
+import nl.pindab0ter.eggbot.model.EarningsBonus
+import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_PROPHECY_EGG_RESEARCH_LEVEL
+import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_SOUL_EGG_RESEARCH_LEVEL
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.database.Farmer
 
 
-fun earningsBonusResponse(farmer: Farmer, compact: Boolean, extended: Boolean): List<String> {
+fun earningsBonusResponse(
+    farmer: Farmer,
+    earningsBonusObject: EarningsBonus,
+    compact: Boolean,
+    extended: Boolean,
+): List<String> = earningsBonusObject.run {
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
 
     fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
         add(Row(label, value, suffix))
 
     val rows = mutableListOf<Row>().apply {
-        addRow("Role:", farmer.earningsBonus.asRank(shortened = compact))
+        addRow("Rank:", earningsBonus.asRank(shortened = compact))
         addRow(
             "Earnings Bonus:",
-            if (extended) farmer.earningsBonus.formatInteger()
-            else farmer.earningsBonus.asIllions(shortened = compact), " %"
+            if (extended) earningsBonus.formatInteger()
+            else earningsBonus.asIllions(shortened = compact), " %"
         )
         addRow(
             "Soul Eggs:",
-            if (extended) farmer.soulEggs.formatInteger()
-            else farmer.soulEggs.asIllions(shortened = compact)
+            if (extended) soulEggs.formatInteger()
+            else soulEggs.asIllions(shortened = compact)
         )
-        addRow("Prophecy Eggs:", farmer.prophecyEggs.formatInteger())
-        if (farmer.soulEggResearchLevel < 140)
-            addRow("Soul Bonus:", farmer.soulEggResearchLevel.formatInteger(), "/140")
-        if (farmer.prophecyEggResearchLevel < 5)
-            addRow("Prophecy Bonus:", farmer.prophecyEggResearchLevel.formatInteger(), "/5")
+        addRow("Prophecy Eggs:", prophecyEggs.formatInteger())
+        if (soulEggsResearchLevel < MAX_SOUL_EGG_RESEARCH_LEVEL)
+            addRow("Soul Bonus:", soulEggsResearchLevel.formatInteger(), "/140")
+        if (prophecyEggsResearchLevel < MAX_PROPHECY_EGG_RESEARCH_LEVEL)
+            addRow("Prophecy Bonus:", prophecyEggsResearchLevel.formatInteger(), "/5")
         addRow("Prestiges:", farmer.prestiges.formatInteger())
         addRow(
             "SE to next rank:", "+ ${
-                if (extended) farmer.seToNextRank.formatInteger()
-                else farmer.seToNextRank.asIllions(shortened = compact)
+                if (extended) soulEggsToNextRank.formatInteger()
+                else soulEggsToNextRank.asIllions(shortened = compact)
             }"
         )
-        addRow("PE to next rank:", "+ ${farmer.peToNextRank.formatInteger()}")
+        addRow("PE to next rank:", "+ ${prophecyEggsToNextRank.formatInteger()}")
     }
 
     return table {

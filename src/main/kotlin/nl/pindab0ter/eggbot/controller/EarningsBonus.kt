@@ -14,6 +14,7 @@ import nl.pindab0ter.eggbot.helpers.compactSwitch
 import nl.pindab0ter.eggbot.helpers.extendedSwitch
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
+import nl.pindab0ter.eggbot.model.EarningsBonus
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.view.earningsBonusResponse
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -57,7 +58,9 @@ object EarningsBonus : EggBotCommand() {
                 }
             }
 
-            earningsBonusResponse(farmer, compact, extended).forEachIndexed { index, block ->
+            val earningsBonus = EarningsBonus(farmer)
+
+            earningsBonusResponse(farmer, earningsBonus, compact, extended).forEachIndexed { index, block ->
                 if (event.channel == EggBot.botCommandsChannel) {
                     event.reply(block)
                 } else {

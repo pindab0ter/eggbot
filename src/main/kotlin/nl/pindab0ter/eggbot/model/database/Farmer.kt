@@ -1,21 +1,19 @@
 package nl.pindab0ter.eggbot.model.database
 
-import ch.obermuhlner.math.big.BigDecimalMath
 import com.auxbrain.ei.Backup
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Farmers
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
+import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
+import nl.pindab0ter.eggbot.helpers.toDateTime
 import nl.pindab0ter.eggbot.model.AuxBrain
+import nl.pindab0ter.eggbot.model.EarningsBonus
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
 import java.math.BigDecimal
-import java.math.RoundingMode
-import kotlin.div
-import kotlin.math.ceil
-import kotlin.math.roundToInt
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
     private val log = KotlinLogging.logger {}
@@ -38,26 +36,8 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
     val isActive: Boolean get() = discordUser.isActive
 
-    val rank: String get() = earningsBonus.asRank()
-
-    private val bonusPerProphecyEgg: BigDecimal
-        get() = BigDecimal(1.05) + BigDecimal(0.01) * BigDecimal(prophecyEggResearchLevel)
-    private val bonusPerSoulEgg: BigDecimal
-        get() {
-            val soulEggBonus = BigDecimal(10 + soulEggResearchLevel)
-            return bonusPerProphecyEgg.pow(prophecyEggs.toInt()) * soulEggBonus
-        }
-    val seToNextRank: BigDecimal
-        get() = earningsBonus.nextPowerOfTen()
-            .minus(earningsBonus)
-            .divide(bonusPerSoulEgg, RoundingMode.HALF_UP)
-    val peToNextRank: Int
-        get() = ceil(
-            BigDecimalMath.log(earningsBonus.nextPowerOfTen() / earningsBonus, mathContext)
-                .div(BigDecimalMath.log(bonusPerProphecyEgg, mathContext))
-                .toDouble()
-        ).roundToInt()
-    val earningsBonus: BigDecimal get() = soulEggs * bonusPerSoulEgg
+    val earningsBonus: BigDecimal
+        get() = EarningsBonus(this).earningsBonus
 
     fun update() = AuxBrain.getFarmerBackup(inGameId)?.let { update(it) }
         ?: log.warn { "Tried to update from backup but failed." }
