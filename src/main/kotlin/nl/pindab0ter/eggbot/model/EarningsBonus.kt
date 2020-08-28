@@ -2,12 +2,12 @@ package nl.pindab0ter.eggbot.model
 
 import ch.obermuhlner.math.big.BigDecimalMath.log
 import nl.pindab0ter.eggbot.helpers.ceiling
+import nl.pindab0ter.eggbot.helpers.floor
 import nl.pindab0ter.eggbot.model.database.Farmer
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.MathContext.DECIMAL128
 import java.math.RoundingMode.CEILING
-import java.math.RoundingMode.FLOOR
 
 
 data class EarningsBonus(
@@ -36,7 +36,7 @@ data class EarningsBonus(
         soulEggs * earningsBonusPerSoulEgg
 
     val earningsBonusForNextRank: BigDecimal =
-        BigDecimal("1".padEnd(length = earningsBonus.setScale(0, FLOOR).toPlainString().length + 1, padChar = '0'))
+        BigDecimal("1".padEnd(length = earningsBonus.floor().toPlainString().length + 1, padChar = '0'))
 
     val soulEggsForNextRank: BigDecimal =
         earningsBonusForNextRank.divide(earningsBonusPerSoulEgg, CEILING)
