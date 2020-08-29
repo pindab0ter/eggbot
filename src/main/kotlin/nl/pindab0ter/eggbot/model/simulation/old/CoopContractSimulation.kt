@@ -4,8 +4,6 @@ import com.auxbrain.ei.Backup
 import com.auxbrain.ei.CoopStatusResponse
 import com.auxbrain.ei.Egg
 import com.auxbrain.ei.LocalContract
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.helpers.*
@@ -14,16 +12,18 @@ import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulationResult.*
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.util.*
+import kotlin.streams.toList
 
 class CoopContractSimulation private constructor(
     val backups: List<Backup>,
-    val coopStatus: CoopStatusResponse
+    val coopStatus: CoopStatusResponse,
 ) {
     val log = KotlinLogging.logger { }
 
     // region Basic info
 
-    private val localContract: LocalContract = backups.findCreatorLocalContract(coopStatus.contractId, coopStatus.creatorId)!!
+    private val localContract: LocalContract =
+        backups.findCreatorLocalContract(coopStatus.contractId, coopStatus.creatorId)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
         backup.farms.any { farm -> farm.contractId == coopStatus.contractId }
@@ -94,18 +94,11 @@ class CoopContractSimulation private constructor(
 
         operator fun invoke(
             contractId: String,
+            contractName: String,
             coopId: String,
-            message: Message? = null
+            message: Message? = null,
         ): CoopContractSimulationResult {
-            val coopStatus = AuxBrain.getCoopStatus(contractId, coopId)
-            val contractName: String? =
-                AuxBrain.getPeriodicals()?.contracts?.contracts?.find { contract ->
-                    contract.id == contractId
-                }?.name
-
-            // Co-op not found?
-            if (coopStatus == null || contractName == null)
-                return NotFound(contractId, coopId)
+            val coopStatus = AuxBrain.getCoopStatus(contractId, coopId) ?: return NotFound(contractId, coopId)
 
             // Is co-op abandoned?
             if (coopStatus.contributors.isEmpty())
@@ -114,9 +107,9 @@ class CoopContractSimulation private constructor(
             message?.editMessage("Fetching backups…")?.complete()
             message?.channel?.sendTyping()?.complete()
 
-            val backups: List<Backup> = runBlocking(Dispatchers.IO) {
-                coopStatus.contributors.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
-            }.filterNotNull()
+            val backups: List<Backup> = coopStatus.contributors.parallelStream().map { contributor ->
+                AuxBrain.getFarmerBackup(contributor.userId)
+            }.toList().filterNotNull()
 
             val contract = backups.findCreatorLocalContract(contractId, coopStatus.creatorId)!!
 

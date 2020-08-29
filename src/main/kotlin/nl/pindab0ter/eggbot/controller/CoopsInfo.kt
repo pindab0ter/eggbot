@@ -34,16 +34,20 @@ object CoopsInfo : EggBotCommand() {
         val message = event.channel.sendMessage("Looking for co-ops…").complete()
 
         val contractId = parameters.getString(CONTRACT_ID)
-        val coops = transaction {
-            Coop.find { Coops.contract eq contractId }.toList().sortedBy { it.name }
-        }
+        val coops = transaction { Coop.find { Coops.contract eq contractId }.toList().sortedBy { it.name } }
         val progressBar = ProgressBar(coops.size, message, WhenDone.STOP_IMMEDIATELY)
         // Replace with mapAsync if running on a multi threaded machine.
+        val start = System.currentTimeMillis()
+        val contractName: String = AuxBrain.getPeriodicals()?.contracts?.contracts?.find { contract ->
+            contract.id == contractId
+        }?.name ?: ""
+        // TODO: Test parallel stream with many coops
         val results = coops.mapIndexed { i, coop ->
-            CoopContractSimulation.Factory(coop.contract, coop.name).also {
+            CoopContractSimulation.Factory(coop.contract, contractName, coop.name).also {
                 progressBar.update(i + 1)
             }
         }
+        log.debug { "Simulation took ${System.currentTimeMillis() - start}ms" }
         if (results.isEmpty()) "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
             message.delete().complete()
             event.replyWarning(it)
@@ -168,6 +172,6 @@ object CoopsInfo : EggBotCommand() {
         val statusEmoji: String,
         val statusMessage: String,
         val eggspected: String = "",
-        val members: String = ""
+        val members: String = "",
     )
 }
