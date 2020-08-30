@@ -1,9 +1,0 @@
-# WinSCP script for updating \bin and \lib
-# Requires WinSCP and Pageant to be configured
-open sftp://root@178.62.64.148/ -hostkey=*
-cd EggBot
-lcd build\install\EggBot
-synchronize remote -delete -criteria=size -resumesupport=off .\bin ./bin
-synchronize remote -delete -criteria=size -resumesupport=off .\lib ./lib
-call screen -p EggBot -X stuff $'^c bin/EggBot^m'
-exit
