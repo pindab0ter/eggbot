@@ -6,6 +6,7 @@ import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
+import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.simulation.new.CoopContractState
 import nl.pindab0ter.eggbot.model.simulation.new.Farmer
@@ -21,6 +22,7 @@ fun coopInfoResponse(
     val bottleneckedFarmers = state.farmers.zip(state.farmers.shortenedNames()).filter { (farmer, _) ->
         willReachBottleneckBeforeDone(farmer, state.timeRemaining, state.goals.last().moment)
     }
+
     appendLine("`${state.coopId}` vs. _${state.contractName}_:")
 
     drawGoals(state, compact)
@@ -60,7 +62,7 @@ fun coopFinishedResponse(
     append('\u200B')
 
     if (!compact) {
-        drawMembers(state, finished = true)
+        drawMembers(state)
 
         if (ifCheckedIn) {
             append('\u200B')
@@ -90,7 +92,6 @@ private fun StringBuilder.drawGoals(
     title = "__${coopContractState.egg.toEmote()} **Goals** (${coopContractState.goalsReached}/${coopContractState.goals.count()}):__"
     displayHeader = false
     topPadding = 1
-    bottomPadding = 1
 
     incrementColumn(suffix = ".")
     column {
@@ -126,17 +127,14 @@ private fun StringBuilder.drawBasicInfo(
     compact: Boolean,
 ): StringBuilder = apply {
 
-    if (!finished) appendLine("__🗒️ **Basic info**:__ ```")
+    appendLine()
+
+    if (!finished || finishedIfCheckedIn) appendLine("__🗒️ **Basic info**:__ ```")
     else appendLine("__**🎉 This contract was successfully completed!**:__ ```")
 
     if (!finished && !finishedIfCheckedIn) {
         appendLine("Time remaining:   ${coopContractState.timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("Eggspected:       ${coopContractState.eggspected.asIllions()} ")
-        if (!compact) append("(${
-            coopContractState.farmers.sumByBigDecimal { farmer ->
-                eggIncrease(farmer.finalState.habs, farmer.constants)
-            }.multiply(SIXTY).asIllions()
-        })")
         appendLine()
     }
 
@@ -147,7 +145,7 @@ private fun StringBuilder.drawBasicInfo(
         coopContractState.farmers.sumByBigDecimal { farmer ->
             eggIncrease(farmer.initialState.habs, farmer.constants)
         }.multiply(SIXTY).asIllions()
-    })")
+    }/hr)")
     appendLine()
 
     append("Current chickens: ${
@@ -169,14 +167,12 @@ private fun StringBuilder.drawBasicInfo(
 
 private fun StringBuilder.drawMembers(
     state: CoopContractState,
-    finished: Boolean = false,
 ): StringBuilder = appendTable {
     val memberEmoji = when (Random.nextBoolean()) {
         true -> "👨‍🌾"
         false -> "👩‍🌾"
     }
     title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize}):__"
-    bottomPadding = if (!finished) 1 else 0
 
     incrementColumn(":")
 
@@ -255,11 +251,11 @@ private fun StringBuilder.drawCompactMembers(
         false -> "👩‍🌾"
     }
     title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize}):__"
-    bottomPadding = 1
+    topPadding = 1
 
     column {
         header = "Name"
-        rightPadding = 2
+        rightPadding = 1
         cells = state.farmers.zip(state.farmers.shortenedNames()).map { (farmer, name) ->
             "$name${if (farmer.isSleeping) " zZ" else ""}"
         }
@@ -333,6 +329,7 @@ private fun StringBuilder.drawBottleNecks(
     bottleneckedFarmers: List<Pair<Farmer, String>>,
 ): StringBuilder = appendTable {
     title = "__**⚠ Bottlenecks**__"
+    topPadding = 1
 
     column {
         header = "Name"
@@ -435,6 +432,7 @@ private fun StringBuilder.drawCompactBottleNecks(
     bottleneckedFarmers: List<Pair<Farmer, String>>,
 ): StringBuilder = appendTable {
     title = "__**⚠ Bottlenecks**__"
+    topPadding = 1
 
     column {
         header = "Name"
@@ -486,7 +484,7 @@ private fun StringBuilder.drawCompactTokens(
     coopContractState: CoopContractState,
 ): StringBuilder = appendTable {
     title = "__**🎫 Tokens**__"
-    bottomPadding = 1
+    topPadding = 1
 
     column {
         header = "Name"
@@ -509,6 +507,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(
     state: CoopContractState,
 ): StringBuilder = appendTable {
     title = "__**🎉 Completed if everyone checks in**:__"
+    topPadding = 1
 
     column {
         header = "Name"
@@ -534,6 +533,7 @@ private fun StringBuilder.drawCompactTimeSinceLastBackup(
     state: CoopContractState,
 ): StringBuilder = appendTable {
     title = "__**🎉 Completed if everyone checks in**:__"
+    topPadding = 1
 
     column {
         header = "Name"
