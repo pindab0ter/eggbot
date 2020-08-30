@@ -185,11 +185,7 @@ private fun StringBuilder.drawMembers(
         leftPadding = 1
         rightPadding = 3
         cells = state.farmers.map { farmer ->
-            buildString {
-                append(farmer.name)
-                appendOvertakingArrow(farmer, state)
-                if (farmer.isSleeping) append(" zZ")
-            }
+            "${farmer.name}${if (farmer.isSleeping) " zZ" else ""}"
         }
     }
 
@@ -197,6 +193,11 @@ private fun StringBuilder.drawMembers(
         header = "Eggs"
         alignment = RIGHT
         cells = state.farmers.map { farmer -> farmer.initialState.eggsLaid.asIllions() }
+    }
+
+    overtakersColumn(state) {
+        leftPadding = 1
+        rightPadding = 1
     }
 
     divider()
@@ -260,14 +261,12 @@ private fun StringBuilder.drawCompactMembers(
         header = "Name"
         rightPadding = 2
         cells = state.farmers.zip(state.farmers.shortenedNames()).map { (farmer, name) ->
-            buildString {
-                append(name)
-
-                appendOvertakingArrow(farmer, state)
-
-                if (farmer.isSleeping) append(" zZ")
-            }
+            "$name${if (farmer.isSleeping) " zZ" else ""}"
         }
+    }
+
+    overtakersColumn(state) {
+        rightPadding = 2
     }
 
     column {
@@ -284,6 +283,32 @@ private fun StringBuilder.drawCompactMembers(
         cells = state.farmers.map { farmer ->
             eggIncrease(farmer.initialState.habs, farmer.constants).multiply(SIXTY).asIllions()
         }
+    }
+}
+
+private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiColumn.() -> Unit) {
+    // TODO: "count" instead of "any" and then +x or -x
+    // TODO: If you're faster than 3, but slower than 1: +2
+    val overtakers: List<String> = state.farmers.map { farmer ->
+        when {
+            state.farmers.any { other ->
+                eggIncrease(farmer.finalState.habs, farmer.constants) >
+                        eggIncrease(other.finalState.habs, other.constants) &&
+                        farmer.finalState.eggsLaid < other.finalState.eggsLaid
+            } -> "⬆️"
+            state.farmers.any { other ->
+                eggIncrease(farmer.finalState.habs, farmer.constants) <
+                        eggIncrease(other.finalState.habs, other.constants) &&
+                        farmer.finalState.eggsLaid > other.finalState.eggsLaid
+            } -> "⬇️"
+            else -> "➖"
+        }
+    }
+
+    if (overtakers.any { it != "➖" }) emojiColumn {
+        header = if (Random.nextBoolean()) "🏃‍♂️" else "🏃‍♀️"
+        cells = overtakers
+        init()
     }
 }
 
