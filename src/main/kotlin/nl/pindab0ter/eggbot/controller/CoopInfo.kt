@@ -4,8 +4,6 @@ import com.auxbrain.ei.Backup
 import com.auxbrain.ei.CoopStatusResponse
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
@@ -20,6 +18,7 @@ import nl.pindab0ter.eggbot.model.simulation.new.simulateCoopContract
 import nl.pindab0ter.eggbot.view.coopFinishedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.streams.toList
 import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
 @Suppress("FoldInitializerAndIfToElvis")
@@ -87,7 +86,6 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-
         // TODO: Incorporate grace period; if simulation says they'll make it if everyone checks in, don't show this
         if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
@@ -102,15 +100,20 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Fetching backups…").queue()
         message.channel.sendTyping().queue()
 
-        val backups: List<Backup> = runBlocking(Dispatchers.IO) {
-            coopStatus.contributors.asyncMap { AuxBrain.getFarmerBackup(it.userId) }
-        }.filterNotNull()
+        val backups: List<Backup> = coopStatus.contributors.parallelStream().map { farmer ->
+            AuxBrain.getFarmerBackup(farmer.userId)
+        }.toList().filterNotNull()
 
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
+        // TODO: Check if backups.count == contributors.count, else add backup not found to message
+        // TODO: Check if backups.findFarm.count == contributors.count, else farm not found to message
+
         if (coopStatus.eggsLaid >= contract.finalGoal) {
-            val state = simulateCoopContract(backups, contractId, coopStatus, catchUp = false) ?: """
+            val state = simulateCoopContract(backups, contractId, coopStatus, catchUp = false)
+
+            if (state == null || state.farmers.count() != coopStatus.contributors.count()) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
 
             This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent().let {
@@ -132,12 +135,17 @@ object CoopInfo : EggBotCommand() {
                 return
             }
         }
-
-        val coopContractState = simulateCoopContract(backups, contractId, coopStatus, catchUp = !forceReportedOnly)
+        val startSimulation = System.currentTimeMillis()
+        val state = simulateCoopContract(backups, contractId, coopStatus, catchUp = !forceReportedOnly).let { state ->
+            state?.copy(
+                farmers = state.farmers.sortedByDescending { farmer -> farmer.initialState.eggsLaid }
+            )
+        }
+        log.debug { "Simulation took ${System.currentTimeMillis() - startSimulation}ms" }
 
         message.delete().queue()
 
-        if (coopContractState == null) """
+        if (state == null) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
                 
             Everyone has left this coop.""".trimIndent().let {
@@ -150,10 +158,10 @@ object CoopInfo : EggBotCommand() {
         // TODO: Sort by other things, e.g. chickens
 
         (when {
-            !forceReportedOnly && coopContractState.finished ->
-                coopFinishedResponse(coopContractState, compact, ifCheckedIn = true)
+            !forceReportedOnly && state.finished ->
+                coopFinishedResponse(state, compact, ifCheckedIn = true)
             else ->
-                coopInfoResponse(coopContractState, compact)
+                coopInfoResponse(state, compact)
         }).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }
