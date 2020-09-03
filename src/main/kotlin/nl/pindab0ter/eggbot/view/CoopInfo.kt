@@ -171,9 +171,7 @@ private fun StringBuilder.drawMembers(
         header = "Name"
         leftPadding = 1
         rightPadding = 3
-        cells = state.farmers.map { farmer ->
-            "${farmer.name}${if (farmer.isSleeping) " zZ" else ""}"
-        }
+        cells = state.farmers.map { farmer -> "${farmer.name}${if (farmer.isSleeping) " zZ" else ""}" }
     }
 
     column {
@@ -194,8 +192,7 @@ private fun StringBuilder.drawMembers(
         rightPadding = 3
         cells = state.farmers.map { farmer ->
             if (farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
-            else eggIncrease(farmer.initialState.habs, farmer.constants)
-                .multiply(SIXTY).asIllions()
+            else eggIncrease(farmer.initialState.habs, farmer.constants).multiply(SIXTY).asIllions()
         }
     }
     column {
@@ -483,11 +480,13 @@ private fun StringBuilder.drawTimeSinceLastBackup(
     title = "__**🎉 Completed if everyone checks in**:__"
     topPadding = 1
 
+    val farmersSortedByTimeSinceBackup = state.farmers.sortedByDescending { farmer -> farmer.timeSinceBackup }
+
     column {
         header = "Name"
         leftPadding = 1
         rightPadding = 3
-        cells = state.farmers.sortedBy { farmer -> farmer.timeSinceBackup }.map { farmer ->
+        cells = farmersSortedByTimeSinceBackup.map { farmer ->
             farmer.name
         }
     }
@@ -497,9 +496,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(
     column {
         header = "Last update"
         leftPadding = 1
-        cells = state.farmers.sortedByDescending { farmer -> farmer.timeSinceBackup }.map { farmer ->
-            "${farmer.timeSinceBackup.asDaysHoursAndMinutes()} ago"
-        }
+        cells = farmersSortedByTimeSinceBackup.map { farmer -> "${farmer.timeSinceBackup.asDaysHoursAndMinutes()} ago" }
     }
 }
 
@@ -509,18 +506,18 @@ private fun StringBuilder.drawCompactTimeSinceLastBackup(
     title = "__**🎉 Completed if everyone checks in**:__"
     topPadding = 1
 
+    val sortedFarmers = state.farmers.sortedByDescending { farmer -> farmer.timeSinceBackup }
+
     column {
         header = "Name"
         rightPadding = 1
-        cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.shortenedNames()
+        cells = sortedFarmers.shortenedNames()
     }
 
     column {
         header = "Last update"
         leftPadding = 1
         alignment = RIGHT
-        cells = state.farmers.sortedBy { farmer -> farmer.awayTimeRemaining }.map { farmer ->
-            "${farmer.timeSinceBackup.asDaysHoursAndMinutes(true)} ago"
-        }
+        cells = sortedFarmers.map { farmer -> "${farmer.timeSinceBackup.asDaysHoursAndMinutes(true)} ago" }
     }
 }
