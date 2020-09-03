@@ -30,7 +30,11 @@ data class Farmer(
     val isSleeping: Boolean get() = awayTimeRemaining <= Duration.ZERO
 
     companion object {
-        operator fun invoke(backup: Backup, contractId: String, catchUp: Boolean): Farmer? {
+        operator fun invoke(
+            backup: Backup,
+            contractId: String,
+            catchUp: Boolean,
+        ): Farmer? {
             val farm = backup.farmFor(contractId) ?: return null
             val constants = Constants(backup, farm)
             val reportedState = FarmState(farm, constants)

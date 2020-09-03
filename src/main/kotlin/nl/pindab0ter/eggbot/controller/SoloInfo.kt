@@ -13,7 +13,8 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
-import nl.pindab0ter.eggbot.model.simulation.new.simulateSoloContract
+import nl.pindab0ter.eggbot.model.simulation.new.SoloContractState
+import nl.pindab0ter.eggbot.model.simulation.new.simulate
 import nl.pindab0ter.eggbot.view.soloFinishedIfCheckedInResponse
 import nl.pindab0ter.eggbot.view.soloInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -82,17 +83,24 @@ object SoloInfo : EggBotCommand() {
                     return
                 }
 
-            val soloContractState = simulateSoloContract(backup, contractId)
+            val contractState = SoloContractState(backup, localContract, !forceReportedOnly)
+                ?: "Failed to collect all necessary information from the backup.".let {
+                    log.warn { it }
+                    event.replyWarning(it)
+                    return
+                }
 
-            if (!forceReportedOnly && soloContractState.farmer.initialState == soloContractState.farmer.finalState)
-                soloFinishedIfCheckedInResponse(soloContractState, compact).let { message ->
+            val state = simulate(contractState)
+
+            if (!forceReportedOnly && state.farmer.initialState == state.farmer.finalState)
+                soloFinishedIfCheckedInResponse(state, compact).let { message ->
                     if (event.channel == botCommandsChannel) {
                         event.reply(message)
                     } else {
                         event.replyInDm(message)
                         if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
                     }
-                } else soloInfoResponse(soloContractState, compact).let { message ->
+                } else soloInfoResponse(state, compact).let { message ->
                 if (event.channel == botCommandsChannel) {
                     event.reply(message)
                 } else {

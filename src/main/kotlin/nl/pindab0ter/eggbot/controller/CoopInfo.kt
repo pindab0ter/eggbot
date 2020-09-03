@@ -14,11 +14,15 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
-import nl.pindab0ter.eggbot.model.simulation.new.simulateCoopContract
+import nl.pindab0ter.eggbot.model.simulation.new.CoopContractState
+import nl.pindab0ter.eggbot.model.simulation.new.Farmer
+import nl.pindab0ter.eggbot.model.simulation.new.simulate
 import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 import kotlin.streams.toList
 import kotlin.text.RegexOption.DOT_MATCHES_ALL
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
@@ -41,6 +45,7 @@ object CoopInfo : EggBotCommand() {
         init()
     }
 
+    @ExperimentalTime
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
@@ -94,10 +99,6 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
-        // TODO: Catch errors instead of same length checks?:
-        // TODO: Check if backups.count == contributors.count, else add backup not found to message
-        // TODO: Check if backups.findFarm.count == contributors.count, else farm not found to message
-
         if (coopStatus.eggsLaid >= contract.finalGoal) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
 
@@ -108,17 +109,9 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-        val startSimulation = System.currentTimeMillis()
-        val state = simulateCoopContract(backups, contractId, coopStatus, catchUp = !forceReportedOnly).let { state ->
-            state?.copy(
-                farmers = state.farmers.sortedByDescending { farmer -> farmer.initialState.eggsLaid }
-            )
-        }
-        log.debug { "Simulation took ${System.currentTimeMillis() - startSimulation}ms" }
+        val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, !forceReportedOnly) }
 
-        message.delete().queue()
-
-        if (state == null) """
+        if (farmers.isEmpty()) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
                 
             Everyone has left this coop.""".trimIndent().let {
@@ -127,20 +120,28 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-        // TODO: Create sorting flag
-        // TODO: Sort by other things, e.g. chickens
+        val (state, duration) = measureTimedValue {
+            simulate(CoopContractState(contract, coopStatus, farmers))
+        }
+
+        log.debug { "Simulation took ${duration.inMilliseconds.toInt()}ms" }
+
+        val sortedState = state.copy(
+            farmers = state.farmers.sortedBy { farmer -> farmer.finalState.eggsLaid }
+        )
+
+        message.delete().queue()
 
         (when {
-            !forceReportedOnly && state.finished ->
-                coopFinishedIfCheckedInResponse(state, compact)
-            else ->
-                coopInfoResponse(state, compact)
+            !forceReportedOnly && state.finished -> coopFinishedIfCheckedInResponse(sortedState, compact)
+            else -> coopInfoResponse(sortedState, compact)
         }).let { messages ->
-            if (event.channel == botCommandsChannel) {
-                messages.forEach { message -> event.reply(message) }
-            } else {
-                event.replyInDms(messages)
-                if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+            when (event.channel) {
+                botCommandsChannel -> messages.forEach { message -> event.reply(message) }
+                else -> {
+                    event.replyInDms(messages)
+                    if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
+                }
             }
         }
     }
