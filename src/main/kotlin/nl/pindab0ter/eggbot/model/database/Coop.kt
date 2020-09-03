@@ -12,7 +12,7 @@ import java.math.BigDecimal
 class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
     var contract by Coops.contract
-    var roleId by Coops.role_id
+    var roleId by Coops.roleId
 
     var farmers by Farmer via CoopFarmers
 
