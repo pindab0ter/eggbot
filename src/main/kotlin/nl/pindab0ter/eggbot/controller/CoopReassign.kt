@@ -46,7 +46,7 @@ object CoopReassign : EggBotCommand() {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
         val newName: String = parameters.getString(NEW_NAME)
-        val coop = transaction { Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.firstOrNull() }
+        val coop = transaction { Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }.firstOrNull() }
 
         if (coop == null) "No co-op registered with that `contract id` and `co-op id`.".let {
             event.replyWarning(it)

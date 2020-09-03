@@ -48,8 +48,8 @@ object CoopAdd : EggBotCommand() {
         val coopId: String = parameters.getString(COOP_ID)
         val noRole: Boolean = parameters.getBoolean(NO_ROLE)
         val exists: Boolean = transaction {
-            Coop.find { (Coops.name eq coopId) and (Coops.contract eq contractId) }.toList()
-        }.isNotEmpty()
+            Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }
+        }.toList().isNotEmpty()
 
         if (exists) "Co-op is already registered.".let {
             event.replyWarning(it)
@@ -72,7 +72,7 @@ object CoopAdd : EggBotCommand() {
             transaction {
                 Coop.new {
                     this.name = status.coopId
-                    this.contract = status.contractId
+                    this.contractId = status.contractId
                     this.roleId = role?.id
                 }
             }

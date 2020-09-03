@@ -1,10 +1,11 @@
 package nl.pindab0ter.eggbot.model.simulation.new
 
+import com.auxbrain.ei.Contract
+import com.auxbrain.ei.CoopStatusResponse
 import com.auxbrain.ei.Egg
-import com.auxbrain.ei.LocalContract
 import nl.pindab0ter.eggbot.helpers.asDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.helpers.sumByBigDecimal
-import nl.pindab0ter.eggbot.helpers.timeRemaining
+import nl.pindab0ter.eggbot.helpers.toDuration
 import org.joda.time.Duration
 import java.math.BigDecimal
 
@@ -28,19 +29,18 @@ data class CoopContractState(
     val finished: Boolean get() = farmers.all { farmer -> farmer.initialState == farmer.finalState }
 
     constructor(
-        localContract: LocalContract,
-        timeRemaining: Duration? = null,
-        public: Boolean,
+        contract: Contract,
+        coopStatus: CoopStatusResponse,
         farmers: List<Farmer>,
     ) : this(
-        contractId = localContract.contract!!.id,
-        contractName = localContract.contract.name,
-        coopId = localContract.coopId,
-        egg = localContract.contract.egg,
-        maxCoopSize = localContract.contract.maxCoopSize,
-        public = public,
-        goals = Goal.fromContract(localContract, farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }),
-        timeRemaining = timeRemaining ?: localContract.timeRemaining,
+        contractId = contract.id,
+        contractName = contract.name,
+        coopId = coopStatus.coopId,
+        egg = contract.egg,
+        maxCoopSize = contract.maxCoopSize,
+        public = coopStatus.public,
+        goals = Goal.fromContract(contract, farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }),
+        timeRemaining = coopStatus.secondsRemaining.toDuration(),
         eggspected = farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid },
         farmers = farmers
     )

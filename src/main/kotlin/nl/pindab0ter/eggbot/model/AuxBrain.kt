@@ -33,6 +33,10 @@ object AuxBrain {
     fun getPeriodicals(): PeriodicalsResponse? =
         periodicalsRequest().responseObject(ContractsDeserializer).third.component1()
 
+    fun getContract(contractId: String): Contract? = getPeriodicals()?.contracts?.contracts?.find { contract ->
+        contract.id == contractId
+    }
+
     private object ContractsDeserializer : ResponseDeserializable<PeriodicalsResponse> {
         override fun deserialize(content: String): PeriodicalsResponse? {
             return content.decodeBase64()?.let { PeriodicalsResponse.deserialize(it) }

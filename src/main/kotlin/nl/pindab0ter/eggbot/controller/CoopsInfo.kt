@@ -34,16 +34,20 @@ object CoopsInfo : EggBotCommand() {
         val message = event.channel.sendMessage("Looking for co-ops…").complete()
 
         val contractId = parameters.getString(CONTRACT_ID)
-        val coops = transaction { Coop.find { Coops.contract eq contractId }.toList().sortedBy { it.name } }
+        val coops = transaction { Coop.find { Coops.contractId eq contractId }.toList().sortedBy { it.name } }
         val progressBar = ProgressBar(coops.size, message, WhenDone.STOP_IMMEDIATELY)
         // Replace with mapAsync if running on a multi threaded machine.
         val start = System.currentTimeMillis()
-        val contractName: String = AuxBrain.getPeriodicals()?.contracts?.contracts?.find { contract ->
-            contract.id == contractId
-        }?.name ?: ""
+        val contract = AuxBrain.getContract(contractId)
+            ?: "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
+                message.delete().complete()
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
         // TODO: Test parallel stream with many coops
         val results = coops.mapIndexed { i, coop ->
-            CoopContractSimulation.Factory(coop.contract, contractName, coop.name).also {
+            CoopContractSimulation.Factory(contract, coop.name).also {
                 progressBar.update(i + 1)
             }
         }
@@ -57,8 +61,6 @@ object CoopsInfo : EggBotCommand() {
 
         // TODO: Show ELR
         // TODO: Show ↑ and ↓ for people overtaking/being overtaken
-
-        val contract = AuxBrain.getPeriodicals()?.contracts?.contracts?.find { it.id == contractId }!!
 
         val resultRows = results.map { result ->
             when (result) {

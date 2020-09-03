@@ -88,31 +88,28 @@ object RollCall : EggBotCommand() {
             return
         }
 
-        val contractInfo: Contract? = AuxBrain.getPeriodicals()?.contracts?.contracts?.find {
-            it.id == contractId
-        }
+        val contract: Contract = AuxBrain.getContract(contractId)
+            ?: "No active contract found with id `${contractId}`".let {
+                event.replyWarning(it)
+                log.debug { it }
+                return
+            }
 
-        if (contractInfo == null) "No active contract found with id `${contractId}`".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
-
-        if (!contractInfo.coopAllowed) "Co-op is not allowed for this contract".let {
+        if (!contract.coopAllowed) "Co-op is not allowed for this contract".let {
             event.replyWarning(it)
             log.debug { it }
             return
         }
 
         transaction {
-            val existingCoops: List<Coop> = Coop.find { Coops.contract eq contractInfo.id }.toList()
+            val existingCoops: List<Coop> = Coop.find { Coops.contractId eq contract.id }.toList()
             if (existingCoops.isNotEmpty()) {
                 if (force) {
                     val roles = existingCoops.mapNotNull { coop ->
                         coop.roleId?.let { guild.getRoleById(it) }
                     }
 
-                    if (roles.isEmpty()) "No roles found for `${contractInfo.id}`".let {
+                    if (roles.isEmpty()) "No roles found for `${contract.id}`".let {
                         event.replyWarning(it)
                         log.warn { it }
                     }
@@ -129,9 +126,9 @@ object RollCall : EggBotCommand() {
                         log.error { it }
                     }
 
-                    Coops.deleteWhere { Coops.contract eq contractInfo.id }
-                    log.info { "Deleted contracts for ${contractInfo.id}" }
-                } else "Co-ops are already generated for contract `${contractInfo.id}`. Add `overwrite` to override.".let {
+                    Coops.deleteWhere { Coops.contractId eq contract.id }
+                    log.info { "Deleted contracts for ${contract.id}" }
+                } else "Co-ops are already generated for contract `${contract.id}`. Add `overwrite` to override.".let {
                     event.replyWarning(it)
                     log.debug { it }
                     return@transaction
@@ -141,7 +138,7 @@ object RollCall : EggBotCommand() {
             val message = event.channel.sendMessage("Generating co-ops and creating roles…").complete()
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
-            val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contractInfo, baseName)
+            val coops: List<Coop> = PaddingDistribution.createRollCall(farmers, contract, baseName)
 
             val progressBar = ProgressBar(farmers.count(), message, WhenDone.STOP_IMMEDIATELY)
 
@@ -167,7 +164,7 @@ object RollCall : EggBotCommand() {
 
             message.delete().complete()
             event.reply(buildString {
-                appendLine("Co-ops generated for `${contractInfo.id}`:")
+                appendLine("Co-ops generated for `${contract.id}`:")
                 appendLine()
 
                 append("```")
@@ -177,7 +174,7 @@ object RollCall : EggBotCommand() {
                     append(" (")
                     appendPaddingCharacters(coop.farmers.count(), coops.map { it.farmers.count() })
                     append(coop.farmers.count())
-                    append("/${contractInfo.maxCoopSize} members): ")
+                    append("/${contract.maxCoopSize} members): ")
                     appendPaddingCharacters(
                         coop.activeEarningsBonus.asIllions(INTEGER),
                         coops.map { it.activeEarningsBonus.asIllions(INTEGER) })
@@ -225,7 +222,7 @@ object RollCall : EggBotCommand() {
                     .complete()
                     .id
                 Coop.new {
-                    this.contract = contract.id
+                    this.contractId = contract.id
                     this.name = coopNames[index]
                     this.roleId = roleId
                 }

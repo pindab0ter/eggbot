@@ -1,9 +1,9 @@
 package nl.pindab0ter.eggbot.model.simulation.old
 
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatusResponse
 import com.auxbrain.ei.Egg
-import com.auxbrain.ei.LocalContract
 import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.helpers.*
@@ -22,26 +22,26 @@ class CoopContractSimulation private constructor(
 
     // region Basic info
 
-    private val localContract: LocalContract =
-        backups.findCreatorLocalContract(coopStatus.contractId, coopStatus.creatorId)!!
+    private val contract: Contract =
+        backups.findContract(coopStatus.contractId, coopStatus.creatorId)!!
 
     val farms: List<ContractSimulation> = backups.filter { backup ->
         backup.farms.any { farm -> farm.contractId == coopStatus.contractId }
     }.mapNotNull { backup ->
-        ContractSimulation(backup, localContract.contract!!.id).also {
+        ContractSimulation(backup, contract.id).also {
             // TODO: Save this information somewhere else
             it?.isActive = coopStatus.contributors.find { contributor ->
                 contributor.userId == backup.userId
             }?.active == true
         }
     }
-    val contractId: String get() = localContract.contract!!.id
-    val contractName: String get() = localContract.contract!!.name
-    val coopId: String get() = localContract.coopId
-    val egg: Egg get() = localContract.contract!!.egg
-    val maxCoopSize: Int get() = localContract.contract!!.maxCoopSize
+    val contractId: String get() = contract.id
+    val contractName: String get() = contract.name
+    val coopId: String get() = coopStatus.coopId
+    val egg: Egg get() = contract.egg
+    val maxCoopSize: Int get() = contract.maxCoopSize
     val timeRemaining: Duration get() = coopStatus.secondsRemaining.toDuration()
-    val goals: SortedSet<BigDecimal> = localContract.contract!!.goals.map { goal ->
+    val goals: SortedSet<BigDecimal> = contract.goals.map { goal ->
         goal.targetAmount.toBigDecimal()
     }.toSortedSet()
     val tokensAvailable: Int = farms.sumBy { it.farm.boostTokensReceived - it.farm.boostTokensGiven - it.farm.boostTokensSpent }
@@ -93,16 +93,15 @@ class CoopContractSimulation private constructor(
         val log = KotlinLogging.logger { }
 
         operator fun invoke(
-            contractId: String,
-            contractName: String,
+            contract: Contract,
             coopId: String,
             message: Message? = null,
         ): CoopContractSimulationResult {
-            val coopStatus = AuxBrain.getCoopStatus(contractId, coopId) ?: return NotFound(contractId, coopId)
+            val coopStatus = AuxBrain.getCoopStatus(contract.id, coopId) ?: return NotFound(contract.id, coopId)
 
             // Is co-op abandoned?
             if (coopStatus.contributors.isEmpty())
-                return Abandoned(coopStatus, contractName)
+                return Abandoned(coopStatus, contract.name)
 
             message?.editMessage("Fetching backups…")?.complete()
             message?.channel?.sendTyping()?.complete()
@@ -111,11 +110,9 @@ class CoopContractSimulation private constructor(
                 AuxBrain.getFarmerBackup(contributor.userId)
             }.toList().filterNotNull()
 
-            val contract = backups.findCreatorLocalContract(contractId, coopStatus.creatorId)!!
-
             // Has the co-op failed?
             if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal)
-                return Failed(coopStatus, contractName)
+                return Failed(coopStatus, contract.name)
 
             //
             // Co-op finished?
@@ -133,7 +130,7 @@ class CoopContractSimulation private constructor(
                         contract.contract!!.id == coopStatus.contractId
                     }?.finished == true
                 }
-            ) return Finished(coopStatus, contractName)
+            ) return Finished(coopStatus, contract.name)
 
             // Co-op in progress
             return InProgress(CoopContractSimulation(backups, coopStatus)).also {

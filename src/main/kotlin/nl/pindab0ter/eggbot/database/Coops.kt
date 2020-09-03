@@ -5,10 +5,10 @@ import org.jetbrains.exposed.dao.IntIdTable
 
 object Coops : IntIdTable() {
     val name = text("name")
-    val contract = text("contract_id")
+    val contractId = text("contract_id")
     val roleId = text("role_id").nullable()
 
     init {
-        this.index(true, name, contract)
+        this.index(true, name, contractId)
     }
 }

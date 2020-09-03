@@ -48,33 +48,26 @@ fun coopInfoResponse(
     }
 }.splitMessage(separator = '\u200B')
 
-fun coopFinishedResponse(
+fun coopFinishedIfCheckedInResponse(
     state: CoopContractState,
     compact: Boolean,
-    ifCheckedIn: Boolean = false,
 ): List<String> = buildString {
     appendLine("`${state.coopId}` vs. _${state.contractName}_:")
 
     drawGoals(state, compact)
 
-    drawBasicInfo(state, finished = true, ifCheckedIn, compact)
+    drawBasicInfo(state, finishedIfCheckedIn = true, compact)
 
     append('\u200B')
 
     if (!compact) {
         drawMembers(state)
-
-        if (ifCheckedIn) {
-            append('\u200B')
-            drawTimeSinceLastBackup(state)
-        }
+        append('\u200B')
+        drawTimeSinceLastBackup(state)
     } else {
         drawCompactMembers(state)
-
-        if (ifCheckedIn) {
-            append('\u200B')
-            drawCompactTimeSinceLastBackup(state)
-        }
+        append('\u200B')
+        drawCompactTimeSinceLastBackup(state)
     }
 }.splitMessage(separator = '\u200B')
 
@@ -122,17 +115,15 @@ private fun StringBuilder.drawGoals(
 
 private fun StringBuilder.drawBasicInfo(
     coopContractState: CoopContractState,
-    finished: Boolean = false,
     finishedIfCheckedIn: Boolean = false,
     compact: Boolean,
 ): StringBuilder = apply {
 
     appendLine()
 
-    if (!finished || finishedIfCheckedIn) appendLine("__🗒️ **Basic info**:__ ```")
-    else appendLine("__**🎉 This contract was successfully completed!**:__ ```")
+    appendLine("__🗒️ **Basic info**:__ ```")
 
-    if (!finished && !finishedIfCheckedIn) {
+    if (!finishedIfCheckedIn) {
         appendLine("Time remaining:   ${coopContractState.timeRemaining.asDaysHoursAndMinutes(compact)}")
         append("Eggspected:       ${coopContractState.eggspected.asIllions()} ")
         appendLine()

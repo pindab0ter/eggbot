@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.controller
 
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatusResponse
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
@@ -13,11 +14,9 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
-import nl.pindab0ter.eggbot.model.database.Contract
 import nl.pindab0ter.eggbot.model.simulation.new.simulateCoopContract
-import nl.pindab0ter.eggbot.view.coopFinishedResponse
+import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
-import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.streams.toList
 import kotlin.text.RegexOption.DOT_MATCHES_ALL
 
@@ -56,25 +55,13 @@ object CoopInfo : EggBotCommand() {
                 return
             }
 
-        val contract: Contract = transaction {
-            Contract.findById(coopStatus.contractId) ?: AuxBrain.getFarmerBackup(coopStatus.creatorId)?.let { backup ->
-                val contract = backup.contracts?.contracts?.find { localContract ->
-                    localContract.contract?.id == coopStatus.contractId
-                } ?: backup.contracts?.archive?.last { localContract ->
-                    localContract.contract?.id == coopStatus.contractId
-                }
-                if (contract == null) null
-                else Contract.new(contract.contract!!.id) {
-                    name = contract.contract.name
-                    finalGoal = contract.contract.finalGoal
-                }
+        val contract: Contract = AuxBrain.getContract(contractId)
+            ?: "Could not find contract information".let {
+                message.delete().queue()
+                event.replyWarning(it)
+                log.debug { it }
+                return
             }
-        } ?: "Could not find contract information".let {
-            message.delete().queue()
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
 
         if (coopStatus.contributors.isEmpty()) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
@@ -107,34 +94,20 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
+        // TODO: Catch errors instead of same length checks?:
         // TODO: Check if backups.count == contributors.count, else add backup not found to message
         // TODO: Check if backups.findFarm.count == contributors.count, else farm not found to message
 
-        if (coopStatus.eggsLaid >= contract.finalGoal) {
-            val state = simulateCoopContract(backups, contractId, coopStatus, catchUp = false)
-
-            if (state == null || state.farmers.count() != coopStatus.contributors.count()) """
+        if (coopStatus.eggsLaid >= contract.finalGoal) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
 
             This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent().let {
-                message.delete().queue()
-                event.reply(it)
-                log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
-                return
-            }
-
             message.delete().queue()
-
-            coopFinishedResponse(state, compact).let { messages ->
-                if (event.channel == botCommandsChannel) {
-                    messages.forEach { message -> event.reply(message) }
-                } else {
-                    event.replyInDms(messages)
-                    if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
-                }
-                return
-            }
+            event.reply(it)
+            log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
+            return
         }
+
         val startSimulation = System.currentTimeMillis()
         val state = simulateCoopContract(backups, contractId, coopStatus, catchUp = !forceReportedOnly).let { state ->
             state?.copy(
@@ -159,7 +132,7 @@ object CoopInfo : EggBotCommand() {
 
         (when {
             !forceReportedOnly && state.finished ->
-                coopFinishedResponse(state, compact, ifCheckedIn = true)
+                coopFinishedIfCheckedInResponse(state, compact)
             else ->
                 coopInfoResponse(state, compact)
         }).let { messages ->

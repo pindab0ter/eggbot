@@ -19,8 +19,6 @@ val Backup.Game.prophecyEggResearchLevel: Int
     get() = epicResearch.find { it.id == "prophecy_bonus" }!!.level
 val Contract.finalGoal: BigDecimal
     get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
-val LocalContract.finalGoal: BigDecimal
-    get() = contract!!.finalGoal
 val LocalContract.finished: Boolean
     get() = lastAmountWhenRewardGiven.toBigDecimal() >= contract?.finalGoal
 val LocalContract.timeRemaining: Duration
@@ -32,7 +30,7 @@ val CoopStatusResponse.timeRemaining: Duration
 
 fun Backup.farmFor(contractId: String): Backup.Simulation? = farms.firstOrNull { farm -> farm.contractId == contractId }
 
-fun List<Backup>.findCreatorLocalContract(contractId: String, creatorId: String): LocalContract? = find { backup ->
+fun List<Backup>.findContract(contractId: String, creatorId: String): Contract? = find { backup ->
     backup.userId == creatorId
 }?.contracts?.run {
     contracts.find { localContract ->
@@ -40,7 +38,7 @@ fun List<Backup>.findCreatorLocalContract(contractId: String, creatorId: String)
     } ?: archive.find { localContract ->
         localContract.contract?.id == contractId
     }
-}
+}?.contract
 
 val Backup.Simulation.internalHatcheryFlatIncreases: List<BigDecimal>
     get() = listOf(

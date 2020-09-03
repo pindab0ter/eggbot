@@ -103,6 +103,7 @@ object Register : EggBotCommand() {
 
             // Check if any back-up was found with the in-game ID
             if (backup?.game == null || backup.stats == null)
+                // TODO: Check if name has spaces in it, if it does, surround the quoted name with spaces
                 ("No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID (not name!) correctly?\n" +
                         "To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.").let {
                     event.replyError(it)

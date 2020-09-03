@@ -34,7 +34,7 @@ object RollClear : EggBotCommand() {
         val contractId = parameters.getString(CONTRACT_ID)
 
         val coops: List<Coop> = transaction {
-            Coop.find { Coops.contract eq contractId }.toList()
+            Coop.find { Coops.contractId eq contractId }.toList()
         }
 
         if (coops.isEmpty()) "Didn't find any co-ops for $contractId".let {

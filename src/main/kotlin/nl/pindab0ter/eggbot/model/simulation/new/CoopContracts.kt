@@ -2,25 +2,25 @@ package nl.pindab0ter.eggbot.model.simulation.new
 
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.CoopStatusResponse
-import com.auxbrain.ei.LocalContract
 import nl.pindab0ter.eggbot.helpers.*
 
 
+// TODO: Inline
 fun simulateCoopContract(
     backups: List<Backup>,
     contractId: String,
     coopStatus: CoopStatusResponse,
     catchUp: Boolean = true,
 ): CoopContractState? {
-    val localContract: LocalContract = backups.findCreatorLocalContract(contractId, coopStatus.creatorId) ?: return null
+    // TODO: Throw error
+    val contract = backups.findContract(contractId, coopStatus.creatorId) ?: return null
 
     val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, catchUp) }
 
+    // TODO: Throw error
     if (farmers.isEmpty()) return null
 
-    val contractState = CoopContractState(
-        localContract, coopStatus.timeRemaining, coopStatus.public, farmers
-    )
+    val contractState = CoopContractState(contract, coopStatus, farmers)
 
     return simulate(contractState)
 }
