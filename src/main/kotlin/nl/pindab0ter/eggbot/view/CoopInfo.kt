@@ -299,23 +299,6 @@ private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiCo
     }
 }
 
-private fun StringBuilder.appendOvertakingArrow(
-    farmer: Farmer,
-    state: CoopContractState,
-) = when {
-    state.farmers.any { other ->
-        eggIncrease(farmer.finalState.habs, farmer.constants) >
-                eggIncrease(other.finalState.habs, other.constants) &&
-                farmer.finalState.eggsLaid < other.finalState.eggsLaid
-    } -> append(" ↑")
-    state.farmers.any { other ->
-        eggIncrease(farmer.finalState.habs, farmer.constants) <
-                eggIncrease(other.finalState.habs, other.constants) &&
-                farmer.finalState.eggsLaid > other.finalState.eggsLaid
-    } -> append(" ↓")
-    else -> this
-}
-
 private fun StringBuilder.drawBottleNecks(
     bottleneckedFarmers: List<Pair<Farmer, String>>,
 ): StringBuilder = appendTable {
