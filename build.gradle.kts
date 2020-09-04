@@ -29,20 +29,20 @@ dependencies {
     implementation("com.github.kittinunf.fuel", "fuel", "2.2.3")
     implementation("org.jetbrains.exposed", "exposed", "0.17.7")
     implementation("com.jagrosh", "jda-utilities-command", "3.0.4")
-    implementation("net.dv8tion", "JDA", "4.2.0_194") {
+    implementation("net.dv8tion", "JDA", "4.2.0_203") {
         exclude("club.minnced", "opus-java")
     }
     implementation("org.campagnelab.ext", "jsap", "3.0.0")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
 
-    runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
+    runtimeOnly("com.google.protobuf", "protobuf-java", "3.13.0")
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.13.3")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.32.3.2")
 
-    testImplementation("io.kotest", "kotest-runner-junit5-jvm", "4.2.0")
-    implementation("io.kotest", "kotest-assertions-core-jvm", "4.2.0")
-    testImplementation("io.kotest", "kotest-property-jvm", "4.2.0")
+    testImplementation("io.kotest", "kotest-runner-junit5-jvm", "4.2.3")
+    implementation("io.kotest", "kotest-assertions-core-jvm", "4.2.3")
+    testImplementation("io.kotest", "kotest-property-jvm", "4.2.3")
     testImplementation("io.mockk", "mockk", "1.10.0")
 }
 
