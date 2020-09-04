@@ -12,7 +12,6 @@ import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulationResult.*
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.util.*
-import kotlin.streams.toList
 
 class CoopContractSimulation private constructor(
     val backups: List<Backup>,
@@ -106,9 +105,9 @@ class CoopContractSimulation private constructor(
             message?.editMessage("Fetching backups…")?.complete()
             message?.channel?.sendTyping()?.complete()
 
-            val backups: List<Backup> = coopStatus.contributors.parallelStream().map { contributor ->
+            val backups: List<Backup> = coopStatus.contributors.parallelMap { contributor ->
                 AuxBrain.getFarmerBackup(contributor.userId)
-            }.toList().filterNotNull()
+            }.filterNotNull()
 
             // Has the co-op failed?
             if (coopStatus.secondsRemaining < 0.0 && coopStatus.totalAmount.toBigDecimal() < contract.finalGoal)

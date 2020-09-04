@@ -19,7 +19,6 @@ import nl.pindab0ter.eggbot.model.simulation.new.Farmer
 import nl.pindab0ter.eggbot.model.simulation.new.simulate
 import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
-import kotlin.streams.toList
 import kotlin.text.RegexOption.DOT_MATCHES_ALL
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
@@ -92,9 +91,9 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Fetching backups…").queue()
         message.channel.sendTyping().queue()
 
-        val backups: List<Backup> = coopStatus.contributors.parallelStream().map { farmer ->
+        val backups: List<Backup> = coopStatus.contributors.parallelMap { farmer ->
             AuxBrain.getFarmerBackup(farmer.userId)
-        }.toList().filterNotNull()
+        }.filterNotNull()
 
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()

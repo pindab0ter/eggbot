@@ -16,7 +16,6 @@ import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulation
 import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulationResult.*
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.streams.toList
 import kotlin.time.ExperimentalTime
 import kotlin.time.measureTimedValue
 
@@ -49,11 +48,11 @@ object CoopsInfo : EggBotCommand() {
             }
 
         val (results, duration) = measureTimedValue {
-            coops.parallelStream().map { coop ->
+            coops.parallelMap { coop ->
                 CoopContractSimulation.Factory(contract, coop.name).also {
                     progressBar.update()
                 }
-            }.toList()
+            }
         }
 
         log.debug { "Simulation took ${duration}ms" }

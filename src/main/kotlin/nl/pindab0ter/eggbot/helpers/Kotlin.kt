@@ -1,5 +1,7 @@
 package nl.pindab0ter.eggbot.helpers
 
+import kotlin.streams.toList
+
 fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
 fun <T> Iterable<T>.replace(newValue: T, predicate: (T) -> Boolean): Iterable<T> {
@@ -15,6 +17,8 @@ inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
 
 fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
     zip(other).flatMap(Pair<T, T>::toList) + if (size > other.size) drop(other.size) else other.drop(size)
+
+fun <T, R> List<T>.parallelMap(transform: (T) -> R): List<R> = parallelStream().map(transform).toList()
 
 /**
  * Returns a string containing this char repeated [n] times.

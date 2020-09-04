@@ -7,9 +7,9 @@ import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.helpers.parallelMap
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.ProgressBar
-import kotlin.streams.toList
 
 object Test : EggBotCommand() {
 
@@ -40,13 +40,13 @@ object Test : EggBotCommand() {
         val rawValues = (1..5)
         val message = event.channel.sendMessage("Calculating…").complete()
         val progressBar = ProgressBar(rawValues.count(), message)
-        val values = rawValues.toList().parallelStream().map {
+        val values = rawValues.toList().parallelMap {
             runBlocking {
                 delay(1000)
                 progressBar.update()
                 it * it
             }
-        }.toList()
+        }
 
         event.reply(values.joinToString())
     }

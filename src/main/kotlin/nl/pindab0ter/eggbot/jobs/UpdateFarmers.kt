@@ -3,12 +3,12 @@ package nl.pindab0ter.eggbot.jobs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.helpers.parallelMap
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
 import org.quartz.JobExecutionContext
-import kotlin.streams.toList
 
 
 class UpdateFarmers : Job {
@@ -23,9 +23,9 @@ class UpdateFarmers : Job {
         }
 
         runBlocking(Dispatchers.IO) {
-            farmers.parallelStream().map { farmer ->
+            farmers.parallelMap { farmer ->
                 farmer to AuxBrain.getFarmerBackup(farmer.inGameId)
-            }.toList().let { farmers ->
+            }.let { farmers ->
                 transaction {
                     farmers.forEach { (farmer, backup) -> backup?.let { farmer.update(it) } }
                 }
