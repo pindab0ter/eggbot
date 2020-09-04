@@ -124,8 +124,8 @@ object RollCall : EggBotCommand() {
 
             val progressBar = ProgressBar(farmers.count(), message, WhenDone.STOP_IMMEDIATELY)
 
-            assignRoles(coops) { index ->
-                progressBar.update(index)
+            assignRoles(coops) {
+                progressBar.update()
                 event.channel.sendTyping().queue()
             }
 
@@ -137,10 +137,10 @@ object RollCall : EggBotCommand() {
         }
     }
 
-    private fun assignRoles(coops: List<Coop>, progressCallback: (Int) -> Unit) = transaction {
+    private fun assignRoles(coops: List<Coop>, progressCallback: () -> Unit) = transaction {
         coops.map { coop ->
             coop.roleId?.let { guild.getRoleById(it) } to coop.farmers
-        }.forEachIndexed { index, (role, coopFarmers) ->
+        }.forEach { (role, coopFarmers) ->
             coopFarmers.map { farmer ->
                 val discordId = farmer.discordUser.discordId
                 val discordTag = farmer.discordUser.discordTag
@@ -148,7 +148,7 @@ object RollCall : EggBotCommand() {
                     if (exception == null) log.info("Added $discordTag to ${role.name}")
                     else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
                 })
-                progressCallback(index)
+                progressCallback()
             }
         }
     }

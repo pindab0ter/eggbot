@@ -86,7 +86,7 @@ object CoopAdd : EggBotCommand() {
 
                 status.contributors.map { contributionInfo ->
                     contributionInfo to transaction { Farmer.findById(contributionInfo.userId)?.discordUser }
-                }.forEachIndexed { i, (contributionInfo, discordUser) ->
+                }.forEach { (contributionInfo, discordUser) ->
                     log.debug { "${contributionInfo.userName}, ${discordUser?.discordTag}" }
                     if (discordUser != null) guild.addRoleToMember(discordUser.discordId, role).submit()
                         .handle { _, exception ->
@@ -99,7 +99,7 @@ object CoopAdd : EggBotCommand() {
                             }
                         }.join()
                     else failures.add(contributionInfo.userName)
-                    progressBar.update(i + 1)
+                    progressBar.update()
                 }
 
                 buildString {

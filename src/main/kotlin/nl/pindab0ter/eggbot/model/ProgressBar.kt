@@ -5,6 +5,7 @@ import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone.PUBLISH_FINAL_UPDATE
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone.STOP_IMMEDIATELY
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
@@ -17,11 +18,7 @@ class ProgressBar(
 
     override val coroutineContext: CoroutineContext = Dispatchers.Default
     private var running: Boolean = true
-    private var value: Int = 0
-        set(value) {
-            field = value
-            dirty = true
-        }
+    private var counter: AtomicInteger = AtomicInteger(0)
     private var dirty: Boolean = true
     private var job: Job
 
@@ -34,7 +31,7 @@ class ProgressBar(
         var i = 0
         while (running) when {
             dirty -> {
-                message.editMessage(drawProgressBar(value, goal)).queue()
+                message.editMessage(drawProgressBar(counter.get(), goal)).queue()
                 dirty = false
             }
             else -> {
@@ -45,12 +42,11 @@ class ProgressBar(
         message.editMessage(drawProgressBar(goal, goal)).complete()
     }
 
-    fun update(newValue: Int): Unit = when {
-        newValue >= goal -> stop()
-        else -> value = newValue
+    fun update() {
+        if (counter.incrementAndGet() >= goal) stop()
     }
 
-    fun stop(onStop: WhenDone = whenDone): Unit = when (onStop) {
+    private fun stop(onStop: WhenDone = whenDone): Unit = when (onStop) {
         PUBLISH_FINAL_UPDATE -> running = false
         STOP_IMMEDIATELY -> job.cancel()
     }

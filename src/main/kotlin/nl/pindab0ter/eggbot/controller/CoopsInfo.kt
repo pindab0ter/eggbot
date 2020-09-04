@@ -16,6 +16,9 @@ import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulation
 import nl.pindab0ter.eggbot.model.simulation.old.CoopContractSimulationResult.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.streams.toList
+import kotlin.time.ExperimentalTime
+import kotlin.time.measureTimedValue
 
 object CoopsInfo : EggBotCommand() {
 
@@ -30,14 +33,13 @@ object CoopsInfo : EggBotCommand() {
         init()
     }
 
+    @ExperimentalTime
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val message = event.channel.sendMessage("Looking for co-ops…").complete()
 
         val contractId = parameters.getString(CONTRACT_ID)
         val coops = transaction { Coop.find { Coops.contractId eq contractId }.toList().sortedBy { it.name } }
         val progressBar = ProgressBar(coops.size, message, WhenDone.STOP_IMMEDIATELY)
-        // Replace with mapAsync if running on a multi threaded machine.
-        val start = System.currentTimeMillis()
         val contract = AuxBrain.getContract(contractId)
             ?: "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
                 message.delete().complete()
@@ -45,13 +47,17 @@ object CoopsInfo : EggBotCommand() {
                 log.debug { it }
                 return
             }
-        // TODO: Test parallel stream with many coops
-        val results = coops.mapIndexed { i, coop ->
-            CoopContractSimulation.Factory(contract, coop.name).also {
-                progressBar.update(i + 1)
-            }
+
+        val (results, duration) = measureTimedValue {
+            coops.parallelStream().map { coop ->
+                CoopContractSimulation.Factory(contract, coop.name).also {
+                    progressBar.update()
+                }
+            }.toList()
         }
-        log.debug { "Simulation took ${System.currentTimeMillis() - start}ms" }
+
+        log.debug { "Simulation took ${duration}ms" }
+
         if (results.isEmpty()) "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
             message.delete().complete()
             event.replyWarning(it)

@@ -5,7 +5,11 @@ import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.ProgressBar
+import kotlin.streams.toList
 
 object Test : EggBotCommand() {
 
@@ -33,9 +37,17 @@ object Test : EggBotCommand() {
     }
 
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
-        val playerName = parameters.getString(PLAYER_NAME)
-        val available = parameters.getBoolean(AVAILABLE, false)
+        val rawValues = (1..5)
+        val message = event.channel.sendMessage("Calculating…").complete()
+        val progressBar = ProgressBar(rawValues.count(), message)
+        val values = rawValues.toList().parallelStream().map {
+            runBlocking {
+                delay(1000)
+                progressBar.update()
+                it * it
+            }
+        }.toList()
 
-        event.reply("$playerName is ${if (available) "" else "not "}available.")
+        event.reply(values.joinToString())
     }
 }
