@@ -49,8 +49,10 @@ object CoopInfo : EggBotCommand() {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
-        val forceReportedOnly: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false)
+        val catchUp: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
+
         val message: Message = event.channel.sendMessage("Fetching contract information…").complete()
+
         val coopStatus: CoopStatusResponse = AuxBrain.getCoopStatus(contractId, coopId)
             ?: "No co-op found for contract `${contractId}` with name `${coopId}`".let {
                 message.delete().queue()
@@ -108,7 +110,7 @@ object CoopInfo : EggBotCommand() {
             return
         }
 
-        val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, !forceReportedOnly) }
+        val farmers = backups.mapNotNull { backup -> Farmer(backup, contractId, catchUp) }
 
         if (farmers.isEmpty()) """
             `${coopStatus.coopId}` vs. __${contract.name}__:
@@ -132,7 +134,7 @@ object CoopInfo : EggBotCommand() {
         message.delete().queue()
 
         (when {
-            !forceReportedOnly && state.finished -> coopFinishedIfCheckedInResponse(sortedState, compact)
+            catchUp && state.finished -> coopFinishedIfCheckedInResponse(sortedState, compact)
             else -> coopInfoResponse(sortedState, compact)
         }).let { messages ->
             when (event.channel) {

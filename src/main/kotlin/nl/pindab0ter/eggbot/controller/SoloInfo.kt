@@ -38,10 +38,11 @@ object SoloInfo : EggBotCommand() {
 
     @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
-        val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList()!! }
         val contractId: String = parameters.getString(CONTRACT_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
-        val forceReportedOnly: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false)
+        val catchUp: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
+
+        val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList()!! }
 
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
             val localContract: LocalContract? = backup.contracts?.contracts?.find { localContract ->
@@ -83,16 +84,16 @@ object SoloInfo : EggBotCommand() {
                     return
                 }
 
-            val contractState = SoloContractState(backup, localContract, !forceReportedOnly)
+            val initialState = SoloContractState(backup, localContract, catchUp)
                 ?: "Failed to collect all necessary information from the backup.".let {
                     log.warn { it }
                     event.replyWarning(it)
                     return
                 }
 
-            val state = simulate(contractState)
+            val state = simulate(initialState)
 
-            if (!forceReportedOnly && state.farmer.initialState == state.farmer.finalState)
+            if (catchUp && state.farmer.initialState == state.farmer.finalState)
                 soloFinishedIfCheckedInResponse(state, compact).let { message ->
                     if (event.channel == botCommandsChannel) {
                         event.reply(message)
