@@ -126,7 +126,7 @@ object CoopInfo : EggBotCommand() {
         log.debug { "Simulation took ${duration.inMilliseconds.toInt()}ms" }
 
         val sortedState = state.copy(
-            farmers = state.farmers.sortedBy { farmer -> farmer.finalState.eggsLaid }
+            farmers = state.farmers.sortedByDescending { farmer -> farmer.finalState.eggsLaid }
         )
 
         message.delete().queue()

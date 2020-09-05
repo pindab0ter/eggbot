@@ -26,7 +26,7 @@ data class CoopContractState(
     val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
     val tokensAvailable: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
     val tokensSpent: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
-    val finished: Boolean get() = goals.all { goal -> goal.moment != null }
+    val finished: Boolean get() = goals.all { goal -> goal.moment != null && goal.moment <= timeRemaining }
 
     constructor(
         contract: Contract,
