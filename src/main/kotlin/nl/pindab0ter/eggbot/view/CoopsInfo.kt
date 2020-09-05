@@ -9,6 +9,8 @@ import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.*
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import kotlin.random.Random
@@ -46,12 +48,8 @@ private fun StringBuilder.drawCoops(
         cells = statuses.map { status ->
             when (status) {
                 is NotFound -> status.coopId
-                is Abandoned -> status.coopStatus.coopId
-                is Failed -> status.coopStatus.coopId
-                is NotOnTrack -> status.state.coopId
-                is OnTrack -> status.state.coopId
-                is FinishedIfCheckedIn -> status.state.coopId
-                is Finished -> status.coopStatus.coopId
+                is InActive -> status.coopStatus.coopId
+                is InProgress -> status.state.coopId
             }
         }
     }
@@ -108,13 +106,9 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is NotFound -> ""
-                is Abandoned -> ""
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is NotOnTrack -> status.state.eggsLaid.asIllions()
-                is OnTrack -> status.state.eggsLaid.asIllions()
-                is FinishedIfCheckedIn -> status.state.eggsLaid.asIllions()
-                is Finished -> ""
+                is InProgress -> status.state.eggsLaid.asIllions()
+                else -> ""
             }
         }
     }
@@ -133,13 +127,8 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is NotFound -> ""
-                is Abandoned -> ""
-                is Failed -> ""
-                is NotOnTrack -> status.state.farmers.sumByBigDecimal { it.initialState.eggsLaid }.asIllions()
-                is OnTrack -> status.state.farmers.sumByBigDecimal { it.initialState.eggsLaid }.asIllions()
-                is FinishedIfCheckedIn -> status.state.farmers.sumByBigDecimal { it.initialState.eggsLaid }.asIllions()
-                is Finished -> ""
+                is InProgress -> status.state.farmers.sumByBigDecimal { it.initialState.eggsLaid }.asIllions()
+                else -> ""
             }
         }
     }
@@ -155,12 +144,8 @@ private fun StringBuilder.drawCoops(
         cells = statuses.map { status ->
             when (status) {
                 is NotFound -> ""
-                is Abandoned -> "${status.coopStatus.contributors.count()}/${contract.maxCoopSize}"
-                is Failed -> "${status.coopStatus.contributors.count()}/${contract.maxCoopSize}"
-                is NotOnTrack -> "${status.state.farmers.count()}/${contract.maxCoopSize}"
-                is OnTrack -> "${status.state.farmers.count()}/${contract.maxCoopSize}"
-                is FinishedIfCheckedIn -> "${status.state.farmers.count()}/${contract.maxCoopSize}"
-                is Finished -> "${status.coopStatus.contributors.count()}/${contract.maxCoopSize}"
+                is InActive -> "${status.coopStatus.contributors.count()}/${contract.maxCoopSize}"
+                is InProgress -> "${status.state.farmers.count()}/${contract.maxCoopSize}"
             }
         }
     }
@@ -168,29 +153,15 @@ private fun StringBuilder.drawCoops(
 
 private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.EmojiColumn.() -> Unit) {
     fun CoopContractStatus.eggIncreasePerMinute(): BigDecimal = when (this) {
-        is NotFound -> ZERO
-        is Abandoned -> ZERO
-        is Failed -> ZERO
-        is NotOnTrack -> state.farmers.sumByBigDecimal { farmer ->
+        is InProgress -> state.farmers.sumByBigDecimal { farmer ->
             eggIncrease(farmer.finalState.habs, farmer.constants)
         }
-        is OnTrack -> state.farmers.sumByBigDecimal { farmer ->
-            eggIncrease(farmer.finalState.habs, farmer.constants)
-        }
-        is FinishedIfCheckedIn -> state.farmers.sumByBigDecimal { farmer ->
-            eggIncrease(farmer.finalState.habs, farmer.constants)
-        }
-        is Finished -> ZERO
+        else -> ZERO
     }
 
     fun CoopContractStatus.eggsLaid(): BigDecimal = when (this) {
-        is NotFound -> ZERO
-        is Abandoned -> ZERO
-        is Failed -> ZERO
-        is NotOnTrack -> state.eggsLaid
-        is OnTrack -> state.eggsLaid
-        is FinishedIfCheckedIn -> state.eggsLaid
-        is Finished -> ZERO
+        is InProgress -> state.eggsLaid
+        else -> ZERO
     }
 
     fun CoopContractStatus.isFasterThanAny(): Boolean = statuses.any { status ->

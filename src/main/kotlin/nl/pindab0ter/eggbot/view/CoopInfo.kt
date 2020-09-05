@@ -28,7 +28,7 @@ fun coopInfoResponse(
 
     drawGoals(state, compact)
 
-    drawBasicInfo(state, compact = compact)
+    drawBasicInfo(state, compact)
 
     append('\u200B')
 
@@ -57,7 +57,7 @@ fun coopFinishedIfCheckedInResponse(
 
     drawGoals(state, compact)
 
-    drawBasicInfo(state, finishedIfCheckedIn = true, compact)
+    drawBasicInfo(state, compact, true)
 
     append('\u200B')
 
@@ -116,8 +116,8 @@ private fun StringBuilder.drawGoals(
 
 private fun StringBuilder.drawBasicInfo(
     coopContractState: CoopContractState,
-    finishedIfCheckedIn: Boolean = false,
     compact: Boolean,
+    finishedIfCheckedIn: Boolean = false,
 ): StringBuilder = apply {
 
     appendLine()

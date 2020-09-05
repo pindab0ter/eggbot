@@ -6,35 +6,29 @@ import nl.pindab0ter.eggbot.helpers.eggsLaid
 import nl.pindab0ter.eggbot.helpers.finalGoal
 import nl.pindab0ter.eggbot.helpers.parallelMap
 import nl.pindab0ter.eggbot.model.AuxBrain
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
 
 sealed class CoopContractStatus {
     data class NotFound(
         val coopId: String,
     ) : CoopContractStatus()
 
-    data class Abandoned(
-        val coopStatus: CoopStatusResponse,
-    ) : CoopContractStatus()
+    sealed class InActive : CoopContractStatus() {
+        abstract val coopStatus: CoopStatusResponse
 
-    data class Failed(
-        val coopStatus: CoopStatusResponse,
-    ) : CoopContractStatus()
+        data class Abandoned(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive()
+        data class Failed(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive()
+        data class Finished(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive()
+    }
 
-    data class NotOnTrack(
-        val state: CoopContractState,
-    ) : CoopContractStatus()
+    sealed class InProgress : CoopContractStatus() {
+        abstract val state: CoopContractState
 
-    data class OnTrack(
-        val state: CoopContractState,
-    ) : CoopContractStatus()
-
-    data class Finished(
-        val coopStatus: CoopStatusResponse,
-    ) : CoopContractStatus()
-
-    data class FinishedIfCheckedIn(
-        val state: CoopContractState,
-    ) : CoopContractStatus()
+        data class NotOnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress()
+        data class OnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress()
+        data class FinishedIfCheckedIn(override val state: CoopContractState) : CoopContractStatus.InProgress()
+    }
 
     companion object {
         operator fun invoke(contract: Contract, coopId: String, catchUp: Boolean): CoopContractStatus {
@@ -45,10 +39,10 @@ sealed class CoopContractStatus {
                     NotFound(coopId)
                 coopStatus.gracePeriodSecondsRemaining <= 0.0 && coopStatus.eggsLaid < contract.finalGoal ->
                     Failed(coopStatus)
-                coopStatus.contributors.isEmpty() ->
-                    Abandoned(coopStatus)
                 coopStatus.eggsLaid >= contract.finalGoal ->
                     Finished(coopStatus)
+                coopStatus.contributors.isEmpty() ->
+                    Abandoned(coopStatus)
                 else -> {
                     val farmers = coopStatus.contributors.parallelMap { contributionInfo ->
                         AuxBrain.getFarmerBackup(contributionInfo.userId)
