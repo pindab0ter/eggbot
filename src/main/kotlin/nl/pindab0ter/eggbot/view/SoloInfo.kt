@@ -143,7 +143,7 @@ private fun StringBuilder.drawFinishedBasicInfo(
     state: SoloContractState,
     compact: Boolean,
 ): StringBuilder = apply {
-    appendLine("__**🎉 Completed if you check in**:__")
+    appendLine("__**🎉 Completed if you check in**:__ ```")
     appendLine("Time since backup: ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
 
     append("Current eggs:      ${state.farmer.initialState.eggsLaid.asIllions()} ")
