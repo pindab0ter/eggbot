@@ -51,7 +51,7 @@ abstract class EggBotCommand : Command() {
 
     private val JSAP.cleanUsage
         get() = clean(usage)
-    val Parameter.cleanSyntax
+    private val Parameter.cleanSyntax
         get() = clean(syntax)
 
     private fun generateCommandHelp() = buildString {

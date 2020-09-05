@@ -1,10 +1,10 @@
 package nl.pindab0ter.eggbot.helpers
 
 import nl.pindab0ter.eggbot.helpers.HabsStatus.*
-import nl.pindab0ter.eggbot.model.simulation.new.Constants
-import nl.pindab0ter.eggbot.model.simulation.new.FarmState
-import nl.pindab0ter.eggbot.model.simulation.new.Farmer
-import nl.pindab0ter.eggbot.model.simulation.new.Hab
+import nl.pindab0ter.eggbot.model.simulation.Constants
+import nl.pindab0ter.eggbot.model.simulation.FarmState
+import nl.pindab0ter.eggbot.model.simulation.Farmer
+import nl.pindab0ter.eggbot.model.simulation.Hab
 import org.joda.time.Duration
 import java.math.BigDecimal
 

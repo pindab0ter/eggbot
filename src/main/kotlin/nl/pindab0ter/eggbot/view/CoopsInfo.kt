@@ -7,8 +7,8 @@ import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
-import nl.pindab0ter.eggbot.model.simulation.new.CoopContractStatus
-import nl.pindab0ter.eggbot.model.simulation.new.CoopContractStatus.*
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.*
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
 import kotlin.random.Random

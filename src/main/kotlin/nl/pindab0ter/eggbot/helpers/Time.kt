@@ -16,8 +16,6 @@ val ONE_MINUTE: Duration = Duration.standardMinutes(1L)
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())
 fun Double.toDuration(): Duration = Duration((this * 1000).roundToLong())
-fun Duration.toDouble(): Double = (millis / 1000).toDouble()
-fun DateTime.toDouble(): Double = (millis / 1000).toDouble()
 operator fun Duration.div(other: Duration): Double? = try {
     this.millis.toDouble() / other.millis.toDouble()
 } catch (e: Exception) {

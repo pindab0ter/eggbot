@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.model.simulation.new
+package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Contract
 import nl.pindab0ter.eggbot.helpers.asDaysHoursAndMinutes
@@ -23,8 +23,5 @@ data class Goal(
                     moment = if (eggsLaid >= goal.targetAmount.toBigDecimal()) Duration.ZERO else null
                 )
             }.toSet()
-
-        fun fromContract(contract: Contract, eggsLaid: Double): Set<Goal> =
-            fromContract(contract, eggsLaid.toBigDecimal())
     }
 }

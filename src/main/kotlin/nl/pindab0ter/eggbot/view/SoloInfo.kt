@@ -4,7 +4,8 @@ import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
-import nl.pindab0ter.eggbot.model.simulation.new.SoloContractState
+import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
+import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import org.joda.time.Duration
 import java.math.BigDecimal
 
@@ -45,11 +46,11 @@ private fun StringBuilder.drawGoals(
     state.goals.forEachIndexed { index, (goal, moment) ->
         append("${index + 1}. ")
         appendPaddingCharacters(
-            goal.asIllions(NumberFormatter.OPTIONAL_DECIMALS),
-            state.goals.map { it.target.asIllions(NumberFormatter.OPTIONAL_DECIMALS) }
+            goal.asIllions(OPTIONAL_DECIMALS),
+            state.goals.map { it.target.asIllions(OPTIONAL_DECIMALS) }
         )
 
-        append(goal.asIllions(NumberFormatter.OPTIONAL_DECIMALS))
+        append(goal.asIllions(OPTIONAL_DECIMALS))
         append(
             when {
                 moment == null || moment > state.timeRemaining -> " 🔴 "

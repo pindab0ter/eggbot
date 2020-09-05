@@ -14,9 +14,9 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
-import nl.pindab0ter.eggbot.model.simulation.new.CoopContractState
-import nl.pindab0ter.eggbot.model.simulation.new.Farmer
-import nl.pindab0ter.eggbot.model.simulation.new.simulate
+import nl.pindab0ter.eggbot.model.simulation.CoopContractState
+import nl.pindab0ter.eggbot.model.simulation.Farmer
+import nl.pindab0ter.eggbot.model.simulation.simulate
 import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 import kotlin.text.RegexOption.DOT_MATCHES_ALL

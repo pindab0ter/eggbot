@@ -32,4 +32,3 @@ operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other
 operator fun BigDecimal.div(other: BigDecimal): BigDecimal = this.divide(other, mathContext)
 fun BigDecimal.floor(): BigDecimal = setScale(0, RoundingMode.FLOOR)
 fun BigDecimal.ceiling(): BigDecimal = setScale(0, RoundingMode.CEILING)
-fun BigDecimal.round(scale: Int = 0): BigDecimal = this.setScale(scale, HALF_UP)

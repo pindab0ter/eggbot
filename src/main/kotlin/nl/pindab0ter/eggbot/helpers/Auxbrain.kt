@@ -30,16 +30,6 @@ val CoopStatusResponse.timeRemaining: Duration
 
 fun Backup.farmFor(contractId: String): Backup.Simulation? = farms.firstOrNull { farm -> farm.contractId == contractId }
 
-fun List<Backup>.findContract(contractId: String, creatorId: String): Contract? = find { backup ->
-    backup.userId == creatorId
-}?.contracts?.run {
-    contracts.find { localContract ->
-        localContract.contract?.id == contractId
-    } ?: archive.find { localContract ->
-        localContract.contract?.id == contractId
-    }
-}?.contract
-
 val Backup.Simulation.internalHatcheryFlatIncreases: List<BigDecimal>
     get() = listOf(
         BigDecimal(2 * commonResearch[CommonResearch.INTERNAL_HATCHERY1.ordinal].level),

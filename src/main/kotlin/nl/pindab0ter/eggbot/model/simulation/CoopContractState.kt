@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.model.simulation.new
+package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatusResponse

@@ -13,8 +13,8 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
-import nl.pindab0ter.eggbot.model.simulation.new.SoloContractState
-import nl.pindab0ter.eggbot.model.simulation.new.simulate
+import nl.pindab0ter.eggbot.model.simulation.SoloContractState
+import nl.pindab0ter.eggbot.model.simulation.simulate
 import nl.pindab0ter.eggbot.view.soloFinishedIfCheckedInResponse
 import nl.pindab0ter.eggbot.view.soloInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction

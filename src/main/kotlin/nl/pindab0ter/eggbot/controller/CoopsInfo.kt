@@ -11,7 +11,7 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
 import nl.pindab0ter.eggbot.model.database.Coop
-import nl.pindab0ter.eggbot.model.simulation.new.CoopContractStatus
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.ExperimentalTime

@@ -31,7 +31,6 @@ enum class NumberFormatter {
     abstract fun format(number: Number): String
 }
 
-fun Int.formatInteger(): String = INTEGER.format(this)
 fun Long.formatInteger(): String = INTEGER.format(this)
 fun BigDecimal.formatInteger(): String = INTEGER.format(this)
 

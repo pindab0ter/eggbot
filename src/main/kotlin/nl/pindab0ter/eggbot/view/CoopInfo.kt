@@ -6,10 +6,11 @@ import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
+import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
-import nl.pindab0ter.eggbot.model.simulation.new.CoopContractState
-import nl.pindab0ter.eggbot.model.simulation.new.Farmer
+import nl.pindab0ter.eggbot.model.simulation.CoopContractState
+import nl.pindab0ter.eggbot.model.simulation.Farmer
 import org.joda.time.Duration
 import java.math.BigDecimal
 import kotlin.random.Random
@@ -89,7 +90,7 @@ private fun StringBuilder.drawGoals(
     incrementColumn(suffix = ".")
     column {
         leftPadding = 1
-        cells = coopContractState.goals.map { (target, _) -> target.asIllions(NumberFormatter.OPTIONAL_DECIMALS) }
+        cells = coopContractState.goals.map { (target, _) -> target.asIllions(OPTIONAL_DECIMALS) }
     }
     column {
         leftPadding = 2
@@ -182,7 +183,6 @@ private fun StringBuilder.drawMembers(
 
     overtakersColumn(state) {
         leftPadding = 1
-        rightPadding = 1
     }
 
     divider()
@@ -271,8 +271,6 @@ private fun StringBuilder.drawCompactMembers(
 }
 
 private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiColumn.() -> Unit) {
-    // TODO: "count" instead of "any" and then +x or -x
-    // TODO: If you're faster than 3, but slower than 1: +2
     val overtakers: List<String> = state.farmers.map { farmer ->
         when {
             state.farmers.any { other ->

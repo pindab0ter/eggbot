@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.model.simulation.new
+package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatusResponse
@@ -7,7 +7,7 @@ import nl.pindab0ter.eggbot.helpers.finalGoal
 import nl.pindab0ter.eggbot.helpers.parallelMap
 import nl.pindab0ter.eggbot.model.AuxBrain
 
-sealed class CoopContractStatus() {
+sealed class CoopContractStatus {
     data class NotFound(
         val coopId: String,
     ) : CoopContractStatus()
