@@ -57,7 +57,7 @@ object CoopsInfo : EggBotCommand() {
                 // TODO: Fix progress bar not updating
                 progressBar.update()
                 status
-            }
+            }.sortedDescending()
         }
 
         log.debug { "Simulation took ${duration}ms" }

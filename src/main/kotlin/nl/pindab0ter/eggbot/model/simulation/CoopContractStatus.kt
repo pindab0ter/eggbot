@@ -9,26 +9,33 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
 
-sealed class CoopContractStatus {
+sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopContractStatus> {
     data class NotFound(
         val coopId: String,
-    ) : CoopContractStatus()
+    ) : CoopContractStatus(0)
 
-    sealed class InActive : CoopContractStatus() {
+    sealed class InActive(priority: Int) : CoopContractStatus(priority) {
         abstract val coopStatus: CoopStatusResponse
 
-        data class Abandoned(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive()
-        data class Failed(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive()
-        data class Finished(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive()
+        data class Finished(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-1)
+        data class Abandoned(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-2)
+        data class Failed(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-3)
     }
 
-    sealed class InProgress : CoopContractStatus() {
+    sealed class InProgress(priority: Int) : CoopContractStatus(priority) {
         abstract val state: CoopContractState
 
-        data class NotOnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress()
-        data class OnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress()
-        data class FinishedIfCheckedIn(override val state: CoopContractState) : CoopContractStatus.InProgress()
+        data class NotOnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress(1)
+        data class OnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress(2)
+        data class FinishedIfCheckedIn(override val state: CoopContractState) : CoopContractStatus.InProgress(3)
+
+        override fun compareTo(other: CoopContractStatus): Int = when (other) {
+            is InProgress -> state.eggspected.compareTo(other.state.eggspected)
+            else -> +1
+        }
     }
+
+    override fun compareTo(other: CoopContractStatus): Int = this.priority.compareTo(other.priority)
 
     companion object {
         operator fun invoke(contract: Contract, coopId: String, catchUp: Boolean): CoopContractStatus {
