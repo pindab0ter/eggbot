@@ -107,7 +107,7 @@ private fun StringBuilder.drawCoops(
         cells = statuses.map { status ->
             when (status) {
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.eggsLaid.asIllions()
+                is InProgress -> status.state.eggspected.asIllions()
                 else -> ""
             }
         }
@@ -160,7 +160,7 @@ private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Tab
     }
 
     fun CoopContractStatus.eggsLaid(): BigDecimal = when (this) {
-        is InProgress -> state.eggsLaid
+        is InProgress -> state.finalEggsLaid
         else -> ZERO
     }
 

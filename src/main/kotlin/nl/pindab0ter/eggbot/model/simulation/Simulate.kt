@@ -48,9 +48,9 @@ tailrec fun simulate(
             goals = when {
                 contract.goals
                     .filter { (_, moment) -> moment == null }
-                    .none { (target, _) -> contract.eggsLaid >= target } -> contract.goals
+                    .none { (target, _) -> contract.finalEggsLaid >= target } -> contract.goals
                 else -> contract.goals.map { goal ->
-                    if (goal.moment == null && contract.eggsLaid >= goal.target) {
+                    if (goal.moment == null && contract.finalEggsLaid >= goal.target) {
                         goal.copy(moment = contract.elapsed)
                     } else goal
                 }
