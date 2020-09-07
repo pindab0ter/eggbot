@@ -10,6 +10,7 @@ import nl.pindab0ter.eggbot.controller.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.ProgressBar
@@ -35,7 +36,11 @@ object CoopAdd : EggBotCommand() {
             Switch(NO_ROLE)
                 .setShortFlag('n')
                 .setLongFlag("no-role")
-                .setHelp("Don't create a role for this co-op. Use this when tracking co-ops not part of ${guild.name}")
+                .setHelp("Don't create a role for this co-op. Use this when tracking co-ops not part of ${guild.name}"),
+            Switch(FORCE)
+                .setShortFlag('f')
+                .setLongFlag("force")
+                .setHelp("Add the co-op even if it doesn't exist. Does not create a role.")
         )
         sendTyping = false
         adminRequired = true
@@ -47,6 +52,7 @@ object CoopAdd : EggBotCommand() {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
         val noRole: Boolean = parameters.getBoolean(NO_ROLE)
+        val force: Boolean = parameters.getBoolean(FORCE)
         val exists: Boolean = transaction {
             Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }.toList().isNotEmpty()
         }
@@ -57,8 +63,14 @@ object CoopAdd : EggBotCommand() {
             return
         }
 
+        AuxBrain.getContract(contractId)?: "Could not find an active contract with that `contract id`.".let {
+            event.replyWarning(it)
+            log.debug { it }
+            return
+        }
+
         getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
-            if (status == null) "Could not find an active co-op with that `contract id` and `co-op id`.".let {
+            if (status == null && !force) "Could not find an active co-op with that `contract id` and `co-op id`.".let {
                 event.replyWarning(it)
                 log.debug { it }
                 return@getCoopStatus
@@ -71,13 +83,13 @@ object CoopAdd : EggBotCommand() {
 
             transaction {
                 Coop.new {
-                    this.name = status.coopId
-                    this.contractId = status.contractId
+                    this.name = coopId
+                    this.contractId = contractId
                     this.roleId = role?.id
                 }
             }
 
-            if (role != null) {
+            if (role != null && status != null) {
                 val message = event.channel.sendMessage("Assigning roles…").complete()
                 val progressBar = ProgressBar(status.contributors.count(), message, WhenDone.STOP_IMMEDIATELY)
 
@@ -120,7 +132,7 @@ object CoopAdd : EggBotCommand() {
                     message.delete().complete()
                     event.reply(messageBody)
                 }
-            } else event.replySuccess("Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
+            } else event.replySuccess("Successfully registered co-op `${coopId}` for contract `${contractId}`.")
         }
     }
 }

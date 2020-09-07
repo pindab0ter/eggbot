@@ -12,6 +12,7 @@ const val EXTENDED: String = "extended"
 const val CONTRACT_ID: String = "contract id"
 const val COOP_ID: String = "co-op id"
 const val NO_ROLE: String = "no role"
+const val FORCE: String = "force"
 const val FORCE_REPORTED_ONLY: String = "reported state"
 
 val compactSwitch: Switch = Switch(COMPACT)
