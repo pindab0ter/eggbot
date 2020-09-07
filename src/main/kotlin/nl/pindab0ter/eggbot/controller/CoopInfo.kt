@@ -69,7 +69,7 @@ object CoopInfo : EggBotCommand() {
             CoopContractStatus(contract, coopId, catchUp)
         }
 
-        log.debug { "Simulation took ${duration.inMilliseconds.toInt()}ms" }
+        log.debug { "Simulation took $duration" }
 
         when (status) {
             is NotFound -> "No co-op found for contract `${contractId}` with name `${coopId}`".let {

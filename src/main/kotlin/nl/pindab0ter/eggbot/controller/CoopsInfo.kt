@@ -60,7 +60,7 @@ object CoopsInfo : EggBotCommand() {
             }.sortedDescending()
         }
 
-        log.debug { "Simulation took ${duration}ms" }
+        log.debug { "Simulation took $duration" }
 
         if (statuses.isEmpty()) "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
             message.delete().queue()
