@@ -25,9 +25,9 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
     sealed class InProgress(priority: Int) : CoopContractStatus(priority) {
         abstract val state: CoopContractState
 
-        data class NotOnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress(1)
-        data class OnTrack(override val state: CoopContractState) : CoopContractStatus.InProgress(2)
-        data class FinishedIfCheckedIn(override val state: CoopContractState) : CoopContractStatus.InProgress(3)
+        data class NotOnTrack(override val state: CoopContractState) : InProgress(1)
+        data class OnTrack(override val state: CoopContractState) : InProgress(2)
+        data class FinishedIfCheckedIn(override val state: CoopContractState) : InProgress(3)
 
         override fun compareTo(other: CoopContractStatus): Int = when (other) {
             is InProgress -> state.initialEggsLaid.compareTo(other.state.initialEggsLaid)
@@ -65,6 +65,12 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
                     else NotOnTrack(simulatedState)
                 }
             }
+        }
+
+        val initialEggsLaidComparator = Comparator<CoopContractStatus> { one, other ->
+            if (one is InProgress && other is InProgress)
+                one.state.initialEggsLaid.compareTo(other.state.initialEggsLaid)
+            else one.compareTo(other)
         }
     }
 }

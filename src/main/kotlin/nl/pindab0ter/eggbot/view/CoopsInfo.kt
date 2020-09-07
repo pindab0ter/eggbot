@@ -19,12 +19,15 @@ import kotlin.random.Random
 fun coopsInfoResponse(
     contract: Contract,
     statuses: List<CoopContractStatus>,
+    compact: Boolean,
 ) = buildString {
     appendLine("`${guild.name}` vs. _${contract.name}_:")
     appendLine()
 
     drawBasicInfo(contract)
-    drawCoops(contract, statuses)
+    if (!compact) drawCoops(contract, statuses)
+    else drawCompactCoops(contract, statuses)
+
 }.splitCodeBlock()
 
 private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = apply {
@@ -145,6 +148,77 @@ private fun StringBuilder.drawCoops(
                 is InProgress -> status.state.farmers.sumByBigDecimal { farmer ->
                     eggIncrease(farmer.initialState.habs, farmer.constants)
                 }.asIllions()
+                else -> ""
+            }
+        }
+    }
+
+    column {
+        header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is NotFound -> ""
+                is InActive -> "${status.coopStatus.contributors.count()}/${contract.maxCoopSize}"
+                is InProgress -> "${status.state.farmers.count()}/${contract.maxCoopSize}"
+            }
+        }
+    }
+}
+
+private fun StringBuilder.drawCompactCoops(
+    contract: Contract,
+    statuses: List<CoopContractStatus>,
+): StringBuilder = appendTable {
+    column {
+        header = "Name"
+
+        rightPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is NotFound -> status.coopId
+                is InActive -> status.coopStatus.coopId
+                is InProgress -> status.state.coopId
+            }
+        }
+    }
+
+    divider()
+
+    emojiColumn {
+        header = "🚥"
+
+        leftPadding = 1
+        rightPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is NotFound -> "🟡"
+                is Abandoned -> "🔴"
+                is Failed -> "🔴"
+                is NotOnTrack -> "🟡"
+                is OnTrack -> "🟢"
+                is FinishedIfCheckedIn -> "🟢"
+                is Finished -> "🏁"
+            }
+        }
+    }
+
+    divider()
+
+    column {
+        header = "Eggspected"
+
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is Failed -> status.coopStatus.eggsLaid.asIllions()
+                is InProgress -> status.state.eggspected.asIllions()
                 else -> ""
             }
         }

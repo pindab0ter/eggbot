@@ -12,6 +12,7 @@ import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.initialEggsLaidComparator
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.ExperimentalTime
@@ -28,6 +29,7 @@ object CoopsInfo : EggBotCommand() {
         parameters = listOf(
             contractIdOption,
             forceReportedOnlySwitch,
+            compactSwitch
         )
         sendTyping = false
         init()
@@ -37,6 +39,7 @@ object CoopsInfo : EggBotCommand() {
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val contractId = parameters.getString(CONTRACT_ID)
         val catchUp = parameters.getBoolean(FORCE_REPORTED_ONLY).not()
+        val compact = parameters.getBoolean(COMPACT)
 
         val coops = transaction { Coop.find { Coops.contractId eq contractId }.toList().sortedBy { it.name } }
 
@@ -57,7 +60,10 @@ object CoopsInfo : EggBotCommand() {
                 // TODO: Fix progress bar not updating
                 progressBar.update()
                 status
-            }.sortedDescending()
+            }.let { coops ->
+                if (!compact) coops.sortedDescending()
+                else coops.sortedWith(initialEggsLaidComparator).reversed()
+            }
         }
 
         log.debug { "Simulation took $duration" }
@@ -70,7 +76,7 @@ object CoopsInfo : EggBotCommand() {
         }
 
         message.delete().queue()
-        coopsInfoResponse(contract, statuses).let { messages ->
+        coopsInfoResponse(contract, statuses, compact).let { messages ->
             messages.forEach { message -> event.reply(message) }
         }
     }
