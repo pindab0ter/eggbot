@@ -101,6 +101,21 @@ private fun StringBuilder.drawCoops(
     column {
         header = "Eggspected"
 
+        leftPadding = 1
+        rightPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is Failed -> status.coopStatus.eggsLaid.asIllions()
+                is InProgress -> status.state.eggspected.asIllions()
+                else -> ""
+            }
+        }
+    }
+
+    column {
+        header = "Eggs"
+
         alignment = RIGHT
         leftPadding = 1
 
@@ -134,8 +149,6 @@ private fun StringBuilder.drawCoops(
             }
         }
     }
-
-    divider()
 
     column {
         header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
