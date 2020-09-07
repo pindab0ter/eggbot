@@ -107,7 +107,7 @@ private fun StringBuilder.drawCoops(
         cells = statuses.map { status ->
             when (status) {
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.eggspected.asIllions()
+                is InProgress -> status.state.initialEggsLaid.asIllions()
                 else -> ""
             }
         }
@@ -166,11 +166,11 @@ private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Tab
         else -> ZERO
     }
 
-    fun CoopContractStatus.isFasterThanAny(): Boolean = statuses.any { other ->
+    fun CoopContractStatus.isFasterThanAny(): Boolean = statuses.minus(this).any { other ->
         this.eggsLaid() < other.eggsLaid() && this.eggIncreasePerMinute() > other.eggIncreasePerMinute()
     }
 
-    fun CoopContractStatus.isSlowerThanAny(): Boolean = statuses.any { other ->
+    fun CoopContractStatus.isSlowerThanAny(): Boolean = statuses.minus(this).any { other ->
         this.eggsLaid() > other.eggsLaid() && this.eggIncreasePerMinute() < other.eggIncreasePerMinute()
     }
 

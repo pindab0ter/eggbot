@@ -30,7 +30,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
         data class FinishedIfCheckedIn(override val state: CoopContractState) : CoopContractStatus.InProgress(3)
 
         override fun compareTo(other: CoopContractStatus): Int = when (other) {
-            is InProgress -> state.eggspected.compareTo(other.state.eggspected)
+            is InProgress -> state.initialEggsLaid.compareTo(other.state.initialEggsLaid)
             else -> +1
         }
     }
