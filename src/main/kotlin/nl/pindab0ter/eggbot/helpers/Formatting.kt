@@ -16,7 +16,7 @@ enum class NumberFormatter {
             DecimalFormat(",##0", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
     },
 
-    /** Format to three decimal places */
+    /** Format to two decimal places */
     DECIMALS {
         override fun format(number: Number): String =
             DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
@@ -33,6 +33,7 @@ enum class NumberFormatter {
 
 fun Long.formatInteger(): String = INTEGER.format(this)
 fun BigDecimal.formatInteger(): String = INTEGER.format(this)
+fun BigDecimal.formatTwoDecimals(): String = DECIMALS.format(this)
 
 fun BigDecimal.asIllions(formatter: NumberFormatter = DECIMALS, shortened: Boolean = true): String {
     return when (this) {

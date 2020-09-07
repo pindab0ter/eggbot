@@ -127,7 +127,25 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is InProgress -> status.state.farmers.sumByBigDecimal { it.initialState.eggsLaid }.asIllions()
+                is InProgress -> status.state.farmers.sumByBigDecimal { farmer ->
+                    eggIncrease(farmer.initialState.habs, farmer.constants)
+                }.asIllions()
+                else -> ""
+            }
+        }
+    }
+
+    column {
+        header = "Time required"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is InProgress ->
+                    if (status.state.elapsed >= ONE_YEAR) "> 1yr"
+                    else status.state.elapsed.asDaysHoursAndMinutes(true)
                 else -> ""
             }
         }
@@ -136,7 +154,62 @@ private fun StringBuilder.drawCoops(
     divider()
 
     column {
-        header = "${'#'.repeat(contract.maxCoopSize).length}/${contract.maxCoopSize}"
+        header = "/remaining"
+
+        alignment = LEFT
+        rightPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is InProgress -> status.state.timeRemaining.asDaysHoursAndMinutes(true)
+                else -> ""
+            }
+        }
+    }
+
+    column {
+        header = "Current %"
+
+        alignment = RIGHT
+
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is InActive -> "${
+                    (status.coopStatus.eggsLaid / contract.finalGoal).times(BigDecimal(100)).formatTwoDecimals()
+                } %"
+                is InProgress -> "${
+                    (status.state.initialEggsLaid / contract.finalGoal).times(BigDecimal(100)).formatTwoDecimals()
+                } %"
+                else -> ""
+            }
+        }
+    }
+
+    divider()
+
+    column {
+        header = "/eggspected"
+
+        alignment = LEFT
+
+        rightPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is InProgress -> "${
+                    (status.state.eggspected / contract.finalGoal).times(BigDecimal(100)).formatTwoDecimals()
+                } %"
+                else -> ""
+            }
+        }
+    }
+
+    divider()
+
+    column {
+        header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
 
         alignment = RIGHT
         leftPadding = 1
