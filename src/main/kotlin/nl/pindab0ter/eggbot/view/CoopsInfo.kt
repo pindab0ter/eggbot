@@ -156,22 +156,22 @@ private fun StringBuilder.drawCoops(
 private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.EmojiColumn.() -> Unit) {
     fun CoopContractStatus.eggIncreasePerMinute(): BigDecimal = when (this) {
         is InProgress -> state.farmers.sumByBigDecimal { farmer ->
-            eggIncrease(farmer.finalState.habs, farmer.constants)
+            eggIncrease(farmer.initialState.habs, farmer.constants)
         }
         else -> ZERO
     }
 
     fun CoopContractStatus.eggsLaid(): BigDecimal = when (this) {
-        is InProgress -> state.finalEggsLaid
+        is InProgress -> state.initialEggsLaid
         else -> ZERO
     }
 
-    fun CoopContractStatus.isFasterThanAny(): Boolean = statuses.any { status ->
-        eggsLaid() < status.eggsLaid() && eggIncreasePerMinute() > status.eggIncreasePerMinute()
+    fun CoopContractStatus.isFasterThanAny(): Boolean = statuses.any { other ->
+        this.eggsLaid() < other.eggsLaid() && this.eggIncreasePerMinute() > other.eggIncreasePerMinute()
     }
 
-    fun CoopContractStatus.isSlowerThanAny(): Boolean = statuses.any { status ->
-        eggsLaid() > status.eggsLaid() && eggIncreasePerMinute() < status.eggIncreasePerMinute()
+    fun CoopContractStatus.isSlowerThanAny(): Boolean = statuses.any { other ->
+        this.eggsLaid() > other.eggsLaid() && this.eggIncreasePerMinute() < other.eggIncreasePerMinute()
     }
 
     val overtakers: List<String> = statuses.map { status ->
