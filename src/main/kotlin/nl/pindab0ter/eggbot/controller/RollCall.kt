@@ -8,22 +8,19 @@ import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
 import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
-import nl.pindab0ter.eggbot.EggBot.botOwner
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.helpers.CONTRACT_ID
+import nl.pindab0ter.eggbot.helpers.NO_ROLE
 import nl.pindab0ter.eggbot.helpers.contractIdOption
 import nl.pindab0ter.eggbot.jda.EggBotCommand
-import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.ProgressBar
+import nl.pindab0ter.eggbot.model.*
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
-import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.rollCallResponse
-import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object RollCall : EggBotCommand() {
@@ -54,6 +51,10 @@ object RollCall : EggBotCommand() {
         parameters = listOf(
             contractIdOption,
             baseNameOption,
+            Switch(NO_ROLE)
+                .setShortFlag('n')
+                .setLongFlag("no-role")
+                .setHelp("Don't create roles for these co-ops."),
             overwriteFlag
         )
         botPermissions = arrayOf(MANAGE_ROLES)
@@ -64,8 +65,9 @@ object RollCall : EggBotCommand() {
     @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val contractId: String = parameters.getString(CONTRACT_ID)
-        val force: Boolean = parameters.getBoolean(OVERWRITE)
+        val overwrite: Boolean = parameters.getBoolean(OVERWRITE)
         val baseName = "-${parameters.getString(BASE_NAME)}"
+        val noRole: Boolean = parameters.getBoolean(NO_ROLE)
 
         if (!allowedCharacters.matches(baseName)) "Only letters, digits and dashes are allowed.".let {
             event.replyWarning(it)
@@ -89,66 +91,66 @@ object RollCall : EggBotCommand() {
         transaction {
             val existingCoops: List<Coop> = Coop.find { Coops.contractId eq contract.id }.toList()
             if (existingCoops.isNotEmpty()) {
-                if (force) {
-                    val roles = existingCoops.mapNotNull { coop ->
-                        coop.roleId?.let { guild.getRoleById(it) }
+                if (overwrite) {
+                    val coopsToRoles = existingCoops.map { coop ->
+                        coop to coop.roleId?.let { guild.getRoleById(it) }
                     }
 
-                    if (roles.isEmpty()) "No roles found for `${contract.id}`".let {
-                        event.replyWarning(it)
-                        log.warn { it }
-                    }
+                    val (successes, failures) = deleteCoopsAndRoles(coopsToRoles, event)
 
-                    val roleDeletions = roles.map { role ->
-                        role.delete().submit()
+                    buildString {
+                        if (successes.isNotEmpty()) {
+                            appendLine("${Config.emojiSuccess} The following coops for `$contractId` have been deleted:")
+                            appendLine("```")
+                            successes.forEach { (coopName, roleName) ->
+                                appendLine("${coopName}${roleName?.let { " (@${it})" } ?: ""}")
+                            }
+                            appendLine("```")
+                        }
+                        if (failures.isNotEmpty()) {
+                            appendLine("${Config.emojiWarning} The following coops for `$contractId` could not be deleted:")
+                            appendLine("```")
+                            successes.forEach { (coopName, roleName) ->
+                                appendLine("${coopName}${roleName?.let { " (@${it})" } ?: ""}")
+                            }
+                            appendLine("```")
+                        }
+                    }.let { messageBody ->
+                        event.reply(messageBody)
                     }
-
-                    if (roleDeletions.any { it.isCompletedExceptionally }) "Something went wrong. Please contact ${botOwner?.asMention ?: "the bot maintainer"}".let {
-                        event.replyWarning(it)
-                        log.error { it }
-                    }
-
-                    Coops.deleteWhere { Coops.contractId eq contract.id }
-                    log.info { "Deleted contracts for ${contract.id}" }
-                } else "Co-ops are already generated for contract `${contract.id}`. Add `overwrite` to override.".let {
+                } else "Co-ops are already generated for contract `${contract.id}`. Add `-o` or `--overwrite` to override.".let {
                     event.replyWarning(it)
                     log.debug { it }
                     return@transaction
                 }
             }
 
-            val message = event.channel.sendMessage("Generating co-ops and creating roles…").complete()
+            val message = event.channel
+                .sendMessage("Generating co-ops${if (!noRole) " and creating roles" else ""}…").complete()
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
-            val coops: List<Coop> = createRollCall(farmers, contract, baseName)
+            val coops: List<Coop> = createRollCall(farmers, contract, baseName, noRole)
 
             val progressBar = ProgressBar(farmers.count(), message, WhenDone.STOP_IMMEDIATELY)
 
-            assignRoles(coops) {
-                progressBar.update()
-                event.channel.sendTyping().queue()
+            if (!noRole) coops.map { coop ->
+                coop.roleId?.let { guild.getRoleById(it) }?.let { role ->
+                    assignRoles(
+                        inGameNamesToDiscordIDs = coop.farmers.map { farmer -> farmer.inGameName to farmer.discordUser.discordId }
+                            .toMap(),
+                        role = role,
+                        progressCallBack = {
+                            progressBar.update()
+                            event.channel.sendTyping().queue()
+                        }
+                    )
+                }
             }
 
             message.delete().complete()
 
             rollCallResponse(contract, coops).forEach { block ->
                 event.reply(block)
-            }
-        }
-    }
-
-    private fun assignRoles(coops: List<Coop>, progressCallback: () -> Unit) = transaction {
-        coops.map { coop ->
-            coop.roleId?.let { guild.getRoleById(it) } to coop.farmers
-        }.forEach { (role, coopFarmers) ->
-            coopFarmers.map { farmer ->
-                val discordId = farmer.discordUser.discordId
-                val discordTag = farmer.discordUser.discordTag
-                guild.addRoleToMember(discordId, role!!).queue({}, { exception ->
-                    if (exception == null) log.info("Added $discordTag to ${role.name}")
-                    else log.warn("Failed to add $discordTag to ${role.name}. Cause: ${exception.localizedMessage}")
-                })
-                progressCallback()
             }
         }
     }

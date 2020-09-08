@@ -12,6 +12,7 @@ import nl.pindab0ter.eggbot.helpers.contractIdOption
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.deleteCoopsAndRoles
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object RollClear : EggBotCommand() {
@@ -49,40 +50,23 @@ object RollClear : EggBotCommand() {
 
         val message = event.channel.sendMessage("Deleting roles…").complete()
 
-        val successes = mutableListOf<Pair<String, String?>>()
-        val failures = mutableListOf<Pair<String, String?>>()
-
-        // TODO: Move this responsibility to somewhere else
-        coopsToRoles.forEach { (coop, role) ->
-            val coopNameToRoleName = coop.name to role?.name
-            if (role != null) role.delete().submit().handle { _, exception ->
-                if (exception != null) {
-                    failures.add(coopNameToRoleName)
-                    log.warn { "Failed to remove Discord role (${exception.localizedMessage})" }
-                    event.replyWarning("Failed to remove Discord role (${exception.localizedMessage})")
-                } else {
-                    transaction { coop.delete() }
-                    successes.add(coopNameToRoleName)
-                    log.info { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
-                }
-            }.join() else {
-                transaction { coop.delete() }
-                successes.add(coopNameToRoleName)
-                log.info { "Co-op ${coopNameToRoleName.first} successfully removed." }
-            }
-        }
+        val (successes, failures) = deleteCoopsAndRoles(coopsToRoles, event)
 
         buildString {
             if (successes.isNotEmpty()) {
                 appendLine("${Config.emojiSuccess} The following coops for `$contractId` have been deleted:")
                 appendLine("```")
-                successes.forEach { appendLine("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
+                successes.forEach { (coopName, roleName) ->
+                    appendLine("${coopName}${roleName?.let { " (@${it})" } ?: ""}")
+                }
                 appendLine("```")
             }
             if (failures.isNotEmpty()) {
                 appendLine("${Config.emojiWarning} The following coops for `$contractId` could not be deleted:")
                 appendLine("```")
-                successes.forEach { appendLine("${it.first}${it.second?.let { role -> " (@${role})" } ?: ""}") }
+                successes.forEach { (coopName, roleName) ->
+                    appendLine("${coopName}${roleName?.let { " (@${it})" } ?: ""}")
+                }
                 appendLine("```")
             }
         }.let { messageBody ->
@@ -90,4 +74,5 @@ object RollClear : EggBotCommand() {
             event.reply(messageBody)
         }
     }
+
 }

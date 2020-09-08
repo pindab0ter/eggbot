@@ -15,9 +15,8 @@ import nl.pindab0ter.eggbot.model.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
+import nl.pindab0ter.eggbot.model.assignRoles
 import nl.pindab0ter.eggbot.model.database.Coop
-import nl.pindab0ter.eggbot.model.database.DiscordUser
-import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -63,7 +62,7 @@ object CoopAdd : EggBotCommand() {
             return
         }
 
-        AuxBrain.getContract(contractId)?: "Could not find an active contract with that `contract id`.".let {
+        AuxBrain.getContract(contractId) ?: "Could not find an active contract with that `contract id`.".let {
             event.replyWarning(it)
             log.debug { it }
             return
@@ -93,26 +92,13 @@ object CoopAdd : EggBotCommand() {
                 val message = event.channel.sendMessage("Assigning roles…").complete()
                 val progressBar = ProgressBar(status.contributors.count(), message, WhenDone.STOP_IMMEDIATELY)
 
-                val successes = mutableListOf<DiscordUser>()
-                val failures = mutableListOf<String>()
-
-                status.contributors.map { contributionInfo ->
-                    contributionInfo to transaction { Farmer.findById(contributionInfo.userId)?.discordUser }
-                }.forEach { (contributionInfo, discordUser) ->
-                    log.debug { "${contributionInfo.userName}, ${discordUser?.discordTag}" }
-                    if (discordUser != null) guild.addRoleToMember(discordUser.discordId, role).submit()
-                        .handle { _, exception ->
-                            if (exception == null) {
-                                successes.add(discordUser)
-                                log.debug("Added ${discordUser.discordTag} to @${role.name}")
-                            } else {
-                                failures.add(contributionInfo.userName)
-                                log.warn("Failed to add ${discordUser.discordTag} to ${role.name}. Cause: ${exception.localizedMessage}")
-                            }
-                        }.join()
-                    else failures.add(contributionInfo.userName)
-                    progressBar.update()
-                }
+                val (successes, failures) = assignRoles(
+                    inGameNamesToDiscordIDs = status.contributors.map { contributor ->
+                        contributor.userName to contributor.userId
+                    }.toMap(),
+                    role = role,
+                    progressCallBack = progressBar::update
+                )
 
                 buildString {
                     appendLine("${Config.emojiSuccess} Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
