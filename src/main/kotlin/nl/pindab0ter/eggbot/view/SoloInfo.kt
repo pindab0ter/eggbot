@@ -76,7 +76,7 @@ private fun StringBuilder.drawBasicInfo(
     appendLine("__🗒️ **Basic info**:__ ```")
     appendLine("Time remaining:   ${state.timeRemaining.asDaysHoursAndMinutes(compact)}")
 
-    append("Eggspected:       ${state.eggspected.asIllions()} ")
+    append("Eggspected:       ${state.farmer.finalState.eggsLaid.asIllions()} ")
     if (!compact) append("(${
         minOf(
             eggIncrease(state.farmer.finalState.habs, state.farmer.constants),

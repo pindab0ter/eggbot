@@ -110,7 +110,7 @@ private fun StringBuilder.drawCoops(
         cells = statuses.map { status ->
             when (status) {
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.eggspected.asIllions()
+                is InProgress -> status.state.finalEggsLaid.asIllions()
                 else -> ""
             }
         }
@@ -218,7 +218,7 @@ private fun StringBuilder.drawCompactCoops(
         cells = statuses.map { status ->
             when (status) {
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.eggspected.asIllions()
+                is InProgress -> status.state.finalEggsLaid.asIllions()
                 else -> ""
             }
         }

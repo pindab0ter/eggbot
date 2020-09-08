@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.model.simulation
 import nl.pindab0ter.eggbot.helpers.ONE_MINUTE
 import nl.pindab0ter.eggbot.helpers.ONE_YEAR
 import nl.pindab0ter.eggbot.helpers.advanceOneMinute
-import nl.pindab0ter.eggbot.helpers.sumByBigDecimal
 
 
 tailrec fun simulate(
@@ -26,10 +25,6 @@ tailrec fun simulate(
                     } else goal
                 }
             }.toSet(),
-            eggspected = when {
-                contract.elapsed <= contract.timeRemaining -> contract.farmer.finalState.eggsLaid
-                else -> contract.eggspected
-            },
             elapsed = contract.elapsed + ONE_MINUTE
         )
     )
@@ -55,11 +50,6 @@ tailrec fun simulate(
                     } else goal
                 }
             }.toSet(),
-            eggspected = when {
-                contract.elapsed <= contract.timeRemaining ->
-                    contract.farmers.sumByBigDecimal { farmer -> farmer.finalState.eggsLaid }
-                else -> contract.eggspected
-            },
             elapsed = contract.elapsed + ONE_MINUTE
         )
     )

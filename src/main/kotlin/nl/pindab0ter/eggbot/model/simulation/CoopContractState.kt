@@ -19,7 +19,6 @@ data class CoopContractState(
     val goals: Set<Goal>,
     val timeRemaining: Duration,
     val elapsed: Duration = Duration.ZERO,
-    val eggspected: BigDecimal = BigDecimal.ZERO,
     val farmers: List<Farmer>,
 ) {
     val initialEggsLaid: BigDecimal get() = farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }
@@ -42,7 +41,6 @@ data class CoopContractState(
         public = coopStatus.public,
         goals = Goal.fromContract(contract, farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }),
         timeRemaining = coopStatus.secondsRemaining.toDuration(),
-        eggspected = farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid },
         farmers = farmers
     )
 

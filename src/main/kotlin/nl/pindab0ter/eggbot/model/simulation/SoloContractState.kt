@@ -6,7 +6,6 @@ import com.auxbrain.ei.LocalContract
 import nl.pindab0ter.eggbot.helpers.asDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.helpers.timeRemaining
 import org.joda.time.Duration
-import java.math.BigDecimal
 
 data class SoloContractState(
     val contractId: String,
@@ -15,7 +14,6 @@ data class SoloContractState(
     val goals: Set<Goal>,
     val timeRemaining: Duration,
     val elapsed: Duration = Duration.ZERO,
-    val eggspected: BigDecimal = BigDecimal.ZERO,
     val farmer: Farmer,
 ) {
     val finished: Boolean get() = goals.all { (_, moment) -> moment == Duration.ZERO }
@@ -30,7 +28,7 @@ data class SoloContractState(
         ): SoloContractState? {
             val farmer = Farmer(backup, localContract.contract!!.id, catchUp)
 
-            return if (farmer ==  null) null else SoloContractState(
+            return if (farmer == null) null else SoloContractState(
                 contractId = localContract.contract.id,
                 contractName = localContract.contract.name,
                 egg = localContract.contract.egg,

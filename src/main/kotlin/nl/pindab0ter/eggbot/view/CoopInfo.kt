@@ -126,7 +126,7 @@ private fun StringBuilder.drawBasicInfo(
 
     if (!finishedIfCheckedIn) {
         appendLine("Time remaining:   ${coopContractState.timeRemaining.asDaysHoursAndMinutes(compact)}")
-        append("Eggspected:       ${coopContractState.eggspected.asIllions()} ")
+        append("Eggspected:       ${coopContractState.finalEggsLaid.asIllions()} ")
         appendLine()
     }
 
