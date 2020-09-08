@@ -8,8 +8,7 @@ import nl.pindab0ter.eggbot.helpers.advanceOneMinute
 tailrec fun simulate(
     contract: SoloContractState,
 ): SoloContractState = when {
-    contract.goals.last().moment != null -> contract
-    contract.elapsed >= ONE_YEAR -> contract
+    contract.elapsed >= contract.timeRemaining || contract.elapsed >= ONE_YEAR -> contract
     else -> simulate(
         contract.copy(
             farmer = contract.farmer.copy(
@@ -33,8 +32,7 @@ tailrec fun simulate(
 tailrec fun simulate(
     contract: CoopContractState,
 ): CoopContractState = when {
-    contract.goals.last().moment != null -> contract
-    contract.elapsed >= ONE_YEAR -> contract
+    contract.elapsed >= contract.timeRemaining || contract.elapsed >= ONE_YEAR -> contract
     else -> simulate(
         contract.copy(
             farmers = contract.farmers.map { farmer ->
