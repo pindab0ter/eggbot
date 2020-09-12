@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot.helpers
 
-import kotlin.streams.toList
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
 
 fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
@@ -18,7 +20,9 @@ inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
 fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
     zip(other).flatMap(Pair<T, T>::toList) + if (size > other.size) drop(other.size) else other.drop(size)
 
-fun <T, R> List<T>.parallelMap(transform: (T) -> R): List<R> = parallelStream().map(transform).toList()
+suspend fun <T, R> Iterable<T>.asyncMap(transform: suspend (T) -> R): List<R> = coroutineScope {
+    map { async { transform(it) } }.awaitAll()
+}
 
 /**
  * Returns a string containing this char repeated [n] times.

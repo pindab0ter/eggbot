@@ -55,7 +55,7 @@ object CoopsInfo : EggBotCommand() {
         val progressBar = ProgressBar(coops.size, message)
 
         val (statuses, duration) = measureTimedValue {
-            coops.parallelMap status@{ coop ->
+            coops.map status@{ coop ->
                 val status = CoopContractStatus(contract, coop.name, catchUp)
                 progressBar.update()
                 status

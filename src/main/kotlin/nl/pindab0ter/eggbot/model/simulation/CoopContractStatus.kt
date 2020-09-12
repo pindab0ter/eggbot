@@ -2,9 +2,10 @@ package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatusResponse
+import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.eggsLaid
 import nl.pindab0ter.eggbot.helpers.finalGoal
-import nl.pindab0ter.eggbot.helpers.parallelMap
+import nl.pindab0ter.eggbot.helpers.asyncMap
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
@@ -51,10 +52,12 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
                 coopStatus.contributors.isEmpty() ->
                     Abandoned(coopStatus)
                 else -> {
-                    val farmers = coopStatus.contributors.parallelMap { contributionInfo ->
-                        AuxBrain.getFarmerBackup(contributionInfo.userId)
-                            ?.let { Farmer(it, contract.id, catchUp) }
-                    }.filterNotNull()
+                    val farmers = runBlocking {
+                        coopStatus.contributors.asyncMap { contributionInfo ->
+                            AuxBrain.getFarmerBackup(contributionInfo.userId)
+                                ?.let { Farmer(it, contract.id, catchUp) }
+                        }.filterNotNull()
+                    }
                     val initialState = CoopContractState(contract, coopStatus, farmers)
 
                     if (initialState.finished) FinishedIfCheckedIn(initialState)

@@ -3,7 +3,7 @@ package nl.pindab0ter.eggbot.jobs
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.parallelMap
+import nl.pindab0ter.eggbot.helpers.asyncMap
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -23,7 +23,7 @@ class UpdateFarmers : Job {
         }
 
         runBlocking(Dispatchers.IO) {
-            farmers.parallelMap { farmer ->
+            farmers.asyncMap { farmer ->
                 farmer to AuxBrain.getFarmerBackup(farmer.inGameId)
             }.let { farmers ->
                 transaction {
