@@ -17,7 +17,6 @@ import nl.pindab0ter.eggbot.helpers.NO_ROLE
 import nl.pindab0ter.eggbot.helpers.contractIdOption
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.*
-import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.rollCallResponse
@@ -131,7 +130,7 @@ object RollCall : EggBotCommand() {
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
             val coops: List<Coop> = createRollCall(farmers, contract, baseName, noRole)
 
-            val progressBar = ProgressBar(farmers.count(), message, WhenDone.STOP_IMMEDIATELY)
+            val progressBar = ProgressBar(farmers.count(), message)
 
             if (!noRole) coops.map { coop ->
                 coop.roleId?.let { guild.getRoleById(it) }?.let { role ->

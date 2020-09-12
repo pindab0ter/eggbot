@@ -9,7 +9,6 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.ProgressBar
-import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.initialEggsLaidComparator
@@ -44,7 +43,6 @@ object CoopsInfo : EggBotCommand() {
         val coops = transaction { Coop.find { Coops.contractId eq contractId }.toList().sortedBy { it.name } }
 
         val message = event.channel.sendMessage("Looking for co-ops…").complete()
-        val progressBar = ProgressBar(coops.size, message, WhenDone.STOP_IMMEDIATELY)
 
         val contract = AuxBrain.getContract(contractId)
             ?: "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
@@ -54,10 +52,11 @@ object CoopsInfo : EggBotCommand() {
                 return
             }
 
+        val progressBar = ProgressBar(coops.size, message)
+
         val (statuses, duration) = measureTimedValue {
             coops.parallelMap status@{ coop ->
                 val status = CoopContractStatus(contract, coop.name, catchUp)
-                // TODO: Fix progress bar not updating
                 progressBar.update()
                 status
             }.let { coops ->

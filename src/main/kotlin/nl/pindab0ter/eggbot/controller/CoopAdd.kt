@@ -14,7 +14,6 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.AuxBrain.getCoopStatus
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.ProgressBar
-import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone
 import nl.pindab0ter.eggbot.model.assignRoles
 import nl.pindab0ter.eggbot.model.database.Coop
 import org.jetbrains.exposed.sql.and
@@ -90,7 +89,7 @@ object CoopAdd : EggBotCommand() {
 
             if (role != null && status != null) {
                 val message = event.channel.sendMessage("Assigning roles…").complete()
-                val progressBar = ProgressBar(status.contributors.count(), message, WhenDone.STOP_IMMEDIATELY)
+                val progressBar = ProgressBar(status.contributors.count(), message)
 
                 val (successes, failures) = assignRoles(
                     inGameNamesToDiscordIDs = status.contributors.map { contributor ->

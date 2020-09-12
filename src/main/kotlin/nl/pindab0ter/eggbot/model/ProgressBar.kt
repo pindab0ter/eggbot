@@ -3,36 +3,34 @@ package nl.pindab0ter.eggbot.model
 import kotlinx.coroutines.*
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
-import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone.PUBLISH_FINAL_UPDATE
-import nl.pindab0ter.eggbot.model.ProgressBar.WhenDone.STOP_IMMEDIATELY
+import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
+
 class ProgressBar(
     private val goal: Int,
     private val message: Message,
-    private val whenDone: WhenDone = PUBLISH_FINAL_UPDATE
+    coroutineContext: CoroutineContext? = null,
 ) : CoroutineScope {
-    enum class WhenDone { STOP_IMMEDIATELY, PUBLISH_FINAL_UPDATE }
-
-    override val coroutineContext: CoroutineContext = Dispatchers.Default
+    override val coroutineContext: CoroutineContext = coroutineContext ?: Dispatchers.Default
     private var running: Boolean = true
     private var counter: AtomicInteger = AtomicInteger(0)
-    private var dirty: Boolean = true
+    private var dirty: AtomicBoolean = AtomicBoolean(true)
     private var job: Job
 
     init {
+        require(goal > 0) { "Goal must be at least 1" }
         job = loop()
     }
 
-    private fun loop(): Job = GlobalScope.launch {
+    private fun loop(): Job = GlobalScope.launch(coroutineContext) {
         message.channel.sendTyping().queue()
         var i = 0
         while (running) when {
-            dirty -> {
+            dirty.getAndSet(false) -> {
                 message.editMessage(drawProgressBar(counter.get(), goal)).queue()
-                dirty = false
             }
             else -> {
                 if (i++ % 5 == 0) message.channel.sendTyping().queue()
@@ -43,29 +41,28 @@ class ProgressBar(
     }
 
     fun update() {
-        if (counter.incrementAndGet() >= goal) stop()
+        counter.incrementAndGet()
+        if (counter.get() >= goal) stop()
+        dirty.set(true)
     }
 
-    private fun stop(onStop: WhenDone = whenDone): Unit = when (onStop) {
-        PUBLISH_FINAL_UPDATE -> running = false
-        STOP_IMMEDIATELY -> job.cancel()
-    }
+    private fun stop(): Unit = job.cancel()
 
     private fun drawProgressBar(
         current: Int,
         total: Int,
         width: Int = 30,
         showSteps: Boolean = true,
-        showPercentage: Boolean = true
+        showPercentage: Boolean = true,
     ): String {
         val percentage = (current.toDouble() / total.toDouble() * 100.0).roundToInt()
-        val full = (current.toDouble() / total.toDouble() * width.toDouble()).roundToInt()
-        val empty = width - full
+        val completed = (current.toDouble() / total.toDouble() * width.toDouble()).roundToInt()
+        val remaining = width - completed
 
         return buildString {
             append("`")
-            append("▓".repeat(full))
-            append("░".repeat(empty))
+            append("▓".repeat(completed))
+            append("░".repeat(remaining))
             if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
             if (showPercentage) append(" ($percentage%)")
             append("`")

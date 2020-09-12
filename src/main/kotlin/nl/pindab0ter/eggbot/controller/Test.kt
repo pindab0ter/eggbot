@@ -37,12 +37,12 @@ object Test : EggBotCommand() {
     }
 
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
-        val rawValues = (1..5)
+        val rawValues = (1..10)
         val message = event.channel.sendMessage("Calculating…").complete()
         val progressBar = ProgressBar(rawValues.count(), message)
         val values = rawValues.toList().parallelMap {
             runBlocking {
-                delay(1000)
+                delay(it * 1000L)
                 progressBar.update()
                 it * it
             }
