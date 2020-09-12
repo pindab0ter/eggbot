@@ -16,7 +16,7 @@ data class SoloContractState(
     val elapsed: Duration = Duration.ZERO,
     val farmer: Farmer,
 ) {
-    val finished: Boolean get() = goals.all { (_, moment) -> moment == Duration.ZERO }
+    val willFinish: Boolean get() = goals.all { (_, moment) -> moment != null }
     val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
 
 

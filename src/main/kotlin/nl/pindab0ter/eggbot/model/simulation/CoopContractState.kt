@@ -23,9 +23,10 @@ data class CoopContractState(
 ) {
     val initialEggsLaid: BigDecimal get() = farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }
     val finalEggsLaid: BigDecimal get() = farmers.sumByBigDecimal { farmer -> farmer.finalState.eggsLaid }
-    val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
     val tokensAvailable: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
     val tokensSpent: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
+    val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
+    val willFinish: Boolean get() = goals.all { (_, moment) -> moment != null }
     val finished: Boolean get() = goals.all { goal -> goal.moment != null && goal.moment <= timeRemaining }
 
     constructor(
