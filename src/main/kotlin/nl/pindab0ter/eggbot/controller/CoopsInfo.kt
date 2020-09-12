@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.controller
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coops
@@ -35,7 +36,7 @@ object CoopsInfo : EggBotCommand() {
     }
 
     @ExperimentalTime
-    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+    override fun execute(event: CommandEvent, parameters: JSAPResult) = runBlocking {
         val contractId = parameters.getString(CONTRACT_ID)
         val catchUp = parameters.getBoolean(FORCE_REPORTED_ONLY).not()
         val compact = parameters.getBoolean(COMPACT)
@@ -49,13 +50,14 @@ object CoopsInfo : EggBotCommand() {
                 message.delete().queue()
                 event.replyWarning(it)
                 log.debug { it }
-                return
+                return@runBlocking
             }
 
-        val progressBar = ProgressBar(coops.size, message)
+        val progressBar = ProgressBar(coops.size, message, coroutineContext = coroutineContext)
 
         val (statuses, duration) = measureTimedValue {
-            coops.map status@{ coop ->
+            // TODO: Let CoopContractStatus update ProgressBar since requesting Backups takes a lot of the time?
+            coops.asyncMap(coroutineContext) status@{ coop ->
                 val status = CoopContractStatus(contract, coop.name, catchUp)
                 progressBar.update()
                 status
@@ -71,7 +73,7 @@ object CoopsInfo : EggBotCommand() {
             message.delete().queue()
             event.replyWarning(it)
             log.debug { it }
-            return
+            return@runBlocking
         }
 
         message.delete().queue()

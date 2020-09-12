@@ -37,7 +37,7 @@ class ProgressBar(
                 delay(1000)
             }
         }
-        message.editMessage(drawProgressBar(goal, goal)).complete()
+        message.editMessage(drawProgressBar(goal, goal)).queue({}, { /* Ignore exception */ })
     }
 
     fun update() {
@@ -46,7 +46,9 @@ class ProgressBar(
         dirty.set(true)
     }
 
-    private fun stop(): Unit = job.cancel()
+    private fun stop() {
+        running = false
+    }
 
     private fun drawProgressBar(
         current: Int,

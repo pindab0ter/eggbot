@@ -1,8 +1,10 @@
 package nl.pindab0ter.eggbot.helpers
 
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlin.coroutines.CoroutineContext
 
 fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
@@ -20,8 +22,11 @@ inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
 fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
     zip(other).flatMap(Pair<T, T>::toList) + if (size > other.size) drop(other.size) else other.drop(size)
 
-suspend fun <T, R> Iterable<T>.asyncMap(transform: suspend (T) -> R): List<R> = coroutineScope {
-    map { async { transform(it) } }.awaitAll()
+suspend fun <T, R> Iterable<T>.asyncMap(
+    coroutineContext: CoroutineContext = Dispatchers.Default,
+    transform: suspend (T) -> R,
+): List<R> = coroutineScope {
+    map { async(coroutineContext) { transform(it) } }.awaitAll()
 }
 
 /**

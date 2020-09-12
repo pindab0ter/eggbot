@@ -51,12 +51,11 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
                     Finished(coopStatus)
                 coopStatus.contributors.isEmpty() ->
                     Abandoned(coopStatus)
-                else -> {
-                    val farmers = runBlocking {
-                        coopStatus.contributors.asyncMap { contributionInfo ->
-                            AuxBrain.getFarmerBackup(contributionInfo.userId)
-                                ?.let { Farmer(it, contract.id, catchUp) }
-                        }.filterNotNull()
+                else -> runBlocking {
+                    val farmers = coopStatus.contributors.asyncMap { contributionInfo ->
+                        AuxBrain.getFarmerBackup(contributionInfo.userId)
+                            ?.let { Farmer(it, contract.id, catchUp) }
+                    }.filterNotNull()
                     }
                     val initialState = CoopContractState(contract, coopStatus, farmers)
 
@@ -77,4 +76,3 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
         }
     }
 }
-
