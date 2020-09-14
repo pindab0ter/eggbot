@@ -3,12 +3,13 @@ package nl.pindab0ter.eggbot.model.simulation
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatusResponse
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.helpers.asyncMap
 import nl.pindab0ter.eggbot.helpers.eggsLaid
 import nl.pindab0ter.eggbot.helpers.finalGoal
-import nl.pindab0ter.eggbot.helpers.asyncMap
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
+import kotlin.coroutines.CoroutineContext
 
 sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopContractStatus> {
     data class NotFound(
@@ -39,6 +40,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
     override fun compareTo(other: CoopContractStatus): Int = this.priority.compareTo(other.priority)
 
     companion object {
+        operator fun invoke(
         operator fun invoke(contract: Contract, coopId: String, catchUp: Boolean): CoopContractStatus {
             val coopStatus = AuxBrain.getCoopStatus(contract.id, coopId)
 
@@ -56,7 +58,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
                         AuxBrain.getFarmerBackup(contributionInfo.userId)
                             ?.let { Farmer(it, contract.id, catchUp) }
                     }.filterNotNull()
-                    }
+
                     val initialState = CoopContractState(contract, coopStatus, farmers)
 
                     if (initialState.finished) FinishedIfCheckedIn(initialState)

@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.controller
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
-import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
@@ -21,8 +20,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopAdd : EggBotCommand() {
-
-    private val log = KotlinLogging.logger { }
 
     init {
         category = AdminCategory
@@ -55,24 +52,18 @@ object CoopAdd : EggBotCommand() {
             Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }.toList().isNotEmpty()
         }
 
-        if (exists) "Co-op is already registered.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        if (exists) return event.replyAndLogWarning(
+            "Co-op is already registered."
+        )
 
-        AuxBrain.getContract(contractId) ?: "Could not find an active contract with that `contract id`.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        AuxBrain.getContract(contractId) ?: return event.replyAndLogWarning(
+            "Could not find an active contract with that `contract id`."
+        )
 
         getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
-            if (status == null && !force) "Could not find an active co-op with that `contract id` and `co-op id`.".let {
-                event.replyWarning(it)
-                log.debug { it }
-                return@getCoopStatus
-            }
+            if (status == null && !force) return@getCoopStatus event.replyAndLogWarning(
+                "Could not find an active co-op with that `contract id` and `co-op id`."
+            )
 
             val role = if (noRole) null else guild.createRole()
                 .setName(coopId)

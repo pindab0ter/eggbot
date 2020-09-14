@@ -6,7 +6,6 @@ import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
-import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
@@ -24,7 +23,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object RollCall : EggBotCommand() {
 
-    private val log = KotlinLogging.logger { }
     private val allowedCharacters = Regex("""^[a-zA-Z0-9\-]+$""")
     private const val BASE_NAME = "base name"
     private const val OVERWRITE = "overwrite"
@@ -68,24 +66,17 @@ object RollCall : EggBotCommand() {
         val baseName = "-${parameters.getString(BASE_NAME)}"
         val noRole: Boolean = parameters.getBoolean(NO_ROLE)
 
-        if (!allowedCharacters.matches(baseName)) "Only letters, digits and dashes are allowed.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        if (!allowedCharacters.matches(baseName)) return event.replyAndLogWarning(
+            "Only letters, digits and dashes are allowed."
+        )
 
-        val contract: Contract = AuxBrain.getContract(contractId)
-            ?: "No active contract found with id `${contractId}`".let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
+        val contract: Contract = AuxBrain.getContract(contractId) ?: return event.replyAndLogWarning(
+            "No active contract found with id `${contractId}`"
+        )
 
-        if (!contract.coopAllowed) "Co-op is not allowed for this contract".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        if (!contract.coopAllowed) return event.replyAndLogWarning(
+            "Co-op is not allowed for this contract"
+        )
 
         transaction {
             val existingCoops: List<Coop> = Coop.find { Coops.contractId eq contract.id }.toList()
@@ -117,11 +108,9 @@ object RollCall : EggBotCommand() {
                     }.let { messageBody ->
                         event.reply(messageBody)
                     }
-                } else "Co-ops are already generated for contract `${contract.id}`. Add `-o` or `--overwrite` to override.".let {
-                    event.replyWarning(it)
-                    log.debug { it }
-                    return@transaction
-                }
+                } else return@transaction event.replyAndLogWarning(
+                    "Co-ops are already generated for contract `${contract.id}`. Add `-o` or `--overwrite` to override."
+                )
             }
 
             val message = event.channel

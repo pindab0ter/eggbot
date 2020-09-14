@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.controller
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
@@ -16,8 +15,6 @@ import nl.pindab0ter.eggbot.model.deleteCoopsAndRoles
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object RollClear : EggBotCommand() {
-
-    private val log = KotlinLogging.logger { }
 
     init {
         category = AdminCategory
@@ -38,11 +35,7 @@ object RollClear : EggBotCommand() {
             Coop.find { Coops.contractId eq contractId }.toList()
         }
 
-        if (coops.isEmpty()) "Didn't find any co-ops for $contractId".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        if (coops.isEmpty()) return event.replyAndLogWarning("Didn't find any co-ops for $contractId")
 
         val coopsToRoles = coops.zip(coops.map { coop ->
             coop.roleId?.let { guild.getRoleById(it) }

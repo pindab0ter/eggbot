@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.Egg
-import mu.KotlinLogging
 import net.dv8tion.jda.api.JDA
 import net.dv8tion.jda.api.JDABuilder
 import net.dv8tion.jda.api.entities.*
@@ -11,13 +10,15 @@ import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmers
-import nl.pindab0ter.eggbot.jda.CommandLogger
+import nl.pindab0ter.eggbot.jda.IncomingCommand
 import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
 import nl.pindab0ter.eggbot.jobs.UpdateFarmers
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.utilities.JobLogger
+import org.apache.logging.log4j.kotlin.Logging
+import org.apache.logging.log4j.kotlin.logger
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -33,8 +34,7 @@ import java.time.ZoneId
 import java.util.*
 
 
-object EggBot {
-    val log = KotlinLogging.logger {}
+object EggBot : Logging {
 
     // region Public values
 
@@ -50,7 +50,7 @@ object EggBot {
             GUILD_MESSAGE_TYPING,
         )
         .disableCache(ACTIVITY, CLIENT_STATUS, EMOTE, MEMBER_OVERRIDES, VOICE_STATE)
-        .addEventListeners(CommandLogger)
+        .addEventListeners(IncomingCommand)
         .build()
     val guild: Guild by lazy {
         jdaClient.getGuildById(Config.guildId) ?: throw Exception("Could not find guild with ID ${Config.guildId}")
@@ -64,7 +64,7 @@ object EggBot {
     var clientVersion = Config.clientVersion
         set(value) {
             field = value
-            log.warn { "Client version upgraded to $value" }
+            logger.warn { "Client version upgraded to $value" }
         }
     val botCommandsChannel: TextChannel by lazy {
         guild.getTextChannelById(Config.botCommandsChannelId)
@@ -110,7 +110,7 @@ object EggBot {
         startScheduler()
         jdaClient.awaitReady()
         jdaClient.addEventListener(commandClient)
-        log.info { "${jdaClient.selfUser.name} is ready for business!" }
+        logger.info { "${jdaClient.selfUser.name} is ready for business!" }
     }
 
     private fun connectToDatabase() {
@@ -121,7 +121,7 @@ object EggBot {
                 connection.createStatement().execute("PRAGMA foreign_keys = ON")
             })
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
-        KotlinLogging.logger("Exposed").info { "Connected to database" }
+        logger("Exposed").info { "Connected to database" }
     }
 
     fun initializeDatabase() = transaction {
@@ -135,7 +135,7 @@ object EggBot {
         // Use Europe/London because it moves with Daylight Saving Time
         val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
 
-        log.info { "Starting scheduler…" }
+        logger.info { "Starting scheduler…" }
 
         if (!Config.devMode) scheduleJob(
             newJob(UpdateFarmers::class.java)

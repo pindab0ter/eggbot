@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.model.database
 
 import com.auxbrain.ei.Backup
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Farmers
@@ -10,13 +9,13 @@ import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.toDateTime
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.EarningsBonus
+import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
 import java.math.BigDecimal
 
-class Farmer(id: EntityID<String>) : Entity<String>(id) {
-    private val log = KotlinLogging.logger {}
+class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
     val inGameId: String get() = id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
@@ -40,14 +39,11 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         get() = EarningsBonus(this).earningsBonus
 
     fun update() = AuxBrain.getFarmerBackup(inGameId)?.let { update(it) }
-        ?: log.warn { "Tried to update from backup but failed." }
+        ?: logger.warn { "Tried to update from backup but failed." }
 
     fun update(backup: Backup) {
         if (backup.clientVersion > EggBot.clientVersion) EggBot.clientVersion = backup.clientVersion
-        if (backup.game == null || backup.stats == null) {
-            log.warn { "Tried to update from backup but failed." }
-            return
-        }
+        if (backup.game == null || backup.stats == null) return logger.warn { "Tried to update from backup but failed." }
         if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) inGameName = backup.userName
         prestiges = backup.stats.prestigeCount
         soulEggsLong = backup.game.soulEggsLong

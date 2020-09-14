@@ -5,7 +5,6 @@ import com.martiansoftware.jsap.JSAPResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
@@ -21,7 +20,6 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 object EarningsBonus : EggBotCommand() {
 
-    private val log = KotlinLogging.logger { }
     private const val EXTENDED = "extended"
 
     init {
@@ -47,11 +45,7 @@ object EarningsBonus : EggBotCommand() {
 
         farmers.forEach { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
-                if (backup == null) "Could not get information on ${farmer.inGameName}".let {
-                    event.replyWarning(it)
-                    log.warn { it }
-                    return@getFarmerBackup
-                }
+                if (backup == null) return@getFarmerBackup event.replyAndLogWarning("Could not get information on ${farmer.inGameName}")
 
                 GlobalScope.launch(Dispatchers.IO) {
                     transaction { farmer.update(backup) }

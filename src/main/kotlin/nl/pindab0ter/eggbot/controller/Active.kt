@@ -3,8 +3,8 @@ package nl.pindab0ter.eggbot.controller
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object Active : EggBotCommand() {
@@ -18,19 +18,16 @@ object Active : EggBotCommand() {
     }
 
     @Suppress("FoldInitializerAndIfToElvis")
-    override fun execute(event: CommandEvent, parameters: JSAPResult) {
-        val discordUser = transaction { DiscordUser.findById(event.author.id)!! }
+    override fun execute(
+        event: CommandEvent,
+        parameters: JSAPResult,
+    ) = transaction {
+        val discordUser = DiscordUser.findById(event.author.id)!!
 
-        when {
-            discordUser.isActive -> {
-                event.reply("You are already active.")
-                return
-            }
-            else -> {
-                transaction { discordUser.inactiveUntil = null }
-                event.replySuccess("You are now active again.")
-                return
-            }
+        if (discordUser.isActive) event.reply("You are already active.")
+        else {
+            discordUser.inactiveUntil = null
+            event.replySuccess("You are now active again.")
         }
     }
 }

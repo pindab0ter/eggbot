@@ -1,6 +1,5 @@
 package nl.pindab0ter.eggbot.jobs
 
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.dronesLeaderBoardChannel
 import nl.pindab0ter.eggbot.EggBot.earningsBonusLeaderBoardChannel
 import nl.pindab0ter.eggbot.EggBot.eliteDronesLeaderBoardChannel
@@ -9,13 +8,12 @@ import nl.pindab0ter.eggbot.EggBot.soulEggsLeaderBoardChannel
 import nl.pindab0ter.eggbot.controller.LeaderBoard
 import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.model.database.Farmer
+import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 
-class UpdateLeaderBoardsJob : Job {
-
-    private val log = KotlinLogging.logger {}
+class UpdateLeaderBoardsJob : Job, Logging {
 
     override fun execute(context: JobExecutionContext?) {
         UpdateFarmers().execute(context)
@@ -25,11 +23,11 @@ class UpdateLeaderBoardsJob : Job {
         }
 
         if (farmers.isEmpty()) {
-            log.info { "There are no registered farmers" }
+            logger.info { "There are no registered farmers" }
             return
         }
 
-        log.info { "Updating leader boards…" }
+        logger.info { "Updating leader boards…" }
 
         listOf(
             earningsBonusLeaderBoardChannel to EARNINGS_BONUS,

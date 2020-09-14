@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.controller
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import mu.KotlinLogging
 import net.dv8tion.jda.api.Permission
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
@@ -17,8 +16,6 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object CoopRemove : EggBotCommand() {
-
-    private val log = KotlinLogging.logger { }
 
     init {
         category = AdminCategory
@@ -36,30 +33,20 @@ object CoopRemove : EggBotCommand() {
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
-        val coop = transaction { Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }.firstOrNull() }
-            ?: "No co-op registered with that `contract id` and `co-op id`.".let {
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
+        val coop = transaction {
+            Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }.firstOrNull()
+        } ?: return event.replyAndLogWarning("No co-op registered with that `contract id` and `co-op id`.")
 
         val role = transaction { coop.roleId?.let { guild.getRoleById(it) } }
 
         if (role != null) role.delete().queue({
             transaction { coop.delete() }
-            "Co-op and role successfully removed.".let {
-                event.replySuccess(it)
-                log.debug { it }
-            }
+            event.replyAndLogSuccess("Co-op and role successfully removed.")
         }, { exception ->
-            log.warn { exception.localizedMessage }
-            event.replyWarning("Failed to remove Discord role (${exception.localizedMessage})")
+            event.replyAndLogWarning("Failed to remove Discord role (${exception.localizedMessage})", LogType.Warning)
         }) else {
             transaction { coop.delete() }
-            "Co-op successfully removed.".let {
-                event.replySuccess(it)
-                log.debug { it }
-            }
+            event.replyAndLogSuccess("Co-op successfully removed.")
         }
     }
 }

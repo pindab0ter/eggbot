@@ -24,7 +24,7 @@ repositories {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.3.9")
-    implementation("io.github.microutils", "kotlin-logging", "1.8.3")
+    implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.0.0")
     implementation("joda-time", "joda-time", "2.10.6")
     implementation("com.github.kittinunf.fuel", "fuel", "2.2.3")
     implementation("org.jetbrains.exposed", "exposed", "0.17.7")

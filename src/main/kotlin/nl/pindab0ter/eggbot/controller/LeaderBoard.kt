@@ -5,21 +5,18 @@ import com.martiansoftware.jsap.FlaggedOption
 import com.martiansoftware.jsap.JSAP.INTEGER_PARSER
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.EggBot.emoteProphecyEgg
 import nl.pindab0ter.eggbot.EggBot.emoteSoulEgg
 import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
+import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object LeaderBoard : EggBotCommand() {
-
-    private val log = KotlinLogging.logger { }
 
     private const val TOP = "number of players"
     private const val BOARD = "board"
@@ -62,30 +59,22 @@ object LeaderBoard : EggBotCommand() {
             Farmer.all().toList().sortedByDescending { it.earningsBonus }
         }
 
-        if (farmers.isEmpty()) "There are no registered farmers.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        if (farmers.isEmpty()) return event.replyAndLogWarning("There are no registered farmers.")
 
         val top = parameters.getIntOrNull(TOP)
 
-        if (top != null && top < 1) "${TOP.capitalize()} must be a positive number.".let {
-            event.replyWarning(it)
-            log.debug { it }
-            return
-        }
+        if (top != null && top < 1) return event.replyAndLogWarning("${TOP.capitalize()} must be a positive number.")
 
         val board = parameters.getStringOrNull(BOARD)?.let { input ->
             Board.getByString(input)
         }
 
         formatLeaderBoard(
-            farmers,
-            board ?: EARNINGS_BONUS,
-            top,
-            parameters.getBoolean(COMPACT),
-            parameters.getBoolean(EXTENDED)
+            farmers = farmers,
+            board = board ?: EARNINGS_BONUS,
+            top = top,
+            compact = parameters.getBoolean(COMPACT),
+            extended = parameters.getBoolean(EXTENDED)
         ).let { messages ->
             if (event.channel == botCommandsChannel) {
                 messages.forEach { message -> event.reply(message) }

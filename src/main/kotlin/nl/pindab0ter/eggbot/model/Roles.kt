@@ -2,12 +2,12 @@ package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Contract
 import com.jagrosh.jdautilities.command.CommandEvent
-import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.Role
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.DiscordUser
+import org.apache.logging.log4j.kotlin.logger
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 import kotlin.math.ceil
@@ -21,7 +21,7 @@ fun assignRoles(
     role: Role,
     progressCallBack: () -> Unit,
 ): Pair<List<DiscordUser>, List<String>> {
-    val log = KotlinLogging.logger { }
+    val logger = logger("assignRoles")
     val successes = mutableListOf<DiscordUser>()
     val failures = mutableListOf<String>()
 
@@ -32,10 +32,10 @@ fun assignRoles(
             .handle { _, exception ->
                 if (exception == null) {
                     successes.add(discordUser)
-                    log.debug("Assigned @${role.name} to ${discordUser.discordTag}.")
+                    logger.debug("Assigned @${role.name} to ${discordUser.discordTag}.")
                 } else {
                     failures.add(inGameName)
-                    log.warn("Failed to assign @${role.name} to ${discordUser.discordTag}. Cause: ${exception.localizedMessage}")
+                    logger.warn("Failed to assign @${role.name} to ${discordUser.discordTag}. Cause: ${exception.localizedMessage}")
                 }
             }.join()
         else failures.add(inGameName)
@@ -83,7 +83,7 @@ fun deleteCoopsAndRoles(
     coopsToRoles: List<Pair<Coop, Role?>>,
     event: CommandEvent,
 ): Pair<Map<String, String?>, Map<String, String?>> {
-    val log = KotlinLogging.logger { }
+    val logger = logger("deleteCoopsAndRoles")
     val successes = mutableListOf<Pair<String, String?>>()
     val failures = mutableListOf<Pair<String, String?>>()
 
@@ -92,17 +92,17 @@ fun deleteCoopsAndRoles(
         if (role != null) role.delete().submit().handle { _, exception ->
             if (exception != null) "Failed to remove Discord role (${exception.localizedMessage})".let {
                 failures.add(coopNameToRoleName)
-                log.warn { it }
+                logger.warn { it }
                 event.replyWarning(it)
             } else {
                 transaction { coop.delete() }
                 successes.add(coopNameToRoleName)
-                log.info { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
+                logger.info { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
             }
         }.join() else {
             transaction { coop.delete() }
             successes.add(coopNameToRoleName)
-            log.info { "Co-op ${coopNameToRoleName.first} successfully removed." }
+            logger.info { "Co-op ${coopNameToRoleName.first} successfully removed." }
         }
     }
     return successes.toMap() to failures.toMap()

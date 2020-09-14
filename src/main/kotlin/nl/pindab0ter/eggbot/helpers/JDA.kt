@@ -32,7 +32,7 @@ val User.isAdmin: Boolean
 fun String.splitMessage(
     prefix: String = "",
     postfix: String = "",
-    separator: Char = '\n'
+    separator: Char = '\n',
 ): List<String> = split(separator)
     .also { blocks ->
         require(blocks.none { it.length >= 2000 - prefix.length - postfix.length }) { "Any block cannot be larger than 2000 characters." }

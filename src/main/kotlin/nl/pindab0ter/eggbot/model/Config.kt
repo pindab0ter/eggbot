@@ -1,13 +1,12 @@
 package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Egg
-import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.Activity
+import org.apache.logging.log4j.kotlin.Logging
 import java.io.FileInputStream
 import java.util.*
 
-object Config {
-    private val log = KotlinLogging.logger { }
+object Config : Logging {
     private const val FILE_NAME = "eggbot.properties"
 
     val botToken: String
@@ -107,7 +106,7 @@ object Config {
             emoteSoulEggId = getOptional("emote.soul")
             emoteProphecyEggId = getOptional("emote.prophecy")
 
-            log.info("Config loaded")
+            logger.info("Config loaded")
         }
     }
 

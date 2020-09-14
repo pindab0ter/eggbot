@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.controller
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import kotlinx.coroutines.runBlocking
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.helpers.*
@@ -16,11 +15,8 @@ import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.initia
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.ExperimentalTime
-import kotlin.time.measureTimedValue
 
 object CoopsInfo : EggBotCommand() {
-
-    private val log = KotlinLogging.logger { }
 
     init {
         category = ContractsCategory
@@ -45,38 +41,28 @@ object CoopsInfo : EggBotCommand() {
 
         val message = event.channel.sendMessage("Looking for co-ops…").complete()
 
-        val contract = AuxBrain.getContract(contractId)
-            ?: "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
-                message.delete().queue()
-                event.replyWarning(it)
-                log.debug { it }
-                return@runBlocking
-            }
+        val contract = AuxBrain.getContract(contractId) ?: return@runBlocking event.replyAndLogWarning(
+            "Could not find any co-ops for contract id `$contractId`. Is `contract id` correct and are there registered teams?"
+        ).also { message.delete().queue() }
 
         val progressBar = ProgressBar(coops.size, message, coroutineContext = coroutineContext)
 
-        val (statuses, duration) = measureTimedValue {
-            // TODO: Let CoopContractStatus update ProgressBar since requesting Backups takes a lot of the time?
-            coops.asyncMap(coroutineContext) status@{ coop ->
-                val status = CoopContractStatus(contract, coop.name, catchUp)
-                progressBar.update()
-                status
-            }.let { coops ->
-                if (!compact) coops.sortedDescending()
-                else coops.sortedWith(initialEggsLaidComparator).reversed()
-            }
-        }
-
-        log.debug { "Simulation took $duration" }
-
-        if (statuses.isEmpty()) "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?".let {
-            message.delete().queue()
-            event.replyWarning(it)
-            log.debug { it }
-            return@runBlocking
+        // TODO: Let CoopContractStatus update ProgressBar since requesting Backups takes a lot of the time?
+        val statuses = coops.asyncMap(coroutineContext) status@{ coop ->
+            val status = CoopContractStatus(contract, coop.name, catchUp)
+            progressBar.update()
+            status
+        }.let { statuses ->
+            if (!compact) statuses.sortedDescending()
+            else statuses.sortedWith(initialEggsLaidComparator).reversed()
         }
 
         message.delete().queue()
+
+        if (statuses.isEmpty()) return@runBlocking event.replyAndLogWarning(
+            "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?"
+        )
+
         coopsInfoResponse(contract, statuses, compact).let { messages ->
             messages.forEach { message -> event.reply(message) }
         }

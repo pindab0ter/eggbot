@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.controller
 import com.auxbrain.ei.LocalContract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
@@ -20,8 +19,6 @@ import nl.pindab0ter.eggbot.view.soloInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object SoloInfo : EggBotCommand() {
-
-    private val log = KotlinLogging.logger { }
 
     init {
         category = ContractsCategory
@@ -42,54 +39,50 @@ object SoloInfo : EggBotCommand() {
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
         val catchUp: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
 
-        val farmers = transaction { DiscordUser.findById(event.author.id)?.farmers?.toList()!! }
+        val farmers: List<Farmer> = transaction {
+            DiscordUser.findById(event.author.id)?.farmers
+        }?.toList() ?: return event.replyAndLogError("Could not find any farmers. Please contact the bot maintainer.")
 
+        // TODO: Replace with parallelMap
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
-            val localContract: LocalContract? = backup.contracts?.contracts?.find { localContract ->
+            val localContract: LocalContract = backup.contracts?.contracts?.find { localContract ->
                 localContract.contract?.id == contractId
-            }
+            } ?: backup.contracts?.archive?.find { archivedContract ->
+                archivedContract.contract!!.id == contractId
+            }?.let { archivedContract ->
+                return when {
+                    archivedContract.contract!!.coopAllowed && archivedContract.coopId.isNotBlank() -> event.replyAndLogWarning(
+                        "The contract with ID `$contractId` was not a solo contract."
+                    )
+                    archivedContract.finished -> event.replyAndLogWarning(
+                        """
+                        `${backup.userName}` vs. _${archivedContract.contract.name}_:
 
-            if (localContract == null) {
-                backup.contracts?.archive?.last { archivedContract ->
-                    archivedContract.contract!!.id == contractId
-                }?.let { archivedContract ->
-                    when {
-                        archivedContract.contract!!.coopAllowed && archivedContract.coopId.isNotBlank() ->
-                            "The contract with ID `$contractId` was not a solo contract."
-                        archivedContract.finished -> """
-                            `${backup.userName}` vs. _${archivedContract.contract.name}_:
-
-                            You have successfully completed this contract in the past! ${Config.emojiSuccess}""".trimIndent()
-                        else -> """
-                            `${backup.userName}` vs. _${archivedContract.contract.name}_:
-                            
-                            You have attempted this contract in the past, but not finished it.""".trimIndent()
-                    }
-                }?.let {
-                    log.debug { it.replace("""\s+""".toRegex(RegexOption.DOT_MATCHES_ALL), " ") }
-                    event.reply(it)
-                    return
-                } ?: """No contract found with ID `$contractId` for `${farmer.inGameName}`.
-                    Try using `${event.client.textualPrefix}${ContractIDs.name}`""".let {
-                    log.warn { it }
-                    event.reply(it)
-                    return
+                        You have successfully completed this contract in the past! ${Config.emojiSuccess}
+                        """.trimIndent()
+                    )
+                    else -> event.replyAndLogWarning(
+                        """
+                        `${backup.userName}` vs. _${archivedContract.contract.name}_:
+                        
+                        You have attempted this contract in the past, but not finished it.
+                        """.trimIndent()
+                    )
                 }
-            }
+            } ?: return event.replyAndLogWarning(
+                """
+                No contract found with ID `$contractId` for `${farmer.inGameName}`.
+                Try using `${event.client.textualPrefix}${ContractIDs.name}`
+                """.trimIndent()
+            )
 
-            if (localContract.contract?.coopAllowed == true && localContract.coopId.isNotBlank())
-                "The contract with ID `$contractId` is not a solo contract.".let {
-                    log.debug { it }
-                    event.reply(it)
-                    return
-                }
+            if (localContract.contract?.coopAllowed == true && localContract.coopId.isNotBlank()) return event.replyAndLogWarning(
+                "The contract with ID `$contractId` is not a solo contract."
+            )
 
-            val initialState = SoloContractState(backup, localContract, catchUp)
-                ?: "Failed to collect all necessary information from the backup.".let {
-                    log.warn { it }
-                    event.replyWarning(it)
-                    return
-                }
+            val initialState = SoloContractState(backup, localContract, catchUp) ?: return event.replyAndLogWarning(
+                "Failed to collect all necessary information from the backup."
+            )
 
             val state = simulate(initialState)
 

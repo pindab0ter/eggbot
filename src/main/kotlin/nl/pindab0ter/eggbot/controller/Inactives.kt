@@ -32,16 +32,8 @@ object Inactives : EggBotCommand() {
                 .toList()
         }
 
-        when {
-            inactiveDiscordUsers.isEmpty() -> {
-                event.reply("There are no users that have set themselves as inactive.")
-                return
-            }
-            else -> {
-                event.reply(message(inactiveDiscordUsers))
-                return
-            }
-        }
+        if (inactiveDiscordUsers.isEmpty()) event.reply("There are no users that have set themselves as inactive.")
+        else event.reply(message(inactiveDiscordUsers))
     }
 
     fun message(inactiveDiscordUsers: List<DiscordUser>): String = buildString {

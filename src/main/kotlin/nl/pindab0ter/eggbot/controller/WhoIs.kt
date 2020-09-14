@@ -3,19 +3,17 @@ package nl.pindab0ter.eggbot.controller
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.UnflaggedOption
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.database.DiscordUsers
-import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.jda.EggBotCommand
+import nl.pindab0ter.eggbot.model.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 
 object WhoIs : EggBotCommand() {
 
-    private val log = KotlinLogging.logger { }
     private const val USER = "user"
 
     init {
@@ -36,7 +34,6 @@ object WhoIs : EggBotCommand() {
         init()
     }
 
-    @Suppress("FoldInitializerAndIfToElvis")
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val name = parameters.getString(USER).replace(Regex("""^@?(\w*)(?:#\d{4})?$"""), "$1")
 
@@ -53,10 +50,7 @@ object WhoIs : EggBotCommand() {
 
                 // TODO: No farmers or discord users found by the name of <@!444983923777339407>.
 
-                "`@$discordUserName$nickname` is registered with: `$farmerNames`".let {
-                    event.reply(it)
-                    return@transaction
-                }
+                return@let event.reply("`@$discordUserName$nickname` is registered with: `$farmerNames`")
             }
 
             Farmer.find { Farmers.inGameName like name }.firstOrNull()?.let { farmer ->
@@ -64,18 +58,10 @@ object WhoIs : EggBotCommand() {
                 val nickname = guild.getMemberById(farmer.discordUser.discordId)?.nickname
                     ?.let { nickname -> " ($nickname)" } ?: ""
 
-                "`${farmer.inGameName}` belongs to `@$discordUserName$nickname`".let {
-                    event.reply(it)
-                    return@transaction
-                }
+                return@transaction event.reply("`${farmer.inGameName}` belongs to `@$discordUserName$nickname`")
             }
 
-
-            "No farmers or discord users found by the name of `$name`.".let {
-                event.reply(it)
-                log.debug { it }
-                return@transaction
-            }
+            event.replyAndLogWarning("No farmers or discord users found by the name of `$name`.")
         }
     }
 }

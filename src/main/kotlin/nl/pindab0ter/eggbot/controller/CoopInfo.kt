@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.controller
 import com.auxbrain.ei.Contract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import mu.KotlinLogging
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
@@ -19,14 +18,10 @@ import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.Finis
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.NotFound
 import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
-import kotlin.text.RegexOption.DOT_MATCHES_ALL
 import kotlin.time.ExperimentalTime
-import kotlin.time.measureTimedValue
 
 @Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
-
-    private val log = KotlinLogging.logger { }
 
     init {
         name = "coop"
@@ -50,61 +45,30 @@ object CoopInfo : EggBotCommand() {
         val coopId: String = parameters.getString(COOP_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
         val catchUp: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
-
         val message: Message = event.channel.sendMessage("Fetching required information…").complete()
 
-        val contract: Contract = AuxBrain.getContract(contractId)
-            ?: "Could not find contract information".let {
-                message.delete().queue()
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
+        val contract: Contract = AuxBrain.getContract(contractId) ?: return event.replyAndLogWarning(
+            "Could not find contract information"
+        ).also { message.delete().queue() }
 
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
 
-        val (status, duration) = measureTimedValue {
-            CoopContractStatus(contract, coopId, catchUp)
-        }
-
-        log.debug { "Simulation took $duration" }
-
-        when (status) {
-            is NotFound -> "No co-op found for contract `${contractId}` with name `${coopId}`".let {
-                message.delete().queue()
-                event.replyWarning(it)
-                log.debug { it }
-                return
-            }
-            is Abandoned -> """
+        when (val status = CoopContractStatus(contract, coopId, catchUp)) {
+            is NotFound -> event.replyAndLogWarning("No co-op found for contract `${contractId}` with name `${coopId}`")
+            is Abandoned -> event.replyAndLog("""
                 `${status.coopStatus.coopId}` vs. __${contract.name}__:
                     
-                This co-op has no members.""".trimIndent().let {
-                message.delete().queue()
-                event.replyWarning(it)
-                log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
-                return
-            }
-            is Failed -> """
+                This co-op has no members.""".trimIndent())
+            is Failed -> event.replyAndLog("""
                 `${status.coopStatus.coopId}` vs. __${contract.name}__:
                     
-                This co-op has not reached their final goal.""".trimIndent().let {
-                message.delete().queue()
-                event.reply(it)
-                log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
-                return
-            }
-            is Finished -> """
+                This co-op has not reached their final goal.""".trimIndent())
+            is Finished -> event.replyAndLog("""
                 `${status.coopStatus.coopId}` vs. __${contract.name}__:
     
-                This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent().let {
-                message.delete().queue()
-                event.reply(it)
-                log.debug { it.replace("""\s+""".toRegex(DOT_MATCHES_ALL), " ") }
-                return
-            }
+                This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent())
             is InProgress -> {
                 val sortedState = status.state.copy(
                     farmers = status.state.farmers.sortedByDescending { farmer -> farmer.finalState.eggsLaid }

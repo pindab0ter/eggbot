@@ -29,6 +29,8 @@ suspend fun <T, R> Iterable<T>.asyncMap(
     map { async(coroutineContext) { transform(it) } }.awaitAll()
 }
 
+fun Any?.discard(): Unit = Unit
+
 /**
  * Returns a string containing this char repeated [n] times.
  * @throws [IllegalArgumentException] when n < 0.
