@@ -65,7 +65,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
 
                     val simulatedState = simulate(initialState)
 
-                    if (simulatedState.finished) OnTrack(simulatedState)
+                    if (simulatedState.willFinishInTime) OnTrack(simulatedState)
                     else NotOnTrack(simulatedState)
                 }
             }
