@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.model.simulation
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Egg
 import com.auxbrain.ei.LocalContract
-import nl.pindab0ter.eggbot.helpers.asDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.helpers.timeRemaining
 import org.joda.time.Duration
 
@@ -38,12 +37,4 @@ data class SoloContractState(
             )
         }
     }
-
-    override fun toString(): String = "${this::class.simpleName}(" +
-            "contractId=${contractId}, " +
-            "contractName=${contractName}, " +
-            "goals=${goals}, " +
-            "timeRemaining=${timeRemaining.asDaysHoursAndMinutes()}, " +
-            "elapsed=${elapsed.asDaysHoursAndMinutes()}" +
-            ")"
 }
