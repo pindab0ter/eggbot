@@ -48,67 +48,71 @@ object CoopAdd : EggBotCommand() {
         val coopId: String = parameters.getString(COOP_ID)
         val noRole: Boolean = parameters.getBoolean(NO_ROLE)
         val force: Boolean = parameters.getBoolean(FORCE)
-        val exists: Boolean = transaction {
-            Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }.toList().isNotEmpty()
-        }
 
-        if (exists) return event.replyAndLogWarning(
+        if (transaction {
+                Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contractId) }.toList().isNotEmpty()
+            }) return event.replyAndLogWarning(
             "Co-op is already registered."
         )
+
+        if (!noRole) guild.roles.find { role -> role.name == coopId }?.let { role ->
+            event.replyAndLogWarning("The role ${role.asMention} already exists.")
+        }
 
         AuxBrain.getContract(contractId) ?: return event.replyAndLogWarning(
             "Could not find an active contract with that `contract id`."
         )
 
-        getCoopStatus(contractId, coopId).let getCoopStatus@{ status ->
-            if (status == null && !force) return@getCoopStatus event.replyAndLogWarning(
-                "Could not find an active co-op with that `contract id` and `co-op id`."
+        val coopStatus = getCoopStatus(contractId, coopId)
+        if (coopStatus == null && !force) return event.replyAndLogWarning(
+            "Could not find an active co-op with that `contract id` and `co-op id`."
+        )
+
+        val role = if (noRole) null else guild.createRole()
+            .setName(coopId)
+            .setMentionable(true)
+            .complete()
+
+        transaction {
+            Coop.new {
+                this.name = coopId
+                this.contractId = contractId
+                this.roleId = role?.id
+            }
+        }
+
+        if (role != null && coopStatus != null) {
+            val message = event.channel.sendMessage("Assigning roles…").complete()
+            val progressBar = ProgressBar(coopStatus.contributors.count(), message)
+
+            val (successes, failures) = assignRoles(
+                inGameNamesToDiscordIDs = coopStatus.contributors.map { contributor ->
+                    contributor.userName to contributor.userId
+                }.toMap(),
+                role = role,
+                progressCallBack = progressBar::update
             )
 
-            val role = if (noRole) null else guild.createRole()
-                .setName(coopId)
-                .setMentionable(true)
-                .complete()
-
-            transaction {
-                Coop.new {
-                    this.name = coopId
-                    this.contractId = contractId
-                    this.roleId = role?.id
+            buildString {
+                appendLine("${Config.emojiSuccess} Successfully registered co-op `${coopStatus.coopId}` for contract `${coopStatus.contractId}`.")
+                if (successes.isNotEmpty()) {
+                    appendLine()
+                    appendLine("The following players have been assigned the role ${role.asMention}:")
+                    successes.forEach { discordUser -> appendLine(guild.getMemberById(discordUser.discordId)?.asMention) }
                 }
+                if (failures.isNotEmpty()) {
+                    appendLine()
+                    appendLine("Unable to assign the following players their role:")
+                    appendLine("```")
+                    failures.forEach { userName -> appendLine(userName) }
+                    appendLine("```")
+                }
+            }.let { messageBody ->
+                message.delete().complete()
+                event.reply(messageBody)
             }
-
-            if (role != null && status != null) {
-                val message = event.channel.sendMessage("Assigning roles…").complete()
-                val progressBar = ProgressBar(status.contributors.count(), message)
-
-                val (successes, failures) = assignRoles(
-                    inGameNamesToDiscordIDs = status.contributors.map { contributor ->
-                        contributor.userName to contributor.userId
-                    }.toMap(),
-                    role = role,
-                    progressCallBack = progressBar::update
-                )
-
-                buildString {
-                    appendLine("${Config.emojiSuccess} Successfully registered co-op `${status.coopId}` for contract `${status.contractId}`.")
-                    if (successes.isNotEmpty()) {
-                        appendLine()
-                        appendLine("The following players have been assigned the role ${role.asMention}:")
-                        successes.forEach { discordUser -> appendLine(guild.getMemberById(discordUser.discordId)?.asMention) }
-                    }
-                    if (failures.isNotEmpty()) {
-                        appendLine()
-                        appendLine("Unable to assign the following players their role:")
-                        appendLine("```")
-                        failures.forEach { userName -> appendLine(userName) }
-                        appendLine("```")
-                    }
-                }.let { messageBody ->
-                    message.delete().complete()
-                    event.reply(messageBody)
-                }
-            } else event.replySuccess("Successfully registered co-op `${coopId}` for contract `${contractId}`.")
+        } else {
+            event.replySuccess("Successfully registered co-op `${coopId}` for contract `${contractId}`.")
         }
     }
 }
