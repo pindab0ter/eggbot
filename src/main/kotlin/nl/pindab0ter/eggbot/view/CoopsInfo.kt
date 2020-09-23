@@ -43,6 +43,11 @@ private fun StringBuilder.drawCoops(
     contract: Contract,
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
+
+    // TODO: Replace status with TTF (Time To Finish) and/or Remaining?
+    // TODO: Remove eggspected
+    // TODO: Replace "eggs" column with "reported" column
+
     column {
         header = "Name"
 

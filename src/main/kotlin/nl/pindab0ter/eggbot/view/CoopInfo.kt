@@ -104,6 +104,7 @@ private fun StringBuilder.drawGoals(
         }
     }
     column {
+        // TODO: Replace with status
         cells = coopContractState.goals.map { (_, moment) ->
             when (moment) {
                 null -> "More than a year"

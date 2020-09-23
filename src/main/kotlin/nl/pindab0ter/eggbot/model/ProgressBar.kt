@@ -9,6 +9,8 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 
+// TODO: Move state out of ProgressBar, update takes percentage instead
+// TODO: Add message to ProgressBar so it can say "Fetching backups…\n[ProgressBar]"
 class ProgressBar(
     private val goal: Int,
     private val message: Message,
