@@ -71,7 +71,7 @@ object CoopInfo : EggBotCommand() {
                 This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent())
             is InProgress -> {
                 val sortedState = status.state.copy(
-                    farmers = status.state.farmers.sortedByDescending { farmer -> farmer.finalState.eggsLaid }
+                    farmers = status.state.farmers.sortedByDescending { farmer -> farmer.runningState.eggsLaid }
                 )
 
                 when (status) {

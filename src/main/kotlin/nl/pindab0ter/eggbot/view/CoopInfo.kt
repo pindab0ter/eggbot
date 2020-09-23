@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.view
 
 import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
@@ -12,7 +11,6 @@ import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.simulation.CoopContractState
 import nl.pindab0ter.eggbot.model.simulation.Farmer
 import org.joda.time.Duration
-import java.math.BigDecimal
 import kotlin.random.Random
 
 
@@ -127,28 +125,19 @@ private fun StringBuilder.drawBasicInfo(
 
     if (!finishedIfCheckedIn) {
         appendLine("Time remaining:   ${coopContractState.timeRemaining.asDaysHoursAndMinutes(compact)}")
-        append("Eggspected:       ${coopContractState.finalEggsLaid.asIllions()} ")
+        append("Eggspected:       ${coopContractState.timeUpEggsLaid.asIllions()} ")
         appendLine()
     }
 
-    append("Current eggs:     ${
-        coopContractState.farmers.sumByBigDecimal { farmer -> farmer.initialState.eggsLaid }.asIllions()
-    } ")
-    if (!compact) append("(${
-        coopContractState.farmers.sumByBigDecimal { farmer ->
-            eggIncrease(farmer.initialState.habs, farmer.constants)
-        }.multiply(SIXTY).asIllions()
-    }/hr)")
+    append("Current eggs:     ${coopContractState.currentEggsLaid.asIllions()} ")
+    if (!compact) append("(${coopContractState.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)")
     appendLine()
 
     append("Current chickens: ${
-        coopContractState.farmers.sumByBigDecimal { farmer -> farmer.initialState.population }.asIllions()
+        coopContractState.currentPopulation.asIllions()
     } ")
     if (!compact) append("(${
-        coopContractState.farmers.sumByBigDecimal { farmer ->
-            chickenIncrease(farmer.initialState.habs, farmer.constants)
-                .multiply(FOUR - farmer.initialState.habs.fullCount())
-        }.multiply(SIXTY).asIllions()
+        coopContractState.currentPopulationIncreasePerMinute.multiply(SIXTY).asIllions()
     }/hr)")
     appendLine()
 
@@ -179,7 +168,7 @@ private fun StringBuilder.drawMembers(
     column {
         header = "Eggs"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.initialState.eggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
     }
 
     overtakersColumn(state) {
@@ -191,15 +180,12 @@ private fun StringBuilder.drawMembers(
     column {
         header = "/hr"
         rightPadding = 3
-        cells = state.farmers.map { farmer ->
-            if (farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
-            else eggIncrease(farmer.initialState.habs, farmer.constants).multiply(SIXTY).asIllions()
-        }
+        cells = state.farmers.map { farmer -> farmer.currentEggsPerMinute.multiply(SIXTY).asIllions() }
     }
     column {
         header = "Chickens"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.initialState.population.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentChickens.asIllions() }
     }
 
     divider()
@@ -208,9 +194,7 @@ private fun StringBuilder.drawMembers(
         header = "/hr"
         rightPadding = 3
         cells = state.farmers.map { farmer ->
-            chickenIncrease(farmer.initialState.habs, farmer.constants)
-                .multiply(FOUR - farmer.initialState.habs.fullCount())
-                .multiply(SIXTY).asIllions()
+            farmer.currentChickenIncreasePerMinute.multiply(SIXTY).asIllions()
         }
     }
 
@@ -257,7 +241,7 @@ private fun StringBuilder.drawCompactMembers(
     column {
         header = "Eggs"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.initialState.eggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
     }
 
     divider()
@@ -265,9 +249,7 @@ private fun StringBuilder.drawCompactMembers(
     column {
         header = "/hr"
         rightPadding = 2
-        cells = state.farmers.map { farmer ->
-            eggIncrease(farmer.initialState.habs, farmer.constants).multiply(SIXTY).asIllions()
-        }
+        cells = state.farmers.map { farmer -> farmer.currentEggsPerMinute.times(SIXTY).asIllions() }
     }
 }
 
@@ -275,14 +257,15 @@ private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiCo
     val overtakers: List<String> = state.farmers.map { farmer ->
         when {
             state.farmers.any { other ->
-                eggIncrease(farmer.finalState.habs, farmer.constants) >
-                        eggIncrease(other.finalState.habs, other.constants) &&
-                        farmer.finalState.eggsLaid < other.finalState.eggsLaid
+                // TODO: currentEggs vs. finalEggs instead, i.e.: Will somebody actually overtake someone in time?
+                farmer.currentEggsPerMinute > other.currentEggsPerMinute &&
+                        (farmer.goalsReachedState ?: farmer.runningState).eggsLaid <
+                        (other.goalsReachedState ?: other.runningState).eggsLaid
             } -> "⬆️"
             state.farmers.any { other ->
-                eggIncrease(farmer.finalState.habs, farmer.constants) <
-                        eggIncrease(other.finalState.habs, other.constants) &&
-                        farmer.finalState.eggsLaid > other.finalState.eggsLaid
+                farmer.currentEggsPerMinute < other.currentEggsPerMinute &&
+                        (farmer.goalsReachedState ?: farmer.runningState).eggsLaid >
+                        (other.goalsReachedState ?: other.runningState).eggsLaid
             } -> "⬇️"
             else -> "➖"
         }
@@ -312,14 +295,14 @@ private fun StringBuilder.drawBottleNecks(
         leftPadding = 1
         alignment = RIGHT
         cells = bottleneckedFarmers.map { (farmer, _) ->
-            when (farmer.finalState.habsStatus) {
-                is BottleneckReached -> when (farmer.finalState.habsStatus.moment) {
+            when (farmer.runningState.habsStatus) {
+                is BottleneckReached -> when (farmer.runningState.habsStatus.moment) {
                     Duration.ZERO -> "Full!"
-                    else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+                    else -> farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(true)
                 }
-                is MaxedOut -> when (farmer.finalState.habsStatus.moment) {
+                is MaxedOut -> when (farmer.runningState.habsStatus.moment) {
                     Duration.ZERO -> "Maxed!"
-                    else -> farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(true)
+                    else -> farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(true)
                 }
                 else -> ""
             }
@@ -330,8 +313,8 @@ private fun StringBuilder.drawBottleNecks(
         header = "🏘️"
         leftPadding = 1
         cells = bottleneckedFarmers.map { (farmer, _) ->
-            when (farmer.finalState.habsStatus) {
-                is BottleneckReached -> if (farmer.finalState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
+            when (farmer.runningState.habsStatus) {
+                is BottleneckReached -> if (farmer.runningState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
                 is MaxedOut -> "🟢"
                 else -> "➖"
             }
@@ -345,10 +328,10 @@ private fun StringBuilder.drawBottleNecks(
         leftPadding = 1
         alignment = RIGHT
         cells = bottleneckedFarmers.map { (farmer, _) ->
-            when (farmer.finalState.transportBottleneck) {
+            when (farmer.runningState.transportBottleneck) {
                 null -> ""
                 Duration.ZERO -> "Full!"
-                else -> farmer.finalState.transportBottleneck.asDaysHoursAndMinutes(true)
+                else -> farmer.runningState.transportBottleneck.asDaysHoursAndMinutes(true)
             }
         }
     }
@@ -357,7 +340,7 @@ private fun StringBuilder.drawBottleNecks(
         header = "🚛"
         leftPadding = 1
         cells = bottleneckedFarmers.map { (farmer, _) ->
-            when (farmer.finalState.transportBottleneck) {
+            when (farmer.runningState.transportBottleneck) {
                 null -> "➖"
                 Duration.ZERO -> "🛑"
                 else -> "⚠️"
@@ -413,8 +396,8 @@ private fun StringBuilder.drawCompactBottleNecks(
         header = "🏘️"
         leftPadding = 1
         cells = bottleneckedFarmers.map { (farmer, _) ->
-            when (farmer.finalState.habsStatus) {
-                is BottleneckReached -> if (farmer.finalState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
+            when (farmer.runningState.habsStatus) {
+                is BottleneckReached -> if (farmer.runningState.habsStatus.moment == Duration.ZERO) "🛑" else "⚠️"
                 is MaxedOut -> "🟢"
                 else -> "➖"
             }
@@ -426,7 +409,7 @@ private fun StringBuilder.drawCompactBottleNecks(
     emojiColumn {
         header = "🚛"
         cells = bottleneckedFarmers.map { (farmer, _) ->
-            when (farmer.finalState.transportBottleneck) {
+            when (farmer.runningState.transportBottleneck) {
                 null -> "➖"
                 Duration.ZERO -> "🛑"
                 else -> "⚠️"

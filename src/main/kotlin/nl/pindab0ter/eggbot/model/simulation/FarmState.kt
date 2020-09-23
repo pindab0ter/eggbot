@@ -1,8 +1,11 @@
 package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Backup
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.HabsStatus
 import nl.pindab0ter.eggbot.helpers.HabsStatus.Free
+import nl.pindab0ter.eggbot.helpers.eggIncrease
+import nl.pindab0ter.eggbot.helpers.habsStatus
+import nl.pindab0ter.eggbot.helpers.sumByBigDecimal
 import org.joda.time.Duration
 import java.math.BigDecimal
 

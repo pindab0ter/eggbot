@@ -2,12 +2,10 @@ package nl.pindab0ter.eggbot.view
 
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
 import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import org.joda.time.Duration
-import java.math.BigDecimal
 
 
 fun soloInfoResponse(
@@ -76,29 +74,22 @@ private fun StringBuilder.drawBasicInfo(
     appendLine("__🗒️ **Basic info**:__ ```")
     appendLine("Time remaining:   ${state.timeRemaining.asDaysHoursAndMinutes(compact)}")
 
-    append("Eggspected:       ${state.farmer.finalState.eggsLaid.asIllions()} ")
+    // TODO: Replace eggspected with somethings else, it doesn't say anything
+    append("Eggspected:       ${state.farmer.runningState.eggsLaid.asIllions()} ")
     if (!compact) append("(${
         minOf(
-            eggIncrease(state.farmer.finalState.habs, state.farmer.constants),
+            eggIncrease(state.farmer.runningState.habs, state.farmer.constants),
             state.farmer.constants.transportRate
         ).multiply(SIXTY).asIllions()
     }/hr) ")
     appendLine()
 
-    append("Current eggs:     ${state.farmer.initialState.eggsLaid.asIllions()} ")
-    if (!compact) append("(${
-        if (state.farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
-        else eggIncrease(state.farmer.initialState.habs, state.farmer.constants)
-            .multiply(SIXTY).asIllions()
-    }/hr) ")
+    append("Current eggs:     ${state.farmer.currentEggsLaid.asIllions()} ")
+    if (!compact) append("(${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr) ")
     appendLine()
 
-    append("Current chickens: ${state.farmer.initialState.population.asIllions()} ")
-    if (!compact) append("(${
-        chickenIncrease(state.farmer.initialState.habs, state.farmer.constants)
-            .multiply(FOUR - state.farmer.initialState.habs.fullCount())
-            .multiply(SIXTY).asIllions()
-    }/hr)")
+    append("Current chickens: ${state.farmer.currentChickens.asIllions()} ")
+    if (!compact) append("(${state.farmer.currentChickenIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)")
     appendLine()
 
     appendLine("Last update:      ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
@@ -111,24 +102,24 @@ private fun StringBuilder.drawBottleNecks(
 ): StringBuilder = apply {
     appendLine("__**⚠ Bottlenecks**__ ```")
 
-    when (state.farmer.finalState.habsStatus) {
-        is HabsStatus.BottleneckReached -> when (state.farmer.finalState.habsStatus.moment) {
+    when (state.farmer.runningState.habsStatus) {
+        is HabsStatus.BottleneckReached -> when (state.farmer.runningState.habsStatus.moment) {
             Duration.ZERO -> appendLine("🏠 Full! ")
-            else -> appendLine("🏠 ${state.farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+            else -> appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
         }
-        is HabsStatus.MaxedOut -> when (state.farmer.finalState.habsStatus.moment) {
+        is HabsStatus.MaxedOut -> when (state.farmer.runningState.habsStatus.moment) {
             Duration.ZERO -> appendLine("🏠 Maxed! ")
-            else -> appendLine("🏠 ${state.farmer.finalState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+            else -> appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
         }
         else -> Unit
     }
 
     when {
-        state.farmer.finalState.transportBottleneck == null -> Unit
-        state.farmer.finalState.transportBottleneck == Duration.ZERO ->
+        state.farmer.runningState.transportBottleneck == null -> Unit
+        state.farmer.runningState.transportBottleneck == Duration.ZERO ->
             appendLine("🚛 Full! ")
-        state.farmer.finalState.transportBottleneck > Duration.ZERO ->
-            appendLine("🚛 ${state.farmer.finalState.transportBottleneck.asDaysHoursAndMinutes(compact)} ")
+        state.farmer.runningState.transportBottleneck > Duration.ZERO ->
+            appendLine("🚛 ${state.farmer.runningState.transportBottleneck.asDaysHoursAndMinutes(compact)} ")
     }
 
     when {
@@ -147,20 +138,12 @@ private fun StringBuilder.drawFinishedBasicInfo(
     appendLine("__**🎉 Completed if you check in**:__ ```")
     appendLine("Time since backup: ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
 
-    append("Current eggs:      ${state.farmer.initialState.eggsLaid.asIllions()} ")
-    if (!compact) append("(${
-        if (state.farmer.awayTimeRemaining <= Duration.ZERO) BigDecimal.ZERO.asIllions()
-        else eggIncrease(state.farmer.initialState.habs, state.farmer.constants)
-            .multiply(SIXTY).asIllions()
-    }/hr) ")
+    append("Current eggs:      ${state.farmer.currentEggsLaid.asIllions()} ")
+    if (!compact) append("(${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr) ")
     appendLine()
 
-    append("Current chickens:  ${state.farmer.initialState.population.asIllions()} ")
-    if (!compact) append("(${
-        chickenIncrease(state.farmer.initialState.habs, state.farmer.constants)
-            .multiply(FOUR - state.farmer.initialState.habs.fullCount())
-            .multiply(SIXTY).asIllions()
-    }/hr)")
+    append("Current chickens:  ${state.farmer.currentChickens.asIllions()} ")
+    if (!compact) append("(${state.farmer.currentChickenIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)")
     appendLine()
 
     appendLine("```")

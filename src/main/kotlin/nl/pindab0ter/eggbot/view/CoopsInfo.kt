@@ -115,7 +115,7 @@ private fun StringBuilder.drawCoops(
         cells = statuses.map { status ->
             when (status) {
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.finalEggsLaid.asIllions()
+                is InProgress -> status.state.timeUpEggsLaid.asIllions()
                 else -> ""
             }
         }
@@ -130,7 +130,7 @@ private fun StringBuilder.drawCoops(
         cells = statuses.map { status ->
             when (status) {
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.initialEggsLaid.asIllions()
+                is InProgress -> status.state.currentEggsLaid.asIllions()
                 else -> ""
             }
         }
@@ -150,9 +150,7 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is InProgress -> status.state.farmers.sumByBigDecimal { farmer ->
-                    eggIncrease(farmer.initialState.habs, farmer.constants)
-                }.asIllions()
+                is InProgress -> status.state.currentEggsPerMinute.asIllions()
                 else -> ""
             }
         }
@@ -205,7 +203,7 @@ private fun StringBuilder.drawCompactCoops(
                 is NotFound -> "🟡"
                 is Abandoned -> "🔴"
                 is Failed -> "🔴"
-                is NotOnTrack -> "🟡"
+                is NotOnTrack -> "🔴"
                 is OnTrack -> "🟢"
                 is FinishedIfCheckedIn -> "🟢"
                 is Finished -> "🏁"
@@ -223,7 +221,7 @@ private fun StringBuilder.drawCompactCoops(
         cells = statuses.map { status ->
             when (status) {
                 is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.finalEggsLaid.asIllions()
+                is InProgress -> status.state.timeUpEggsLaid.asIllions()
                 else -> ""
             }
         }
@@ -247,21 +245,22 @@ private fun StringBuilder.drawCompactCoops(
 
 private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.EmojiColumn.() -> Unit) {
     fun CoopContractStatus.eggIncreasePerMinute(): BigDecimal = when (this) {
-        is InProgress -> state.farmers.sumByBigDecimal { farmer ->
-            eggIncrease(farmer.initialState.habs, farmer.constants)
-        }
+        is InProgress -> state.currentEggsPerMinute
         else -> ZERO
     }
 
     fun CoopContractStatus.eggsLaid(): BigDecimal = when (this) {
-        is InProgress -> state.initialEggsLaid
+        is InProgress -> state.currentEggsLaid
         else -> ZERO
     }
 
+    // TODO: currentEggs vs. finalEggs instead, i.e.: Will somebody actually overtake someone in time?
+    // TODO: isFasterThanAny → willOvertake
     fun CoopContractStatus.isFasterThanAny(): Boolean = statuses.minus(this).any { other ->
         this.eggsLaid() < other.eggsLaid() && this.eggIncreasePerMinute() > other.eggIncreasePerMinute()
     }
 
+    // TODO: isSlowerThanAny → willBeOvertaken
     fun CoopContractStatus.isSlowerThanAny(): Boolean = statuses.minus(this).any { other ->
         this.eggsLaid() > other.eggsLaid() && this.eggIncreasePerMinute() < other.eggIncreasePerMinute()
     }

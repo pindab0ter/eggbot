@@ -71,13 +71,13 @@ fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
 
 fun willReachBottleneckBeforeDone(farmer: Farmer, timeRemaining: Duration, finalGoalReachedAt: Duration?): Boolean {
     val firstBottleneckReachedAt: List<Duration> = listOfNotNull(
-        if (farmer.finalState.habsStatus is BottleneckReached) farmer.finalState.habsStatus.moment else null,
-        farmer.finalState.transportBottleneck,
+        if (farmer.runningState.habsStatus is BottleneckReached) farmer.runningState.habsStatus.moment else null,
+        farmer.runningState.transportBottleneck,
         farmer.awayTimeRemaining.let { moment -> if (moment < Duration.standardHours(12)) moment else null }
     )
 
     return when {
-        farmer.finalState.habsStatus is MaxedOut -> true
+        farmer.runningState.habsStatus is MaxedOut -> true
         firstBottleneckReachedAt.isEmpty() -> false
         else -> firstBottleneckReachedAt.minOrNull()!! < listOfNotNull(timeRemaining, finalGoalReachedAt).minOrNull()!!
     }

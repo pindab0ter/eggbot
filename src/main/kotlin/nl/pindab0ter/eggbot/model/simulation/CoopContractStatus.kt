@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatusResponse
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.asyncMap
 import nl.pindab0ter.eggbot.helpers.eggsLaid
@@ -32,7 +33,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
         data class FinishedIfCheckedIn(override val state: CoopContractState) : InProgress(3)
 
         override fun compareTo(other: CoopContractStatus): Int = when (other) {
-            is InProgress -> state.initialEggsLaid.compareTo(other.state.initialEggsLaid)
+            is InProgress -> state.currentEggsLaid.compareTo(other.state.currentEggsLaid)
             else -> +1
         }
     }
@@ -41,7 +42,11 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
 
     companion object {
         operator fun invoke(
-        operator fun invoke(contract: Contract, coopId: String, catchUp: Boolean): CoopContractStatus {
+            contract: Contract,
+            coopId: String,
+            catchUp: Boolean,
+            coroutineContext: CoroutineContext = Dispatchers.Default,
+        ): CoopContractStatus {
             val coopStatus = AuxBrain.getCoopStatus(contract.id, coopId)
 
             return when {
@@ -53,8 +58,8 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
                     Finished(coopStatus)
                 coopStatus.contributors.isEmpty() ->
                     Abandoned(coopStatus)
-                else -> runBlocking {
-                    val farmers = coopStatus.contributors.asyncMap { contributionInfo ->
+                else -> runBlocking(coroutineContext) {
+                    val farmers = coopStatus.contributors.asyncMap(coroutineContext) { contributionInfo ->
                         AuxBrain.getFarmerBackup(contributionInfo.userId)
                             ?.let { Farmer(it, contract.id, catchUp) }
                     }.filterNotNull()
@@ -65,7 +70,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
 
                     val simulatedState = simulate(initialState)
 
-                    if (simulatedState.willFinishInTime) OnTrack(simulatedState)
+                    if (simulatedState.willFinish) OnTrack(simulatedState)
                     else NotOnTrack(simulatedState)
                 }
             }
@@ -73,7 +78,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
 
         val initialEggsLaidComparator = Comparator<CoopContractStatus> { one, other ->
             if (one is InProgress && other is InProgress)
-                one.state.initialEggsLaid.compareTo(other.state.initialEggsLaid)
+                one.state.currentEggsLaid.compareTo(other.state.currentEggsLaid)
             else one.compareTo(other)
         }
     }

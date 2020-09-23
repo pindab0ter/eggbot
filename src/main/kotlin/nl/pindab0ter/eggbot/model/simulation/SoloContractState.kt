@@ -12,12 +12,11 @@ data class SoloContractState(
     val egg: Egg,
     val goals: Set<Goal>,
     val timeRemaining: Duration,
-    val elapsed: Duration = Duration.ZERO,
+    val timeElapsed: Duration = Duration.ZERO,
     val farmer: Farmer,
 ) {
     val willFinish: Boolean get() = goals.all { (_, moment) -> moment != null }
     val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
-
 
     companion object {
         operator fun invoke(
@@ -31,7 +30,7 @@ data class SoloContractState(
                 contractId = localContract.contract.id,
                 contractName = localContract.contract.name,
                 egg = localContract.contract.egg,
-                goals = Goal.fromContract(localContract.contract, farmer.initialState.eggsLaid),
+                goals = Goal.fromContract(localContract.contract, farmer.reportedState.eggsLaid),
                 timeRemaining = localContract.timeRemaining,
                 farmer = farmer
             )
