@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="EggBot" type="JetRunConfigurationType" factoryName="Kotlin">
+  <configuration default="false" name="TestEggBot" type="JetRunConfigurationType">
     <module name="EggBot.main" />
     <option name="VM_PARAMETERS" value="" />
     <option name="PROGRAM_PARAMETERS" value="" />
