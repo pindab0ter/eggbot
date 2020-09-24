@@ -66,6 +66,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
 
                     val initialState = CoopContractState(contract, coopStatus, farmers)
 
+                    // TODO: Doesn't work correctly
                     if (initialState.finished) FinishedIfCheckedIn(initialState)
 
                     val simulatedState = simulate(initialState)

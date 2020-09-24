@@ -54,8 +54,11 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
+        val status = CoopContractStatus(contract, coopId, catchUp)
 
-        when (val status = CoopContractStatus(contract, coopId, catchUp)) {
+        message.delete().queue()
+
+        when (status) {
             is NotFound -> event.replyAndLogWarning("No co-op found for contract `${contractId}` with name `${coopId}`")
             is Abandoned -> event.replyAndLog("""
                 `${status.coopStatus.coopId}` vs. __${contract.name}__:
@@ -78,7 +81,6 @@ object CoopInfo : EggBotCommand() {
                     is FinishedIfCheckedIn -> coopFinishedIfCheckedInResponse(sortedState, compact)
                     else -> coopInfoResponse(sortedState, compact)
                 }.let { messages ->
-                    message.delete().queue()
                     when (event.channel) {
                         botCommandsChannel -> messages.forEach { message -> event.reply(message) }
                         else -> {
