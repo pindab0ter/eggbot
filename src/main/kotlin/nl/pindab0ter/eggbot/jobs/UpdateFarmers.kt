@@ -15,10 +15,7 @@ class UpdateFarmers : Job, Logging {
 
     override fun execute(context: JobExecutionContext?): Unit = runBlocking(Dispatchers.IO) {
         val farmers = transaction { Farmer.all().toList() }
-        if (farmers.isEmpty()) {
-            logger.info { "No farmers to update…" }
-            return@runBlocking
-        }
+        if (farmers.isEmpty()) return@runBlocking logger.info { "No farmers to update…" }
 
         farmers.asyncMap { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId)?.let {
