@@ -12,6 +12,7 @@ data class Farmer(
     val caughtUpState: FarmState?,
     val runningState: FarmState,
     val goalsReachedState: FarmState?,
+    val timeUpState: FarmState?,
     val constants: Constants,
     val timeSinceBackup: Duration,
 ) {
@@ -26,6 +27,7 @@ data class Farmer(
         caughtUpState = state,
         runningState = state,
         goalsReachedState = null,
+        timeUpState = null,
         constants = constants,
         timeSinceBackup = timeSinceBackup
     )
