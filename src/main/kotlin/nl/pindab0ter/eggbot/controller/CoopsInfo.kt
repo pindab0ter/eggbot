@@ -12,7 +12,7 @@ import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
-import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.initialEggsLaidComparator
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.currentEggsComparator
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.time.ExperimentalTime
@@ -57,8 +57,8 @@ object CoopsInfo : EggBotCommand() {
             progressBar.update()
             status
         }.let { statuses ->
-            if (!compact) statuses.sortedDescending()
-            else statuses.sortedWith(initialEggsLaidComparator).reversed()
+            if (!compact) statuses.sortedWith(currentEggsComparator)
+            else statuses.sortedWith(currentEggsComparator)
         }
 
         message.delete().queue()

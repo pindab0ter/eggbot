@@ -61,10 +61,18 @@ class Table {
         private val _header: String by lazy { "${'#'.repeat(this@Table.amountOfRows.toString().length)}$suffix" }
         override var header: String = ""
             get() = _header
-        private val _cells: List<String> by lazy { List(this@Table.amountOfRows) { index -> "${index + 1}$suffix" } }
+        private val _cells: List<String> by lazy {
+            (displayRows ?: List(this@Table.amountOfRows) { true }).mapIndexed { index, display ->
+                when (display) {
+                    true -> "${index + 1}$suffix"
+                    false -> ""
+                }
+            }
+        }
         override var cells: List<String> = emptyList()
             get() = _cells
         var suffix: String = ""
+        var displayRows: List<Boolean>? = null
     }
 
     private inner class SpacingColumn(left: Column?, right: Column?) : Column() {
@@ -114,9 +122,11 @@ class Table {
 
     fun emojiColumn(init: EmojiColumn.() -> Unit): EmojiColumn = initColumn(EmojiColumn(), init)
 
-    fun incrementColumn(suffix: String = ""): IncrementColumn = initColumn(IncrementColumn(), {
-        this.suffix = suffix
-    })
+    fun incrementColumn(suffix: String = "", init: IncrementColumn.() -> Unit = {}): IncrementColumn =
+        initColumn(IncrementColumn(), {
+            this.suffix = suffix
+            init()
+        })
 
     fun divider(border: Char = '│', intersection: Char = '╪'): DividerColumn = initColumn(DividerColumn(), {
         this.border = border

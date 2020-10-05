@@ -44,13 +44,22 @@ private fun StringBuilder.drawCoops(
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
 
-    // TODO: Replace status with TTF (Time To Finish) and/or Remaining?
-    // TODO: Remove eggspected
-    // TODO: Replace "eggs" column with "reported" column
+    // TODO: Replace "eggs" column with "reported" column?
+
+    incrementColumn {
+        suffix = "."
+        displayRows = statuses.map { status ->
+            when (status) {
+                is NotFound, is Abandoned -> false
+                else -> true
+            }
+        }
+    }
 
     column {
         header = "Name"
 
+        leftPadding = 1
         rightPadding = 1
 
         cells = statuses.map { status ->
@@ -83,12 +92,9 @@ private fun StringBuilder.drawCoops(
         }
     }
 
-    divider()
-
     column {
         header = "Status"
 
-        leftPadding = 1
         rightPadding = 1
 
         cells = statuses.map { status ->
@@ -96,27 +102,12 @@ private fun StringBuilder.drawCoops(
                 is NotFound -> "Waiting for starter"
                 is Abandoned -> "Abandoned"
                 is Failed -> "Failed"
-                is NotOnTrack -> "Not on track"
+                is NotOnTrack -> "Short ${
+                    "(${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%)".padStart(7, ' ')
+                }"
                 is OnTrack -> "On Track"
                 is FinishedIfCheckedIn -> "Finished if checked in"
                 is Finished -> "Finished"
-            }
-        }
-    }
-
-    divider()
-
-    column {
-        header = "Eggspected"
-
-        leftPadding = 1
-        rightPadding = 1
-
-        cells = statuses.map { status ->
-            when (status) {
-                is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.timeUpEggsLaid.asIllions()
-                else -> ""
             }
         }
     }
@@ -155,6 +146,23 @@ private fun StringBuilder.drawCoops(
             }
         }
     }
+
+    column {
+        header = "Finished In"
+
+        alignment = RIGHT
+        leftPadding = 1
+        rightPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is InProgress -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(true) ?: "ERROR"
+                else -> ""
+            }
+        }
+    }
+
+    divider()
 
     column {
         header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"

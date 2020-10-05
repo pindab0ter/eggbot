@@ -10,12 +10,11 @@ import nl.pindab0ter.eggbot.helpers.finalGoal
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
+import org.joda.time.Duration
 import kotlin.coroutines.CoroutineContext
 
 sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopContractStatus> {
-    data class NotFound(
-        val coopId: String,
-    ) : CoopContractStatus(0)
+    data class NotFound(val coopId: String) : CoopContractStatus(0)
 
     sealed class InActive(priority: Int) : CoopContractStatus(priority) {
         abstract val coopStatus: CoopStatusResponse
@@ -31,11 +30,6 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
         data class NotOnTrack(override val state: CoopContractState) : InProgress(1)
         data class OnTrack(override val state: CoopContractState) : InProgress(2)
         data class FinishedIfCheckedIn(override val state: CoopContractState) : InProgress(3)
-
-        override fun compareTo(other: CoopContractStatus): Int = when (other) {
-            is InProgress -> state.currentEggsLaid.compareTo(other.state.currentEggsLaid)
-            else -> +1
-        }
     }
 
     override fun compareTo(other: CoopContractStatus): Int = this.priority.compareTo(other.priority)
@@ -77,10 +71,15 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
             }
         }
 
-        val initialEggsLaidComparator = Comparator<CoopContractStatus> { one, other ->
+        val currentEggsComparator = Comparator<CoopContractStatus> { one, other ->
             if (one is InProgress && other is InProgress)
-                one.state.currentEggsLaid.compareTo(other.state.currentEggsLaid)
-            else one.compareTo(other)
+                other.state.currentEggsLaid.compareTo(one.state.currentEggsLaid)
+            else other.compareTo(one)
+        }
+        val timeTillFinalGoalComparator = Comparator<CoopContractStatus> { one, other ->
+            if (one is InProgress && other is InProgress)
+                (other.state.timeTillFinalGoal ?: Duration.ZERO).compareTo(one.state.timeTillFinalGoal ?: Duration.ZERO)
+            else other.compareTo(one)
         }
     }
 }

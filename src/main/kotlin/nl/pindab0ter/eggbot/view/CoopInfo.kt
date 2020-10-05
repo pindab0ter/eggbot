@@ -156,7 +156,7 @@ private fun StringBuilder.drawMembers(
     }
     title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize}):__"
 
-    incrementColumn(":")
+    incrementColumn { suffix = "." }
 
     column {
         header = "Name"

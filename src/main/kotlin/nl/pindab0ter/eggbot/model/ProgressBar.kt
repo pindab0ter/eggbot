@@ -27,6 +27,7 @@ class ProgressBar(
         job = loop()
     }
 
+    // Add time out to prevent infinite “Typing…”
     private fun loop(): Job = GlobalScope.launch(coroutineContext) {
         message.channel.sendTyping().queue()
         var i = 0
