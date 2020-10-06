@@ -257,15 +257,10 @@ private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiCo
     val overtakers: List<String> = state.farmers.map { farmer ->
         when {
             state.farmers.any { other ->
-                // TODO: currentEggs vs. finalEggs instead, i.e.: Will somebody actually overtake someone in time?
-                farmer.currentEggsPerMinute > other.currentEggsPerMinute &&
-                        (farmer.goalsReachedState ?: farmer.runningState).eggsLaid <
-                        (other.goalsReachedState ?: other.runningState).eggsLaid
+                farmer.currentEggsLaid < other.currentEggsLaid && farmer.timeUpEggsLaid > other.timeUpEggsLaid
             } -> "⬆️"
             state.farmers.any { other ->
-                farmer.currentEggsPerMinute < other.currentEggsPerMinute &&
-                        (farmer.goalsReachedState ?: farmer.runningState).eggsLaid >
-                        (other.goalsReachedState ?: other.runningState).eggsLaid
+                farmer.currentEggsLaid > other.currentEggsLaid && farmer.timeUpEggsLaid < other.timeUpEggsLaid
             } -> "⬇️"
             else -> "➖"
         }

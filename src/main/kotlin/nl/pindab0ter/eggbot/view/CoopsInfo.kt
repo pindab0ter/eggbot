@@ -252,30 +252,27 @@ private fun StringBuilder.drawCompactCoops(
 }
 
 private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.EmojiColumn.() -> Unit) {
-    fun CoopContractStatus.eggIncreasePerMinute(): BigDecimal = when (this) {
-        is InProgress -> state.currentEggsPerMinute
-        else -> ZERO
-    }
-
-    fun CoopContractStatus.eggsLaid(): BigDecimal = when (this) {
+    fun CoopContractStatus.currentEggsLaid(): BigDecimal = when (this) {
         is InProgress -> state.currentEggsLaid
         else -> ZERO
     }
 
-    // TODO: currentEggs vs. finalEggs instead, i.e.: Will somebody actually overtake someone in time?
-    // TODO: isFasterThanAny → willOvertake
-    fun CoopContractStatus.isFasterThanAny(): Boolean = statuses.minus(this).any { other ->
-        this.eggsLaid() < other.eggsLaid() && this.eggIncreasePerMinute() > other.eggIncreasePerMinute()
+    fun CoopContractStatus.timeUpEggsLaid(): BigDecimal = when (this) {
+        is InProgress -> state.timeUpEggsLaid
+        else -> ZERO
     }
 
-    // TODO: isSlowerThanAny → willBeOvertaken
+    fun CoopContractStatus.willOvertake(): Boolean = statuses.minus(this).any { other ->
+        this.currentEggsLaid() < other.currentEggsLaid() && this.timeUpEggsLaid() > other.timeUpEggsLaid()
+    }
+
     fun CoopContractStatus.isSlowerThanAny(): Boolean = statuses.minus(this).any { other ->
-        this.eggsLaid() > other.eggsLaid() && this.eggIncreasePerMinute() < other.eggIncreasePerMinute()
+        this.currentEggsLaid() > other.currentEggsLaid() && this.timeUpEggsLaid() < other.timeUpEggsLaid()
     }
 
     val overtakers: List<String> = statuses.map { status ->
         when {
-            status.isFasterThanAny() -> "⬆️"
+            status.willOvertake() -> "⬆️"
             status.isSlowerThanAny() -> "⬇️"
             else -> "➖"
         }

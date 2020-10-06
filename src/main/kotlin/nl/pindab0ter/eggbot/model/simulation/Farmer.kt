@@ -32,7 +32,7 @@ data class Farmer(
         timeSinceBackup = timeSinceBackup
     )
 
-    val currentState = caughtUpState ?: reportedState
+    private val currentState = caughtUpState ?: reportedState
     val currentEggsLaid: BigDecimal get() = currentState.eggsLaid
     val currentEggsPerMinute: BigDecimal
         get() = when {
@@ -43,6 +43,7 @@ data class Farmer(
     val currentChickenIncreasePerMinute: BigDecimal
         get() = chickenIncrease(currentState.habs,
             constants).multiply(FOUR - currentState.habs.fullCount())
+    val timeUpEggsLaid: BigDecimal get() = timeUpState?.eggsLaid ?: BigDecimal.ZERO
     val awayTimeRemaining: Duration get() = constants.maxAwayTime - timeSinceBackup
     val isSleeping: Boolean get() = awayTimeRemaining <= Duration.ZERO
 
