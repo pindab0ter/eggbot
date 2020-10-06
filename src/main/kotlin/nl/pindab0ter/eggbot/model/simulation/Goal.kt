@@ -5,14 +5,14 @@ import org.joda.time.Duration
 import java.math.BigDecimal
 
 data class Goal(
-    val target: BigDecimal,
+    val amount: BigDecimal,
     val moment: Duration? = null,
 ) {
     companion object {
         fun fromContract(contract: Contract, eggsLaid: BigDecimal): Set<Goal> =
             contract.goals.map { goal ->
                 Goal(
-                    target = goal.targetAmount.toBigDecimal(),
+                    amount = goal.targetAmount.toBigDecimal(),
                     moment = if (eggsLaid >= goal.targetAmount.toBigDecimal()) Duration.ZERO else null
                 )
             }.toSet()

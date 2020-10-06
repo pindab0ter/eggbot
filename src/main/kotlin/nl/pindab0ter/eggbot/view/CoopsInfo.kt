@@ -45,8 +45,6 @@ private fun StringBuilder.drawCoops(
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
 
-    // TODO: Replace "eggs" column with "reported" column?
-
     incrementColumn {
         suffix = "."
         displayRows = statuses.map { status ->
@@ -87,7 +85,7 @@ private fun StringBuilder.drawCoops(
                 is Failed -> "🔴"
                 is NotOnTrack -> "🟡"
                 is OnTrack -> "🟢"
-                is FinishedIfCheckedIn -> "🟢"
+                is FinishedIfCheckedIn -> "🔵"
                 is Finished -> "🏁"
             }
         }
@@ -107,7 +105,7 @@ private fun StringBuilder.drawCoops(
                     "(${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%)".padStart(7, ' ')
                 }"
                 is OnTrack -> "On Track"
-                is FinishedIfCheckedIn -> "Finished if checked in"
+                is FinishedIfCheckedIn -> "Check In Now!"
                 is Finished -> "Finished"
             }
         }

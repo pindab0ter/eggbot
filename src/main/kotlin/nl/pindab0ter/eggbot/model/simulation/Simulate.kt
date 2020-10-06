@@ -28,7 +28,7 @@ tailrec fun simulate(
             ),
             goals = contract.goals.map { goal ->
                 when {
-                    goal.moment == null && contract.farmer.runningState.eggsLaid >= goal.target -> {
+                    goal.moment == null && contract.farmer.runningState.eggsLaid >= goal.amount -> {
                         goal.copy(moment = contract.timeElapsed)
                     }
                     else -> goal
@@ -60,7 +60,7 @@ tailrec fun simulate(
             },
             goals = contract.goals.map { goal ->
                 when {
-                    goal.moment == null && contract.runningEggsLaid >= goal.target -> {
+                    goal.moment == null && contract.runningEggsLaid >= goal.amount -> {
                         goal.copy(moment = contract.timeElapsed)
                     }
                     else -> goal

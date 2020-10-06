@@ -39,15 +39,30 @@ data class CoopContractState(
                 chickenIncrease(state.habs, farmer.constants).multiply(FOUR - state.habs.fullCount())
             }
         }
-    val runningEggsLaid: BigDecimal get() = farmers.sumByBigDecimal { farmer -> farmer.runningState.eggsLaid }
-    val timeUpEggsLaid: BigDecimal get() = farmers.sumByBigDecimal { farmer -> farmer.timeUpState?.eggsLaid ?: ZERO }
-    val timeUpPercentageOfFinalGoal: BigDecimal get() = (timeUpEggsLaid / goals.last().target) * 100
-    val timeTillFinalGoal: Duration? get() = goals.last().moment
-    val tokensAvailable: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
-    val tokensSpent: Int get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
-    val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
-    val willFinish: Boolean get() = goals.all { (_, moment) -> moment != null && moment <= timeRemaining }
-    val finished: Boolean get() = goals.all { (_, moment) -> moment == Duration.ZERO }
+    val reportedEggsLaid: BigDecimal
+        get() = farmers.sumByBigDecimal { farmer -> farmer.reportedState.eggsLaid }
+    val caughtUpEggsLaid: BigDecimal
+        get() = farmers.sumByBigDecimal { farmer -> farmer.caughtUpState?.eggsLaid ?: ZERO }
+    val runningEggsLaid: BigDecimal
+        get() = farmers.sumByBigDecimal { farmer -> farmer.runningState.eggsLaid }
+    val timeUpEggsLaid: BigDecimal
+        get() = farmers.sumByBigDecimal { farmer -> farmer.timeUpState?.eggsLaid ?: ZERO }
+    val timeUpPercentageOfFinalGoal: BigDecimal
+        get() = (timeUpEggsLaid / goals.last().amount) * 100
+    val timeTillFinalGoal: Duration?
+        get() = goals.last().moment
+    val tokensAvailable: Int
+        get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
+    val tokensSpent: Int
+        get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
+    val goalsReached: Int
+        get() = goals.count { (_, moment) -> moment != null }
+    val willFinish: Boolean
+        get() = timeUpEggsLaid >= goals.last().amount
+    val finishedIfCheckedIn: Boolean
+        get() = reportedEggsLaid < goals.last().amount && caughtUpEggsLaid >= goals.last().amount
+    val finished: Boolean
+        get() = reportedEggsLaid >= goals.last().amount
 
     constructor(
         contract: Contract,

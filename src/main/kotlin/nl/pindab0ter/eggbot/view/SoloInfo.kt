@@ -45,7 +45,7 @@ private fun StringBuilder.drawGoals(
         append("${index + 1}. ")
         appendPaddingCharacters(
             goal.asIllions(OPTIONAL_DECIMALS),
-            state.goals.map { it.target.asIllions(OPTIONAL_DECIMALS) }
+            state.goals.map { it.amount.asIllions(OPTIONAL_DECIMALS) }
         )
 
         append(goal.asIllions(OPTIONAL_DECIMALS))

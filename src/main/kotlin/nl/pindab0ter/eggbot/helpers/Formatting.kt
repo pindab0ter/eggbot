@@ -123,8 +123,6 @@ fun BigDecimal.asRank(shortened: Boolean = false): String = when (this) {
 
 // Padding
 
-// TODO: Replace with String.rightPad?
-
 fun paddingCharacters(current: Any, longest: Any, character: String = " "): String {
     val currentLength = current.toString().length
     val longestLength = longest.toString().length

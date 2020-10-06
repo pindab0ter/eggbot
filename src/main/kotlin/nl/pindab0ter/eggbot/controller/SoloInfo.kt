@@ -43,7 +43,6 @@ object SoloInfo : EggBotCommand() {
             DiscordUser.findById(event.author.id)?.farmers
         }?.toList() ?: return event.replyAndLogError("Could not find any farmers. Please contact the bot maintainer.")
 
-        // TODO: Replace with parallelMap
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
             val localContract: LocalContract = backup.contracts?.contracts?.find { localContract ->
                 localContract.contract?.id == contractId
