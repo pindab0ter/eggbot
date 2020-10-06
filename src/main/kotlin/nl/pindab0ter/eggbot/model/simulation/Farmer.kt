@@ -32,7 +32,7 @@ data class Farmer(
         timeSinceBackup = timeSinceBackup
     )
 
-    private val currentState = caughtUpState ?: reportedState
+    val currentState = caughtUpState ?: reportedState
     val currentEggsLaid: BigDecimal get() = currentState.eggsLaid
     val currentEggsPerMinute: BigDecimal
         get() = when {
