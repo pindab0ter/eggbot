@@ -50,7 +50,7 @@ object RollCall : EggBotCommand() {
             baseNameOption,
             Switch(NO_ROLE)
                 .setShortFlag('n')
-                .setLongFlag("no-role")
+                .setLongFlag("no-roles")
                 .setHelp("Don't create roles for these co-ops."),
             overwriteFlag
         )
@@ -64,7 +64,7 @@ object RollCall : EggBotCommand() {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val overwrite: Boolean = parameters.getBoolean(OVERWRITE)
         val baseName = "-${parameters.getString(BASE_NAME)}"
-        val noRole: Boolean = parameters.getBoolean(NO_ROLE)
+        val noRoles: Boolean = parameters.getBoolean(NO_ROLE)
 
         if (!allowedCharacters.matches(baseName)) return event.replyAndLogWarning(
             "Only letters, digits and dashes are allowed."
@@ -113,29 +113,29 @@ object RollCall : EggBotCommand() {
                 )
             }
 
-            val message = event.channel
-                .sendMessage("Generating co-ops${if (!noRole) " and creating roles" else ""}…").complete()
+            val messageContents = "Generating co-ops${if (!noRoles) " and creating roles" else ""}…"
+            val message = event.channel.sendMessage(messageContents).complete()
 
             val farmers = transaction { Farmer.all().sortedByDescending { it.earningsBonus }.toList() }
-            val coops: List<Coop> = createRollCall(farmers, contract, baseName, noRole)
+            val coops: List<Coop> = createRollCall(farmers, contract, baseName, noRoles)
 
-            val progressBar = ProgressBar(farmers.count(), message)
+            if (!noRoles) {
+                val progressBar = ProgressBar(farmers.count(), message, statusText = messageContents)
 
-            if (!noRole) coops.map { coop ->
-                coop.roleId?.let { guild.getRoleById(it) }?.let { role ->
-                    assignRoles(
-                        inGameNamesToDiscordIDs = coop.farmers.map { farmer -> farmer.inGameName to farmer.discordUser.discordId }
-                            .toMap(),
-                        role = role,
-                        progressCallBack = {
-                            progressBar.update()
-                            event.channel.sendTyping().queue()
-                        }
-                    )
+                coops.map { coop ->
+                    coop.roleId?.let { guild.getRoleById(it) }?.let { role ->
+                        assignRoles(
+                            inGameNamesToDiscordIDs = coop.farmers.map { farmer ->
+                                farmer.inGameName to farmer.discordUser.discordId
+                            }.toMap(),
+                            role = role,
+                            progressCallBack = progressBar::update
+                        )
+                    }
                 }
-            }
 
-            message.delete().complete()
+                progressBar.stopAndDeleteMessage()
+            }
 
             rollCallResponse(contract, coops).forEach { block ->
                 event.reply(block)

@@ -9,14 +9,14 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 
-// TODO: Move state out of ProgressBar, update takes percentage instead
-// TODO: Add message to ProgressBar so it can say "Fetching backups…\n[ProgressBar]"
 class ProgressBar(
     private val goal: Int,
     private val message: Message,
+    private val statusText: String? = null,
     coroutineContext: CoroutineContext? = null,
 ) : CoroutineScope {
     override val coroutineContext: CoroutineContext = coroutineContext ?: Dispatchers.Default
+    private var deleteMessage = false
     private var running: Boolean = true
     private var counter: AtomicInteger = AtomicInteger(0)
     private var dirty: AtomicBoolean = AtomicBoolean(true)
@@ -27,20 +27,25 @@ class ProgressBar(
         job = loop()
     }
 
-    // Add time out to prevent infinite “Typing…”
     private fun loop(): Job = GlobalScope.launch(coroutineContext) {
         message.channel.sendTyping().queue()
         var i = 0
         while (running) when {
             dirty.getAndSet(false) -> {
-                message.editMessage(drawProgressBar(counter.get(), goal)).queue()
+                val contents = buildString {
+                    if (statusText != null) appendLine(statusText)
+                    appendLine(drawProgressBar(counter.get(), goal))
+                }
+                message.editMessage(contents).queue()
+                i = 0
             }
             else -> {
-                if (i++ % 5 == 0) message.channel.sendTyping().queue()
+                if (i >= TIME_OUT) running = false
+                if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.sendTyping().queue()
                 delay(1000)
             }
         }
-        message.editMessage(drawProgressBar(goal, goal)).queue({}, { /* Ignore exception */ })
+        if (deleteMessage) message.delete().queue()
     }
 
     fun update() {
@@ -49,28 +54,38 @@ class ProgressBar(
         dirty.set(true)
     }
 
-    private fun stop() {
+    fun stop() {
         running = false
     }
 
-    private fun drawProgressBar(
-        current: Int,
-        total: Int,
-        width: Int = 30,
-        showSteps: Boolean = true,
-        showPercentage: Boolean = true,
-    ): String {
-        val percentage = (current.toDouble() / total.toDouble() * 100.0).roundToInt()
-        val completed = (current.toDouble() / total.toDouble() * width.toDouble()).roundToInt()
-        val remaining = width - completed
+    fun stopAndDeleteMessage() {
+        deleteMessage = true
+        stop()
+    }
 
-        return buildString {
-            append("`")
-            append("▓".repeat(completed))
-            append("░".repeat(remaining))
-            if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
-            if (showPercentage) append(" ($percentage%)")
-            append("`")
+    companion object {
+        private const val TIME_OUT = 30
+        private const val SEND_TYPING_INTERVAL = 10
+
+        private fun drawProgressBar(
+            current: Int,
+            total: Int,
+            width: Int = 30,
+            showSteps: Boolean = true,
+            showPercentage: Boolean = true,
+        ): String {
+            val percentage = (current.toDouble() / total.toDouble() * 100.0).roundToInt()
+            val completed = (current.toDouble() / total.toDouble() * width.toDouble()).roundToInt()
+            val remaining = width - completed
+
+            return buildString {
+                append("`")
+                append("▓".repeat(completed))
+                append("░".repeat(remaining))
+                if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
+                if (showPercentage) append(" ($percentage%)")
+                append("`")
+            }
         }
     }
 }

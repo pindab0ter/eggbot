@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.controller
 
+import com.auxbrain.ei.CoopStatusResponse
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import kotlinx.coroutines.runBlocking
@@ -48,20 +49,30 @@ object CoopsInfo : EggBotCommand() {
             "Could not find any co-ops for contract id `$contractId`. To register new contracts use `${Config.prefix}${CoopAdd.name}` or create a new roll call using `${Config.prefix}${RollCall.name}`"
         )
 
-        val message = event.channel.sendMessage("Looking for co-ops…").complete()
-        val progressBar = ProgressBar(coops.size, message, coroutineContext = coroutineContext)
+        val message = event.channel.sendMessage("Fetching co-op statuses…").complete()
+        message.channel.sendTyping().queue()
 
-        // TODO: Let CoopContractStatus update ProgressBar since requesting Backups takes a lot of the time?
-        val statuses = coops.asyncMap(coroutineContext) status@{ coop ->
-            val status = CoopContractStatus(contract, coop.name, catchUp)
-            progressBar.update()
-            status
-        }.let { statuses ->
-            if (!compact) statuses.sortedWith(currentEggsComparator)
-            else statuses.sortedWith(currentEggsComparator)
+        val coopStatuses: List<CoopStatusResponse?> = coops.asyncMap(coroutineContext) status@{ coop ->
+            AuxBrain.getCoopStatus(contract.id, coop.name)
         }
 
-        message.delete().queue()
+        val progressBar = ProgressBar(
+            goal = coopStatuses.sumBy { coopStatus -> coopStatus?.contributors?.count() ?: 0 },
+            message = message,
+            statusText = "Fetching backups and running simulations…",
+            coroutineContext = coroutineContext
+        )
+
+        val statuses = coopStatuses
+            .zip(coops.map { coop -> coop.name })
+            .asyncMap(coroutineContext) { (coopStatus, coopId) ->
+                CoopContractStatus(contract, coopStatus, coopId, catchUp, progressCallback = progressBar::update)
+            }.let { statuses ->
+                if (!compact) statuses.sortedWith(currentEggsComparator)
+                else statuses.sortedWith(currentEggsComparator)
+            }
+
+        progressBar.stopAndDeleteMessage()
 
         if (statuses.isEmpty()) return@runBlocking event.replyAndLogWarning(
             "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?"

@@ -82,8 +82,9 @@ object CoopAdd : EggBotCommand() {
         }
 
         if (role != null && coopStatus != null) {
-            val message = event.channel.sendMessage("Assigning roles…").complete()
-            val progressBar = ProgressBar(coopStatus.contributors.count(), message)
+            val messageContent = "Assigning roles…"
+            val message = event.channel.sendMessage(messageContent).complete()
+            val progressBar = ProgressBar(coopStatus.contributors.count(), message, messageContent)
 
             val (successes, failures) = assignRoles(
                 inGameNamesToDiscordIDs = coopStatus.contributors.map { contributor ->
@@ -93,24 +94,23 @@ object CoopAdd : EggBotCommand() {
                 progressCallBack = progressBar::update
             )
 
-            buildString {
-                appendLine("${Config.emojiSuccess} Successfully registered co-op `${coopStatus.coopId}` for contract `${coopStatus.contractId}`.")
-                if (successes.isNotEmpty()) {
-                    appendLine()
-                    appendLine("The following players have been assigned the role ${role.asMention}:")
-                    successes.forEach { discordUser -> appendLine(guild.getMemberById(discordUser.discordId)?.asMention) }
-                }
-                if (failures.isNotEmpty()) {
-                    appendLine()
-                    appendLine("Unable to assign the following players their role:")
-                    appendLine("```")
-                    failures.forEach { userName -> appendLine(userName) }
-                    appendLine("```")
-                }
-            }.let { messageBody ->
-                message.delete().complete()
-                event.reply(messageBody)
-            }
+            progressBar.stop()
+            message.editMessage(
+                buildString {
+                    appendLine("${Config.emojiSuccess} Successfully registered co-op `${coopStatus.coopId}` for contract `${coopStatus.contractId}`.")
+                    if (successes.isNotEmpty()) {
+                        appendLine()
+                        appendLine("The following players have been assigned the role ${role.asMention}:")
+                        successes.forEach { discordUser -> appendLine(guild.getMemberById(discordUser.discordId)?.asMention) }
+                    }
+                    if (failures.isNotEmpty()) {
+                        appendLine()
+                        appendLine("Unable to assign the following players their role:")
+                        appendLine("```")
+                        failures.forEach { userName -> appendLine(userName) }
+                        appendLine("```")
+                    }
+                }).queue()
         } else {
             event.replySuccess("Successfully registered co-op `${coopId}` for contract `${contractId}`.")
         }

@@ -11,7 +11,6 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
 import org.joda.time.Duration
-import kotlin.coroutines.CoroutineContext
 
 sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopContractStatus> {
     data class NotFound(val coopId: String) : CoopContractStatus(0)
@@ -37,36 +36,34 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
     companion object {
         operator fun invoke(
             contract: Contract,
+            coopStatus: CoopStatusResponse?,
             coopId: String,
             catchUp: Boolean,
-            coroutineContext: CoroutineContext = Dispatchers.Default,
-        ): CoopContractStatus {
-            val coopStatus = AuxBrain.getCoopStatus(contract.id, coopId)
+            progressCallback: () -> Unit = { },
+        ): CoopContractStatus = when {
+            coopStatus == null ->
+                NotFound(coopId)
+            coopStatus.contributors.isEmpty() ->
+                Abandoned(coopStatus)
+            coopStatus.eggsLaid >= contract.finalGoal ->
+                Finished(coopStatus)
+            coopStatus.gracePeriodSecondsRemaining <= 0.0 && coopStatus.eggsLaid < contract.finalGoal ->
+                Failed(coopStatus)
+            else -> runBlocking(Dispatchers.Default) {
+                val farmers = coopStatus.contributors.asyncMap(this.coroutineContext) { contributionInfo ->
+                    AuxBrain.getFarmerBackup(contributionInfo.userId)
+                        ?.let { Farmer(it, contract.id, catchUp) }
+                        .also { progressCallback() }
+                }.filterNotNull()
 
-            return when {
-                coopStatus == null ->
-                    NotFound(coopId)
-                coopStatus.contributors.isEmpty() ->
-                    Abandoned(coopStatus)
-                coopStatus.eggsLaid >= contract.finalGoal ->
-                    Finished(coopStatus)
-                coopStatus.gracePeriodSecondsRemaining <= 0.0 && coopStatus.eggsLaid < contract.finalGoal ->
-                    Failed(coopStatus)
-                else -> runBlocking(coroutineContext) {
-                    val farmers = coopStatus.contributors.asyncMap(coroutineContext) { contributionInfo ->
-                        AuxBrain.getFarmerBackup(contributionInfo.userId)
-                            ?.let { Farmer(it, contract.id, catchUp) }
-                    }.filterNotNull()
+                val initialState = CoopContractState(contract, coopStatus, farmers)
 
-                    val initialState = CoopContractState(contract, coopStatus, farmers)
+                if (initialState.finishedIfCheckedIn) FinishedIfCheckedIn(initialState)
 
-                    if (initialState.finishedIfCheckedIn) FinishedIfCheckedIn(initialState)
+                val simulatedState = simulate(initialState)
 
-                    val simulatedState = simulate(initialState)
-
-                    if (simulatedState.willFinish) OnTrack(simulatedState)
-                    else NotOnTrack(simulatedState)
-                }
+                if (simulatedState.willFinish) OnTrack(simulatedState)
+                else NotOnTrack(simulatedState)
             }
         }
 

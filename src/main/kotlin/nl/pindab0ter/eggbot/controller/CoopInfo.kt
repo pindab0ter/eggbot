@@ -54,7 +54,8 @@ object CoopInfo : EggBotCommand() {
         message.editMessage("Running simulation…").queue()
         message.channel.sendTyping().queue()
 
-        val status = CoopContractStatus(contract, coopId, catchUp)
+        val coopStatus = AuxBrain.getCoopStatus(contract.id, coopId)
+        val status = CoopContractStatus(contract, coopStatus, coopId, catchUp)
 
         message.delete().queue()
 
