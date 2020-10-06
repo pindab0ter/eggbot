@@ -182,6 +182,7 @@ private fun StringBuilder.drawMembers(
         rightPadding = 3
         cells = state.farmers.map { farmer -> farmer.currentEggsPerMinute.multiply(SIXTY).asIllions() }
     }
+
     column {
         header = "Chickens"
         alignment = RIGHT

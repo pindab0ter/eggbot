@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.view
 import com.auxbrain.ei.Contract
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
@@ -141,7 +142,7 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is InProgress -> status.state.currentEggsPerMinute.asIllions()
+                is InProgress -> status.state.currentEggsPerMinute.times(SIXTY).asIllions()
                 else -> ""
             }
         }
