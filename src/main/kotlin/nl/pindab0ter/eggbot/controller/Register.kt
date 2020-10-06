@@ -86,11 +86,10 @@ object Register : EggBotCommand() {
             ).also { rollback() }
 
             // Check if any back-up was found with the in-game ID
-            // TODO: Check if name has spaces in it, if it does, surround the quoted name with spaces
             if (backup?.game == null || backup.stats == null) return@transaction event.replyAndLogWarning(
                 """
                 No account found with in-game ID `${registrant.inGameId}`. Did you enter your ID (not name!) correctly?
-                To register, type `${event.client.textualPrefix}$name $arguments` without the brackets.
+                Type `${event.client.textualPrefix}$name --help` for more info, hints and tips on how to use this command.
                 """.trimIndent()
             ).also { rollback() }
 
