@@ -5,6 +5,7 @@ import com.auxbrain.ei.Egg
 import com.auxbrain.ei.LocalContract
 import nl.pindab0ter.eggbot.helpers.timeRemaining
 import org.joda.time.Duration
+import java.math.BigDecimal
 
 data class SoloContractState(
     val contractId: String,
@@ -15,16 +16,32 @@ data class SoloContractState(
     val timeElapsed: Duration = Duration.ZERO,
     val farmer: Farmer,
 ) {
-    val willFinish: Boolean get() = goals.all { (_, moment) -> moment != null }
-    val goalsReached: Int get() = goals.count { (_, moment) -> moment != null }
+    val reportedEggsLaid: BigDecimal
+        get() = farmer.reportedState.eggsLaid
+    val caughtUpEggsLaid: BigDecimal
+        get() = farmer.caughtUpState?.eggsLaid ?: BigDecimal.ZERO
+    val runningEggsLaid: BigDecimal
+        get() = farmer.runningState.eggsLaid
+    val timeUpEggsLaid: BigDecimal
+        get() = farmer.timeUpState?.eggsLaid ?: BigDecimal.ZERO
+    val willFinish: Boolean
+        get() = when {
+            timeElapsed < timeRemaining -> runningEggsLaid >= goals.last().amount
+            else -> timeUpEggsLaid >= goals.last().amount
+        }
+    val finishedIfCheckedIn: Boolean
+        get() = reportedEggsLaid < goals.last().amount && caughtUpEggsLaid >= goals.last().amount
+    val finished: Boolean
+        get() = reportedEggsLaid >= goals.last().amount
+    val goalsReached: Int
+        get() = goals.count { (_, moment) -> moment != null }
 
     companion object {
         operator fun invoke(
             backup: Backup,
             localContract: LocalContract,
-            catchUp: Boolean,
         ): SoloContractState? {
-            val farmer = Farmer(backup, localContract.contract!!.id, catchUp)
+            val farmer = Farmer(backup, localContract.contract!!.id)
 
             return if (farmer == null) null else SoloContractState(
                 contractId = localContract.contract.id,

@@ -85,7 +85,7 @@ object SoloInfo : EggBotCommand() {
 
             val state = simulate(initialState)
 
-            if (catchUp && state.farmer.caughtUpState == state.farmer.runningState) {
+            if (state.finishedIfCheckedIn) {
                 soloFinishedIfCheckedInResponse(state, compact).let { message ->
                     // TODO: Remove replies to DM and only allow in bot channel(s)
                     if (event.channel == botCommandsChannel) {
