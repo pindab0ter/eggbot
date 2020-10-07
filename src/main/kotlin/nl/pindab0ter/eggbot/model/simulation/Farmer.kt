@@ -18,22 +18,24 @@ data class Farmer(
 ) {
     constructor(
         name: String,
-        state: FarmState,
+        reportedState: FarmState,
+        caughtUpState: FarmState? = null,
         constants: Constants,
         timeSinceBackup: Duration,
     ) : this(
         name = name,
-        reportedState = state,
-        caughtUpState = state,
-        runningState = state,
+        reportedState = reportedState,
+        caughtUpState = caughtUpState,
+        runningState = caughtUpState ?: reportedState,
         goalsReachedState = null,
         timeUpState = null,
         constants = constants,
         timeSinceBackup = timeSinceBackup
     )
 
+    val reportedEggsLaid: BigDecimal get() = reportedState.eggsLaid
+    val caughtUpEggsLaid: BigDecimal get() = caughtUpState?.eggsLaid ?: BigDecimal.ZERO
     val currentState = caughtUpState ?: reportedState
-    val currentEggsLaid: BigDecimal get() = currentState.eggsLaid
     val currentEggsPerMinute: BigDecimal
         get() = when {
             awayTimeRemaining <= Duration.ZERO -> BigDecimal.ZERO

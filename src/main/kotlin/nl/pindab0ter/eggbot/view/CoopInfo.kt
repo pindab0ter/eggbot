@@ -131,6 +131,7 @@ private fun StringBuilder.drawBasicInfo(
     append("Current eggs:     ${coopContractState.currentEggsLaid.asIllions()} ")
     if (!compact) append("(${coopContractState.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)")
     appendLine()
+    appendLine("Banked eggs:      ${coopContractState.reportedEggsLaid.asIllions()} ")
 
     append("Current chickens: ${
         coopContractState.currentPopulation.asIllions()
@@ -165,16 +166,25 @@ private fun StringBuilder.drawMembers(
     }
 
     column {
-        header = "Eggs"
+        header = "Current"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.caughtUpEggsLaid.asIllions() }
+    }
+
+    divider()
+
+    column {
+        header = "Banked"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = state.farmers.map { farmer -> farmer.reportedEggsLaid.asIllions() }
     }
 
     overtakersColumn(state) {
         leftPadding = 1
     }
-
-    divider()
 
     column {
         header = "/hr"
@@ -192,7 +202,7 @@ private fun StringBuilder.drawMembers(
 
     column {
         header = "/hr"
-        rightPadding = 3
+        rightPadding = 2
         cells = state.farmers.map { farmer ->
             farmer.currentChickenIncreasePerMinute.multiply(SIXTY).asIllions()
         }
@@ -239,12 +249,21 @@ private fun StringBuilder.drawCompactMembers(
     }
 
     column {
-        header = "Eggs"
+        header = "Current"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.caughtUpEggsLaid.asIllions() }
     }
 
     divider()
+
+    column {
+        header = "Banked"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = state.farmers.map { farmer -> farmer.reportedEggsLaid.asIllions() }
+    }
 
     column {
         header = "/hr"
@@ -257,10 +276,10 @@ private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiCo
     val overtakers: List<String> = state.farmers.map { farmer ->
         when {
             state.farmers.any { other ->
-                farmer.currentEggsLaid < other.currentEggsLaid && farmer.timeUpEggsLaid > other.timeUpEggsLaid
+                farmer.caughtUpEggsLaid < other.caughtUpEggsLaid && farmer.timeUpEggsLaid > other.timeUpEggsLaid
             } -> "⬆️"
             state.farmers.any { other ->
-                farmer.currentEggsLaid > other.currentEggsLaid && farmer.timeUpEggsLaid < other.timeUpEggsLaid
+                farmer.caughtUpEggsLaid > other.caughtUpEggsLaid && farmer.timeUpEggsLaid < other.timeUpEggsLaid
             } -> "⬇️"
             else -> "➖"
         }

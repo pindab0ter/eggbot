@@ -32,10 +32,10 @@ fun coopsInfoResponse(
 }.splitCodeBlock()
 
 private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = apply {
-    appendLine("__🗒️ **Basic info**__ ```")
+    appendLine("__🗒️ **Basic info**:__ ```")
     appendLine("Contract:         ${contract.name}")
     appendLine("Final goal:       ${contract.finalGoal.asIllions(OPTIONAL_DECIMALS)}")
-    appendLine("Time to complete: ${contract.lengthSeconds.toDuration().asDaysHoursAndMinutes(true)}")
+    appendLine("Time to complete: ${contract.lengthSeconds.toDuration().asDaysAndHours()}")
     appendLine("Max size:         ${contract.maxCoopSize} farmers")
     appendLine("```")
 }
@@ -45,15 +45,7 @@ private fun StringBuilder.drawCoops(
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
 
-    incrementColumn {
-        suffix = "."
-        displayRows = statuses.map { status ->
-            when (status) {
-                is NotFound, is Abandoned -> false
-                else -> true
-            }
-        }
-    }
+    title = "__🐓 **Co-ops** (${statuses.count()}):__"
 
     column {
         header = "Name"
@@ -70,7 +62,24 @@ private fun StringBuilder.drawCoops(
         }
     }
 
-    divider()
+    column {
+        header = "Status"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is NotFound -> "Waiting for starter"
+                is Abandoned -> "Abandoned"
+                is Failed -> "Failed"
+                is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
+                is OnTrack -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(true) ?: "ERROR"
+                is FinishedIfCheckedIn -> "Bank now!"
+                is Finished -> "Finished"
+            }
+        }
+    }
 
     emojiColumn {
         header = "🚥"
@@ -92,82 +101,10 @@ private fun StringBuilder.drawCoops(
     }
 
     column {
-        header = "Status"
-
-        rightPadding = 1
-
-        cells = statuses.map { status ->
-            when (status) {
-                is NotFound -> "Waiting for starter"
-                is Abandoned -> "Abandoned"
-                is Failed -> "Failed"
-                is NotOnTrack -> "Short ${
-                    "(${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%)".padStart(7, ' ')
-                }"
-                is OnTrack -> "On Track"
-                is FinishedIfCheckedIn -> "Check In Now!"
-                is Finished -> "Finished"
-            }
-        }
-    }
-
-    column {
-        header = "Eggs"
-
-        alignment = RIGHT
-        leftPadding = 1
-
-        cells = statuses.map { status ->
-            when (status) {
-                is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.currentEggsLaid.asIllions()
-                else -> ""
-            }
-        }
-    }
-
-    overtakersColumn(statuses) {
-        leftPadding = 1
-    }
-
-    divider()
-
-    column {
-        header = "/hr"
+        header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
 
         alignment = LEFT
         rightPadding = 1
-
-        cells = statuses.map { status ->
-            when (status) {
-                is InProgress -> status.state.currentEggsPerMinute.times(SIXTY).asIllions()
-                else -> ""
-            }
-        }
-    }
-
-    column {
-        header = "Finished In"
-
-        alignment = RIGHT
-        leftPadding = 1
-        rightPadding = 1
-
-        cells = statuses.map { status ->
-            when (status) {
-                is InProgress -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(true) ?: "ERROR"
-                else -> ""
-            }
-        }
-    }
-
-    divider()
-
-    column {
-        header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
-
-        alignment = RIGHT
-        leftPadding = 1
 
         cells = statuses.map { status ->
             when (status) {
@@ -177,12 +114,63 @@ private fun StringBuilder.drawCoops(
             }
         }
     }
+
+    column {
+        header = "Current"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is InProgress -> status.state.caughtUpEggsLaid.asIllions()
+                else -> ""
+            }
+        }
+    }
+
+    divider()
+
+    column {
+        header = "Banked"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is Failed -> status.coopStatus.eggsLaid.asIllions()
+                is InProgress -> status.state.reportedEggsLaid.asIllions()
+                else -> ""
+            }
+        }
+    }
+
+    divider()
+
+    overtakersColumn(statuses)
+
+    column {
+        header = "Eggs/hr"
+
+        alignment = LEFT
+
+        cells = statuses.map { status ->
+            when (status) {
+                is InProgress -> status.state.currentEggsPerMinute.times(SIXTY).asIllions()
+                else -> ""
+            }
+        }
+    }
 }
 
 private fun StringBuilder.drawCompactCoops(
     contract: Contract,
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
+
+    title = "__🐓 **Co-ops** (${statuses.count()}):__"
+
     column {
         header = "Name"
 
@@ -197,7 +185,24 @@ private fun StringBuilder.drawCompactCoops(
         }
     }
 
-    divider()
+    column {
+        header = "Status"
+
+        alignment = RIGHT
+        leftPadding = 1
+
+        cells = statuses.map { status ->
+            when (status) {
+                is NotFound -> "Start"
+                is Abandoned -> "Empty"
+                is Failed -> "Failed"
+                is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
+                is OnTrack -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(true) ?: "ERROR"
+                is FinishedIfCheckedIn -> "Bank!"
+                is Finished -> "Done"
+            }
+        }
+    }
 
     emojiColumn {
         header = "🚥"
@@ -210,26 +215,10 @@ private fun StringBuilder.drawCompactCoops(
                 is NotFound -> "🟡"
                 is Abandoned -> "🔴"
                 is Failed -> "🔴"
-                is NotOnTrack -> "🔴"
+                is NotOnTrack -> "🟡"
                 is OnTrack -> "🟢"
-                is FinishedIfCheckedIn -> "🟢"
+                is FinishedIfCheckedIn -> "🔵"
                 is Finished -> "🏁"
-            }
-        }
-    }
-
-    divider()
-
-    column {
-        header = "Eggspected"
-
-        leftPadding = 1
-
-        cells = statuses.map { status ->
-            when (status) {
-                is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.timeUpEggsLaid.asIllions()
-                else -> ""
             }
         }
     }
@@ -237,8 +226,7 @@ private fun StringBuilder.drawCompactCoops(
     column {
         header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
 
-        alignment = RIGHT
-        leftPadding = 1
+        alignment = LEFT
 
         cells = statuses.map { status ->
             when (status) {
@@ -250,7 +238,7 @@ private fun StringBuilder.drawCompactCoops(
     }
 }
 
-private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.EmojiColumn.() -> Unit) {
+private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.EmojiColumn.() -> Unit = {}) {
     fun CoopContractStatus.currentEggsLaid(): BigDecimal = when (this) {
         is InProgress -> state.currentEggsLaid
         else -> ZERO
