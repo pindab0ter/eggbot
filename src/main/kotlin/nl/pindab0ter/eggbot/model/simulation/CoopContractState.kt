@@ -58,7 +58,10 @@ data class CoopContractState(
     val goalsReached: Int
         get() = goals.count { (_, moment) -> moment != null }
     val willFinish: Boolean
-        get() = timeUpEggsLaid >= goals.last().amount
+        get() = when {
+            timeElapsed < timeRemaining -> runningEggsLaid >= goals.last().amount
+            else -> timeUpEggsLaid >= goals.last().amount
+        }
     val finishedIfCheckedIn: Boolean
         get() = reportedEggsLaid < goals.last().amount && caughtUpEggsLaid >= goals.last().amount
     val finished: Boolean

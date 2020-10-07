@@ -56,14 +56,14 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
                         .also { progressCallback() }
                 }.filterNotNull()
 
-                val initialState = CoopContractState(contract, coopStatus, farmers)
+                val coopContractState = simulate(CoopContractState(contract, coopStatus, farmers))
 
-                if (initialState.finishedIfCheckedIn) FinishedIfCheckedIn(initialState)
-
-                val simulatedState = simulate(initialState)
-
-                if (simulatedState.willFinish) OnTrack(simulatedState)
-                else NotOnTrack(simulatedState)
+                when {
+                    coopContractState.finished -> Finished(coopStatus)
+                    coopContractState.finishedIfCheckedIn -> FinishedIfCheckedIn(coopContractState)
+                    coopContractState.willFinish -> OnTrack(coopContractState)
+                    else -> NotOnTrack(coopContractState)
+                }
             }
         }
 
