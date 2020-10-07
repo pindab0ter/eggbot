@@ -51,7 +51,7 @@ fun earningsBonusResponse(
 
     return table {
         title = "Earnings bonus for **${farmer.inGameName}**"
-        displayHeader = false
+        displayHeaders = false
         column {
             rightPadding = 2
             cells = rows.map { row -> row.label }

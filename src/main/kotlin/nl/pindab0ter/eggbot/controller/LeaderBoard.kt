@@ -136,7 +136,7 @@ object LeaderBoard : EggBotCommand() {
                 ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"
             }
         }${if (!compact) " Leader Board" else ""}**__"
-        displayHeader = true
+        displayHeaders = true
         if (compact) incrementColumn() else incrementColumn(":")
         column {
             header = "Name"

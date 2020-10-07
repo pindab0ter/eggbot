@@ -17,7 +17,7 @@ class Table {
     private val alignedColumns: List<AlignedColumn> get() = columns.filterIsInstance<AlignedColumn>()
     private val amountOfRows: Int get() = (columns.first { it is ValueColumn } as? ValueColumn)?.cells?.size ?: 0
     var title: String? = null
-    var displayHeader: Boolean = true
+    var displayHeaders: Boolean = true
     var topPadding: Int = 0
     var bottomPadding: Int = 0
 
@@ -156,7 +156,7 @@ class Table {
             if (title != null) appendLine("$title ```")
             else appendLine("```")
 
-            if (displayHeader) {
+            if (displayHeaders) {
                 // Draw table header
                 appendLine(spacedColumns.renderRow {
                     when (this) {
