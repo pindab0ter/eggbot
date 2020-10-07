@@ -56,14 +56,13 @@ data class Farmer(
             val farm = backup.farmFor(contractId) ?: return null
             val constants = Constants(backup, farm)
             val reportedState = FarmState(farm, constants)
-            return if (catchUp) Farmer(
+            return Farmer(
                 name = backup.userName,
-                state = catchUp(reportedState, constants, minOf(backup.timeSinceBackup, constants.maxAwayTime)),
-                constants = constants,
-                timeSinceBackup = backup.timeSinceBackup
-            ) else Farmer(
-                name = backup.userName,
-                state = reportedState,
+                reportedState = reportedState,
+                caughtUpState = when {
+                    catchUp -> catchUp(reportedState, constants, minOf(backup.timeSinceBackup, constants.maxAwayTime))
+                    else -> null
+                },
                 constants = constants,
                 timeSinceBackup = backup.timeSinceBackup
             )
