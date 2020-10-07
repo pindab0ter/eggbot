@@ -37,8 +37,8 @@ object CoopsInfo : EggBotCommand() {
     @ExperimentalTime
     override fun execute(event: CommandEvent, parameters: JSAPResult) = runBlocking {
         val contractId = parameters.getString(CONTRACT_ID)
-        val catchUp = parameters.getBoolean(FORCE_REPORTED_ONLY).not()
-        val compact = parameters.getBoolean(COMPACT)
+        val catchUp = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
+        val compact = parameters.getBoolean(COMPACT, false)
 
         val contract = AuxBrain.getContract(contractId) ?: return@runBlocking event.replyAndLogWarning(
             "Could not find a contract with ID `$contractId`. Use `${Config.prefix}${ContractIDs.name}` to get a list of the current contracts."
