@@ -18,9 +18,9 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
     sealed class InActive(priority: Int) : CoopContractStatus(priority) {
         abstract val coopStatus: CoopStatusResponse
 
-        data class Finished(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-1)
-        data class Abandoned(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-2)
-        data class Failed(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-3)
+        data class Finished(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(4)
+        data class Abandoned(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-1)
+        data class Failed(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-2)
     }
 
     sealed class InProgress(priority: Int) : CoopContractStatus(priority) {
