@@ -46,6 +46,7 @@ object CoopInfo : EggBotCommand() {
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
         val catchUp: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
         val message: Message = event.channel.sendMessage("Fetching required information…").complete()
+        message.channel.sendTyping().queue()
 
         val contract: Contract = AuxBrain.getContract(contractId) ?: return event.replyAndLogWarning(
             "Could not find contract information"
