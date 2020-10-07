@@ -53,7 +53,6 @@ data class Farmer(
         operator fun invoke(
             backup: Backup,
             contractId: String,
-            catchUp: Boolean,
         ): Farmer? {
             val farm = backup.farmFor(contractId) ?: return null
             val constants = Constants(backup, farm)
@@ -61,10 +60,7 @@ data class Farmer(
             return Farmer(
                 name = backup.userName,
                 reportedState = reportedState,
-                caughtUpState = when {
-                    catchUp -> catchUp(reportedState, constants, minOf(backup.timeSinceBackup, constants.maxAwayTime))
-                    else -> null
-                },
+                caughtUpState = catchUp(reportedState, constants, minOf(backup.timeSinceBackup, constants.maxAwayTime)),
                 constants = constants,
                 timeSinceBackup = backup.timeSinceBackup
             )

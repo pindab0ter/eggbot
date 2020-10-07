@@ -33,7 +33,6 @@ object CoopInfo : EggBotCommand() {
             contractIdOption,
             coopIdOption,
             compactSwitch,
-            forceReportedOnlySwitch
         )
         sendTyping = false
         init()
@@ -44,7 +43,6 @@ object CoopInfo : EggBotCommand() {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
-        val catchUp: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
         val message: Message = event.channel.sendMessage("Fetching required information…").complete()
         message.channel.sendTyping().queue()
 
@@ -56,7 +54,7 @@ object CoopInfo : EggBotCommand() {
         message.channel.sendTyping().queue()
 
         val coopStatus = AuxBrain.getCoopStatus(contract.id, coopId)
-        val status = CoopContractStatus(contract, coopStatus, coopId, catchUp)
+        val status = CoopContractStatus(contract, coopStatus, coopId)
 
         message.delete().queue()
 

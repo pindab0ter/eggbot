@@ -27,7 +27,6 @@ object CoopsInfo : EggBotCommand() {
         help = "Shows info on all known co-ops for the specified contract."
         parameters = listOf(
             contractIdOption,
-            forceReportedOnlySwitch,
             compactSwitch
         )
         sendTyping = false
@@ -37,7 +36,6 @@ object CoopsInfo : EggBotCommand() {
     @ExperimentalTime
     override fun execute(event: CommandEvent, parameters: JSAPResult) = runBlocking {
         val contractId = parameters.getString(CONTRACT_ID)
-        val catchUp = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
         val compact = parameters.getBoolean(COMPACT, false)
 
         val contract = AuxBrain.getContract(contractId) ?: return@runBlocking event.replyAndLogWarning(
@@ -71,7 +69,7 @@ object CoopsInfo : EggBotCommand() {
         val statuses = coopStatuses
             .zip(coops.map { coop -> coop.name })
             .asyncMap(coroutineContext) { (coopStatus, coopId) ->
-                CoopContractStatus(contract, coopStatus, coopId, catchUp, progressCallback = progressBar::update)
+                CoopContractStatus(contract, coopStatus, coopId, progressCallback = progressBar::update)
             }.let { statuses ->
                 if (!compact) statuses.sortedWith(currentEggsComparator)
                 else statuses.sortedWith(currentEggsComparator)

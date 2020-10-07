@@ -27,7 +27,6 @@ object SoloInfo : EggBotCommand() {
         parameters = listOf(
             contractIdOption,
             compactSwitch,
-            forceReportedOnlySwitch
         )
         sendTyping = true
         init()
@@ -37,7 +36,6 @@ object SoloInfo : EggBotCommand() {
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
-        val catchUp: Boolean = parameters.getBoolean(FORCE_REPORTED_ONLY, false).not()
 
         val farmers: List<Farmer> = transaction {
             DiscordUser.findById(event.author.id)?.farmers
@@ -79,7 +77,7 @@ object SoloInfo : EggBotCommand() {
                 "The contract with ID `$contractId` is not a solo contract."
             )
 
-            val initialState = SoloContractState(backup, localContract, catchUp) ?: return event.replyAndLogWarning(
+            val initialState = SoloContractState(backup, localContract) ?: return event.replyAndLogWarning(
                 "Failed to collect all necessary information from the backup."
             )
 

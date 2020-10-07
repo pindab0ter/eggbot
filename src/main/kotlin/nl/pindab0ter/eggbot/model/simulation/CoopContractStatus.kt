@@ -38,7 +38,6 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
             contract: Contract,
             coopStatus: CoopStatusResponse?,
             coopId: String,
-            catchUp: Boolean,
             progressCallback: () -> Unit = { },
         ): CoopContractStatus = when {
             coopStatus == null ->
@@ -52,7 +51,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
             else -> runBlocking(Dispatchers.Default) {
                 val farmers = coopStatus.contributors.asyncMap(this.coroutineContext) { contributionInfo ->
                     AuxBrain.getFarmerBackup(contributionInfo.userId)
-                        ?.let { Farmer(it, contract.id, catchUp) }
+                        ?.let { Farmer(it, contract.id) }
                         .also { progressCallback() }
                 }.filterNotNull()
 
