@@ -22,6 +22,16 @@ operator fun Duration.div(other: Duration): Double? = try {
     null
 }
 
+private val longDaysAndHoursFormatter: PeriodFormatter = PeriodFormatterBuilder()
+    .appendDays()
+    .appendSuffix(" day", " days")
+    .appendSeparator(", ")
+    .printZeroNever()
+    .appendHours()
+    .appendSuffix(" hour", " hours")
+    .toFormatter()
+    .withLocale(Locale.UK)
+
 private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
     .printZeroNever()
     .appendDays()
@@ -43,18 +53,17 @@ private val shortDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatter
     .appendHours()
     .appendSuffix("h")
     .appendSeparator(" ")
+    .minimumPrintedDigits(2)
     .appendMinutes()
     .appendSuffix("m")
     .toFormatter()
     .withLocale(Locale.UK)
 
+fun Period.asDaysAndHours(): String = longDaysAndHoursFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
+
 fun Period.asDaysHoursAndMinutes(compact: Boolean = false): String = when (compact) {
-    true ->
-        if (toStandardDuration().standardSeconds < 60L) "< 1m"
-        else shortDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
-    false ->
-        if (toStandardDuration().standardSeconds < 60L) "< 1 minute"
-        else longDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
+    true -> shortDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
+    false -> longDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
 }
 
 private val longDaysFormatter: PeriodFormatter = PeriodFormatterBuilder()
@@ -80,6 +89,8 @@ fun Period.asDays(compact: Boolean = false): String = when (compact) {
         if (toStandardDuration().standardDays < 1L) "< 1 day"
         else longDaysFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
 }
+
+fun Duration.asDaysAndHours(): String = this.toPeriod().asDaysAndHours()
 
 fun Duration.asDaysHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDaysHoursAndMinutes(compact)
 
