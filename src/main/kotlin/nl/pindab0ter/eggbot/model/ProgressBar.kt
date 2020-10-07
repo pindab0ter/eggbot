@@ -16,8 +16,8 @@ class ProgressBar(
     coroutineContext: CoroutineContext? = null,
 ) : CoroutineScope {
     override val coroutineContext: CoroutineContext = coroutineContext ?: Dispatchers.Default
-    private var deleteMessage = false
-    private var running: Boolean = true
+    private var deleteMessage: AtomicBoolean = AtomicBoolean(true)
+    private var running: AtomicBoolean = AtomicBoolean(true)
     private var counter: AtomicInteger = AtomicInteger(0)
     private var dirty: AtomicBoolean = AtomicBoolean(true)
     private var job: Job
@@ -30,7 +30,7 @@ class ProgressBar(
     private fun loop(): Job = GlobalScope.launch(coroutineContext) {
         message.channel.sendTyping().queue()
         var i = 0
-        while (running) when {
+        while (running.get()) when {
             dirty.getAndSet(false) -> {
                 val contents = buildString {
                     if (statusText != null) appendLine(statusText)
@@ -40,12 +40,12 @@ class ProgressBar(
                 i = 0
             }
             else -> {
-                if (i >= TIME_OUT) running = false
+                if (i >= TIME_OUT) running.set(false)
                 if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.sendTyping().queue()
                 delay(1000)
             }
         }
-        if (deleteMessage) message.delete().queue()
+        if (deleteMessage.get()) message.delete().queue()
     }
 
     fun update() {
@@ -55,11 +55,11 @@ class ProgressBar(
     }
 
     fun stop() {
-        running = false
+        running.set(false)
     }
 
     fun stopAndDeleteMessage() {
-        deleteMessage = true
+        deleteMessage.set(true)
         stop()
     }
 
