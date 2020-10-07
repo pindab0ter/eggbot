@@ -16,6 +16,7 @@ import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.currentEggsComparator
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.math.BigDecimal
 import kotlin.time.ExperimentalTime
 
 object CoopsInfo : EggBotCommand() {
@@ -57,7 +58,11 @@ object CoopsInfo : EggBotCommand() {
         }
 
         val progressBar = ProgressBar(
-            goal = coopStatuses.sumBy { coopStatus -> coopStatus?.contributors?.count() ?: 0 },
+            goal = coopStatuses.sumBy { coopStatus ->
+                if ((coopStatus?.eggsLaid ?: BigDecimal.ZERO) < contract.goals.last().targetAmount.toBigDecimal()) {
+                    coopStatus?.contributors?.count() ?: 0
+                } else 0
+            },
             message = message,
             statusText = "Fetching backups and running simulations…",
             coroutineContext = coroutineContext
