@@ -2,7 +2,9 @@ package nl.pindab0ter.eggbot.model
 
 import kotlinx.coroutines.*
 import net.dv8tion.jda.api.entities.Message
+import net.dv8tion.jda.api.exceptions.ContextException
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
+import org.apache.logging.log4j.kotlin.Logging
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
@@ -14,7 +16,7 @@ class ProgressBar(
     private val message: Message,
     private val statusText: String? = null,
     coroutineContext: CoroutineContext? = null,
-) : CoroutineScope {
+) : CoroutineScope, Logging {
     override val coroutineContext: CoroutineContext = coroutineContext ?: Dispatchers.Default
     private var deleteMessage: AtomicBoolean = AtomicBoolean(true)
     private var running: AtomicBoolean = AtomicBoolean(true)
@@ -45,7 +47,11 @@ class ProgressBar(
                 delay(1000)
             }
         }
-        if (deleteMessage.get()) message.delete().queue()
+        if (deleteMessage.get()) try {
+            message.delete().queue()
+        } catch (exception: ContextException) {
+            logger.error("Failed to delete message: ${exception.localizedMessage}")
+        }
     }
 
     fun update() {
