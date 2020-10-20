@@ -33,7 +33,6 @@ private val longDaysAndHoursFormatter: PeriodFormatter = PeriodFormatterBuilder(
     .withLocale(Locale.UK)
 
 private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
-    .printZeroNever()
     .appendDays()
     .appendSuffix(" day", " days")
     .appendSeparator(", ")
@@ -46,7 +45,6 @@ private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterB
     .withLocale(Locale.UK)
 
 private val shortDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
-    .printZeroNever()
     .appendDays()
     .appendSuffix("d")
     .appendSeparator(" ")

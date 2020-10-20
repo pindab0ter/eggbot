@@ -182,6 +182,8 @@ private fun StringBuilder.drawMembers(
         cells = state.farmers.map { farmer -> farmer.reportedEggsLaid.asIllions() }
     }
 
+    divider()
+
     overtakersColumn(state) {
         leftPadding = 1
     }
@@ -272,7 +274,7 @@ private fun StringBuilder.drawCompactMembers(
     }
 }
 
-private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiColumn.() -> Unit) {
+private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiColumn.() -> Unit = {}) {
     val overtakers: List<String> = state.farmers.map { farmer ->
         when {
             state.farmers.any { other ->
