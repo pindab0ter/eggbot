@@ -2,10 +2,8 @@ package nl.pindab0ter.eggbot.helpers
 
 import org.joda.time.DateTime
 import org.joda.time.Duration
-import org.joda.time.Period
 import org.joda.time.PeriodType
 import org.joda.time.format.DateTimeFormatterBuilder
-import org.joda.time.format.PeriodFormatter
 import org.joda.time.format.PeriodFormatterBuilder
 import java.util.*
 import kotlin.math.roundToLong
@@ -22,7 +20,36 @@ operator fun Duration.div(other: Duration): Double? = try {
     null
 }
 
-private val longDaysAndHoursFormatter: PeriodFormatter = PeriodFormatterBuilder()
+fun Duration.asDaysHoursAndMinutes(compact: Boolean = false, spacing: Boolean = false): String = when (compact) {
+    true -> PeriodFormatterBuilder().apply {
+        appendDays()
+        appendSuffix("d")
+        appendSeparator(" ")
+        printZeroAlways()
+        if (spacing) appendPrefix(arrayOf("""\d\d""", """\d"""), arrayOf("", " "))
+        appendHours()
+        appendSuffix("h")
+        appendSeparator(" ")
+        if (spacing) appendPrefix(arrayOf("""\d\d""", """\d"""), arrayOf("", " "))
+        appendMinutes()
+        appendSuffix("m")
+    }
+    false -> PeriodFormatterBuilder().apply {
+        appendDays()
+        appendSuffix(" day", " days")
+        appendSeparator(", ")
+        if (spacing) appendPrefix(arrayOf("""\d\d""", """\d"""), arrayOf("", " "))
+        appendHours()
+        appendSuffix(" hour", " hours")
+        appendSeparator(" and ")
+        printZeroAlways()
+        if (spacing) appendPrefix(arrayOf("""\d\d""", """\d"""), arrayOf("", " "))
+        appendMinutes()
+        appendSuffix(" minute", " minutes")
+    }
+}.toFormatter().withLocale(Locale.UK).print(this.toPeriod().normalizedStandard(PeriodType.dayTime()))
+
+fun Duration.asDaysAndHours(): String = PeriodFormatterBuilder()
     .appendDays()
     .appendSuffix(" day", " days")
     .appendSeparator(", ")
@@ -30,69 +57,39 @@ private val longDaysAndHoursFormatter: PeriodFormatter = PeriodFormatterBuilder(
     .appendHours()
     .appendSuffix(" hour", " hours")
     .toFormatter()
-    .withLocale(Locale.UK)
+    .withLocale(Locale.UK).print(this.toPeriod().normalizedStandard(PeriodType.dayTime()))
 
-private val longDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
-    .appendDays()
-    .appendSuffix(" day", " days")
-    .appendSeparator(", ")
-    .appendHours()
-    .appendSuffix(" hour", " hours")
-    .appendSeparator(" and ")
-    .appendMinutes()
-    .appendSuffix(" minute", " minutes")
-    .toFormatter()
-    .withLocale(Locale.UK)
+fun Duration.asDays(compact: Boolean = false): String {
+    val toPeriod = this.toPeriod()
+    return when (compact) {
+        true ->
+            if (toPeriod.toStandardDuration().standardDays < 1L) "< 1d"
+            else PeriodFormatterBuilder()
+                .printZeroNever()
+                .appendDays()
+                .appendSuffix("d")
+                .toFormatter()
+                .withLocale(Locale.UK).print(toPeriod.normalizedStandard(PeriodType.dayTime()))
+        false ->
+            if (toPeriod.toStandardDuration().standardDays < 1L) "< 1 day"
+            else PeriodFormatterBuilder()
+                .printZeroNever()
+                .appendDays()
+                .appendSuffix(" day", " days")
+                .toFormatter()
+                .withLocale(Locale.UK).print(toPeriod.normalizedStandard(PeriodType.dayTime()))
+    }
+}
 
-private val shortDaysHoursAndMinutesFormatter: PeriodFormatter = PeriodFormatterBuilder()
-    .appendDays()
-    .appendSuffix("d")
-    .appendSeparator(" ")
+fun Duration.asHoursAndMinutes(): String = PeriodFormatterBuilder()
+    .printZeroAlways()
     .appendHours()
-    .appendSuffix("h")
-    .appendSeparator(" ")
+    .appendSeparator(":")
     .minimumPrintedDigits(2)
     .appendMinutes()
-    .appendSuffix("m")
     .toFormatter()
     .withLocale(Locale.UK)
-
-fun Period.asDaysAndHours(): String = longDaysAndHoursFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
-
-fun Period.asDaysHoursAndMinutes(compact: Boolean = false): String = when (compact) {
-    true -> shortDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
-    false -> longDaysHoursAndMinutesFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
-}
-
-private val longDaysFormatter: PeriodFormatter = PeriodFormatterBuilder()
-    .printZeroNever()
-    .appendDays()
-    .appendSuffix(" day", " days")
-    .toFormatter()
-    .withLocale(Locale.UK)
-
-private val shortDaysFormatter: PeriodFormatter = PeriodFormatterBuilder()
-    .printZeroNever()
-    .appendDays()
-    .appendSuffix("d")
-    .toFormatter()
-    .withLocale(Locale.UK)
-
-
-fun Period.asDays(compact: Boolean = false): String = when (compact) {
-    true ->
-        if (toStandardDuration().standardDays < 1L) "< 1d"
-        else shortDaysFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
-    false ->
-        if (toStandardDuration().standardDays < 1L) "< 1 day"
-        else longDaysFormatter.print(this.normalizedStandard(PeriodType.dayTime()))
-}
-
-fun Duration.asDaysAndHours(): String = this.toPeriod().asDaysAndHours()
-
-fun Duration.asDaysHoursAndMinutes(compact: Boolean = false): String = this.toPeriod().asDaysHoursAndMinutes(compact)
-
-fun Duration.asDays(compact: Boolean = false): String = this.toPeriod().asDays(compact)
+    .print(this.toPeriod().normalizedStandard(PeriodType.time()))
 
 fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()

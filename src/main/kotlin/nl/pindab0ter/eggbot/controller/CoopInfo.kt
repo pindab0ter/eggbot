@@ -14,9 +14,9 @@ import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress
-import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.FinishedIfCheckedIn
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.FinishedIfBanked
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.NotFound
-import nl.pindab0ter.eggbot.view.coopFinishedIfCheckedInResponse
+import nl.pindab0ter.eggbot.view.coopFinishedIfBankedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 import kotlin.time.ExperimentalTime
 
@@ -78,7 +78,7 @@ object CoopInfo : EggBotCommand() {
                 )
 
                 when (status) {
-                    is FinishedIfCheckedIn -> coopFinishedIfCheckedInResponse(sortedState, compact)
+                    is FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
                     else -> coopInfoResponse(sortedState, compact)
                 }.let { messages ->
                     when (event.channel) {

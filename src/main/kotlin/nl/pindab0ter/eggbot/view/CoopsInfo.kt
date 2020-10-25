@@ -25,19 +25,64 @@ fun coopsInfoResponse(
     appendLine("`${guild.name}` vs. _${contract.name}_:")
     appendLine()
 
-    drawBasicInfo(contract)
-    if (!compact) drawCoops(contract, statuses)
-    else drawCompactCoops(contract, statuses)
+    if (!compact) {
+        drawBasicInfo(contract)
+        drawCoops(contract, statuses)
+    } else {
+        drawCompactBasicInfo(contract)
+        drawCompactCoops(contract, statuses)
+    }
 
 }.splitCodeBlock()
 
-private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = apply {
-    appendLine("__🗒️ **Basic info**:__ ```")
-    appendLine("Contract:         ${contract.name}")
-    appendLine("Final goal:       ${contract.finalGoal.asIllions(OPTIONAL_DECIMALS)}")
-    appendLine("Time to complete: ${contract.lengthSeconds.toDuration().asDaysAndHours()}")
-    appendLine("Max size:         ${contract.maxCoopSize} farmers")
-    appendLine("```")
+private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = appendTable {
+    title = "__**🗒️ Basic info**__"
+    displayHeaders = false
+
+    column {
+        rightPadding = 1
+        cells = listOf(
+            "Contract:",
+            "Final goal:",
+            "Time to complete:",
+            "Max size:",
+        )
+    }
+
+    column {
+        cells = listOf(
+            contract.name,
+            contract.finalGoal.asIllions(OPTIONAL_DECIMALS),
+            contract.lengthSeconds.toDuration().asDaysAndHours(),
+            "${contract.maxCoopSize} farmers",
+        )
+    }
+}
+
+
+private fun StringBuilder.drawCompactBasicInfo(contract: Contract): StringBuilder = appendTable {
+    title = "__**🗒️ Basic info**__"
+    displayHeaders = false
+
+    column {
+        rightPadding = 2
+        cells = listOf(
+            "Contract:",
+            "Final goal:",
+            "Time to complete:",
+            "Max size:",
+        )
+    }
+
+    column {
+        alignment = RIGHT
+        cells = listOf(
+            contract.name,
+            contract.finalGoal.asIllions(OPTIONAL_DECIMALS),
+            contract.lengthSeconds.toDuration().asDaysAndHours(),
+            "${contract.maxCoopSize} farmers",
+        )
+    }
 }
 
 private fun StringBuilder.drawCoops(
@@ -45,12 +90,12 @@ private fun StringBuilder.drawCoops(
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
 
-    title = "__🐓 **Co-ops** (${statuses.count()}):__"
+    title = "__**🐓 Co-ops** (${statuses.count()}):__"
+    topPadding = 1
 
     column {
         header = "Name"
 
-        leftPadding = 1
         rightPadding = 1
 
         cells = statuses.map { status ->
@@ -75,7 +120,7 @@ private fun StringBuilder.drawCoops(
                 is Failed -> "Failed"
                 is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
                 is OnTrack -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(true) ?: "ERROR"
-                is FinishedIfCheckedIn -> "Bank now!"
+                is FinishedIfBanked -> "Bank now!"
                 is Finished -> "Finished"
             }
         }
@@ -94,7 +139,7 @@ private fun StringBuilder.drawCoops(
                 is Failed -> "🔴"
                 is NotOnTrack -> "🟡"
                 is OnTrack -> "🟢"
-                is FinishedIfCheckedIn -> "🔵"
+                is FinishedIfBanked -> "🔵"
                 is Finished -> "🏁"
             }
         }
@@ -169,7 +214,8 @@ private fun StringBuilder.drawCompactCoops(
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
 
-    title = "__🐓 **Co-ops** (${statuses.count()}):__"
+    title = "__**🐓 Co-ops** (${statuses.count()}):__"
+    topPadding = 1
 
     column {
         header = "Name"
@@ -197,8 +243,8 @@ private fun StringBuilder.drawCompactCoops(
                 is Abandoned -> "Empty"
                 is Failed -> "Failed"
                 is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
-                is OnTrack -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(true) ?: "ERROR"
-                is FinishedIfCheckedIn -> "Bank!"
+                is OnTrack -> status.state.timeTillFinalGoal?.asHoursAndMinutes() ?: "ERROR"
+                is FinishedIfBanked -> "Bank!"
                 is Finished -> "Done"
             }
         }
@@ -217,7 +263,7 @@ private fun StringBuilder.drawCompactCoops(
                 is Failed -> "🔴"
                 is NotOnTrack -> "🟡"
                 is OnTrack -> "🟢"
-                is FinishedIfCheckedIn -> "🔵"
+                is FinishedIfBanked -> "🔵"
                 is Finished -> "🏁"
             }
         }
@@ -226,7 +272,7 @@ private fun StringBuilder.drawCompactCoops(
     column {
         header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
 
-        alignment = LEFT
+        alignment = RIGHT
 
         cells = statuses.map { status ->
             when (status) {

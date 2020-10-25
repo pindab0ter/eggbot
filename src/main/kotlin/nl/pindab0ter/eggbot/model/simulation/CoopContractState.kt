@@ -21,6 +21,8 @@ data class CoopContractState(
     val timeElapsed: Duration = Duration.ZERO,
     val farmers: List<Farmer>,
 ) {
+    // TODO: Remove "current" and replace with reported and caughtUp
+    // TODO: Remove force reported only flag if it still exists
     val currentEggsLaid: BigDecimal
         get() = farmers.sumByBigDecimal { farmer ->
             farmer.caughtUpState?.eggsLaid ?: farmer.reportedState.eggsLaid
@@ -62,7 +64,7 @@ data class CoopContractState(
             timeElapsed < timeRemaining -> runningEggsLaid >= goals.last().amount
             else -> timeUpEggsLaid >= goals.last().amount
         }
-    val finishedIfCheckedIn: Boolean
+    val finishedIfBanked: Boolean
         get() = reportedEggsLaid < goals.last().amount && caughtUpEggsLaid >= goals.last().amount
     val finished: Boolean
         get() = reportedEggsLaid >= goals.last().amount

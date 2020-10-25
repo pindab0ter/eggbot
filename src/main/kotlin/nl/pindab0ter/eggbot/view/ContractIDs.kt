@@ -18,10 +18,7 @@ fun contractIDsResponse(soloContracts: List<Contract>, coopContracts: List<Contr
             append(EggBot.eggsToEmotes[contract.egg]?.asMention ?: "(${contract.egg.name})")
             append(", _valid for ")
             append(
-                Duration(DateTime.now(), contract.expirationTime.toDateTime())
-                    .toPeriod()
-                    .normalizedStandard()
-                    .asDaysHoursAndMinutes()
+                Duration(DateTime.now(), contract.expirationTime.toDateTime()).asDaysHoursAndMinutes()
             )
             appendLine("_")
         }

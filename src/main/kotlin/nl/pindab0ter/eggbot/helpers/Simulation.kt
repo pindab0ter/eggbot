@@ -12,6 +12,7 @@ import java.math.BigDecimal
  *
  * A chicken lays 1/30 of an egg per second, so 2 per minute */
 private val EGG_LAYING_BASE_RATE = BigDecimal(2)
+private val MAX_HABS_CAPACITY = BigDecimal(2835000000L)
 
 tailrec fun catchUp(
     state: FarmState,
@@ -26,7 +27,6 @@ tailrec fun catchUp(
     )
 }
 
-// TODO: Add boosts
 fun advanceOneMinute(state: FarmState, constants: Constants, elapsed: Duration = Duration.ZERO): FarmState = state.copy(
     eggsLaid = state.eggsLaid + eggIncrease(state.habs, constants),
     habs = state.habs.map { hab ->
@@ -48,8 +48,10 @@ fun transportBottleneck(habs: List<Hab>, constants: Constants, elapsed: Duration
 
 fun habsStatus(habs: List<Hab>, elapsed: Duration): HabsStatus {
     return when {
-        habs.all { (population, _) -> population == BigDecimal(2835000000L) } -> MaxedOut(elapsed)
-        habs.all { (population, capacity) -> population == capacity } -> BottleneckReached(elapsed)
+        habs.all { (population, capacity) -> population == MAX_HABS_CAPACITY && capacity == MAX_HABS_CAPACITY } ->
+            MaxedOut(elapsed)
+        habs.all { (population, capacity) -> population == capacity } ->
+            BottleneckReached(elapsed)
         else -> Free
     }
 }

@@ -3,6 +3,8 @@ package nl.pindab0ter.eggbot.model.simulation
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Egg
 import com.auxbrain.ei.LocalContract
+import nl.pindab0ter.eggbot.helpers.chickenIncrease
+import nl.pindab0ter.eggbot.helpers.eggIncrease
 import nl.pindab0ter.eggbot.helpers.timeRemaining
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -18,6 +20,12 @@ data class SoloContractState(
 ) {
     val reportedEggsLaid: BigDecimal
         get() = farmer.reportedState.eggsLaid
+    val reportedEggsPerMinute: BigDecimal
+        get() = eggIncrease(farmer.reportedState.habs, farmer.constants)
+    val reportedPopulation: BigDecimal
+        get() = farmer.reportedState.population
+    val reportedPopulationIncreasePerMinute: BigDecimal
+        get() = chickenIncrease(farmer.reportedState.habs, farmer.constants)
     val caughtUpEggsLaid: BigDecimal
         get() = farmer.caughtUpState?.eggsLaid ?: BigDecimal.ZERO
     val runningEggsLaid: BigDecimal
@@ -29,7 +37,7 @@ data class SoloContractState(
             timeElapsed < timeRemaining -> runningEggsLaid >= goals.last().amount
             else -> timeUpEggsLaid >= goals.last().amount
         }
-    val finishedIfCheckedIn: Boolean
+    val finishedIfBanked: Boolean
         get() = reportedEggsLaid < goals.last().amount && caughtUpEggsLaid >= goals.last().amount
     val finished: Boolean
         get() = reportedEggsLaid >= goals.last().amount

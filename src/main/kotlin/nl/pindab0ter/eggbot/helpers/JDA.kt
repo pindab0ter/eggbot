@@ -7,6 +7,8 @@ import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
 
+const val BREAKPOINT: Char = '\u200B'
+
 val User.isRegistered: Boolean
     get() = transaction {
         DiscordUser.findById(id)?.farmers?.sortedBy { it.inGameName }?.isNotEmpty() == true
@@ -16,6 +18,8 @@ val User.isAdmin: Boolean
     get() = EggBot.guild.getMember(this)?.let { author ->
         author.isOwner || author == EggBot.botOwner || author.roles.contains(EggBot.adminRole)
     } == true
+
+fun StringBuilder.appendBreakpoint(): StringBuilder = append(BREAKPOINT)
 
 /**
  * Splits a string into multiple strings.

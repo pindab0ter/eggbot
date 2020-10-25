@@ -28,7 +28,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
 
         data class NotOnTrack(override val state: CoopContractState) : InProgress(1)
         data class OnTrack(override val state: CoopContractState) : InProgress(2)
-        data class FinishedIfCheckedIn(override val state: CoopContractState) : InProgress(3)
+        data class FinishedIfBanked(override val state: CoopContractState) : InProgress(3)
     }
 
     override fun compareTo(other: CoopContractStatus): Int = this.priority.compareTo(other.priority)
@@ -59,7 +59,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
 
                 when {
                     coopContractState.finished -> Finished(coopStatus)
-                    coopContractState.finishedIfCheckedIn -> FinishedIfCheckedIn(coopContractState)
+                    coopContractState.finishedIfBanked -> FinishedIfBanked(coopContractState)
                     coopContractState.willFinish -> OnTrack(coopContractState)
                     else -> NotOnTrack(coopContractState)
                 }

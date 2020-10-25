@@ -1,9 +1,10 @@
 package nl.pindab0ter.eggbot.view
 
-import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
+import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import org.joda.time.Duration
 
@@ -13,7 +14,6 @@ fun soloInfoResponse(
     compact: Boolean = false,
 ): String = buildString message@{
     appendLine("`${state.farmer.name}` vs. _${state.contractName}_:")
-    appendLine()
 
     drawGoals(state, compact)
 
@@ -23,7 +23,7 @@ fun soloInfoResponse(
         drawBottleNecks(state, compact)
 }
 
-fun soloFinishedIfCheckedInResponse(
+fun soloFinishedIfBankedResponse(
     state: SoloContractState,
     compact: Boolean,
 ): String = buildString {
@@ -36,64 +36,90 @@ fun soloFinishedIfCheckedInResponse(
 }
 
 private fun StringBuilder.drawGoals(
-    state: SoloContractState,
+    coopContractState: SoloContractState,
     compact: Boolean,
-): StringBuilder = apply {
-    val eggEmote = EggBot.eggsToEmotes[state.egg]?.asMention ?: "🥚"
-    appendLine("__$eggEmote **Goals** (${state.goalsReached}/${state.goals.count()}):__ ```")
-    state.goals.forEachIndexed { index, (goal, moment) ->
-        append("${index + 1}. ")
-        appendPaddingCharacters(
-            goal.asIllions(OPTIONAL_DECIMALS),
-            state.goals.map { it.amount.asIllions(OPTIONAL_DECIMALS) }
-        )
+): StringBuilder = appendTable {
+    title = "__${coopContractState.egg.toEmote()} **Goals** (${coopContractState.goalsReached}/${coopContractState.goals.count()}):__"
+    displayHeaders = false
+    topPadding = 1
 
-        append(goal.asIllions(OPTIONAL_DECIMALS))
-        append(
-            when {
-                moment == null || moment > state.timeRemaining -> " 🔴 "
-                moment == Duration.ZERO -> " 🏁 "
-                else -> " 🟢 "
-            }
-        )
-
-        when (moment) {
-            null -> append("More than a year")
-            Duration.ZERO -> append("Goal reached!")
-            else -> append(moment.asDaysHoursAndMinutes(compact))
-        }
-        if (index + 1 < state.goals.count()) appendLine()
+    incrementColumn(suffix = ".")
+    column {
+        leftPadding = 1
+        cells = coopContractState.goals.map { (target, _) -> target.asIllions(OPTIONAL_DECIMALS) }
     }
-    appendLine("```")
+    column {
+        leftPadding = 1
+        rightPadding = 1
+        cells = coopContractState.goals.map { (_, moment) ->
+            when {
+                moment == null || moment > coopContractState.timeRemaining -> "🔴"
+                moment == Duration.ZERO -> "🏁"
+                else -> "🟢"
+            }
+        }
+    }
+
+    column {
+        cells = coopContractState.goals.map { (_, moment) ->
+            when (moment) {
+                null -> "More than a year"
+                Duration.ZERO -> "Goal reached!"
+                else -> moment.asDaysHoursAndMinutes(compact)
+            }
+        }
+    }
 }
+
 
 private fun StringBuilder.drawBasicInfo(
     state: SoloContractState,
     compact: Boolean,
-): StringBuilder = apply {
-    appendLine("__🗒️ **Basic info**:__ ```")
-    appendLine("Time remaining:   ${state.timeRemaining.asDaysHoursAndMinutes(compact)}")
+): StringBuilder = appendTable {
+    title = "__**🗒️ Basic info**__"
+    displayHeaders = false
+    topPadding = 1
 
-    // TODO: Replace eggspected with somethings else, it doesn't say anything
-    append("Eggspected:       ${state.farmer.runningState.eggsLaid.asIllions()} ")
-    if (!compact) append("(${
-        minOf(
-            eggIncrease(state.farmer.runningState.habs, state.farmer.constants),
-            state.farmer.constants.transportRate
-        ).multiply(SIXTY).asIllions()
-    }/hr) ")
-    appendLine()
+    column {
+        alignment = Table.AlignedColumn.Alignment.LEFT
+        rightPadding = 1
 
-    append("Current eggs:     ${state.farmer.caughtUpEggsLaid.asIllions()} ")
-    if (!compact) append("(${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr) ")
-    appendLine()
+        val progressKeys = if (state.finishedIfBanked) emptyList() else listOf(
+            "Time remaining:",
+            "Eggspected:",
+        )
+        val statusKeys = listOf(
+            "Current eggs:",
+            "Banked eggs:",
+            "Current chickens:",
+            "Tokens available:",
+            "Tokens spent:",
+            "Last update:",
+        )
 
-    append("Current chickens: ${state.farmer.currentChickens.asIllions()} ")
-    if (!compact) append("(${state.farmer.currentChickenIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)")
-    appendLine()
+        cells = progressKeys + statusKeys
+    }
 
-    appendLine("Last update:      ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
-    appendLine("```")
+    column {
+        alignment = if (!compact) Table.AlignedColumn.Alignment.LEFT else Table.AlignedColumn.Alignment.RIGHT
+
+        val progressValues = if (state.finishedIfBanked) emptyList() else listOf(
+            state.timeRemaining.asDaysHoursAndMinutes(compact, compact),
+            state.timeUpEggsLaid.asIllions(),
+        )
+        val statusValues = listOf(
+            state.farmer.reportedEggsLaid.asIllions() + if (!compact)
+                "(${state.reportedEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "",
+            state.reportedEggsLaid.asIllions(),
+            state.reportedPopulation.asIllions() + if (!compact)
+                "(${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "",
+            state.farmer.constants.tokensAvailable.toString(),
+            state.farmer.constants.tokensSpent.toString(),
+            "${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago",
+        )
+
+        cells = progressValues + statusValues
+    }
 }
 
 private fun StringBuilder.drawBottleNecks(
@@ -135,7 +161,7 @@ private fun StringBuilder.drawFinishedBasicInfo(
     state: SoloContractState,
     compact: Boolean,
 ): StringBuilder = apply {
-    appendLine("__**🎉 Completed if you check in**:__ ```")
+    appendLine("__**🎉 Completed if you check in**__ ```")
     appendLine("Time since backup: ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
 
     append("Current eggs:      ${state.farmer.caughtUpEggsLaid.asIllions()} ")

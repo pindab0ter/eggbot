@@ -14,7 +14,7 @@ import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import nl.pindab0ter.eggbot.model.simulation.simulate
-import nl.pindab0ter.eggbot.view.soloFinishedIfCheckedInResponse
+import nl.pindab0ter.eggbot.view.soloFinishedIfBankedResponse
 import nl.pindab0ter.eggbot.view.soloInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -83,8 +83,8 @@ object SoloInfo : EggBotCommand() {
 
             val state = simulate(initialState)
 
-            if (state.finishedIfCheckedIn) {
-                soloFinishedIfCheckedInResponse(state, compact).let { message ->
+            if (state.finishedIfBanked) {
+                soloFinishedIfBankedResponse(state, compact).let { message ->
                     // TODO: Remove replies to DM and only allow in bot channel(s)
                     if (event.channel == botCommandsChannel) {
                         event.reply(message)
