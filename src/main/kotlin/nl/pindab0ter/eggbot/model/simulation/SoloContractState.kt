@@ -26,8 +26,8 @@ data class SoloContractState(
         get() = farmer.reportedState.population
     val reportedPopulationIncreasePerMinute: BigDecimal
         get() = chickenIncrease(farmer.reportedState.habs, farmer.constants)
-    val caughtUpEggsLaid: BigDecimal
-        get() = farmer.caughtUpState?.eggsLaid ?: BigDecimal.ZERO
+    val currentEggsLaid: BigDecimal
+        get() = farmer.currentState?.eggsLaid ?: BigDecimal.ZERO
     val runningEggsLaid: BigDecimal
         get() = farmer.runningState.eggsLaid
     val timeUpEggsLaid: BigDecimal
@@ -38,7 +38,7 @@ data class SoloContractState(
             else -> timeUpEggsLaid >= goals.last().amount
         }
     val finishedIfBanked: Boolean
-        get() = reportedEggsLaid < goals.last().amount && caughtUpEggsLaid >= goals.last().amount
+        get() = reportedEggsLaid < goals.last().amount && currentEggsLaid >= goals.last().amount
     val finished: Boolean
         get() = reportedEggsLaid >= goals.last().amount
     val goalsReached: Int

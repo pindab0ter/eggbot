@@ -168,7 +168,7 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is InProgress -> status.state.caughtUpEggsLaid.asIllions()
+                is InProgress -> status.state.currentEggsLaid.asIllions()
                 else -> ""
             }
         }

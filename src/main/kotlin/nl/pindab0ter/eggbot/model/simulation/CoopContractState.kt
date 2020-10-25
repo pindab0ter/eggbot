@@ -7,7 +7,6 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
 import org.joda.time.Duration
 import java.math.BigDecimal
-import java.math.BigDecimal.ZERO
 
 data class CoopContractState(
     val contractId: String,
@@ -21,34 +20,28 @@ data class CoopContractState(
     val timeElapsed: Duration = Duration.ZERO,
     val farmers: List<Farmer>,
 ) {
-    // TODO: Remove "current" and replace with reported and caughtUp
-    // TODO: Remove force reported only flag if it still exists
-    val currentEggsLaid: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer ->
-            farmer.caughtUpState?.eggsLaid ?: farmer.reportedState.eggsLaid
-        }
-    val currentEggsPerMinute: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer ->
-            eggIncrease(farmer.caughtUpState?.habs ?: farmer.reportedState.habs, farmer.constants)
-        }
     val currentPopulation: BigDecimal
         get() = farmers.sumByBigDecimal { farmer ->
-            farmer.caughtUpState?.population ?: farmer.reportedState.population
+            farmer.currentState?.population ?: BigDecimal.ZERO
         }
     val currentPopulationIncreasePerMinute: BigDecimal
         get() = farmers.sumByBigDecimal { farmer ->
-            (farmer.caughtUpState ?: farmer.reportedState).let { state ->
-                chickenIncrease(state.habs, farmer.constants).multiply(FOUR - state.habs.fullCount())
-            }
+            chickenIncrease(farmer.currentState?.habs ?: emptyList(),
+                farmer.constants).multiply(FOUR - (farmer.currentState?.habs?.fullCount() ?: BigDecimal.ZERO))
+
         }
     val reportedEggsLaid: BigDecimal
         get() = farmers.sumByBigDecimal { farmer -> farmer.reportedState.eggsLaid }
-    val caughtUpEggsLaid: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer -> farmer.caughtUpState?.eggsLaid ?: ZERO }
+    val currentEggsLaid: BigDecimal
+        get() = farmers.sumByBigDecimal { farmer -> farmer.currentState?.eggsLaid ?: BigDecimal.ZERO }
+    val currentEggsPerMinute: BigDecimal
+        get() = farmers.sumByBigDecimal { farmer ->
+            eggIncrease(farmer.currentState?.habs ?: emptyList(), farmer.constants)
+        }
     val runningEggsLaid: BigDecimal
         get() = farmers.sumByBigDecimal { farmer -> farmer.runningState.eggsLaid }
     val timeUpEggsLaid: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer -> farmer.timeUpState?.eggsLaid ?: ZERO }
+        get() = farmers.sumByBigDecimal { farmer -> farmer.timeUpState?.eggsLaid ?: BigDecimal.ZERO }
     val timeUpPercentageOfFinalGoal: BigDecimal
         get() = (timeUpEggsLaid / goals.last().amount) * 100
     val timeTillFinalGoal: Duration?
@@ -65,7 +58,7 @@ data class CoopContractState(
             else -> timeUpEggsLaid >= goals.last().amount
         }
     val finishedIfBanked: Boolean
-        get() = reportedEggsLaid < goals.last().amount && caughtUpEggsLaid >= goals.last().amount
+        get() = reportedEggsLaid < goals.last().amount && currentEggsLaid >= goals.last().amount
     val finished: Boolean
         get() = reportedEggsLaid >= goals.last().amount
 

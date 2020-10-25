@@ -182,7 +182,7 @@ private fun StringBuilder.drawMembers(
     column {
         header = "Current"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.caughtUpEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
     }
 
     divider()
@@ -265,7 +265,7 @@ private fun StringBuilder.drawCompactMembers(
     column {
         header = "Current"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.caughtUpEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
     }
 
     divider()
@@ -283,10 +283,10 @@ private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiCo
     val overtakers: List<String> = state.farmers.map { farmer ->
         when {
             state.farmers.any { other ->
-                farmer.caughtUpEggsLaid < other.caughtUpEggsLaid && farmer.timeUpEggsLaid > other.timeUpEggsLaid
+                farmer.currentEggsLaid < other.currentEggsLaid && farmer.timeUpEggsLaid > other.timeUpEggsLaid
             } -> "⬆️"
             state.farmers.any { other ->
-                farmer.caughtUpEggsLaid > other.caughtUpEggsLaid && farmer.timeUpEggsLaid < other.timeUpEggsLaid
+                farmer.currentEggsLaid > other.currentEggsLaid && farmer.timeUpEggsLaid < other.timeUpEggsLaid
             } -> "⬇️"
             else -> "➖"
         }

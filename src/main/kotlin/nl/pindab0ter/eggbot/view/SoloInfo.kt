@@ -164,7 +164,7 @@ private fun StringBuilder.drawFinishedBasicInfo(
     appendLine("__**🎉 Completed if you check in**__ ```")
     appendLine("Time since backup: ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
 
-    append("Current eggs:      ${state.farmer.caughtUpEggsLaid.asIllions()} ")
+    append("Current eggs:      ${state.farmer.currentEggsLaid.asIllions()} ")
     if (!compact) append("(${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr) ")
     appendLine()
 
