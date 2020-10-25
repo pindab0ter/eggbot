@@ -2,9 +2,6 @@ package nl.pindab0ter.eggbot.controller
 
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
 import nl.pindab0ter.eggbot.helpers.COMPACT
 import nl.pindab0ter.eggbot.helpers.compactSwitch
@@ -34,27 +31,24 @@ object EarningsBonus : EggBotCommand() {
         init()
     }
 
-    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+    override fun execute(event: CommandEvent, parameters: JSAPResult) = transaction {
         val compact = parameters.getBoolean(COMPACT)
         val extended = parameters.getBoolean(EXTENDED)
 
-        val farmers = transaction {
-            DiscordUser.findById(event.author.id)?.farmers?.toList()?.sortedBy { it.inGameName }!!
-        }
+        val farmers = DiscordUser.findById(event.author.id)?.farmers?.toList()?.sortedBy { it.inGameName }!!
 
         farmers.forEach { farmer ->
-            AuxBrain.getFarmerBackup(farmer.inGameId) { (backup, _) ->
-                if (backup == null) return@getFarmerBackup event.replyAndLogWarning("Could not get information on ${farmer.inGameName}")
+            val backup = AuxBrain.getFarmerBackup(farmer.inGameId)
+                ?: return@forEach event.replyAndLogWarning("Could not get information on ${farmer.inGameName}")
 
-                GlobalScope.launch(Dispatchers.IO) {
-                    transaction { farmer.update(backup) }
-                }
+            farmer.update(backup)
 
-                val earningsBonus = EarningsBonus(farmer)
-
-                earningsBonusResponse(farmer, earningsBonus, backup.timeSinceBackup, compact, extended).forEach { response ->
-                    event.reply(response)
-                }
+            earningsBonusResponse(farmer,
+                EarningsBonus(farmer),
+                backup.timeSinceBackup,
+                compact,
+                extended).forEach { response ->
+                event.reply(response)
             }
         }
     }
