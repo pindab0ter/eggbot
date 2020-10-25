@@ -1,19 +1,18 @@
 package nl.pindab0ter.eggbot.view
 
-import nl.pindab0ter.eggbot.helpers.asIllions
-import nl.pindab0ter.eggbot.helpers.asRank
-import nl.pindab0ter.eggbot.helpers.formatInteger
-import nl.pindab0ter.eggbot.helpers.table
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.EarningsBonus
 import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_PROPHECY_EGG_RESEARCH_LEVEL
 import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_SOUL_EGG_RESEARCH_LEVEL
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.database.Farmer
+import org.joda.time.Duration
 
 
 fun earningsBonusResponse(
     farmer: Farmer,
     earningsBonusObject: EarningsBonus,
+    timeSinceBackup: Duration,
     compact: Boolean,
     extended: Boolean,
 ): List<String> = earningsBonusObject.run {
@@ -24,6 +23,7 @@ fun earningsBonusResponse(
 
     val rows = mutableListOf<Row>().apply {
         addRow("Rank:", earningsBonus.asRank(shortened = compact))
+        addRow("Backed up:", timeSinceBackup.asDaysHoursAndMinutes(compact = compact), " ago")
         addRow(
             "Earnings Bonus:",
             if (extended) earningsBonus.formatInteger()

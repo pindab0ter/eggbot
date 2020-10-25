@@ -9,6 +9,7 @@ import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
 import nl.pindab0ter.eggbot.helpers.COMPACT
 import nl.pindab0ter.eggbot.helpers.compactSwitch
 import nl.pindab0ter.eggbot.helpers.extendedSwitch
+import nl.pindab0ter.eggbot.helpers.timeSinceBackup
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.EarningsBonus
@@ -48,12 +49,12 @@ object EarningsBonus : EggBotCommand() {
                 GlobalScope.launch(Dispatchers.IO) {
                     transaction { farmer.update(backup) }
                 }
-            }
 
-            val earningsBonus = EarningsBonus(farmer)
+                val earningsBonus = EarningsBonus(farmer)
 
-            earningsBonusResponse(farmer, earningsBonus, compact, extended).forEach { response ->
-                event.reply(response)
+                earningsBonusResponse(farmer, earningsBonus, backup.timeSinceBackup, compact, extended).forEach { response ->
+                    event.reply(response)
+                }
             }
         }
     }
