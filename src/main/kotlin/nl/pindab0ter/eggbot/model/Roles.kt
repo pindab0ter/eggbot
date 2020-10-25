@@ -53,13 +53,15 @@ fun createCoopsAndRoles(
 ): List<Coop> = transaction {
     val coopNames = coopNames(amount, baseName)
     List(amount) { index ->
-        // TODO: Check if role with same name already exists, if so, use that ID instead.
-        val roleId = if (noRole) null else EggBot.guild.createRole().run {
+        val roleId = if (noRole) null else EggBot.guild.roles.find { role ->
+            role.name == coopNames[index]
+        }?.id ?: EggBot.guild.createRole().run {
             setName(coopNames[index])
             setMentionable(true)
             setColor(DEFAULT_ROLE_COLOR)
             complete()
         }.id
+
         Coop.new {
             this.contractId = contract.id
             this.name = coopNames[index]
