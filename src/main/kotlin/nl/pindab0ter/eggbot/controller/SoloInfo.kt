@@ -3,8 +3,6 @@ package nl.pindab0ter.eggbot.controller
 import com.auxbrain.ei.LocalContract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
@@ -83,24 +81,10 @@ object SoloInfo : EggBotCommand() {
 
             val state = simulate(initialState)
 
-            if (state.finishedIfBanked) {
-                soloFinishedIfBankedResponse(state, compact).let { message ->
-                    // TODO: Remove replies to DM and only allow in bot channel(s)
-                    if (event.channel == botCommandsChannel) {
-                        event.reply(message)
-                    } else {
-                        event.replyInDm(message)
-                        if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
-                    }
-                }
-            } else soloInfoResponse(state, compact).let { message ->
-                if (event.channel == botCommandsChannel) {
-                    event.reply(message)
-                } else {
-                    event.replyInDm(message)
-                    if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
-                }
-            }
+            event.reply(
+                if (state.finishedIfBanked) soloFinishedIfBankedResponse(state, compact)
+                else soloInfoResponse(state, compact)
+            )
         }
     }
 }

@@ -5,7 +5,6 @@ import com.martiansoftware.jsap.FlaggedOption
 import com.martiansoftware.jsap.JSAP.INTEGER_PARSER
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.stringparsers.EnumeratedStringParser
-import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.EggBot.emoteProphecyEgg
 import nl.pindab0ter.eggbot.EggBot.emoteSoulEgg
 import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.*
@@ -75,13 +74,7 @@ object LeaderBoard : EggBotCommand() {
             top = top,
             compact = parameters.getBoolean(COMPACT),
             extended = parameters.getBoolean(EXTENDED)
-        ).let { messages ->
-            if (event.channel == botCommandsChannel) {
-                messages.forEach { message -> event.reply(message) }
-            } else {
-                event.replyInDms(messages)
-            }
-        }
+        ).forEach { response -> event.reply(response) }
     }
 
     enum class Board {

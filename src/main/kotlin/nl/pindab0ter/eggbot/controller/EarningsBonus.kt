@@ -5,8 +5,6 @@ import com.martiansoftware.jsap.JSAPResult
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.dv8tion.jda.api.entities.ChannelType
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
 import nl.pindab0ter.eggbot.helpers.COMPACT
 import nl.pindab0ter.eggbot.helpers.compactSwitch
@@ -54,16 +52,8 @@ object EarningsBonus : EggBotCommand() {
 
             val earningsBonus = EarningsBonus(farmer)
 
-            earningsBonusResponse(farmer, earningsBonus, compact, extended).forEachIndexed { index, block ->
-                if (event.channel == EggBot.botCommandsChannel) {
-                    event.reply(block)
-                } else {
-                    event.replyInDm(block) {
-                        if (event.isFromType(ChannelType.TEXT) && index == 0) {
-                            event.reactSuccess()
-                        }
-                    }
-                }
+            earningsBonusResponse(farmer, earningsBonus, compact, extended).forEach { response ->
+                event.reply(response)
             }
         }
     }

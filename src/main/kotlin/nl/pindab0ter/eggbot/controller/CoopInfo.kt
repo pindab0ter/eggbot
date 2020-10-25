@@ -3,9 +3,7 @@ package nl.pindab0ter.eggbot.controller
 import com.auxbrain.ei.Contract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
-import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.Message
-import nl.pindab0ter.eggbot.EggBot.botCommandsChannel
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
@@ -80,15 +78,7 @@ object CoopInfo : EggBotCommand() {
                 when (status) {
                     is FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
                     else -> coopInfoResponse(sortedState, compact)
-                }.let { messages ->
-                    when (event.channel) {
-                        botCommandsChannel -> messages.forEach { message -> event.reply(message) }
-                        else -> {
-                            event.replyInDms(messages)
-                            if (event.isFromType(ChannelType.TEXT)) event.reactSuccess()
-                        }
-                    }
-                }
+                }.forEach { response -> event.reply(response) }
             }
         }
     }

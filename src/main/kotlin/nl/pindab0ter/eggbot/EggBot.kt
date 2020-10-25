@@ -66,10 +66,6 @@ object EggBot : Logging {
             field = value
             logger.warn { "Client version upgraded to $value" }
         }
-    val botCommandsChannel: TextChannel by lazy {
-        guild.getTextChannelById(Config.botCommandsChannelId)
-            ?: throw Exception("Could not find channel with ID ${Config.botCommandsChannelId}")
-    }
     val earningsBonusLeaderBoardChannel: TextChannel by lazy {
         guild.getTextChannelById(Config.earningsBonusLeaderBoardChannelId)
             ?: throw Exception("Could not find channel with ID ${Config.earningsBonusLeaderBoardChannelId}")
