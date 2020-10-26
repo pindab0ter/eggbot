@@ -39,7 +39,7 @@ private fun StringBuilder.drawGoals(
     coopContractState: SoloContractState,
     compact: Boolean,
 ): StringBuilder = appendTable {
-    title = "__${coopContractState.egg.toEmote()} **Goals** (${coopContractState.goalsReached}/${coopContractState.goals.count()}):__"
+    title = "__${coopContractState.egg.toEmote()} **Goals** (${coopContractState.goalsReached}/${coopContractState.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 

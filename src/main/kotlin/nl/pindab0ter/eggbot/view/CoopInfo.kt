@@ -79,7 +79,7 @@ private fun StringBuilder.drawGoals(
     state: CoopContractState,
     compact: Boolean,
 ): StringBuilder = appendTable {
-    title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()}):__"
+    title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 
@@ -163,7 +163,7 @@ private fun StringBuilder.drawMembers(
         true -> "👨‍🌾"
         false -> "👩‍🌾"
     }
-    title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize}):__"
+    title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize})__"
     topPadding = 1
 
     incrementColumn { suffix = "." }
@@ -243,7 +243,7 @@ private fun StringBuilder.drawCompactMembers(
         true -> "👨‍🌾"
         false -> "👩‍🌾"
     }
-    title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize}):__"
+    title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize})__"
     topPadding = 1
 
     column {

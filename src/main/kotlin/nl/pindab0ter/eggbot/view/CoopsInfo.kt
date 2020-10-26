@@ -90,7 +90,7 @@ private fun StringBuilder.drawCoops(
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
 
-    title = "__**🐓 Co-ops** (${statuses.count()}):__"
+    title = "__**🐓 Co-ops** (${statuses.count()})__"
     topPadding = 1
 
     column {
@@ -214,7 +214,7 @@ private fun StringBuilder.drawCompactCoops(
     statuses: List<CoopContractStatus>,
 ): StringBuilder = appendTable {
 
-    title = "__**🐓 Co-ops** (${statuses.count()}):__"
+    title = "__**🐓 Co-ops** (${statuses.count()})__"
     topPadding = 1
 
     column {
