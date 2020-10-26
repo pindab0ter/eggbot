@@ -28,7 +28,7 @@ fun rollCallResponse(
         append(coop.activeEarningsBonus.asIllions(NumberFormatter.INTEGER) + " %")
         appendLine()
     }
-    append("```")
+    appendLine("```")
 }).plus(coops.map { coop ->
     val role = coop.roleId?.let { EggBot.guild.getRoleById(it) }
     buildString {
@@ -42,5 +42,6 @@ fun rollCallResponse(
             if (farmer.isActive.not()) append(" _Inactive_")
             appendLine()
         }
+        appendLine()
     }
 })
