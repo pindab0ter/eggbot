@@ -8,13 +8,14 @@ import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.FinishedIfBanked
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.NotFound
+import nl.pindab0ter.eggbot.model.simulation.Farmer
 import nl.pindab0ter.eggbot.view.coopFinishedIfBankedResponse
+import nl.pindab0ter.eggbot.view.coopFinishedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 
 object CoopInfo : EggBotCommand() {
@@ -63,20 +64,16 @@ object CoopInfo : EggBotCommand() {
                 `${status.coopStatus.coopId}` vs. __${contract.name}__:
                     
                 This co-op has not reached their final goal.""".trimIndent())
-            // TODO: Display CoopContractStatus output here
-            is Finished -> event.replyAndLog("""
-                `${status.coopStatus.coopId}` vs. __${contract.name}__:
-    
-                This co-op has successfully finished their contract! ${Config.emojiSuccess}""".trimIndent())
+            is Finished -> coopFinishedResponse(coopStatus!!, contract, compact).forEach(event::reply)
             is InProgress -> {
                 val sortedState = status.state.copy(
-                    farmers = status.state.farmers.sortedByDescending { farmer -> farmer.currentEggsLaid }
+                    farmers = status.state.farmers.sortedByDescending(Farmer::currentEggsLaid)
                 )
 
                 when (status) {
                     is FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
                     else -> coopInfoResponse(sortedState, compact)
-                }.forEach { response -> event.reply(response) }
+                }.forEach(event::reply)
             }
         }
     }

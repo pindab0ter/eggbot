@@ -1,11 +1,14 @@
 package nl.pindab0ter.eggbot.view
 
+import com.auxbrain.ei.Contract
+import com.auxbrain.ei.CoopStatusResponse
 import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
+import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
@@ -65,6 +68,121 @@ fun coopFinishedIfBankedResponse(
         drawCompactMembers(state)
         appendBreakpoint()
         drawCompactTimeSinceLastBackup(state)
+    }
+}.splitMessage(separator = BREAKPOINT)
+
+fun coopFinishedResponse(
+    status: CoopStatusResponse,
+    contract: Contract,
+    compact: Boolean,
+) = buildString {
+    append("""
+        `${status.coopId}` vs. __${contract.name}__:
+
+        This co-op has successfully finished their contract! ${Config.emojiSuccess}
+
+        """.trimIndent())
+
+    appendTable {
+        title = "__**🗒️ Basic info**__"
+        displayHeaders = false
+        topPadding = 1
+
+        column {
+            alignment = LEFT
+            rightPadding = 1
+
+            cells = buildList list@{
+                add("Time remaining:")
+                add("Banked eggs:")
+                if (status.public) add("Access:")
+            }
+        }
+
+        column {
+            alignment = if (!compact) LEFT else RIGHT
+
+            val eggsLaid = status.contributors.sumByBigDecimal { contributor ->
+                contributor.contributionAmount.toBigDecimal()
+            }
+            val eggsLaidRate = status.contributors.sumByBigDecimal { contributor ->
+                contributor.contributionRate.toBigDecimal()
+            }.multiply(SIXTY)
+
+            cells = buildList {
+                add(status.timeRemaining.asDaysHoursAndMinutes(compact, compact))
+                add(eggsLaid.asIllions() + if (!compact) " (${eggsLaidRate.asIllions()}/hr)" else "")
+                if (status.public) add("This co-op is PUBLIC")
+            }
+        }
+    }
+
+    appendTable {
+        title = "__${contract.egg.toEmote()} **Goals** (${contract.goals.count()}/${contract.goals.count()})__"
+        displayHeaders = false
+        topPadding = 1
+
+        incrementColumn(suffix = ".")
+        column {
+            leftPadding = 1
+            cells = contract.goals.map { goal -> goal.targetAmount.toBigDecimal().asIllions(OPTIONAL_DECIMALS) }
+        }
+        column {
+            leftPadding = 1
+            rightPadding = 1
+            cells = contract.goals.map { "🏁" }
+        }
+        column {
+            cells = contract.goals.map { "Goal reached!" }
+        }
+    }
+
+    appendTable {
+        val memberEmoji = when (Random.nextBoolean()) {
+            true -> "👨‍🌾"
+            false -> "👩‍🌾"
+        }
+        title = "__**${memberEmoji} Members** (${status.contributors.count()}/${contract.maxCoopSize})__"
+        topPadding = 1
+
+        incrementColumn { suffix = "." }
+
+        column {
+            header = "Name"
+            leftPadding = 1
+            rightPadding = 1
+
+            val shortenedNames by lazy {
+                status.contributors.map { contributor ->
+                    contributor.userName.let { name ->
+                        if (name.length <= 10) name
+                        else "${name.substring(0 until 9)}…"
+                    }
+                }
+            }
+
+            cells = if (compact) shortenedNames else status.contributors.map { contributor ->
+                contributor.userName
+            }
+        }
+
+        column {
+            header = "Banked"
+            alignment = RIGHT
+            cells = status.contributors.map { contributor ->
+                contributor.contributionAmount.toBigDecimal().asIllions()
+            }
+        }
+
+        divider()
+
+        column {
+            header = "/hr"
+            alignment = LEFT
+            cells = status.contributors.map { contributor ->
+                contributor.contributionRate.toBigDecimal().multiply(SIXTY).asIllions()
+            }
+        }
     }
 }.splitMessage(separator = BREAKPOINT)
 
@@ -171,7 +289,7 @@ private fun StringBuilder.drawMembers(
     column {
         header = "Name"
         leftPadding = 1
-        rightPadding = 3
+        rightPadding = 2
         cells = state.farmers.map { farmer -> "${farmer.name}${if (farmer.isSleeping) " zZ" else ""}" }
     }
 
