@@ -142,10 +142,8 @@ class Table {
         val Column.longest: Int get() = (cells.map { cell -> cell.length }).plus(header.length).maxOrNull() ?: 0
     }
 
-    fun render(): List<String> {
-        // TODO: Refactor
-        val blocks = mutableListOf<String>()
-        blocks.add(buildString {
+    fun render(): List<String> = buildList {
+        add(buildString {
             require(alignedColumns.filterIsInstance<ValueColumn>().isNotEmpty()) { "Table must have ValueColumns" }
             require(columns.all { it.cells.size == amountOfRows }) { "All columns must be of equal size" }
 
@@ -180,7 +178,7 @@ class Table {
                 val renderedRow = spacedColumns.renderRow { cells[rowIndex] }
                 if (length + renderedRow.length + 3 > 2000) {
                     append("```\u200B")
-                    blocks.add(toString())
+                    add(toString())
                     clear()
                     appendLine("```")
                 }
@@ -189,10 +187,7 @@ class Table {
             append("```")
 
             repeat(bottomPadding) { appendLine() }
-
         })
-
-        return blocks
     }
 
     /** Add SpacingColumns between adjacent left and right aligned columns and before and after the last column **/

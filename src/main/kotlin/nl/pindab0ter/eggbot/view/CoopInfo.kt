@@ -122,41 +122,37 @@ private fun StringBuilder.drawBasicInfo(
         alignment = LEFT
         rightPadding = 1
 
-        val progressKeys = if (state.finishedIfBanked) emptyList() else listOf(
-            "Time remaining:",
-            "Eggspected:",
-        )
-        val statusKeys = listOf(
-            "Current eggs:",
-            "Banked eggs:",
-            "Current chickens:",
-            "Tokens available:",
-            "Tokens spent:",
-        )
-        val coopAccessKey = if (state.public) listOf("Access:") else emptyList()
-
-        cells = progressKeys + statusKeys + coopAccessKey
+        cells = buildList list@{
+            if (!state.finishedIfBanked) {
+                add("Time remaining:")
+                add("Eggspected:")
+            }
+            add("Current eggs:")
+            add("Banked eggs:")
+            add("Current chickens:")
+            add("Tokens available:")
+            add("Tokens spent:")
+            if (state.public) add("Access:")
+        }
     }
 
     column {
         alignment = if (!compact) LEFT else RIGHT
 
-        val progressValues = if (state.finishedIfBanked) emptyList() else listOf(
-            state.timeRemaining.asDaysHoursAndMinutes(compact, compact),
-            state.timeUpEggsLaid.asIllions(),
-        )
-        val statusValues = listOf(
-            state.currentEggsLaid.asIllions() + if (!compact)
-                "(${state.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "",
-            state.reportedEggsLaid.asIllions(),
-            state.currentPopulation.asIllions() + if (!compact)
-                "(${state.currentPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "",
-            state.tokensAvailable.toString(),
-            state.tokensSpent.toString()
-        )
-        val coopAccessValue = if (state.public) listOf("This co-op is PUBLIC") else emptyList()
-
-        cells = progressValues + statusValues + coopAccessValue
+        cells = buildList {
+            if (!state.finishedIfBanked) {
+                add(state.timeRemaining.asDaysHoursAndMinutes(compact, compact))
+                add(state.timeUpEggsLaid.asIllions())
+            }
+            add(state.currentEggsLaid.asIllions() + if (!compact)
+                " (${state.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+            add(state.reportedEggsLaid.asIllions())
+            add(state.currentPopulation.asIllions() + if (!compact)
+                " (${state.currentPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+            add(state.tokensAvailable.toString())
+            add(state.tokensSpent.toString())
+            if (state.public) add("This co-op is PUBLIC")
+        }
     }
 }
 

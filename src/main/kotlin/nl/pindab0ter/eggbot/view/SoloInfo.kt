@@ -84,41 +84,37 @@ private fun StringBuilder.drawBasicInfo(
         alignment = Table.AlignedColumn.Alignment.LEFT
         rightPadding = 1
 
-        val progressKeys = if (state.finishedIfBanked) emptyList() else listOf(
-            "Time remaining:",
-            "Eggspected:",
-        )
-        val statusKeys = listOf(
-            "Current eggs:",
-            "Banked eggs:",
-            "Current chickens:",
-            "Tokens available:",
-            "Tokens spent:",
-            "Last update:",
-        )
-
-        cells = progressKeys + statusKeys
+        cells = buildList {
+            if (!state.finishedIfBanked) {
+                add("Time remaining:")
+                add("Eggspected:")
+            }
+            add("Current eggs:")
+            add("Banked eggs:")
+            add("Current chickens:")
+            add("Tokens available:")
+            add("Tokens spent:")
+            add("Last update:")
+        }
     }
 
     column {
         alignment = if (!compact) Table.AlignedColumn.Alignment.LEFT else Table.AlignedColumn.Alignment.RIGHT
 
-        val progressValues = if (state.finishedIfBanked) emptyList() else listOf(
-            state.timeRemaining.asDaysHoursAndMinutes(compact, compact),
-            state.timeUpEggsLaid.asIllions(),
-        )
-        val statusValues = listOf(
-            state.farmer.reportedEggsLaid.asIllions() + if (!compact)
-                "(${state.reportedEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "",
-            state.reportedEggsLaid.asIllions(),
-            state.reportedPopulation.asIllions() + if (!compact)
-                "(${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "",
-            state.farmer.constants.tokensAvailable.toString(),
-            state.farmer.constants.tokensSpent.toString(),
-            "${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago",
-        )
-
-        cells = progressValues + statusValues
+        cells = buildList {
+            if (!state.finishedIfBanked) {
+                add(state.timeRemaining.asDaysHoursAndMinutes(compact, compact))
+                add(state.timeUpEggsLaid.asIllions())
+            }
+            add(state.farmer.reportedEggsLaid.asIllions() + if (!compact)
+                "(${state.reportedEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+            add(state.reportedEggsLaid.asIllions())
+            add(state.reportedPopulation.asIllions() + if (!compact)
+                "(${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+            add(state.farmer.constants.tokensAvailable.toString())
+            add(state.farmer.constants.tokensSpent.toString())
+            add("${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
+        }
     }
 }
 

@@ -16,9 +16,7 @@ import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.Finis
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.NotFound
 import nl.pindab0ter.eggbot.view.coopFinishedIfBankedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
-import kotlin.time.ExperimentalTime
 
-@Suppress("FoldInitializerAndIfToElvis")
 object CoopInfo : EggBotCommand() {
 
     init {
@@ -36,7 +34,6 @@ object CoopInfo : EggBotCommand() {
         init()
     }
 
-    @ExperimentalTime
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
@@ -66,6 +63,7 @@ object CoopInfo : EggBotCommand() {
                 `${status.coopStatus.coopId}` vs. __${contract.name}__:
                     
                 This co-op has not reached their final goal.""".trimIndent())
+            // TODO: Display CoopContractStatus output here
             is Finished -> event.replyAndLog("""
                 `${status.coopStatus.coopId}` vs. __${contract.name}__:
     

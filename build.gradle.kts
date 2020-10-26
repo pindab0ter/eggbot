@@ -46,9 +46,21 @@ dependencies {
     testImplementation("io.mockk", "mockk", "1.10.2")
 }
 
-tasks.withType<Test> {
-    useJUnitPlatform()
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    languageVersion = "1.4"
+    jvmTarget = "1.8"
+    freeCompilerArgs = freeCompilerArgs.plus(listOf(
+        "-Xopt-in=kotlin.RequiresOptIn",
+        "-Xopt-in=kotlin.ExperimentalStdlibApi"
+    ))
 }
+
+val compileJava: JavaCompile by tasks
+compileJava.enabled = false
+
+val test: Test by tasks
+test.useJUnitPlatform()
 
 configurations.forEach { configuration ->
     // Workaround the Gradle bug resolving multi platform dependencies.
@@ -56,12 +68,4 @@ configurations.forEach { configuration ->
     if (configuration.name.contains("proto", ignoreCase = true)) {
         configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "java-runtime"))
     }
-}
-
-tasks.withType<KotlinCompile> {
-    kotlinOptions.jvmTarget = "1.8"
-}
-
-tasks.withType<JavaCompile> {
-    enabled = false
 }
