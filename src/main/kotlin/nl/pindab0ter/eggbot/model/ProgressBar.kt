@@ -15,6 +15,7 @@ class ProgressBar(
     private val goal: Int,
     private val message: Message,
     private val statusText: String? = null,
+    private val unit: String = "",
     coroutineContext: CoroutineContext? = null,
 ) : CoroutineScope, Logging {
     override val coroutineContext: CoroutineContext = coroutineContext ?: Dispatchers.Default
@@ -36,7 +37,7 @@ class ProgressBar(
             dirty.getAndSet(false) -> {
                 val contents = buildString {
                     if (statusText != null) appendLine(statusText)
-                    appendLine(drawProgressBar(counter.get(), goal))
+                    appendLine(drawProgressBar(counter.get(), goal, unit))
                 }
                 message.editMessage(contents).queue()
                 i = 0
@@ -76,6 +77,7 @@ class ProgressBar(
         private fun drawProgressBar(
             current: Int,
             total: Int,
+            unit: String = "",
             width: Int = 30,
             showSteps: Boolean = true,
             showPercentage: Boolean = true,
@@ -88,8 +90,10 @@ class ProgressBar(
                 append("`")
                 append("▓".repeat(completed))
                 append("░".repeat(remaining))
-                if (showSteps) append(" ${paddingCharacters(current, total)}$current/$total")
-                if (showPercentage) append(" ($percentage%)")
+                if (showSteps || showPercentage) appendLine()
+                if (showSteps) append("${paddingCharacters(current, total)}$current/$total ")
+                if (unit.isNotBlank()) append("$unit ")
+                if (showPercentage) append("($percentage%)")
                 append("`")
             }
         }

@@ -3,11 +3,13 @@ package nl.pindab0ter.eggbot.controller
 import com.auxbrain.ei.Contract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
+import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress
@@ -17,6 +19,7 @@ import nl.pindab0ter.eggbot.model.simulation.Farmer
 import nl.pindab0ter.eggbot.view.coopFinishedIfBankedResponse
 import nl.pindab0ter.eggbot.view.coopFinishedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
+import java.math.BigDecimal
 
 object CoopInfo : EggBotCommand() {
 
@@ -35,24 +38,30 @@ object CoopInfo : EggBotCommand() {
         init()
     }
 
-    override fun execute(event: CommandEvent, parameters: JSAPResult) {
+    override fun execute(event: CommandEvent, parameters: JSAPResult) = runBlocking {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val coopId: String = parameters.getString(COOP_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
         val message: Message = event.channel.sendMessage("Fetching required information…").complete()
         message.channel.sendTyping().queue()
 
-        val contract: Contract = AuxBrain.getContract(contractId) ?: return event.replyAndLogWarning(
+        val contract: Contract = AuxBrain.getContract(contractId) ?: return@runBlocking event.replyAndLogWarning(
             "Could not find contract information"
         ).also { message.delete().queue() }
 
-        message.editMessage("Running simulation…").queue()
-        message.channel.sendTyping().queue()
-
         val coopStatus = AuxBrain.getCoopStatus(contract.id, coopId)
-        val status = CoopContractStatus(contract, coopStatus, coopId)
+        val progressBar = ProgressBar(
+            goal = if ((coopStatus?.eggsLaid ?: BigDecimal.ZERO) < contract.goals.last().targetAmount.toBigDecimal()) {
+                coopStatus?.contributors?.count() ?: 0
+            } else 0,
+            message = message,
+            statusText = "Fetching backups and running simulations…",
+            unit = "simulations",
+            coroutineContext = coroutineContext
+        )
+        val status = CoopContractStatus(contract, coopStatus, coopId, progressBar::update)
 
-        message.delete().queue()
+        progressBar.stopAndDeleteMessage()
 
         when (status) {
             is NotFound -> event.replyAndLogWarning("No co-op found for contract `${contractId}` with name `${coopId}`")

@@ -41,7 +41,11 @@ object Test : EggBotCommand() {
         val rawValues = (1..100)
         val message = event.channel.sendMessage("Calculating…").complete()
         runBlocking {
-            val progressBar = ProgressBar(rawValues.count(), message, coroutineContext = coroutineContext)
+            val progressBar = ProgressBar(rawValues.count(),
+                message,
+                "Testing…",
+                "tests",
+                coroutineContext = coroutineContext)
             val values = rawValues.asyncMap {
                 delay(it * 100L)
                 progressBar.update()
@@ -51,7 +55,7 @@ object Test : EggBotCommand() {
                 displayHeaders = false
                 column {
                     cells = values.map { index ->
-                        index.toString().padEnd(50, '=')
+                        index.toString()
                     }
                 }
             }.forEach { block ->
