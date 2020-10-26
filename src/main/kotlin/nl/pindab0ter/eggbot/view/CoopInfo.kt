@@ -202,7 +202,7 @@ private fun StringBuilder.drawMembers(
 
     column {
         header = "/hr"
-        rightPadding = 3
+        rightPadding = 2
         cells = state.farmers.map { farmer -> farmer.currentEggsPerMinute.multiply(SIXTY).asIllions() }
     }
 
