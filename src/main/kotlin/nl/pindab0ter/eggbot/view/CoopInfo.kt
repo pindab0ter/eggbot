@@ -247,6 +247,7 @@ private fun StringBuilder.drawBasicInfo(
             }
             add("Current eggs:")
             add("Banked eggs:")
+            add("Unbanked eggs:")
             add("Current chickens:")
             add("Tokens available:")
             add("Tokens spent:")
@@ -265,6 +266,7 @@ private fun StringBuilder.drawBasicInfo(
             add(state.currentEggsLaid.asIllions() + if (!compact)
                 " (${state.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
             add(state.reportedEggsLaid.asIllions())
+            add(state.unreportedEggsLaid.asIllions())
             add(state.currentPopulation.asIllions() + if (!compact)
                 " (${state.currentPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
             add(state.tokensAvailable.toString())
@@ -597,25 +599,36 @@ private fun StringBuilder.drawTimeSinceLastBackup(
     title = "__**🎉 Bank now to finish!**__"
     topPadding = 1
 
-    val farmersSortedByTimeSinceBackup = state.farmers.sortedByDescending { farmer -> farmer.timeSinceBackup }
+    val farmersSortedByUnreportedEggsLaid = state.farmers.sortedByDescending { farmer -> farmer.unreportedEggsLaid }
 
     column {
         header = "Name"
-        rightPadding = 3
-        cells = farmersSortedByTimeSinceBackup.map { farmer ->
+        cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
             farmer.name
+        }
+    }
+
+    column {
+        header = "Last update"
+        alignment = RIGHT
+        leftPadding = 2
+        cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
+            "${farmer.timeSinceBackup.asDaysHoursAndMinutes(compact = true, spacing = true)} ago"
         }
     }
 
     divider()
 
     column {
-        header = "Last update"
+        header = "Unbanked"
+        alignment = RIGHT
         leftPadding = 1
-        cells = farmersSortedByTimeSinceBackup.map { farmer ->
-            "${farmer.timeSinceBackup.asDaysHoursAndMinutes(spacing = true)} ago"
+        cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
+            farmer.unreportedEggsLaid.asIllions()
         }
     }
+
+    divider()
 }
 
 private fun StringBuilder.drawCompactTimeSinceLastBackup(

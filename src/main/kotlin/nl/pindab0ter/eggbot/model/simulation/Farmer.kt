@@ -35,6 +35,7 @@ data class Farmer(
 
     val reportedEggsLaid: BigDecimal get() = reportedState.eggsLaid
     val currentEggsLaid: BigDecimal get() = currentState?.eggsLaid ?: BigDecimal.ZERO
+    val unreportedEggsLaid: BigDecimal get() = currentEggsLaid - reportedEggsLaid
     val currentEggsPerMinute: BigDecimal
         get() = when {
             awayTimeRemaining <= Duration.ZERO -> BigDecimal.ZERO
