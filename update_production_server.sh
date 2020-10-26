@@ -1,6 +1,6 @@
-#!/usr/bin/env bash
+#!/bin/bash
 set -o errexit -o nounset -o pipefail
-gradle installDist
+./gradlew installDist
 cd build/install/EggBot
 rsync \
   --recursive \
