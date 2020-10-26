@@ -25,12 +25,12 @@ class ProgressBar(
     private var job: Job
 
     init {
-        require(goal > 0) { "Goal must be at least 1" }
         job = loop()
     }
 
     private fun loop(): Job = GlobalScope.launch(coroutineContext) {
-        message.channel.sendTyping().queue()
+        if (goal == 0) running.set(false)
+        else message.channel.sendTyping().queue()
         var i = 0
         while (running.get()) when {
             dirty.getAndSet(false) -> {
