@@ -48,7 +48,7 @@ fun transportBottleneck(habs: List<Hab>, constants: Constants, elapsed: Duration
 
 fun habsStatus(habs: List<Hab>, elapsed: Duration): HabsStatus {
     return when {
-        habs.all { (population, capacity) -> population == MAX_HABS_CAPACITY && capacity == MAX_HABS_CAPACITY } ->
+        habs.all { (population, capacity) -> population equals MAX_HABS_CAPACITY && capacity equals MAX_HABS_CAPACITY } ->
             MaxedOut(elapsed)
         habs.all { (population, capacity) -> population == capacity } ->
             BottleneckReached(elapsed)
@@ -79,7 +79,7 @@ fun willReachBottleneckBeforeDone(farmer: Farmer, timeRemaining: Duration, final
     )
 
     return when {
-        farmer.runningState.habsStatus is MaxedOut -> true
+        farmer.runningState.habsStatus is MaxedOut && farmer.runningState.habsStatus.moment == Duration.ZERO -> true
         firstBottleneckReachedAt.isEmpty() -> false
         else -> firstBottleneckReachedAt.minOrNull()!! < listOfNotNull(timeRemaining, finalGoalReachedAt).minOrNull()!!
     }
