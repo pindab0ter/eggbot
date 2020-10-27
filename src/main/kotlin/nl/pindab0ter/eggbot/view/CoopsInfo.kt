@@ -119,7 +119,7 @@ private fun StringBuilder.drawCoops(
                 is Abandoned -> "Abandoned"
                 is Failed -> "Failed"
                 is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
-                is OnTrack -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(true) ?: "ERROR"
+                is OnTrack -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
                 is FinishedIfBanked -> "Bank now!"
                 is Finished -> "Finished"
             }
@@ -148,7 +148,7 @@ private fun StringBuilder.drawCoops(
     column {
         header = "${'#'.repeat(contract.maxCoopSize.toString().length)}/${contract.maxCoopSize}"
 
-        alignment = LEFT
+        alignment = RIGHT
         rightPadding = 1
 
         cells = statuses.map { status ->
