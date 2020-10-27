@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.controller
 import com.auxbrain.ei.LocalContract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
+import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
@@ -26,7 +27,6 @@ object SoloInfo : EggBotCommand() {
             contractIdOption,
             compactSwitch,
         )
-        sendTyping = true
         init()
     }
 
@@ -34,6 +34,9 @@ object SoloInfo : EggBotCommand() {
     override fun execute(event: CommandEvent, parameters: JSAPResult) {
         val contractId: String = parameters.getString(CONTRACT_ID)
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
+
+        val message: Message = event.channel.sendMessage("Fetching required information and simulating…").complete()
+        event.channel.sendTyping().queue()
 
         val farmers: List<Farmer> = transaction {
             DiscordUser.findById(event.author.id)?.farmers?.toList()
@@ -80,6 +83,8 @@ object SoloInfo : EggBotCommand() {
             )
 
             val state = simulate(initialState)
+
+            message.delete().queue()
 
             event.reply(
                 if (state.finishedIfBanked) soloFinishedIfBankedResponse(state, compact)

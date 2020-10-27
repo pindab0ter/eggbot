@@ -90,6 +90,7 @@ private fun StringBuilder.drawBasicInfo(
             }
             add("Current eggs:")
             add("Banked eggs:")
+            add("Unbanked eggs:")
             add("Current chickens:")
             add("Tokens available:")
             add("Tokens spent:")
@@ -105,11 +106,12 @@ private fun StringBuilder.drawBasicInfo(
                 add(state.timeRemaining.asDaysHoursAndMinutes(compact, compact))
                 add(state.timeUpEggsLaid.asIllions())
             }
-            add(state.farmer.reportedEggsLaid.asIllions() + if (!compact)
-                "(${state.reportedEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+            add(state.farmer.currentEggsLaid.asIllions() + if (!compact)
+                " (${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
             add(state.reportedEggsLaid.asIllions())
+            add(state.farmer.unreportedEggsLaid.asIllions())
             add(state.reportedPopulation.asIllions() + if (!compact)
-                "(${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+                " (${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
             add(state.farmer.constants.tokensAvailable.toString())
             add(state.farmer.constants.tokensSpent.toString())
             add("${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
@@ -121,6 +123,7 @@ private fun StringBuilder.drawBottleNecks(
     state: SoloContractState,
     compact: Boolean,
 ): StringBuilder = apply {
+    appendLine()
     appendLine("__**⚠ Bottlenecks**__ ```")
 
     when (state.farmer.runningState.habsStatus) {
