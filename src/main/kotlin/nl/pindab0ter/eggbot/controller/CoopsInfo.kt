@@ -14,6 +14,7 @@ import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.currentEggsComparator
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.timeTillFinalGoalComparator
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.math.BigDecimal
@@ -73,7 +74,7 @@ object CoopsInfo : EggBotCommand() {
                 CoopContractStatus(contract, coopStatus, coopId, progressCallback = progressBar::update)
             }.let { statuses ->
                 if (!compact) statuses.sortedWith(currentEggsComparator)
-                else statuses.sortedWith(currentEggsComparator)
+                else statuses.sortedWith(timeTillFinalGoalComparator)
             }
 
         progressBar.stopAndDeleteMessage()

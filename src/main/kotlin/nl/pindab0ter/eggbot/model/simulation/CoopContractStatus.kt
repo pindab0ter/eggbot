@@ -73,8 +73,8 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
         }
         val timeTillFinalGoalComparator = Comparator<CoopContractStatus> { one, other ->
             if (one is InProgress && other is InProgress)
-                (other.state.timeTillFinalGoal ?: Duration.ZERO).compareTo(one.state.timeTillFinalGoal ?: Duration.ZERO)
-            else other.compareTo(one)
+                (one.state.timeTillFinalGoal ?: Duration.ZERO).compareTo(other.state.timeTillFinalGoal ?: Duration.ZERO)
+            else one.compareTo(other)
         }
     }
 }
