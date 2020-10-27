@@ -36,32 +36,31 @@ fun soloFinishedIfBankedResponse(
 }
 
 private fun StringBuilder.drawGoals(
-    coopContractState: SoloContractState,
+    state: SoloContractState,
     compact: Boolean,
 ): StringBuilder = appendTable {
-    title = "__${coopContractState.egg.toEmote()} **Goals** (${coopContractState.goalsReached}/${coopContractState.goals.count()})__"
+    title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 
     incrementColumn(suffix = ".")
     column {
         leftPadding = 1
-        cells = coopContractState.goals.map { (target, _) -> target.asIllions(OPTIONAL_DECIMALS) }
+        cells = state.goals.map { (target, _) -> target.asIllions(OPTIONAL_DECIMALS) }
     }
     column {
         leftPadding = 1
         rightPadding = 1
-        cells = coopContractState.goals.map { (_, moment) ->
+        cells = state.goals.map { (_, moment) ->
             when {
-                moment == null || moment > coopContractState.timeRemaining -> "🔴"
+                moment == null || moment > state.timeRemaining -> "🔴"
                 moment == Duration.ZERO -> "🏁"
                 else -> "🟢"
             }
         }
     }
-
     column {
-        cells = coopContractState.goals.map { (_, moment) ->
+        cells = state.goals.map { (_, moment) ->
             when (moment) {
                 null -> "More than a year"
                 Duration.ZERO -> "Goal reached!"
@@ -125,9 +124,14 @@ private fun StringBuilder.drawBottleNecks(
     appendLine("__**⚠ Bottlenecks**__ ```")
 
     when (state.farmer.runningState.habsStatus) {
-        is HabsStatus.BottleneckReached -> when (state.farmer.runningState.habsStatus.moment) {
-            Duration.ZERO -> appendLine("🏠 Full! ")
-            else -> appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+        is HabsStatus.BottleneckReached -> {
+            val moment = state.farmer.runningState.habsStatus.moment
+            when {
+                moment == Duration.ZERO -> appendLine("🏠 Full! ")
+                moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR ->
+                    appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+                else -> Unit
+            }
         }
         is HabsStatus.MaxedOut -> when (state.farmer.runningState.habsStatus.moment) {
             Duration.ZERO -> appendLine("🏠 Maxed! ")
@@ -136,19 +140,22 @@ private fun StringBuilder.drawBottleNecks(
         else -> Unit
     }
 
+    val transportBottleneckMoment = state.farmer.runningState.transportBottleneck
     when {
-        state.farmer.runningState.transportBottleneck == null -> Unit
-        state.farmer.runningState.transportBottleneck == Duration.ZERO ->
-            appendLine("🚛 Full! ")
-        state.farmer.runningState.transportBottleneck > Duration.ZERO ->
-            appendLine("🚛 ${state.farmer.runningState.transportBottleneck.asDaysHoursAndMinutes(compact)} ")
+        transportBottleneckMoment == null -> Unit
+        transportBottleneckMoment == Duration.ZERO -> appendLine("🚛 Full! ")
+        transportBottleneckMoment < state.timeRemaining && transportBottleneckMoment < state.timeTillFinalGoal ?: ONE_YEAR ->
+            appendLine("🚛 ${transportBottleneckMoment.asDaysHoursAndMinutes(compact)} ")
+        else -> Unit
     }
 
     when {
-        state.farmer.awayTimeRemaining < Duration.ZERO ->
-            appendLine("⌛ Empty!")
-        state.farmer.awayTimeRemaining < Duration.standardHours(12L) ->
+        state.farmer.awayTimeRemaining <= Duration.ZERO -> appendLine("⌛ Empty!")
+        state.farmer.awayTimeRemaining < Duration.standardHours(12L)
+                && state.farmer.awayTimeRemaining < state.timeRemaining
+                && state.farmer.awayTimeRemaining < state.timeTillFinalGoal ?: ONE_YEAR ->
             appendLine("⌛ ${state.farmer.awayTimeRemaining.asDaysHoursAndMinutes(compact)}")
+        else -> Unit
     }
     appendLine("```")
 }
@@ -157,15 +164,14 @@ private fun StringBuilder.drawFinishedBasicInfo(
     state: SoloContractState,
     compact: Boolean,
 ): StringBuilder = apply {
-    appendLine("__**🎉 Completed if you check in**__ ```")
+    appendLine("__**🎉 Bank now to finish!**__ ```")
     appendLine("Time since backup: ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
 
-    append("Current eggs:      ${state.farmer.currentEggsLaid.asIllions()} ")
+    append("Current eggs:   ${state.farmer.currentEggsLaid.asIllions()} ")
     if (!compact) append("(${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr) ")
     appendLine()
 
-    append("Current chickens:  ${state.farmer.currentChickens.asIllions()} ")
-    if (!compact) append("(${state.farmer.currentChickenIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)")
+    append("Unbanked eggs:  ${state.farmer.unreportedEggsLaid.asIllions()} ")
     appendLine()
 
     appendLine("```")

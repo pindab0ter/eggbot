@@ -32,6 +32,8 @@ data class SoloContractState(
         get() = farmer.runningState.eggsLaid
     val timeUpEggsLaid: BigDecimal
         get() = farmer.timeUpState?.eggsLaid ?: BigDecimal.ZERO
+    val timeTillFinalGoal: Duration?
+        get() = goals.last().moment
     val willFinish: Boolean
         get() = when {
             timeElapsed < timeRemaining -> runningEggsLaid >= goals.last().amount

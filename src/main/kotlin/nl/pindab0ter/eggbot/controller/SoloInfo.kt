@@ -47,7 +47,7 @@ object SoloInfo : EggBotCommand() {
             }?.let { archivedContract ->
                 return when {
                     archivedContract.contract!!.coopAllowed && archivedContract.coopId.isNotBlank() -> event.replyAndLogWarning(
-                        "The contract with ID `$contractId` was not a solo contract."
+                        "The contract with ID `$contractId` is not a solo contract."
                     )
                     archivedContract.finished -> event.replyAndLogWarning(
                         """
