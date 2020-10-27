@@ -36,8 +36,8 @@ object SoloInfo : EggBotCommand() {
         val compact: Boolean = parameters.getBoolean(COMPACT, false)
 
         val farmers: List<Farmer> = transaction {
-            DiscordUser.findById(event.author.id)?.farmers
-        }?.toList() ?: return event.replyAndLogError("Could not find any farmers. Please contact the bot maintainer.")
+            DiscordUser.findById(event.author.id)?.farmers?.toList()
+        } ?: return event.replyAndLogError("Could not find any farmers. Please contact the bot maintainer.")
 
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
             val localContract: LocalContract = backup.contracts?.contracts?.find { localContract ->
