@@ -658,7 +658,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(
         }
     }
 
-    divider()
+    divider(intersection = '╡')
 }
 
 private fun StringBuilder.drawCompactTimeSinceLastBackup(
