@@ -8,7 +8,6 @@ import com.martiansoftware.jsap.UnflaggedOption
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.asyncMap
-import nl.pindab0ter.eggbot.helpers.table
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.ProgressBar
 
@@ -37,30 +36,30 @@ object Test : EggBotCommand() {
         init()
     }
 
-    override fun execute(event: CommandEvent, parameters: JSAPResult) {
-        val rawValues = (1..100)
+    override fun execute(event: CommandEvent, parameters: JSAPResult) = runBlocking {
         val message = event.channel.sendMessage("Calculating…").complete()
         runBlocking {
-            val progressBar = ProgressBar(rawValues.count(),
+            val progressBar = ProgressBar(
+                2,
                 message,
-                "Testing…",
-                "tests",
+                "Counting…",
+                "number(s) counted",
                 coroutineContext = coroutineContext)
-            val values = rawValues.asyncMap {
-                delay(it * 100L)
-                progressBar.update()
-                it
+            (1..2).asyncMap {
+                delay(it * 1000L)
+                progressBar.increment()
             }
-            table {
-                displayHeaders = false
-                column {
-                    cells = values.map { index ->
-                        index.toString()
-                    }
-                }
-            }.forEach { block ->
-                event.reply(block)
+            progressBar.reset(
+                3,
+                "Counting again…",
+                "number(s) counted"
+            )
+            (1..3).asyncMap {
+                delay(it * 1000L)
+                progressBar.increment()
             }
+            progressBar.stop()
+            event.reply("Done")
         }
     }
 }

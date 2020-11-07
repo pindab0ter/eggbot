@@ -129,12 +129,12 @@ object RollCall : EggBotCommand() {
                                 farmer.inGameName to farmer.discordUser.discordId
                             }.toMap(),
                             role = role,
-                            progressCallBack = progressBar::update
+                            progressCallBack = progressBar::increment
                         )
                     }
                 }
 
-                progressBar.stopAndDeleteMessage()
+                progressBar.stop()
             }
 
             rollCallResponse(contract, coops).forEach { block ->

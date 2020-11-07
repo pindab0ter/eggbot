@@ -71,13 +71,13 @@ object CoopsInfo : EggBotCommand() {
         val statuses = coopStatuses
             .zip(coops.map { coop -> coop.name })
             .asyncMap(coroutineContext) { (coopStatus, coopId) ->
-                CoopContractStatus(contract, coopStatus, coopId, progressCallback = progressBar::update)
+                CoopContractStatus(contract, coopStatus, coopId, progressCallback = progressBar::increment)
             }.let { statuses ->
                 if (!compact) statuses.sortedWith(currentEggsComparator)
                 else statuses.sortedWith(timeTillFinalGoalComparator)
             }
 
-        progressBar.stopAndDeleteMessage()
+        progressBar.stop()
 
         if (statuses.isEmpty()) return@runBlocking event.replyAndLogWarning(
             "Could not find any co-ops for contract id `$contractId`.\nIs `contract id` correct and are there registered teams?"

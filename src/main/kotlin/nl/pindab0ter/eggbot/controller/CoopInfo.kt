@@ -59,9 +59,9 @@ object CoopInfo : EggBotCommand() {
             unit = "simulations",
             coroutineContext = coroutineContext
         )
-        val status = CoopContractStatus(contract, coopStatus, coopId, progressBar::update)
+        val status = CoopContractStatus(contract, coopStatus, coopId, progressBar::increment)
 
-        progressBar.stopAndDeleteMessage()
+        progressBar.stop()
 
         when (status) {
             is NotFound -> event.replyAndLogWarning("No co-op found for contract `${contractId}` with name `${coopId}`")

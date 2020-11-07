@@ -91,7 +91,7 @@ object CoopAdd : EggBotCommand() {
                     contributor.userName to contributor.userId
                 }.toMap(),
                 role = role,
-                progressCallBack = progressBar::update
+                progressCallBack = progressBar::increment
             )
 
             progressBar.stop()

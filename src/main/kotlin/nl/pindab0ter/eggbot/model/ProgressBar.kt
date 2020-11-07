@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.model
 
 import kotlinx.coroutines.*
 import net.dv8tion.jda.api.entities.Message
-import net.dv8tion.jda.api.exceptions.ContextException
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
 import org.apache.logging.log4j.kotlin.Logging
 import java.util.concurrent.atomic.AtomicBoolean
@@ -12,14 +11,14 @@ import kotlin.math.roundToInt
 
 
 class ProgressBar(
-    private val goal: Int,
-    private val message: Message,
-    private val statusText: String? = null,
-    private val unit: String = "",
+    goal: Int,
+    private var message: Message,
+    private var statusText: String? = null,
+    private var unit: String = "",
     coroutineContext: CoroutineContext? = null,
 ) : CoroutineScope, Logging {
     override val coroutineContext: CoroutineContext = coroutineContext ?: Dispatchers.Default
-    private var deleteMessage: AtomicBoolean = AtomicBoolean(true)
+    private var goal: AtomicInteger = AtomicInteger(goal)
     private var running: AtomicBoolean = AtomicBoolean(true)
     private var counter: AtomicInteger = AtomicInteger(0)
     private var dirty: AtomicBoolean = AtomicBoolean(true)
@@ -30,16 +29,14 @@ class ProgressBar(
     }
 
     private fun loop(): Job = GlobalScope.launch(coroutineContext) {
-        if (goal == 0) running.set(false)
-        else message.channel.sendTyping().queue()
+        if (goal.get() == 0) running.set(false)
         var i = 0
         while (running.get()) when {
             dirty.getAndSet(false) -> {
-                val contents = buildString {
+                message.editMessage(buildString {
                     if (statusText != null) appendLine(statusText)
-                    appendLine(drawProgressBar(counter.get(), goal, unit))
-                }
-                message.editMessage(contents).queue()
+                    appendLine(drawProgressBar(counter.get(), goal.get(), unit))
+                }).queue()
                 i = 0
             }
             else -> {
@@ -48,26 +45,28 @@ class ProgressBar(
                 delay(1000)
             }
         }
-        if (deleteMessage.get()) try {
+        try {
             message.delete().queue()
-        } catch (exception: ContextException) {
-            logger.error("Failed to delete message: ${exception.localizedMessage}")
+        } catch (exception: Exception) {
+            logger.error("Failed to delete message: ${exception.message}")
         }
     }
 
-    fun update() {
+    fun increment() {
         counter.incrementAndGet()
-        if (counter.get() >= goal) stop()
+        dirty.set(true)
+    }
+
+    fun reset(goal: Int, statusText: String? = null, unit: String = "") {
+        this.statusText = statusText
+        this.unit = unit
+        this.goal.set(goal)
+        counter.set(0)
         dirty.set(true)
     }
 
     fun stop() {
         running.set(false)
-    }
-
-    fun stopAndDeleteMessage() {
-        deleteMessage.set(true)
-        stop()
     }
 
     companion object {
