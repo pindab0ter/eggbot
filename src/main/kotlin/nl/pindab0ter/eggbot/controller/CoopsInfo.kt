@@ -64,8 +64,7 @@ object CoopsInfo : EggBotCommand() {
             },
             message = message,
             statusText = "Fetching backups and running simulations…",
-            unit = "simulations",
-            coroutineContext = coroutineContext
+            unit = "simulations"
         )
 
         val statuses = coopStatuses

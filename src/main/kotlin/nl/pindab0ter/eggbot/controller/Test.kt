@@ -40,11 +40,11 @@ object Test : EggBotCommand() {
         val message = event.channel.sendMessage("Calculating…").complete()
         runBlocking {
             val progressBar = ProgressBar(
-                2,
-                message,
-                "Counting…",
-                "number(s) counted",
-                coroutineContext = coroutineContext)
+                goal = 2,
+                message = message,
+                statusText = "Counting…",
+                unit = "number(s) counted"
+            )
             (1..2).asyncMap {
                 delay(it * 1000L)
                 progressBar.increment()

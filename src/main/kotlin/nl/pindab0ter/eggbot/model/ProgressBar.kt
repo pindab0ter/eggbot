@@ -6,7 +6,6 @@ import nl.pindab0ter.eggbot.helpers.paddingCharacters
 import org.apache.logging.log4j.kotlin.Logging
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 
@@ -15,9 +14,7 @@ class ProgressBar(
     private var message: Message,
     private var statusText: String? = null,
     private var unit: String = "",
-    coroutineContext: CoroutineContext? = null,
-) : CoroutineScope, Logging {
-    override val coroutineContext: CoroutineContext = coroutineContext ?: Dispatchers.Default
+) : Logging {
     private var goal: AtomicInteger = AtomicInteger(goal)
     private var running: AtomicBoolean = AtomicBoolean(true)
     private var counter: AtomicInteger = AtomicInteger(0)
@@ -28,7 +25,7 @@ class ProgressBar(
         job = loop()
     }
 
-    private fun loop(): Job = GlobalScope.launch(coroutineContext) {
+    private fun loop(): Job = GlobalScope.launch(Dispatchers.Default) {
         if (goal.get() == 0) running.set(false)
         var i = 0
         while (running.get()) when {

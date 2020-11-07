@@ -52,10 +52,10 @@ object SolosInfo : EggBotCommand() {
             goal = databaseFarmers.count(),
             message = message,
             statusText = "Looking up which farmers are attempting _${contract.name}_…",
-            unit = "registered farmers",
+            unit = "registered farmers"
         )
 
-        val farmers: List<Backup> = databaseFarmers.asyncMap { databaseFarmer ->
+        val farmers: List<Backup> = databaseFarmers.asyncMap() { databaseFarmer ->
             AuxBrain.getFarmerBackup(databaseFarmer.inGameId).also {
                 progressBar.increment()
             }
@@ -78,7 +78,7 @@ object SolosInfo : EggBotCommand() {
             unit = "farms",
         )
 
-        val states = farmers.asyncMap { farmer ->
+        val states = farmers.asyncMap() { farmer ->
             farmer.contracts?.contracts?.find { localContract ->
                 localContract.contract?.id == contractId
             }?.let { localContract ->
