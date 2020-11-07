@@ -29,7 +29,7 @@ object AuxBrain {
             handler(PeriodicalsResponse.deserialize(response.body().decodeBase64()))
         }.discard()
 
-    private fun getPeriodicals(): PeriodicalsResponse? =
+    fun getPeriodicals(): PeriodicalsResponse? =
         periodicalsRequest().responseObject(ContractsDeserializer).third.component1()
 
     fun getContract(contractId: String): Contract? = getPeriodicals()?.contracts?.contracts?.find { contract ->
