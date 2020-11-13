@@ -21,13 +21,15 @@ fun solosInfoResponse(
 
     if (!compact) {
         drawBasicInfo(contract)
+        appendBreakpoint()
         drawFarmers(states.sortedWith(SoloContractState.timeUpEggsLaidComparator))
     } else {
         drawCompactBasicInfo(contract)
+        appendBreakpoint()
         drawCompactFarmers(states.sortedWith(SoloContractState.timeUpEggsLaidComparator))
     }
 
-}.splitCodeBlock()
+}.splitMessage(separator = BREAKPOINT)
 
 private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = appendTable {
     title = "__**🗒️ Basic info**__"
