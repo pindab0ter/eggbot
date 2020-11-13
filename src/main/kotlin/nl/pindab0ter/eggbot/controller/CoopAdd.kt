@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.controller
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
+import kotlinx.coroutines.Dispatchers
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.controller.categories.AdminCategory
@@ -84,7 +85,13 @@ object CoopAdd : EggBotCommand() {
         if (role != null && coopStatus != null) {
             val messageContent = "Assigning roles…"
             val message = event.channel.sendMessage(messageContent).complete()
-            val progressBar = ProgressBar(coopStatus.contributors.count(), message, messageContent)
+            val progressBar = ProgressBar(
+                coopStatus.contributors.count(),
+                message,
+                messageContent,
+                "roles assigned",
+                coroutineContext = Dispatchers.Default
+            )
 
             val (successes, failures) = assignRoles(
                 inGameNamesToDiscordIDs = coopStatus.contributors.map { contributor ->

@@ -1,11 +1,15 @@
 package nl.pindab0ter.eggbot.model
 
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
 import org.apache.logging.log4j.kotlin.Logging
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 
@@ -14,6 +18,7 @@ class ProgressBar(
     private var message: Message,
     private var statusText: String? = null,
     private var unit: String = "",
+    coroutineContext: CoroutineContext,
 ) : Logging {
     private var goal: AtomicInteger = AtomicInteger(goal)
     private var running: AtomicBoolean = AtomicBoolean(true)
@@ -22,10 +27,10 @@ class ProgressBar(
     private var job: Job
 
     init {
-        job = loop()
+        job = loop(coroutineContext)
     }
 
-    private fun loop(): Job = GlobalScope.launch(Dispatchers.Default) {
+    private fun loop(coroutineContext: CoroutineContext): Job = GlobalScope.launch(coroutineContext) {
         if (goal.get() == 0) running.set(false)
         var i = 0
         while (running.get()) when {

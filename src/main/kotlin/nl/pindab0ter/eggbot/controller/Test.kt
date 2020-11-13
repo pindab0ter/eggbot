@@ -43,7 +43,8 @@ object Test : EggBotCommand() {
                 goal = 2,
                 message = message,
                 statusText = "Counting…",
-                unit = "number(s) counted"
+                unit = "number(s) counted",
+                coroutineContext = coroutineContext
             )
             (1..2).asyncMap {
                 delay(it * 1000L)

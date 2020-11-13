@@ -6,6 +6,7 @@ import com.martiansoftware.jsap.JSAP.REQUIRED
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.Switch
 import com.martiansoftware.jsap.UnflaggedOption
+import kotlinx.coroutines.Dispatchers
 import net.dv8tion.jda.api.Permission.MANAGE_ROLES
 import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.EggBot.jdaClient
@@ -120,7 +121,13 @@ object RollCall : EggBotCommand() {
             val coops: List<Coop> = createRollCall(farmers, contract, baseName, noRoles)
 
             if (!noRoles) {
-                val progressBar = ProgressBar(farmers.count(), message, statusText = messageContents)
+                val progressBar = ProgressBar(
+                    farmers.count(),
+                    message,
+                    statusText = messageContents,
+                    "roles assigned",
+                    coroutineContext = Dispatchers.Default
+                )
 
                 coops.map { coop ->
                     coop.roleId?.let { guild.getRoleById(it) }?.let { role ->

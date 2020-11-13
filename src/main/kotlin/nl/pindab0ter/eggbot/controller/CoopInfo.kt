@@ -56,7 +56,8 @@ object CoopInfo : EggBotCommand() {
             } else 0,
             message = message,
             statusText = "Fetching backups and running simulations…",
-            unit = "simulations"
+            unit = "simulations",
+            coroutineContext = coroutineContext
         )
         val status = CoopContractStatus(contract, coopStatus, coopId, progressBar::increment)
 
