@@ -9,7 +9,6 @@ import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.ProgressBar
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.simulation.SoloContractState
@@ -40,18 +39,12 @@ object SolosInfo : EggBotCommand() {
         val message = event.channel.sendMessage("Looking up contract information ").complete()
         message.channel.sendTyping().queue()
 
-        val contract: Contract = AuxBrain.getPeriodicals()?.contracts?.contracts?.find { contract ->
-            contract.id == contractId
-        } ?: return@runBlocking event.replyAndLogWarning(
-            "Could not find a contract with ID `$contractId`. Use `${Config.prefix}${ContractIDs.name}` to get a list of the current contracts."
-        )
-
         val databaseFarmers = transaction { Farmer.all().toList() }
 
         val progressBar = ProgressBar(
             goal = databaseFarmers.count(),
             message = message,
-            statusText = "Looking up which farmers are attempting _${contract.name}_…",
+            statusText = "Looking up which farmers are attempting `${contractId}`…",
             unit = "registered farmers",
             coroutineContext
         )
@@ -90,6 +83,14 @@ object SolosInfo : EggBotCommand() {
                 }
             }
         }.filterNotNull()
+
+        val contract: Contract = farmers.asSequence().mapNotNull { farmer ->
+            farmer.contracts?.contracts
+        }.flatten().toSet().map { it.contract }.find { contract ->
+            contract?.id == contractId
+        } ?: return@runBlocking event.replyAndLogWarning(
+            "Nobody is soloing a contract with ID `$contractId`. Are you sure the contract ID is correct?"
+        )
 
         progressBar.stop()
 
