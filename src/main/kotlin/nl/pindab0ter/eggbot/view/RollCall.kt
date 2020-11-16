@@ -12,7 +12,6 @@ fun rollCallResponse(
     coops: List<Coop>,
 ): List<String> = listOf(buildString {
     appendLine("Co-ops generated for `${contract.id}`:")
-    appendLine()
 
     append("```")
     coops.forEach { coop ->
