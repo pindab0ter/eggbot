@@ -5,6 +5,7 @@ import com.jagrosh.jdautilities.command.CommandClientBuilder
 import nl.pindab0ter.eggbot.controller.*
 import nl.pindab0ter.eggbot.model.Config
 
+// TODO: Log error to channel and ping the admin user
 val commandClient: CommandClient = CommandClientBuilder().apply {
     setOwnerId(Config.botOwnerId)
     setPrefix(Config.prefix)
