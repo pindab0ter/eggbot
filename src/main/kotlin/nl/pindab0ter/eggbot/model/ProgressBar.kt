@@ -43,7 +43,7 @@ class ProgressBar(
             }
             else -> {
                 if (i >= TIME_OUT) running.set(false)
-                if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.sendTyping().queue()
+                else if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.sendTyping().queue()
                 delay(1000)
             }
         }
