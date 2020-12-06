@@ -24,6 +24,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         Inactive,
         Inactives,
         LeaderBoard,
+        Migrate,
         Register,
         RollCall,
         RollClear,

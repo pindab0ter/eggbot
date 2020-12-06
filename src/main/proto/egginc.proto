@@ -27,6 +27,7 @@ message Backup {
     Misc misc = 10;
     repeated Simulation farms = 12;
     MyContracts contracts = 13;
+    string ei_user_id = 18;
     bool force_offer_backup = 20;
     uint32 client_version = 21;
     uint32 force_backup = 22;

@@ -30,7 +30,7 @@ object Register : EggBotCommand() {
             UnflaggedOption(IN_GAME_ID)
                 .setRequired(REQUIRED)
                 .setHelp(
-                    "You in-game ID. Can be found by going to the Menu → Settings → More and looking in the" +
+                    "Your in-game ID. Can be found by going to the Menu → Settings → More and looking in the" +
                             "bottom of that screen."
                 ),
             UnflaggedOption(IN_GAME_NAME)
