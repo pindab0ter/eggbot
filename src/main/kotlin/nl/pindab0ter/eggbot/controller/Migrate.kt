@@ -23,8 +23,7 @@ object Migrate : EggBotCommand() {
     init {
         category = FarmersCategory
         name = "migrate"
-        help = "Migrate your account to register with the new Egg, Inc. ID. **DM only!"
-        hidden = true
+        help = "Migrate your account to register with the new Egg, Inc. ID. **DM only!**"
         registrationRequired = true
         parameters = listOf(
             UnflaggedOption(EGG_INC_ID)
@@ -64,9 +63,9 @@ object Migrate : EggBotCommand() {
 
             if (backup?.game == null || backup.stats == null) return@transaction event.replyAndLogWarning(
                 """
-            No account found with in-game ID `$eggIncId`. Did you enter your new Egg, Inc. ID correctly?
-            Type `${event.client.textualPrefix}${Register.name} --help` for more info, hints and tips on how to use this command.
-            """.trimIndent()
+                No account found with in-game ID `$eggIncId`. Did you enter your new Egg, Inc. ID correctly?
+                Type `${event.client.textualPrefix}${Register.name} --help` for more info, hints and tips on how to use this command.
+                """.trimIndent()
             )
 
             val farmer = discordUser.farmers.find { farmer ->

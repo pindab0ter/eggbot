@@ -16,7 +16,9 @@ import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
 object AuxBrain {
     private const val PERIODICALS_URL = "http://www.auxbrain.com/ei/get_periodicals"
     private const val COOP_STATUS_URL = "http://www.auxbrain.com/ei/coop_status"
+    private const val COOP_STATUS_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
     private const val FIRST_CONTACT_URL = "http://www.auxbrain.com/ei/first_contact"
+    private const val FIRST_CONTACT_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
 
     private fun periodicalsRequest(): Request = PERIODICALS_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
@@ -42,16 +44,30 @@ object AuxBrain {
         }
     }
 
-    private fun firstContactRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body("data=${
-            FirstContactRequest { this.userId = userId }.serialize().encodeBase64ToString()
-        }")
+    private fun firstContactRequest(userId: String): Request = (when {
+        userId.startsWith("EI") -> FIRST_CONTACT_BETA_URL.httpPost()
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body("data=${
+                FirstContactRequest {
+                    this.userId = userId
+                }.serialize().encodeBase64ToString()
+            }")
+        else -> FIRST_CONTACT_URL.httpPost()
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body("data=${
+                FirstContactRequest {
+                    this.userId = userId
+                }.serialize().encodeBase64ToString()
+            }")
+    })
 
-    private fun coopStatusRequest(contractId: String, coopId: String) = COOP_STATUS_URL.httpPost()
+    private fun coopStatusRequest(contractId: String, coopId: String) = COOP_STATUS_BETA_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body("data=${
-            CoopStatusRequest { this.contractId = contractId; this.coopId = coopId }.serialize().encodeBase64ToString()
+            CoopStatusRequest {
+                this.contractId = contractId
+                this.coopId = coopId
+            }.serialize().encodeBase64ToString()
         }")
 
     fun getCoopStatus(contractId: String, coopId: String): CoopStatusResponse? =
