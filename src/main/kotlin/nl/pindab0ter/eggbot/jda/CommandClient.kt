@@ -30,6 +30,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         RollClear,
         SoloInfo,
         SolosInfo,
+        Unmigrated,
         Unregister,
         WhoIs
     )
