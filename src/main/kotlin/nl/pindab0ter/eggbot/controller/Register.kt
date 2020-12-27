@@ -119,8 +119,7 @@ object Register : EggBotCommand() {
             // Finally confirm the registration
             if (discordUser.farmers.filterNot { it.inGameId == registrant.inGameId }.none()) event.replyAndLogSuccess(
                 "You have been registered with the in-game name `${backup.userName}`, welcome!"
-            )
-            else event.replyAndLogSuccess("You are now registered with the in-game name `${backup.userName}`, as well as `${
+            ) else event.replyAndLogSuccess("You are now registered with the in-game name `${backup.userName}`, as well as `${
                 discordUser.farmers
                     .filterNot { it.inGameId == registrant.inGameId }
                     .joinToString(" `, ` ") { it.inGameName }

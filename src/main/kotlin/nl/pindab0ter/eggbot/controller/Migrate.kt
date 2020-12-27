@@ -91,8 +91,8 @@ object Migrate : EggBotCommand() {
                 this.eliteDroneTakedowns = backup.stats.droneTakedownsElite
                 this.lastUpdated = DateTime.now()
             }
-
-            event.replyAndLogSuccess("You have successfully migrated your account!")
         }
+
+        event.replyAndLogSuccess("You have successfully migrated your account!")
     }
 }
