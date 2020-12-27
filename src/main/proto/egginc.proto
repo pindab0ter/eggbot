@@ -251,6 +251,11 @@ message FirstContactRequest {
 }
 
 message FirstContactResponse {
+  FirstContact first_contact = 1;
+  string checksum = 2;
+}
+
+message FirstContact {
   Backup backup = 1;
   string ei_user_id = 2;
   repeated string ids_transferred = 3;
@@ -328,13 +333,18 @@ message CoopStatusRequest {
 }
 
 message CoopStatusResponse {
+  CoopStatus coopStatus = 1;
+  string checksum = 2;
+}
+
+message CoopStatus {
   string contract_id = 1;
   double total_amount = 2;
   string coop_id = 3;
   repeated ContributionInfo contributors = 4;
-  double seconds_remaining = 5; // in seconds
-  bool all_members_reporting = 6; // no idea yet, always seems to be 0
-  double grace_period_seconds_remaining = 7; // After 48 hours contract becomes inactive (172800 seconds) more than timeleft.
+  double seconds_remaining = 5;
+  bool all_members_reporting = 6;
+  double grace_period_seconds_remaining = 7; // After 48 hours contract becomes inactive (172800 seconds) more than time_left.
   bool auto_generated = 8;
   string creator_id = 9;
   bool public = 10;
@@ -422,6 +432,11 @@ message PeriodicalsRequest {
 }
 
 message PeriodicalsResponse {
+  Periodicals periodicals = 1;
+  string checksum = 2;
+}
+
+message Periodicals {
   uint32 sales = 1; // SalesInfo
   uint32 events = 2; // CurrentEventsInfo
   ContractsResponse contracts = 3;
@@ -429,9 +444,9 @@ message PeriodicalsResponse {
 }
 
 message MissionInfo {
-  MissionInfo.Spaceship ship = 1;
-  MissionInfo.Status status = 2;
-  MissionInfo.DurationType duration_type = 3;
+  Spaceship ship = 1;
+  Status status = 2;
+  DurationType duration_type = 3;
   repeated MissionInfo.Fuel fuel = 4;
   double duration_seconds = 5;
   double seconds_remaining = 6;
@@ -475,9 +490,9 @@ message MissionInfo {
 }
 
 message ArtifactSpec {
-  ArtifactSpec.Name name = 1;
-  ArtifactSpec.Level level = 2;
-  ArtifactSpec.Rarity rarity = 3;
+  Name name = 1;
+  Level level = 2;
+  Rarity rarity = 3;
   Egg egg = 4;
 
   enum Name {
@@ -589,13 +604,13 @@ message ArtifactsConfigurationRequest {
 }
 
 message ArtifactsConfigurationResponse {
-  repeated ArtifactsConfigurationResponse.MissionParameters mission_parameters = 1;
-  repeated ArtifactsConfigurationResponse.ArtifactParameters artifact_parameters = 2;
+  repeated MissionParameters mission_parameters = 1;
+  repeated ArtifactParameters artifact_parameters = 2;
 
   message MissionParameters {
     MissionInfo.Spaceship ship = 1;
     uint32 capacity = 2;
-    repeated ArtifactsConfigurationResponse.MissionParameters.Duration durations = 3;
+    repeated Duration durations = 3;
 
     message Duration {
       MissionInfo.DurationType duration_type = 1;
@@ -632,7 +647,7 @@ message MissionResponse {
 message CompleteMissionResponse {
   bool success = 1;
   MissionInfo info = 2;
-  repeated CompleteMissionResponse.SecureArtifactSpec artifacts = 3;
+  repeated SecureArtifactSpec artifacts = 3;
   repeated Reward other_rewards = 4;
   string ei_user_id = 5;
 

@@ -22,13 +22,15 @@ object ContractIDs : EggBotCommand() {
         event: CommandEvent,
         parameters: JSAPResult,
     ) = AuxBrain.getPeriodicals { periodicalsResponse ->
-        val (soloContracts, coopContracts) = periodicalsResponse.contracts!!.contracts
-            .sortedBy { it.expirationTime }
-            .groupBy { it.coopAllowed }
-            .let { it[false].orEmpty() to it[true].orEmpty() }
+        periodicalsResponse?.contracts?.contracts?.let { contracts ->
+            val (soloContracts, coopContracts) = contracts
+                .sortedBy { it.expirationTime }
+                .groupBy { it.coopAllowed }
+                .let { it[false].orEmpty() to it[true].orEmpty() }
 
-        if (soloContracts.isNotEmpty() && coopContracts.isNotEmpty())
-            event.reply(contractIDsResponse(soloContracts, coopContracts))
-        else event.replyWarning("There are currently no active contracts")
+            if (soloContracts.isNotEmpty() && coopContracts.isNotEmpty())
+                event.reply(contractIDsResponse(soloContracts, coopContracts))
+            else event.replyWarning("There are currently no active contracts")
+        } ?: event.replyWarning("Could not get the active contracts.")
     }
 }

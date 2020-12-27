@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
-import com.auxbrain.ei.CoopStatusResponse
+import com.auxbrain.ei.CoopStatus
 import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
@@ -72,7 +72,7 @@ fun coopFinishedIfBankedResponse(
 }.splitMessage(separator = BREAKPOINT)
 
 fun coopFinishedResponse(
-    status: CoopStatusResponse,
+    status: CoopStatus,
     contract: Contract,
     compact: Boolean,
 ) = buildString {

@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Contract
-import com.auxbrain.ei.CoopStatusResponse
+import com.auxbrain.ei.CoopStatus
 import com.auxbrain.ei.Egg
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
@@ -66,7 +66,7 @@ data class CoopContractState(
 
     constructor(
         contract: Contract,
-        coopStatus: CoopStatusResponse,
+        coopStatus: CoopStatus,
         farmers: List<Farmer>,
     ) : this(
         contractId = contract.id,

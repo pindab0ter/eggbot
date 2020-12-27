@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Contract
-import com.auxbrain.ei.CoopStatusResponse
+import com.auxbrain.ei.CoopStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.asyncMap
@@ -12,15 +12,15 @@ import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
 import org.joda.time.Duration
 
-sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopContractStatus> {
+sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopContractStatus> {
     data class NotFound(val coopId: String) : CoopContractStatus(0)
 
     sealed class InActive(priority: Int) : CoopContractStatus(priority) {
-        abstract val coopStatus: CoopStatusResponse
+        abstract val coopStatus: CoopStatus
 
-        data class Finished(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(4)
-        data class Abandoned(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-1)
-        data class Failed(override val coopStatus: CoopStatusResponse) : CoopContractStatus.InActive(-2)
+        data class Finished(override val coopStatus: CoopStatus) : CoopContractStatus.InActive(4)
+        data class Abandoned(override val coopStatus: CoopStatus) : CoopContractStatus.InActive(-1)
+        data class Failed(override val coopStatus: CoopStatus) : CoopContractStatus.InActive(-2)
     }
 
     sealed class InProgress(priority: Int) : CoopContractStatus(priority) {
@@ -36,7 +36,7 @@ sealed class CoopContractStatus(internal val priority: Int) : Comparable<CoopCon
     companion object {
         operator fun invoke(
             contract: Contract,
-            coopStatus: CoopStatusResponse?,
+            coopStatus: CoopStatus?,
             coopId: String,
             progressCallback: () -> Unit = { },
         ): CoopContractStatus = when {

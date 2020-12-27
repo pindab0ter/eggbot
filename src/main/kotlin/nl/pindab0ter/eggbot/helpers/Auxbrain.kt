@@ -23,9 +23,9 @@ val LocalContract.finished: Boolean
     get() = lastAmountWhenRewardGiven.toBigDecimal() >= contract?.finalGoal
 val LocalContract.timeRemaining: Duration
     get() = contract!!.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), DateTime.now()))
-val CoopStatusResponse.eggsLaid: BigDecimal
+val CoopStatus.eggsLaid: BigDecimal
     get() = BigDecimal(totalAmount)
-val CoopStatusResponse.timeRemaining: Duration
+val CoopStatus.timeRemaining: Duration
     get() = secondsRemaining.toDuration()
 
 fun Backup.farmFor(contractId: String): Backup.Simulation? = farms.firstOrNull { farm -> farm.contractId == contractId }

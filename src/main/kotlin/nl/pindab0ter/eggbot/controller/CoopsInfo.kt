@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.controller
 
-import com.auxbrain.ei.CoopStatusResponse
+import com.auxbrain.ei.CoopStatus
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import kotlinx.coroutines.runBlocking
@@ -52,7 +52,7 @@ object CoopsInfo : EggBotCommand() {
         val message = event.channel.sendMessage("Fetching co-op statuses…").complete()
         message.channel.sendTyping().queue()
 
-        val coopStatuses: List<CoopStatusResponse?> = coops.asyncMap(coroutineContext) status@{ coop ->
+        val coopStatuses: List<CoopStatus?> = coops.asyncMap(coroutineContext) status@{ coop ->
             AuxBrain.getCoopStatus(contract.id, coop.name)
         }
 

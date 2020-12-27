@@ -92,9 +92,7 @@ object Migrate : EggBotCommand() {
                 this.lastUpdated = DateTime.now()
             }
 
-            event.replyAndLogSuccess(
-                "You have successfully migrated your account!"
-            )
+            event.replyAndLogSuccess("You have successfully migrated your account!")
         }
     }
 }
