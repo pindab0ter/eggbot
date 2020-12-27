@@ -44,9 +44,9 @@ object Migrate : EggBotCommand() {
         event.author.openPrivateChannel().queue { it.sendTyping().complete() }
 
         if (event.isFromType(ChannelType.TEXT)) {
-            return if (Register.botPermissions.contains(MESSAGE_MANAGE)) event.replyInDmAndLog("Registering is only allowed in DMs to protect your in-game ID. Please give it a go here!")
+            return if (Register.botPermissions.contains(MESSAGE_MANAGE)) event.replyInDmAndLog("Migrating is only allowed in DMs to protect your in-game ID. Please give it a go here!")
                 .also { event.message.delete().queue() }
-            else event.replyInDmAndLog("Registering is only allowed in DMs to protect your in-game ID. Please give it a go here and delete your previous message!")
+            else event.replyInDmAndLog("Migrating is only allowed in DMs to protect your in-game ID. Please give it a go here and delete your previous message!")
         }
 
         val eggIncId = parameters.getString(EGG_INC_ID).toUpperCase()
@@ -91,8 +91,8 @@ object Migrate : EggBotCommand() {
                 this.eliteDroneTakedowns = backup.stats.droneTakedownsElite
                 this.lastUpdated = DateTime.now()
             }
-        }
 
-        event.replyAndLogSuccess("You have successfully migrated your account!")
+            event.replyAndLogSuccess("You have successfully migrated your account!")
+        }
     }
 }
