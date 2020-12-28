@@ -13,5 +13,5 @@ rsync \
   -e ssh \
   ./bin \
   ./lib \
-  EggBot:~/EggBot
-ssh EggBot 'tmux send-keys -t EggBot C-c "bin/EggBot" Enter'
+  "$1":~/EggBot
+ssh "$1" 'tmux send-keys -t "$2" C-c "bin/EggBot" Enter'
