@@ -6,16 +6,16 @@ message Backup {
   string user_id = 1;
   string user_name = 2;
   double approx_time = 3;
-  Backup.Settings settings = 4;
-  Backup.Tutorial tutorial = 5;
-  Backup.Stats stats = 6;
-  Backup.Game game = 7;
-  Backup.Simulation simulation = 8;
-  Backup.Missions missions = 9;
-  Backup.Misc misc = 10;
-  repeated Backup.Simulation farms = 12;
+  Settings settings = 4;
+  Tutorial tutorial = 5;
+  Stats stats = 6;
+  Game game = 7;
+  Simulation simulation = 8;
+  Missions missions = 9;
+  Misc misc = 10;
+  repeated Simulation farms = 12;
   MyContracts contracts = 13;
-  Backup.Artifacts artifacts = 14;
+  Artifacts artifacts = 14;
   ArtifactsDB artifacts_db = 15;
   string game_services_id = 16;
   string device_id = 17;
@@ -396,7 +396,7 @@ message MyContracts {
   repeated LocalContract contracts = 1;
   repeated LocalContract archive = 2;
   repeated string contract_ids_seen = 3;
-  repeated CoopStatusResponse current_coop_statuses = 4;
+  repeated CoopStatus current_coop_statuses = 4;
 }
 
 message CoopBuffState {
