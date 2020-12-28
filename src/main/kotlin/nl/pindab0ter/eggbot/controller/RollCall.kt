@@ -125,7 +125,7 @@ object RollCall : EggBotCommand() {
                     farmers.count(),
                     message,
                     statusText = messageContents,
-                    "roles assigned",
+                    unit = "roles assigned",
                     coroutineContext = Dispatchers.Default
                 )
 

@@ -21,11 +21,12 @@ object AuxBrain {
     private const val FIRST_CONTACT_URL = "http://www.auxbrain.com/ei/first_contact"
     private const val FIRST_CONTACT_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
 
-    private fun periodicalsRequest(): Request = PERIODICALS_BETA_URL.httpPost()
+    fun periodicalsRequest(): Request = PERIODICALS_BETA_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body("data=${
             PeriodicalsRequest {
                 clientVersion = EggBot.clientVersion
+                userId = "0"
             }.serialize().encodeBase64ToString()
         }")
 
@@ -48,21 +49,21 @@ object AuxBrain {
             }.serialize().encodeBase64ToString()
         }")
 
-    fun getPeriodicals(handler: (Periodicals?) -> Unit) = periodicalsRequest()
+    fun getContracts(handler: (List<Contract>?) -> Unit) = periodicalsRequest()
         .response { _, response, _ ->
-            handler(PeriodicalsResponse.deserialize(response.body().decodeBase64()).periodicals)
+            handler(PeriodicalsResponse.deserialize(response.body().decodeBase64()).periodicals?.contracts?.contracts)
         }.discard()
 
-    fun getPeriodicals(): PeriodicalsResponse? =
+    fun getContracts(): List<Contract>? =
         periodicalsRequest().responseObject(ContractsDeserializer).third.component1()
 
     fun getContract(contractId: String): Contract? =
-        getPeriodicals()?.periodicals?.contracts?.contracts?.find { contract ->
+        getContracts()?.find { contract ->
             contract.id == contractId
         }
 
     fun getCoopStatus(contractId: String, coopId: String): CoopStatus? =
-        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third.component1()?.coopStatus
+        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third.component1()
 
     fun getFarmerBackup(userId: String, handler: ResultHandler<Backup>): CancellableRequest =
         firstContactRequest(userId).responseObject(BackupDeserializer, handler)
@@ -70,15 +71,15 @@ object AuxBrain {
     fun getFarmerBackup(userId: String): Backup? =
         firstContactRequest(userId).responseObject(BackupDeserializer).third.component1()
 
-    private object ContractsDeserializer : ResponseDeserializable<PeriodicalsResponse> {
-        override fun deserialize(content: String): PeriodicalsResponse? {
-            return content.decodeBase64()?.let { PeriodicalsResponse.deserialize(it) }
+    private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
+        override fun deserialize(content: String): List<Contract>? {
+            return content.decodeBase64()?.let { PeriodicalsResponse.deserialize(it).periodicals?.contracts?.contracts }
         }
     }
 
-    private object CoopStatusDeserializer : ResponseDeserializable<CoopStatusResponse> {
-        override fun deserialize(content: String): CoopStatusResponse? {
-            return content.decodeBase64()?.let { CoopStatusResponse.deserialize(it) }
+    private object CoopStatusDeserializer : ResponseDeserializable<CoopStatus> {
+        override fun deserialize(content: String): CoopStatus? {
+            return content.decodeBase64()?.let { CoopStatusResponse.deserialize(it).coopStatus }
         }
     }
 
