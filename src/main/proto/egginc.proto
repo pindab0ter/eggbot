@@ -161,7 +161,7 @@ message Backup {
     double flow_percentage_artifacts = 6;
     bool fueling_enabled = 7;
     bool infusing_enabled = 8;
-    .MissionInfo.Spaceship last_fueled_ship = 9;
+    MissionInfo.Spaceship last_fueled_ship = 9;
     double inventory_score = 10;
     bool enabled = 11;
     bool intro_shown = 12;
@@ -201,7 +201,7 @@ message Backup {
     double eggs_shipped = 30;
   }
 
-  message MissionInfo {
+  message Mission {
     string id = 1;
     bool completed = 2;
     double reference_value = 3;
@@ -210,7 +210,7 @@ message Backup {
   message Missions {
     string current_mission_name = 1;
     double reference_value = 2;
-    repeated Backup.MissionInfo missions = 3;
+    repeated Mission missions = 3;
     repeated string current_missions = 4;
   }
 
@@ -234,6 +234,27 @@ message Backup {
     bool boost_token_alert = 17;
     bool soul_egg_alert = 18;
     bool backup_reminder_alert = 19;
+  }
+
+  message ArtifactsDB {
+    repeated ArtifactInventoryItem inventory_items = 1;
+    uint64 item_sequence = 2;
+    repeated InventorySlot inventory_slots = 3;
+    repeated MissionInfo mission_infos = 4;
+    repeated MissionInfo mission_archive = 5;
+    repeated ArtifactsDB.ActiveArtifactSlot active_artifacts = 7;
+    repeated ArtifactSpec discovered_artifacts = 8;
+    repeated ArtifactsDB.CraftableArtifact craftable_artifacts = 9;
+
+    message ActiveArtifactSlot {
+      bool occupied = 1;
+      uint64 item_id = 2;
+    }
+
+    message CraftableArtifact {
+      ArtifactSpec spec = 1;
+      bool seen = 2;
+    }
   }
 }
 
@@ -654,27 +675,6 @@ message CompleteMissionResponse {
   message SecureArtifactSpec {
     ArtifactSpec spec = 1;
     string server_id = 2;
-  }
-}
-
-message ArtifactsDB {
-  repeated ArtifactInventoryItem inventory_items = 1;
-  uint64 item_sequence = 2;
-  repeated InventorySlot inventory_slots = 3;
-  repeated MissionInfo mission_infos = 4;
-  repeated MissionInfo mission_archive = 5;
-  repeated ArtifactsDB.ActiveArtifactSlot active_artifacts = 7;
-  repeated ArtifactSpec discovered_artifacts = 8;
-  repeated ArtifactsDB.CraftableArtifact craftable_artifacts = 9;
-
-  message ActiveArtifactSlot {
-    bool occupied = 1;
-    uint64 item_id = 2;
-  }
-
-  message CraftableArtifact {
-    ArtifactSpec spec = 1;
-    bool seen = 2;
   }
 }
 
