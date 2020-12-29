@@ -40,6 +40,14 @@ object AuxBrain {
             }.serialize().encodeBase64ToString()
         }")
 
+    private fun oldFirstContactRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
+        .header("Content-Type", "application/x-www-form-urlencoded")
+        .body("data=${
+            FirstContactRequest {
+                this.userId = userId
+            }.serialize().encodeBase64ToString()
+        }")
+
     private fun coopStatusRequest(contractId: String, coopId: String) = COOP_STATUS_BETA_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body("data=${
@@ -65,11 +73,15 @@ object AuxBrain {
     fun getCoopStatus(contractId: String, coopId: String): CoopStatus? =
         coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third.component1()
 
-    fun getFarmerBackup(userId: String, handler: ResultHandler<Backup>): CancellableRequest =
-        firstContactRequest(userId).responseObject(BackupDeserializer, handler)
+    fun getFarmerBackup(userId: String, handler: ResultHandler<Backup>): CancellableRequest = when {
+        userId.startsWith("EI") -> firstContactRequest(userId).responseObject(BackupDeserializer, handler)
+        else -> oldFirstContactRequest(userId).responseObject(OldBackupDeserializer, handler)
+    }
 
-    fun getFarmerBackup(userId: String): Backup? =
-        firstContactRequest(userId).responseObject(BackupDeserializer).third.component1()
+    fun getFarmerBackup(userId: String): Backup? = when {
+        userId.startsWith("EI") -> firstContactRequest(userId).responseObject(BackupDeserializer).third.component1()
+        else -> oldFirstContactRequest(userId).responseObject(OldBackupDeserializer).third.component1()
+    }
 
     private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
         override fun deserialize(content: String): List<Contract>? {
@@ -86,6 +98,12 @@ object AuxBrain {
     private object BackupDeserializer : ResponseDeserializable<Backup> {
         override fun deserialize(content: String): Backup? {
             return content.decodeBase64()?.let { FirstContactResponse.deserialize(it).firstContact?.backup }
+        }
+    }
+
+    private object OldBackupDeserializer : ResponseDeserializable<Backup> {
+        override fun deserialize(content: String): Backup? {
+            return content.decodeBase64()?.let { FirstContact.deserialize(it).backup }
         }
     }
 }
