@@ -6,13 +6,15 @@ import nl.pindab0ter.eggbot.helpers.auxbrain.EpicResearch
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
+import java.math.BigDecimal.ONE
+import java.math.BigDecimal.ZERO
 
 val Backup.timeSinceBackup: Duration
     get() = Duration(approxTime.toDateTime(), DateTime.now())
 val Backup.internalHatcheryMultiplier: BigDecimal
-    get() = BigDecimal.ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
+    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_INT_HATCHERIES.ordinal].level
 val Backup.internalHatcherySharing: BigDecimal
-    get() = BigDecimal.ONE + BigDecimal(".10") * game!!.epicResearch[EpicResearch.INTERNAL_HATCH_SHARING.ordinal].level
+    get() = ONE + BigDecimal(".10") * game!!.epicResearch[EpicResearch.INTERNAL_HATCH_SHARING.ordinal].level
 val Backup.Game.soulEggResearchLevel: Int
     get() = epicResearch.find { it.id == "soul_eggs" }!!.level
 val Backup.Game.prophecyEggResearchLevel: Int
@@ -42,43 +44,43 @@ val Backup.Simulation.internalHatcheryFlatIncreases: List<BigDecimal>
 
 val Backup.Simulation.habCapacityMultipliers: List<BigDecimal>
     get() = listOf(
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.HEN_HOUSE_REMODEL.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.MICROLUX_CHICKEN_SUITES.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".02") * commonResearch[CommonResearch.GRAV_PLATING.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".02") * commonResearch[CommonResearch.WORMHOLE_DAMPENING.ordinal].level
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.HEN_HOUSE_REMODEL.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.MICROLUX_CHICKEN_SUITES.ordinal].level,
+        ONE + BigDecimal(".02") * commonResearch[CommonResearch.GRAV_PLATING.ordinal].level,
+        ONE + BigDecimal(".02") * commonResearch[CommonResearch.WORMHOLE_DAMPENING.ordinal].level
     )
 
 val Backup.Simulation.shippingRateCommonResearchMultipliers: List<BigDecimal>
     get() = listOf(
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".10") * commonResearch[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.DRIVER_TRAINING.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.QUANTUM_STORAGE.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.HOVER_UPGRADES.ordinal].level, // Assumes at least Hover Semi
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.DARK_CONTAINMENT.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.HYPER_PORTALLING.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
+        ONE + BigDecimal(".10") * commonResearch[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.DRIVER_TRAINING.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.QUANTUM_STORAGE.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.HOVER_UPGRADES.ordinal].level, // Assumes at least Hover Semi
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.DARK_CONTAINMENT.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.HYPER_PORTALLING.ordinal].level,
     )
 
 val Backup.shippingRateEpicResearchMultiplier: BigDecimal
-    get() = BigDecimal.ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
+    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
 
 val Backup.Simulation.eggLayingCommonResearchMultipliers: List<BigDecimal>
     get() = listOf(
-        BigDecimal.ONE + BigDecimal(".10") * commonResearch[CommonResearch.COMFORTABLE_NESTS.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".05") * commonResearch[CommonResearch.HEN_HOUSE_AC.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".15") * commonResearch[CommonResearch.IMPROVED_GENETICS.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".10") * commonResearch[CommonResearch.TIME_COMPRESSION.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".02") * commonResearch[CommonResearch.TIMELINE_DIVERSION.ordinal].level,
-        BigDecimal.ONE + BigDecimal(".10") * commonResearch[CommonResearch.RELATIVITY_OPTIMIZATION.ordinal].level,
+        ONE + BigDecimal(".10") * commonResearch[CommonResearch.COMFORTABLE_NESTS.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.HEN_HOUSE_AC.ordinal].level,
+        ONE + BigDecimal(".15") * commonResearch[CommonResearch.IMPROVED_GENETICS.ordinal].level,
+        ONE + BigDecimal(".10") * commonResearch[CommonResearch.TIME_COMPRESSION.ordinal].level,
+        ONE + BigDecimal(".02") * commonResearch[CommonResearch.TIMELINE_DIVERSION.ordinal].level,
+        ONE + BigDecimal(".10") * commonResearch[CommonResearch.RELATIVITY_OPTIMIZATION.ordinal].level,
     )
 
 val Backup.eggLayingEpicResearchMultiplier: BigDecimal
-    get() = BigDecimal.ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
+    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
 
 val Backup.Simulation.baseShippingRate: BigDecimal
-    get() = vehicles.foldIndexed(BigDecimal.ZERO) { index, acc, vehicleType ->
+    get() = vehicles.foldIndexed(ZERO) { index, acc, vehicleType ->
         when (vehicleType) {
             VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * hyperloopCars[index]
             else -> acc + vehicleType.capacity
@@ -91,7 +93,7 @@ val Backup.extraAwayTimePerSilo: Duration
 
 // @formatter:off
 val HabLevel.capacity: BigDecimal get() = when(this) {
-    HabLevel.NO_HAB ->                   BigDecimal.ZERO
+    HabLevel.NO_HAB ->                              ZERO
     HabLevel.COOP ->                     BigDecimal(250)
     HabLevel.SHACK ->                    BigDecimal(500)
     HabLevel.SUPER_SHACK ->            BigDecimal(1_000)
@@ -111,7 +113,7 @@ val HabLevel.capacity: BigDecimal get() = when(this) {
     HabLevel.MONOLITH ->          BigDecimal(50_000_000)
     HabLevel.PLANET_PORTAL ->    BigDecimal(100_000_000)
     HabLevel.CHICKEN_UNIVERSE -> BigDecimal(600_000_000)
-    else ->                              BigDecimal.ZERO
+    else ->                                         ZERO
 }
 
 val VehicleType.capacity: BigDecimal get() = when (this) {
@@ -127,6 +129,6 @@ val VehicleType.capacity: BigDecimal get() = when (this) {
     VehicleType.HOVER_SEMI ->          BigDecimal(30_000_000)
     VehicleType.QUANTUM_TRANSPORTER -> BigDecimal(50_000_000)
     VehicleType.HYPERLOOP_TRAIN ->     BigDecimal(50_000_000)
-    else ->                                   BigDecimal.ZERO
+    else ->                                              ZERO
 }
 // @formatter:on

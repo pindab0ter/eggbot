@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.helpers
 
 import org.joda.time.Duration
 import java.math.BigDecimal
+import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import java.math.RoundingMode
 import java.math.RoundingMode.HALF_UP
@@ -16,7 +17,7 @@ class BigDecimal {
 }
 
 inline fun <T> Iterable<T>.sumByBigDecimal(selector: (T) -> BigDecimal): BigDecimal {
-    var sum: BigDecimal = BigDecimal.ZERO
+    var sum: BigDecimal = ZERO
     for (element in this) {
         sum += selector(element)
     }
