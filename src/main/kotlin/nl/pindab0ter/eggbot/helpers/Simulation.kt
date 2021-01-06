@@ -61,13 +61,13 @@ fun chickenIncrease(habs: List<Hab>, constants: Constants): BigDecimal =
         BigDecimal.ONE + habs.fullCount().multiply(constants.internalHatcherySharing)
     )
 
-fun List<Hab>.fullCount(): BigDecimal = sumByBigDecimal { (population, capacity) ->
+fun List<Hab>.fullCount(): BigDecimal = sumOf { (population, capacity) ->
     if (population == capacity) BigDecimal.ONE
     else BigDecimal.ZERO
 }
 
 fun eggIncrease(habs: List<Hab>, constants: Constants): BigDecimal = minOf(
-    habs.sumByBigDecimal(Hab::population).multiply(EGG_LAYING_BASE_RATE).multiply(constants.eggLayingBonus),
+    habs.sumOf { it.population }.multiply(EGG_LAYING_BASE_RATE).multiply(constants.eggLayingBonus),
     constants.transportRate
 )
 

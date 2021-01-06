@@ -5,7 +5,6 @@ import nl.pindab0ter.eggbot.helpers.HabsStatus
 import nl.pindab0ter.eggbot.helpers.HabsStatus.Free
 import nl.pindab0ter.eggbot.helpers.eggIncrease
 import nl.pindab0ter.eggbot.helpers.habsStatus
-import nl.pindab0ter.eggbot.helpers.sumByBigDecimal
 import org.joda.time.Duration
 import java.math.BigDecimal
 
@@ -25,5 +24,5 @@ data class FarmState(
         }
     )
 
-    val population: BigDecimal get() = habs.sumByBigDecimal(Hab::population)
+    val population: BigDecimal get() = habs.sumOf(Hab::population)
 }

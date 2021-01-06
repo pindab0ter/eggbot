@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Contract
-import nl.pindab0ter.eggbot.helpers.sumByBigDecimal
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.SizedCollection
@@ -33,7 +32,7 @@ fun createRollCall(
         activeFarmers.drop(coops.size).forEach { activeFarmer ->
             coops.filter { coop -> coop.farmers.count() <= preferredCoopSize }
                 .filter { coop -> coop.farmers.count() == coops.map { it.farmers.count() }.minOrNull() }
-                .minByOrNull { coop -> coop.farmers.sumByBigDecimal { it.earningsBonus } }!!
+                .minByOrNull { coop -> coop.farmers.sumOf { it.earningsBonus } }!!
                 .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(activeFarmer)) }
         }
 

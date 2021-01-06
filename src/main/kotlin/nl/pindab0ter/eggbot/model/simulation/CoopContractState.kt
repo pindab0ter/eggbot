@@ -21,29 +21,29 @@ data class CoopContractState(
     val farmers: List<Farmer>,
 ) {
     val currentPopulation: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer ->
+        get() = farmers.sumOf { farmer ->
             farmer.currentState?.population ?: BigDecimal.ZERO
         }
     val currentPopulationIncreasePerMinute: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer ->
+        get() = farmers.sumOf { farmer ->
             chickenIncrease(farmer.currentState?.habs ?: emptyList(),
                 farmer.constants).multiply(FOUR - (farmer.currentState?.habs?.fullCount() ?: BigDecimal.ZERO))
 
         }
     val currentEggsLaid: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer -> farmer.currentEggsLaid }
+        get() = farmers.sumOf { farmer -> farmer.currentEggsLaid }
     val reportedEggsLaid: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer -> farmer.reportedEggsLaid }
+        get() = farmers.sumOf { farmer -> farmer.reportedEggsLaid }
     val unreportedEggsLaid: BigDecimal
         get() = currentEggsLaid - reportedEggsLaid
     val currentEggsPerMinute: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer ->
+        get() = farmers.sumOf { farmer ->
             eggIncrease(farmer.currentState?.habs ?: emptyList(), farmer.constants)
         }
     val runningEggsLaid: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer -> farmer.runningState.eggsLaid }
+        get() = farmers.sumOf { farmer -> farmer.runningState.eggsLaid }
     val timeUpEggsLaid: BigDecimal
-        get() = farmers.sumByBigDecimal { farmer -> farmer.timeUpState?.eggsLaid ?: BigDecimal.ZERO }
+        get() = farmers.sumOf { farmer -> farmer.timeUpState?.eggsLaid ?: BigDecimal.ZERO }
     val timeUpPercentageOfFinalGoal: BigDecimal
         get() = (timeUpEggsLaid / goals.last().amount) * 100
     val timeTillFinalGoal: Duration?
@@ -75,7 +75,7 @@ data class CoopContractState(
         egg = contract.egg,
         maxCoopSize = contract.maxCoopSize,
         public = coopStatus.public,
-        goals = Goal.fromContract(contract, farmers.sumByBigDecimal { farmer -> farmer.reportedState.eggsLaid }),
+        goals = Goal.fromContract(contract, farmers.sumOf { farmer: Farmer -> farmer.reportedState.eggsLaid }),
         timeRemaining = coopStatus.secondsRemaining.toDuration(),
         farmers = farmers
     )

@@ -102,10 +102,10 @@ fun coopFinishedResponse(
         column {
             alignment = if (!compact) LEFT else RIGHT
 
-            val eggsLaid = status.contributors.sumByBigDecimal { contributor ->
+            val eggsLaid = status.contributors.sumOf { contributor ->
                 contributor.contributionAmount.toBigDecimal()
             }
-            val eggsLaidRate = status.contributors.sumByBigDecimal { contributor ->
+            val eggsLaidRate = status.contributors.sumOf { contributor ->
                 contributor.contributionRate.toBigDecimal()
             }.multiply(SIXTY)
 
