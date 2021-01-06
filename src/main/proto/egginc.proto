@@ -617,6 +617,8 @@ message InventorySlot {
   uint32 item_id = 2;
 }
 
+/* http://auxbrain.com/ei_afx/config */
+
 message ArtifactsConfigurationRequest {
   uint32 client_version = 1;
   BasicRequestInfo request_info = 2;

@@ -20,6 +20,7 @@ object AuxBrain {
     private const val COOP_STATUS_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
     private const val FIRST_CONTACT_URL = "http://www.auxbrain.com/ei/first_contact"
     private const val FIRST_CONTACT_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
+    private const val ARTIFACTS_CONFIGURATION_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei_afx/config"
 
     private fun periodicalsRequest(): Request = PERIODICALS_BETA_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
