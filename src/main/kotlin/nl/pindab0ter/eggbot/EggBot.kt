@@ -120,7 +120,7 @@ object EggBot : Logging {
         logger("Exposed").info { "Connected to database" }
     }
 
-    fun initializeDatabase() = transaction {
+    private fun initializeDatabase() = transaction {
         SchemaUtils.create(DiscordUsers)
         SchemaUtils.create(Farmers)
         SchemaUtils.create(Coops)
