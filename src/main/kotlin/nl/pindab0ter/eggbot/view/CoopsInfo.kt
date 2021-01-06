@@ -243,7 +243,7 @@ private fun StringBuilder.drawCompactCoops(
                 is Abandoned -> "Empty"
                 is Failed -> "Failed"
                 is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
-                is OnTrack -> status.state.timeTillFinalGoal?.asHoursAndMinutes() ?: "ERROR"
+                is OnTrack -> status.state.timeTillFinalGoal?.asHourAndMinutes() ?: "ERROR"
                 is FinishedIfBanked -> "Bank!"
                 is Finished -> "Done"
             }

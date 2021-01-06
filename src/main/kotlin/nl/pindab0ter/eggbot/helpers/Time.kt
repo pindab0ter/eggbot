@@ -59,29 +59,26 @@ fun Duration.asDaysAndHours(): String = PeriodFormatterBuilder()
     .toFormatter()
     .withLocale(Locale.UK).print(this.toPeriod().normalizedStandard(PeriodType.dayTime()))
 
-fun Duration.asDays(compact: Boolean = false): String {
-    val toPeriod = this.toPeriod()
-    return when (compact) {
-        true ->
-            if (toPeriod.toStandardDuration().standardDays < 1L) "< 1d"
-            else PeriodFormatterBuilder()
-                .printZeroNever()
-                .appendDays()
-                .appendSuffix("d")
-                .toFormatter()
-                .withLocale(Locale.UK).print(toPeriod.normalizedStandard(PeriodType.dayTime()))
-        false ->
-            if (toPeriod.toStandardDuration().standardDays < 1L) "< 1 day"
-            else PeriodFormatterBuilder()
-                .printZeroNever()
-                .appendDays()
-                .appendSuffix(" day", " days")
-                .toFormatter()
-                .withLocale(Locale.UK).print(toPeriod.normalizedStandard(PeriodType.dayTime()))
-    }
+fun Duration.asDays(compact: Boolean = false): String = when (compact) {
+    true ->
+        if (toPeriod().toStandardDuration().standardDays < 1L) "< 1d"
+        else PeriodFormatterBuilder()
+            .printZeroNever()
+            .appendDays()
+            .appendSuffix("d")
+            .toFormatter()
+            .withLocale(Locale.UK).print(toPeriod().normalizedStandard(PeriodType.dayTime()))
+    false ->
+        if (toPeriod().toStandardDuration().standardDays < 1L) "< 1 day"
+        else PeriodFormatterBuilder()
+            .printZeroNever()
+            .appendDays()
+            .appendSuffix(" day", " days")
+            .toFormatter()
+            .withLocale(Locale.UK).print(toPeriod().normalizedStandard(PeriodType.dayTime()))
 }
 
-fun Duration.asHoursAndMinutes(): String = PeriodFormatterBuilder()
+fun Duration.asHourAndMinutes(): String = PeriodFormatterBuilder()
     .printZeroAlways()
     .appendHours()
     .appendSeparator(":")
@@ -109,16 +106,31 @@ fun DateTime.asCompact(): String = DateTimeFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this)
 
-fun DateTime.asDaysHoursAndMinutes(): String = DateTimeFormatterBuilder()
-    .appendDayOfWeekText()
-    .appendLiteral(" ")
-    .appendDayOfMonth(1)
-    .appendLiteral(" ")
-    .appendMonthOfYearText()
-    .appendLiteral(" ")
-    .appendHourOfDay(1)
-    .appendLiteral(":")
-    .appendMinuteOfHour(2)
-    .toFormatter()
-    .withLocale(Locale.UK)
-    .print(this)
+fun DateTime.asDayHourAndMinutes(compact: Boolean = false): String = when (compact) {
+    true -> DateTimeFormatterBuilder()
+        .appendDayOfWeekShortText()
+        .appendLiteral(" ")
+        .appendDayOfMonth(1)
+        .appendLiteral(" ")
+        .appendMonthOfYearShortText()
+        .appendLiteral(" ")
+        .appendHourOfDay(1)
+        .appendLiteral(":")
+        .appendMinuteOfHour(2)
+        .toFormatter()
+        .withLocale(Locale.UK)
+        .print(this)
+    false -> DateTimeFormatterBuilder()
+        .appendDayOfWeekText()
+        .appendLiteral(" ")
+        .appendDayOfMonth(1)
+        .appendLiteral(" ")
+        .appendMonthOfYearText()
+        .appendLiteral(" ")
+        .appendHourOfDay(1)
+        .appendLiteral(":")
+        .appendMinuteOfHour(2)
+        .toFormatter()
+        .withLocale(Locale.UK)
+        .print(this)
+}
