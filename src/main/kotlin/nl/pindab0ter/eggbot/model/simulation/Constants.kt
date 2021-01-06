@@ -1,7 +1,9 @@
 package nl.pindab0ter.eggbot.model.simulation
 
+import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Backup
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.activeSoloArtifactsFor
+import nl.pindab0ter.eggbot.helpers.auxbrain.*
 import org.joda.time.Duration
 import java.math.BigDecimal
 
@@ -14,27 +16,21 @@ data class Constants(
     val tokensAvailable: Int,
     val tokensSpent: Int,
     val maxAwayTime: Duration,
+    val activeArtifacts: List<Artifact>,
 ) {
-    constructor(backup: Backup, farm: Backup.Simulation) : this(
-        internalHatcherySharing = backup.internalHatcherySharing,
-        internalHatcheryRate = farm.internalHatcheryFlatIncreases.sum()
-            .multiply(backup.internalHatcheryMultiplier),
-        habCapacityMultiplier = farm.habCapacityMultipliers.sum(),
-        eggLayingBonus = farm.eggLayingCommonResearchMultipliers
-            .plus(backup.eggLayingEpicResearchMultiplier)
-            .product(),
-        transportRate = farm.baseShippingRate.multiply(
-            farm.shippingRateCommonResearchMultipliers
-                .plus(backup.shippingRateEpicResearchMultiplier)
-                .product()
-        ),
+    constructor(
+        backup: Backup,
+        farm: Backup.Farm,
+        activeCoopArtifacts: List<Artifact> = emptyList()
+    ) : this(
+        internalHatcherySharing = Hatchery.sharingMultiplierFor(backup),
+        internalHatcheryRate = Hatchery.multiplierFor(backup, farm),
+        habCapacityMultiplier = Habs.multiplierFor(farm, backup),
+        eggLayingBonus = EggLayingRate.multiplierFor(farm, backup, activeCoopArtifacts),
+        transportRate = Transport.multiplierFor(backup, farm),
         tokensAvailable = farm.boostTokensReceived - farm.boostTokensGiven - farm.boostTokensSpent,
-        // TODO: Is this always right?
-        // It seems like bock counted the 18 tokens that I sent Zman as tokens I spent when I ran the coop command
-        // https://discordapp.com/channels/485162044652388384/717043294659543133/747909593346211923
         tokensSpent = farm.boostTokensSpent,
-        maxAwayTime = Duration.standardHours(1L)
-            .plus(backup.extraAwayTimePerSilo)
-            .multipliedBy(farm.silosOwned.toLong())
+        maxAwayTime = Silos.maxAwayTimeFor(backup, farm),
+        activeArtifacts = backup.activeSoloArtifactsFor(farm).plus(activeCoopArtifacts)
     )
 }

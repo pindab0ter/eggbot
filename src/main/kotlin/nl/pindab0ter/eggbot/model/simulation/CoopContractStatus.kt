@@ -4,9 +4,7 @@ import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.helpers.asyncMap
-import nl.pindab0ter.eggbot.helpers.eggsLaid
-import nl.pindab0ter.eggbot.helpers.finalGoal
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
@@ -49,11 +47,14 @@ sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopCont
             coopStatus.gracePeriodSecondsRemaining <= 0.0 && coopStatus.eggsLaid < contract.finalGoal ->
                 Failed(coopStatus)
             else -> runBlocking(Dispatchers.Default) {
-                val farmers = coopStatus.contributors.asyncMap(this.coroutineContext) { contributionInfo ->
+                val backups = coopStatus.contributors.asyncMap(this.coroutineContext) { contributionInfo ->
                     AuxBrain.getFarmerBackup(contributionInfo.userId)
-                        ?.let { Farmer(it, contract.id) }
                         .also { progressCallback() }
                 }.filterNotNull()
+                val activeCoopArtifacts = backups.flatMap { backup ->
+                    backup.activeCoopArtifactsFor(backup.farmFor(contract.id))
+                }
+                val farmers = backups.mapNotNull { Farmer(it, contract.id, activeCoopArtifacts) }
 
                 val coopContractState = simulate(CoopContractState(contract, coopStatus, farmers))
 

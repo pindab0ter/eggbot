@@ -1,9 +1,8 @@
 package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Backup
-import nl.pindab0ter.eggbot.helpers.capacity
-import nl.pindab0ter.eggbot.helpers.habCapacityMultipliers
-import nl.pindab0ter.eggbot.helpers.product
+import nl.pindab0ter.eggbot.helpers.auxbrain.Habs
+import nl.pindab0ter.eggbot.helpers.auxbrain.Habs.capacity
 import java.math.BigDecimal
 
 data class Hab(
@@ -11,10 +10,10 @@ data class Hab(
     val capacity: BigDecimal,
 ) {
     companion object {
-        fun fromFarm(farm: Backup.Farm) = (0..3).map { index ->
+        fun fromFarm(farm: Backup.Farm, backup: Backup): List<Hab> = (0..3).map { index ->
             Hab(
-                population = farm.habPopulation[index].toBigDecimal(),
-                capacity = farm.habs[index].capacity.multiply(farm.habCapacityMultipliers.product())
+                population = farm.habPopulations[index].toBigDecimal(),
+                capacity = farm.habs[index].capacity.multiply(Habs.multiplierFor(farm, backup))
             )
         }
     }

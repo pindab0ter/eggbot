@@ -26,7 +26,10 @@ inline fun <T> Iterable<T>.sumByBigDecimal(selector: (T) -> BigDecimal): BigDeci
 
 fun Iterable<BigDecimal>.product(): BigDecimal = reduce { acc, bonus -> acc * bonus }
 fun List<BigDecimal>.sum(): BigDecimal = this.reduce { acc, duration -> acc + duration }
-operator fun Int.times(other: BigDecimal): BigDecimal = this.toBigDecimal() * other
+inline fun <T> Iterable<T>.productOf(selector: (T) -> BigDecimal): BigDecimal = fold(ONE) { acc, element ->
+    acc * selector(element)
+}
+
 operator fun BigDecimal.times(other: Int): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Long): BigDecimal = this.multiply(other.toBigDecimal())
 operator fun BigDecimal.times(other: Duration): BigDecimal = this.multiply(other.standardSeconds.toBigDecimal())

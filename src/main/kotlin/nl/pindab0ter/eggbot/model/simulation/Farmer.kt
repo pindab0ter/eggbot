@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.model.simulation
 
+import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Backup
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
@@ -53,10 +54,11 @@ data class Farmer(
         operator fun invoke(
             backup: Backup,
             contractId: String,
+            activeCoopArtifacts: List<Artifact> = emptyList()
         ): Farmer? {
             val farm = backup.farmFor(contractId) ?: return null
-            val constants = Constants(backup, farm)
-            val reportedState = FarmState(farm, constants)
+            val constants = Constants(backup, farm, activeCoopArtifacts)
+            val reportedState = FarmState(farm, backup, constants)
             return Farmer(
                 name = backup.userName,
                 reportedState = reportedState,

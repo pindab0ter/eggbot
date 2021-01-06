@@ -15,12 +15,12 @@ data class FarmState(
     val habsStatus: HabsStatus = Free,
     val transportBottleneck: Duration? = null,
 ) {
-    constructor(farm: Backup.Farm, constants: Constants) : this(
-        habs = Hab.fromFarm(farm),
+    constructor(farm: Backup.Farm, backup: Backup, constants: Constants) : this(
+        habs = Hab.fromFarm(farm, backup),
         eggsLaid = farm.eggsLaid.toBigDecimal(),
-        habsStatus = habsStatus(Hab.fromFarm(farm), Duration.ZERO),
+        habsStatus = habsStatus(Hab.fromFarm(farm, backup), Duration.ZERO),
         transportBottleneck = when {
-            eggIncrease(Hab.fromFarm(farm), constants) >= constants.transportRate -> Duration.ZERO
+            eggIncrease(Hab.fromFarm(farm, backup), constants) >= constants.transportRate -> Duration.ZERO
             else -> null
         }
     )
