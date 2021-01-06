@@ -15,7 +15,7 @@ data class FarmState(
     val habsStatus: HabsStatus = Free,
     val transportBottleneck: Duration? = null,
 ) {
-    constructor(farm: Backup.Simulation, constants: Constants) : this(
+    constructor(farm: Backup.Farm, constants: Constants) : this(
         habs = Hab.fromFarm(farm),
         eggsLaid = farm.eggsLaid.toBigDecimal(),
         habsStatus = habsStatus(Hab.fromFarm(farm), Duration.ZERO),

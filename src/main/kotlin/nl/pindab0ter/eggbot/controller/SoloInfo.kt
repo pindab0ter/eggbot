@@ -45,7 +45,7 @@ object SoloInfo : EggBotCommand() {
         for (farmer: Farmer in farmers) AuxBrain.getFarmerBackup(farmer.inGameId)?.let { backup ->
             val localContract: LocalContract = backup.contracts?.contracts?.find { localContract ->
                 localContract.contract?.id == contractId
-            } ?: backup.contracts?.archive?.find { archivedContract ->
+            } ?: backup.contracts?.archived?.find { archivedContract ->
                 archivedContract.contract!!.id == contractId
             }?.let { archivedContract ->
                 return when {

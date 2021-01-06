@@ -81,8 +81,7 @@ object Migrate : EggBotCommand() {
             Farmer.new(backup.eiUserId) {
                 this.discordUser = discordUser
                 this.inGameName = backup.userName.replace('`', '\'')
-                this.soulEggsLong = backup.game.soulEggsLong
-                this.soulEggsDouble = backup.game.soulEggsDouble
+                this.soulEggsDouble = backup.game.soulEggs
                 this.prophecyEggs = backup.game.prophecyEggs
                 this.soulEggResearchLevel = backup.game.soulEggResearchLevel
                 this.prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel

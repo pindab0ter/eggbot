@@ -10,19 +10,18 @@ message Backup {
   Tutorial tutorial = 5;
   Stats stats = 6;
   Game game = 7;
-  Simulation simulation = 8;
   Missions missions = 9;
   Misc misc = 10;
-  repeated Simulation farms = 12;
+  repeated Farm farms = 12;
   MyContracts contracts = 13;
-  Artifacts artifacts = 14;
-  ArtifactsDB artifacts_db = 15;
+  ArtifactsStatus artifacts_status = 14;
+  ArtifactsDatabase artifacts_database = 15;
   string game_services_id = 16;
   string device_id = 17;
   string ei_user_id = 18;
   bool force_offer_backup = 20;
   uint32 client_version = 21;
-  uint32 force_backup = 22;
+  bool force_backup = 22;
   uint64 checksum = 100;
   string signature = 101;
 
@@ -64,21 +63,20 @@ message Backup {
     bool contract_info_shown = 8;
     bool join_coop_shown = 9;
     bool switch_farm_shown = 10;
-    repeated bool tutorial_shown = 11;
+    repeated bool tutorials_shown = 11;
   }
 
   message Stats {
-    repeated uint64 egg_totals_OLD = 1;
     uint64 refill_uses = 2;
-    uint64 video_doubler_uses = 3; // Multiplier videos watched
+    uint64 video_doubler_uses = 3;
     uint64 warp_1_uses = 4;
     uint64 warp_8_uses = 5;
     uint64 drone_takedowns = 6;
     uint64 unlimited_chickens_uses = 7;
-    repeated double egg_totals = 8; // Indexed by actual egg
+    repeated double egg_totals = 8;
     uint64 prestige_count = 9;
     uint64 drone_takedowns_elite = 10;
-    uint64 piggybank_level = 11;
+    uint64 piggy_break_count = 11;
     uint64 iap_packs_purchased = 12;
     uint64 boosts_used = 13;
     bool piggy_full = 14;
@@ -118,22 +116,20 @@ message Backup {
     Egg max_egg_reached = 1;
     uint64 golden_eggs_earned = 2;
     uint64 golden_eggs_spent = 3;
-    uint64 soul_eggs_long = 4;
     double prestige_cash_earned = 5;
     double lifetime_cash_earned = 6;
     uint64 piggy_bank = 7;
     uint32 permit_level = 8;
-    repeated Backup.ResearchItem epic_research = 9;
+    repeated ResearchItem epic_research = 9;
     double next_daily_gift_time = 10;
-    repeated Backup.NewsHeadline news = 11;
+    repeated NewsHeadline news = 11;
     double last_news_time = 12;
     double current_multiplier = 13;
     double current_multiplier_expiration = 14;
-    repeated Backup.AchievementInfo achievement = 15;
-    uint32 unclaimed_golden_eggs = 16;
-    uint64 unclaimed_soul_eggs_long = 17;
+    repeated AchievementInfo achievements = 15;
+    uint64 unclaimed_golden_eggs = 16;
     repeated uint64 max_farm_size_reached = 18;
-    repeated TrophyLevel egg_medal_level = 19;
+    repeated TrophyLevel egg_medal_levels = 19;
     uint32 last_daily_gift_collected_day = 20;
     uint32 current_farm = 22;
     uint64 prophecy_eggs = 23;
@@ -143,16 +139,17 @@ message Backup {
     double long_idle_reward = 27;
     uint32 daily_gift_index = 28;
     bool hyperloop_station = 29;
-    repeated Backup.OwnedBoost boosts = 30;
+    repeated OwnedBoost boosts = 30;
     bool piggy_full_alert_shown = 31;
     uint32 total_time_cheats_detected = 32;
     double prestige_soul_boost_cash = 33;
-    double soul_eggs_double = 34;
-    double unclaimed_soul_eggs_double = 35;
+    double soul_eggs = 34;
+    double unclaimed_soul_eggs = 35;
     bool force_elite_contracts = 36;
+    double new_player_event_end_time = 37;
   }
 
-  message Artifacts {
+  message ArtifactsStatus {
     bool infusing = 1;
     ArtifactInventoryItem item_being_infused = 2;
     Egg egg_type_infusing = 3;
@@ -161,19 +158,19 @@ message Backup {
     double flow_percentage_artifacts = 6;
     bool fueling_enabled = 7;
     bool infusing_enabled = 8;
-    MissionInfo.Spaceship last_fueled_ship = 9;
+    .Mission.Spaceship last_fueled_ship = 9;
     double inventory_score = 10;
     bool enabled = 11;
     bool intro_shown = 12;
-    ArtifactSpec spec_being_infused = 13;
+    Artifact spec_being_infused = 13;
   }
 
-  message Simulation {
+  message Farm {
     Egg egg = 1;
     double cash_earned = 2;
     double cash_spent = 3;
     double unclaimed_cash = 4;
-    double last_online_time = 5;
+    double last_step_time = 5;
     uint64 num_chickens = 6;
     uint64 num_chickens_unsettled = 7;
     uint64 num_chickens_running = 8;
@@ -181,9 +178,9 @@ message Backup {
     double eggs_paid_for = 10;
     uint32 silos_owned = 11;
     repeated HabLevel habs = 12;
-    repeated uint64 hab_population = 13;
-    repeated uint64 hab_population_inbound = 14;
-    repeated double hab_incubator_population = 15;
+    repeated uint64 hab_populations = 13;
+    repeated uint64 hab_population_inbounds = 14;
+    repeated double hab_incubator_populations = 15;
     double hatchery_population = 16;
     repeated VehicleType vehicles = 17;
     repeated ResearchItem common_research = 18;
@@ -236,23 +233,29 @@ message Backup {
     bool backup_reminder_alert = 19;
   }
 
-  message ArtifactsDB {
+  message ArtifactsDatabase {
     repeated ArtifactInventoryItem inventory_items = 1;
     uint64 item_sequence = 2;
     repeated InventorySlot inventory_slots = 3;
-    repeated MissionInfo mission_infos = 4;
-    repeated MissionInfo mission_archive = 5;
-    repeated ArtifactsDB.ActiveArtifactSlot active_artifacts = 7;
-    repeated ArtifactSpec discovered_artifacts = 8;
-    repeated ArtifactsDB.CraftableArtifact craftable_artifacts = 9;
+    repeated Mission missions = 4;
+    repeated Mission archived_missions = 5;
+    repeated ActiveArtifactSlot active_artifacts = 7;
+    repeated Artifact discovered_artifacts = 8;
+    repeated CraftableArtifact craftable_artifacts = 9;
+    repeated CraftableArtifact crafting_counts = 10;
+    repeated ActiveArtifactSet active_artifact_sets = 11;
 
     message ActiveArtifactSlot {
       bool occupied = 1;
       uint64 item_id = 2;
     }
 
+    message ActiveArtifactSet {
+      repeated ActiveArtifactSlot slots = 1;
+    }
+
     message CraftableArtifact {
-      ArtifactSpec spec = 1;
+      Artifact spec = 1;
       bool seen = 2;
     }
   }
@@ -303,7 +306,7 @@ message Contract {
   repeated Goal goals = 3;
   bool coop_allowed = 4;
   uint32 max_coop_size = 5;
-  double expiration_time = 6; // seconds since epoch
+  double expiration_time = 6;
   double length_seconds = 7;
   string name = 9;
   string description = 10;
@@ -385,7 +388,7 @@ message CoopStatus {
     bool active = 4;
     uint32 platform = 5;
     double contribution_rate = 6;
-    bool time_cheat_detection = 7;
+    bool time_cheat_detected = 7;
     int32 rank_change = 8;
     string push_id = 9;
     uint32 ban_votes = 10;
@@ -415,9 +418,9 @@ message LocalContract {
 
 message MyContracts {
   repeated LocalContract contracts = 1;
-  repeated LocalContract archive = 2;
+  repeated LocalContract archived = 2;
   repeated string contract_ids_seen = 3;
-  repeated CoopStatus current_coop_statuses = 4;
+  repeated CoopStatus coop_statuses = 4;
 }
 
 message CoopBuffState {
@@ -464,15 +467,16 @@ message Periodicals {
   repeated ServerGift gifts = 4;
 }
 
-message MissionInfo {
+message Mission {
   Spaceship ship = 1;
   Status status = 2;
   DurationType duration_type = 3;
-  repeated MissionInfo.Fuel fuel = 4;
+  repeated Fuel fuels = 4;
   double duration_seconds = 5;
   double seconds_remaining = 6;
   string identifier = 7;
   double start_time_derived = 8;
+  uint32 capacity = 9;
 
   message Fuel {
     Egg egg = 1;
@@ -484,7 +488,7 @@ message MissionInfo {
     CHICKEN_NINE = 1;
     CHICKEN_HEAVY = 2;
     BCR = 3;
-    MILLENIUM_CHICKEN = 4;
+    MILLENNIUM_CHICKEN = 4;
     CORELLIHEN_CORVETTE = 5;
     GALEGGTICA = 6;
     CHICKFIANT = 7;
@@ -510,7 +514,7 @@ message MissionInfo {
   }
 }
 
-message ArtifactSpec {
+message Artifact {
   Name name = 1;
   Level level = 2;
   Rarity rarity = 3;
@@ -524,9 +528,9 @@ message ArtifactSpec {
     BEAK_OF_MIDAS = 4;
     LIGHT_OF_EGGENDIL = 5;
     DEMETERS_NECKLACE = 6;
-    VIAL_MARTIAN_DUST = 7;
-    ORNATE_GUSSET = 8;
-    THE_CHALICE = 9;
+    VIAL_OF_MARTIAN_DUST = 7;
+    GUSSET = 8;
+    CHALICE = 9;
     BOOK_OF_BASAN = 10;
     PHOENIX_FEATHER = 11;
     TUNGSTEN_ANKH = 12;
@@ -596,16 +600,9 @@ enum Type {
   STONE_INGREDIENT = 3;
 }
 
-enum Rarity {
-  COMMON = 0;
-  RARE = 1;
-  EPIC = 2;
-  LEGENDARY = 3;
-}
-
 message CompleteArtifact {
-  ArtifactSpec spec = 1;
-  repeated ArtifactSpec stones = 2;
+  Artifact artifact_base = 1;
+  repeated Artifact stones = 2;
 }
 
 message ArtifactInventoryItem {
@@ -622,32 +619,41 @@ message InventorySlot {
 
 message ArtifactsConfigurationRequest {
   uint32 client_version = 1;
+  BasicRequestInfo request_info = 2;
 }
 
 message ArtifactsConfigurationResponse {
+  ArtifactsConfiguration artifacts_configuration = 1;
+  string checksum = 2;
+}
+
+message ArtifactsConfiguration {
   repeated MissionParameters mission_parameters = 1;
   repeated ArtifactParameters artifact_parameters = 2;
 
   message MissionParameters {
-    MissionInfo.Spaceship ship = 1;
-    uint32 capacity = 2;
+    Mission.Spaceship ship = 1;
     repeated Duration durations = 3;
 
     message Duration {
-      MissionInfo.DurationType duration_type = 1;
+      Mission.DurationType duration_type = 1;
       double seconds = 2;
       float quality = 3;
       float min_quality = 4;
       float max_quality = 5;
+      uint32 capacity = 6;
     }
   }
 
   message ArtifactParameters {
-    ArtifactSpec spec = 1;
+    Artifact artifact = 1;
     double base_quality = 2;
     double value = 3;
     double odds_multiplier = 4;
     double crafting_price = 5;
+    double crafting_price_low = 6;
+    uint32 crafting_price_domain = 7;
+    double crafting_price_curve = 8;
   }
 }
 
@@ -655,31 +661,31 @@ message ArtifactsConfigurationResponse {
 
 message MissionRequest {
   uint32 client_version = 1;
-  MissionInfo info = 2;
+  Mission info = 2;
   string ei_user_id = 3;
   BasicRequestInfo request_info = 4;
 }
 
 message MissionResponse {
   bool success = 1;
-  MissionInfo info = 2;
+  Mission info = 2;
 }
 
 message CompleteMissionResponse {
   bool success = 1;
-  MissionInfo info = 2;
+  Mission info = 2;
   repeated SecureArtifactSpec artifacts = 3;
-  repeated Reward other_rewards = 4;
+  repeated Reward rewards = 4;
   string ei_user_id = 5;
 
   message SecureArtifactSpec {
-    ArtifactSpec spec = 1;
+    Artifact spec = 1;
     string server_id = 2;
   }
 }
 
 enum Egg {
-  UNKNOWN_EGG = 0;
+  UNDEFINED_EGG = 0;
   EDIBLE = 1;
   SUPERFOOD = 2;
   MEDICAL = 3;
@@ -704,22 +710,24 @@ enum Egg {
   WATER_BALLOON = 102;
   FIREWORK = 103;
   PUMPKIN = 104;
+  UNKNOWN_EGG = 65533;
 }
 
 enum FarmType {
-  NONE = 0;
+  UNDEFINED_FARM_TYPE = 0;
   EMPTY = 1;
   HOME = 2;
   CONTRACT = 3;
 }
 
 enum GoalType {
-  UNKNOWN_GOAL = 0;
+  UNDEFINED_GOAL_TYPE = 0;
   EGGS_LAID = 1;
+  UNKNOWN_GOAL_TYPE = 100;
 }
 
 enum RewardType {
-  UNKNOWN_REWARD = 0;
+  UNDEFINED_REWARD_TYPE = 0;
   CASH = 1;
   GOLDEN_EGGS = 2;
   SOUL_EGGS = 3;
@@ -729,6 +737,8 @@ enum RewardType {
   PIGGY_MULTIPLIER = 7;
   PIGGY_LEVEL_BUMP = 8;
   BOOST = 9;
+  BOOST_TOKEN = 10;
+  UNKNOWN_REWARD_TYPE = 100;
 }
 
 enum HabLevel {
@@ -779,6 +789,6 @@ enum TrophyLevel {
 }
 
 enum League {
-  NORMAL = 0; // Or "BEGINNER"?
+  NORMAL = 0;
   ELITE = 1;
 }

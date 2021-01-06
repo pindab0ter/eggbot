@@ -60,7 +60,7 @@ data class Farmer(
             return Farmer(
                 name = backup.userName,
                 reportedState = reportedState,
-                currentState = catchUp(reportedState, constants, minOf(backup.timeSinceBackup, constants.maxAwayTime)),
+                currentState = catchUp(reportedState, constants, minOf(farm.timeSinceLastStep, constants.maxAwayTime)),
                 constants = constants,
                 timeSinceBackup = backup.timeSinceBackup
             )
