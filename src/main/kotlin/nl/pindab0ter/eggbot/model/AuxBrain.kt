@@ -36,7 +36,7 @@ object AuxBrain {
         .body("data=${
             FirstContactRequest {
                 eiUserId = userId
-                deviceId = "UNKNOWN"
+                deviceId = "B.O.C.K."
                 clientVersion = Config.clientVersion
             }.serialize().encodeBase64ToString()
         }")

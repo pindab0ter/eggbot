@@ -49,7 +49,7 @@ object SolosInfo : EggBotCommand() {
             coroutineContext
         )
 
-        val farmers: List<Backup> = databaseFarmers.asyncMap() { databaseFarmer ->
+        val farmers: List<Backup> = databaseFarmers.asyncMap { databaseFarmer ->
             AuxBrain.getFarmerBackup(databaseFarmer.inGameId).also {
                 progressBar.increment()
             }
