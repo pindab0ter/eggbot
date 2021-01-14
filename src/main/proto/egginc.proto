@@ -162,7 +162,7 @@ message Backup {
     double inventory_score = 10;
     bool enabled = 11;
     bool intro_shown = 12;
-    Artifact spec_being_infused = 13;
+    Artifact artifact_being_infused = 13;
   }
 
   message Farm {
@@ -231,33 +231,6 @@ message Backup {
     bool boost_token_alert = 17;
     bool soul_egg_alert = 18;
     bool backup_reminder_alert = 19;
-  }
-
-  message ArtifactsDatabase {
-    repeated ArtifactInventoryItem inventory_items = 1;
-    uint64 item_sequence = 2;
-    repeated InventorySlot inventory_slots = 3;
-    repeated Mission missions = 4;
-    repeated Mission archived_missions = 5;
-    repeated ActiveArtifactSlot active_artifacts = 7;
-    repeated Artifact discovered_artifacts = 8;
-    repeated CraftableArtifact craftable_artifacts = 9;
-    repeated CraftableArtifact crafting_counts = 10;
-    repeated ActiveArtifactSet active_artifact_sets = 11;
-
-    message ActiveArtifactSlot {
-      bool occupied = 1;
-      uint64 item_id = 2;
-    }
-
-    message ActiveArtifactSet {
-      repeated ActiveArtifactSlot slots = 1;
-    }
-
-    message CraftableArtifact {
-      Artifact spec = 1;
-      bool seen = 2;
-    }
   }
 }
 
@@ -477,6 +450,7 @@ message Mission {
   string identifier = 7;
   double start_time_derived = 8;
   uint32 capacity = 9;
+  string mission_log = 10;
 
   message Fuel {
     Egg egg = 1;
@@ -519,6 +493,13 @@ message Artifact {
   Level level = 2;
   Rarity rarity = 3;
   Egg egg = 4;
+
+  enum Type {
+    ARTIFACT = 0;
+    STONE = 1;
+    INGREDIENT = 2;
+    STONE_INGREDIENT = 3;
+  }
 
   enum Name {
     LUNAR_TOTEM = 0;
@@ -659,31 +640,46 @@ message ArtifactsConfiguration {
   }
 }
 
-/* http://www.auxbrain.com/ei/??? */
+message ArtifactsDatabase {
+  repeated ArtifactInventoryItem inventory_items = 1;
+  uint64 item_sequence = 2;
+  repeated InventorySlot inventory_slots = 3;
+  repeated Mission missions = 4;
+  repeated Mission archived_missions = 5;
+  repeated ActiveArtifactSlot active_artifacts = 7;
+  repeated Artifact discovered_artifacts = 8;
+  repeated CraftableArtifact craftable_artifacts = 9;
+  repeated CraftableArtifact crafting_counts = 10;
+  repeated ActiveArtifactSet active_artifact_sets = 11;
 
-message MissionRequest {
-  uint32 client_version = 1;
-  Mission info = 2;
-  string ei_user_id = 3;
-  BasicRequestInfo request_info = 4;
-}
-
-message MissionResponse {
-  bool success = 1;
-  Mission info = 2;
-}
-
-message CompleteMissionResponse {
-  bool success = 1;
-  Mission info = 2;
-  repeated SecureArtifactSpec artifacts = 3;
-  repeated Reward rewards = 4;
-  string ei_user_id = 5;
-
-  message SecureArtifactSpec {
-    Artifact spec = 1;
-    string server_id = 2;
+  message ActiveArtifactSlot {
+    bool occupied = 1;
+    uint64 item_id = 2;
   }
+
+  message ActiveArtifactSet {
+    repeated ActiveArtifactSlot slots = 1;
+  }
+
+  message CraftableArtifact {
+    Artifact artifact = 1;
+    bool seen = 2;
+  }
+}
+
+message ActiveArtifactSlot {
+  bool occupied = 1;
+  uint64 item_id = 2;
+}
+
+message ActiveArtifactSet {
+  repeated ActiveArtifactSlot slots = 1;
+}
+
+message CraftableArtifact {
+  Artifact artifact = 1;
+  bool seen = 2;
+  uint32 count = 3;
 }
 
 enum Egg {
