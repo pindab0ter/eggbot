@@ -51,47 +51,54 @@ object Migrate : EggBotCommand() {
 
         val eggIncId = parameters.getString(EGG_INC_ID).toUpperCase()
 
-        transaction {
+        val farmer: Farmer? = transaction {
             val discordUser: DiscordUser = DiscordUser.findById(event.author.id)
-                ?: return@transaction event.replyAndLogWarning("You are not registered.")
+                ?: return@transaction null.also { event.replyAndLogWarning("You are not registered.") }
 
-            if (discordUser.farmers.all { farmer -> farmer.inGameId.startsWith("EI") }) return@transaction event.replyAndLogSuccess(
-                "Your in-game ID has already been updated."
-            )
+            if (discordUser.farmers.all { farmer -> farmer.inGameId.startsWith("EI") }) return@transaction null.also {
+                event.replyAndLogSuccess("Your in-game ID has already been updated.")
+            }
 
             val backup = AuxBrain.getFarmerBackup(eggIncId)
 
-            if (backup?.game == null || backup.stats == null) return@transaction event.replyAndLogWarning(
-                """
-                No account found with in-game ID `$eggIncId`. Did you enter your new Egg, Inc. ID correctly?
-                Type `${event.client.textualPrefix}${Register.name} --help` for more info, hints and tips on how to use this command.
-                """.trimIndent()
-            )
-
-            val farmer = discordUser.farmers.find { farmer ->
-                farmer.inGameName == backup.userName
-            } ?: return@transaction event.replyAndLogWarning(
-                """
-                The account for the given Egg, Inc. ID (${backup.userName}) does not match any of the accounts you are registered with (${discordUser.farmers.joinToString { it.inGameName }}).
-                If you think this is an error, please contact the bot maintainer.
-                """.trimIndent())
-
-            farmer.delete()
-
-            Farmer.new(backup.eiUserId) {
-                this.discordUser = discordUser
-                this.inGameName = backup.userName.replace('`', '\'')
-                this.soulEggsDouble = backup.game.soulEggs
-                this.prophecyEggs = backup.game.prophecyEggs
-                this.soulEggResearchLevel = backup.game.soulEggResearchLevel
-                this.prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
-                this.prestiges = backup.stats.prestigeCount
-                this.droneTakedowns = backup.stats.droneTakedowns
-                this.eliteDroneTakedowns = backup.stats.droneTakedownsElite
-                this.lastUpdated = DateTime.now()
+            if (backup?.game == null || backup.stats == null) return@transaction null.also {
+                event.replyAndLogWarning("""
+                    No account found with in-game ID `$eggIncId`. Did you enter your new Egg, Inc. ID correctly?
+                    Type `${event.client.textualPrefix}${Register.name} --help` for more info, hints and tips on how to use this command.
+                    """.trimIndent()
+                )
             }
 
-            event.replyAndLogSuccess("You have successfully migrated your account!")
+            val oldFarmer = discordUser.farmers.find { farmer ->
+                farmer.inGameName == backup.userName
+            } ?: return@transaction null.also {
+                event.replyAndLogWarning("""
+                    The account for the given Egg, Inc. ID (${backup.userName}) does not match any of the accounts you are registered with (${discordUser.farmers.joinToString { it.inGameName }}).
+                    If you think this is an error, please contact the bot maintainer.
+                    """.trimIndent()
+                )
+            }
+
+            oldFarmer.delete()
+
+            return@transaction Farmer.new(backup.eiUserId) {
+                this.discordUser = discordUser
+                inGameName = backup.userName.replace('`', '\'')
+                soulEggsDouble = backup.game.soulEggs
+                prophecyEggs = backup.game.prophecyEggs
+                soulEggResearchLevel = backup.game.soulEggResearchLevel
+                prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
+                prestiges = backup.stats.prestigeCount
+                droneTakedowns = backup.stats.droneTakedowns
+                eliteDroneTakedowns = backup.stats.droneTakedownsElite
+                lastUpdated = DateTime.now()
+            }
+        }
+
+        if (farmer != null) {
+            event.replyAndLogSuccess("You have successfully migrated ${farmer.inGameName}!")
+        } else {
+            event.replyAndLogError("Failed to migrate. Please contact the bot maintainer.")
         }
     }
 }
