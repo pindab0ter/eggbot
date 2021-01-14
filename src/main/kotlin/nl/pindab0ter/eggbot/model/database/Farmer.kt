@@ -19,7 +19,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
 
-    internal var soulEggsDouble by Farmers.soulEggsDouble
+    internal var soulEggsDouble by Farmers.soulEggs
     val soulEggs: BigDecimal
         get() = BigDecimal(soulEggsDouble)
     var soulEggResearchLevel by Farmers.soulBonus
