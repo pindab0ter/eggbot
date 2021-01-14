@@ -7,14 +7,11 @@ import com.martiansoftware.jsap.UnflaggedOption
 import net.dv8tion.jda.api.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.api.entities.ChannelType.TEXT
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
-import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
 
 object Register : EggBotCommand() {
 
@@ -94,7 +91,7 @@ object Register : EggBotCommand() {
             ).also { rollback() }
 
             // Check if the in-game name matches with the in-game name belonging to the in-game ID's account
-            if (registrant.inGameId != backup.userId || registrant.inGameName.toLowerCase() != backup.userName.toLowerCase()) return@transaction event.replyAndLogWarning(
+            if (!listOf(backup.userId, backup.eiUserId).contains(registrant.inGameId) || registrant.inGameName.toLowerCase() != backup.userName.toLowerCase()) return@transaction event.replyAndLogWarning(
                 """
                 The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.userName}`)
                 If this is you, please register with `${event.client.textualPrefix}$name ${backup.userId} ${backup.userName}`
@@ -102,22 +99,13 @@ object Register : EggBotCommand() {
             ).also { rollback() }
 
             // Add the new in-game name
-            Farmer.new(registrant.inGameId) {
-                this.discordUser = discordUser
-                this.inGameName = backup.userName.replace('`', '\'')
-                this.soulEggsDouble = backup.game.soulEggs
-                this.prophecyEggs = backup.game.prophecyEggs
-                this.soulEggResearchLevel = backup.game.soulEggResearchLevel
-                this.prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
-                this.prestiges = backup.stats.prestigeCount
-                this.droneTakedowns = backup.stats.droneTakedowns
-                this.eliteDroneTakedowns = backup.stats.droneTakedownsElite
-                this.lastUpdated = DateTime.now()
-            }
+            val farmer = Farmer.new(discordUser, backup) ?: return@transaction event.replyAndLogWarning(
+                "Failed to save the new registration to the database. Please contact the bot maintainer."
+            )
 
             // Finally confirm the registration
             if (discordUser.farmers.filterNot { it.inGameId == registrant.inGameId }.none()) event.replyAndLogSuccess(
-                "You have been registered with the in-game name `${backup.userName}`, welcome!"
+                "You have been registered with the in-game name `${farmer.inGameName}`, welcome!"
             ) else event.replyAndLogSuccess("You are now registered with the in-game name `${backup.userName}`, as well as `${
                 discordUser.farmers
                     .filterNot { it.inGameId == registrant.inGameId }

@@ -18,18 +18,18 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
     val inGameId: String get() = id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
+    var coops by Coop via CoopFarmers
 
-    internal var soulEggsDouble by Farmers.soulEggs
+    var prestiges by Farmers.prestiges
+    private var _soulEggs by Farmers.soulEggs
     val soulEggs: BigDecimal
-        get() = BigDecimal(soulEggsDouble)
+        get() = BigDecimal(_soulEggs)
     var soulEggResearchLevel by Farmers.soulBonus
     var prophecyEggs by Farmers.prophecyEggs
     var prophecyEggResearchLevel by Farmers.prophecyBonus
-    var prestiges by Farmers.prestiges
     var droneTakedowns by Farmers.droneTakedowns
     var eliteDroneTakedowns by Farmers.eliteDroneTakedowns
     var lastUpdated by Farmers.lastUpdated
-    var coops by Coop via CoopFarmers
 
     val isActive: Boolean get() = discordUser.isActive
 
@@ -41,7 +41,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
         if (backup.game == null || backup.stats == null) return logger.warn { "Tried to update from backup but failed." }
         if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) inGameName = backup.userName
         prestiges = backup.stats.prestigeCount
-        soulEggsDouble = backup.game.soulEggs
+        _soulEggs = backup.game.soulEggs
         prophecyEggs = backup.game.prophecyEggs
         soulEggResearchLevel = backup.game.soulEggResearchLevel
         prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
@@ -50,5 +50,22 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
         lastUpdated = backup.approxTime.toDateTime()
     }
 
-    companion object : EntityClass<String, Farmer>(Farmers)
+    companion object : EntityClass<String, Farmer>(Farmers), Logging {
+        fun new(discordUser: DiscordUser, backup: Backup): Farmer? {
+            if (backup.game == null || backup.stats == null) return null.also { logger.warn { "Tried to register from backup but failed." } }
+
+            return Farmer.new(if (backup.eiUserId.isNotBlank()) backup.eiUserId else backup.userId) {
+                this.discordUser = discordUser
+                inGameName = backup.userName
+                prestiges = backup.stats.prestigeCount
+                _soulEggs = backup.game.soulEggs
+                prophecyEggs = backup.game.prophecyEggs
+                soulEggResearchLevel = backup.game.soulEggResearchLevel
+                prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
+                droneTakedowns = backup.stats.droneTakedowns
+                eliteDroneTakedowns = backup.stats.droneTakedownsElite
+                lastUpdated = backup.approxTime.toDateTime()
+            }
+        }
+    }
 }

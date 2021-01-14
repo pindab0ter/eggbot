@@ -7,14 +7,11 @@ import com.martiansoftware.jsap.UnflaggedOption
 import net.dv8tion.jda.api.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.api.entities.ChannelType
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
-import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.joda.time.DateTime
 
 object Migrate : EggBotCommand() {
 
@@ -81,18 +78,7 @@ object Migrate : EggBotCommand() {
 
             oldFarmer.delete()
 
-            return@transaction Farmer.new(backup.eiUserId) {
-                this.discordUser = discordUser
-                inGameName = backup.userName.replace('`', '\'')
-                soulEggsDouble = backup.game.soulEggs
-                prophecyEggs = backup.game.prophecyEggs
-                soulEggResearchLevel = backup.game.soulEggResearchLevel
-                prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
-                prestiges = backup.stats.prestigeCount
-                droneTakedowns = backup.stats.droneTakedowns
-                eliteDroneTakedowns = backup.stats.droneTakedownsElite
-                lastUpdated = DateTime.now()
-            }
+            return@transaction Farmer.new(discordUser, backup)
         }
 
         if (farmer != null) {
