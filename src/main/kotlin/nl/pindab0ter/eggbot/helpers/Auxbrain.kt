@@ -12,7 +12,7 @@ fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm 
 
 private fun Backup.activeArtifactsFor(
     farm: Backup.Farm?,
-) = artifactsDatabase?.activeArtifactSets?.get(farms.indexOf(farm))?.slots?.flatMap { activeArtifactSlot ->
+) = artifactsDatabase?.activeArtifactSets?.getOrNull(farms.indexOf(farm))?.slots?.flatMap { activeArtifactSlot ->
     artifactsDatabase.inventoryItems.find { artifactInventoryItem ->
         artifactInventoryItem.itemId == activeArtifactSlot.itemId
     }?.artifact?.let { artifact ->
