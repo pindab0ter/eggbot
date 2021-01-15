@@ -3,11 +3,8 @@ package nl.pindab0ter.eggbot.helpers.auxbrain
 import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Artifact.Name.*
 import com.auxbrain.ei.Backup
-import nl.pindab0ter.eggbot.helpers.activeSoloArtifactsFor
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.auxbrain.CommonResearch.*
-import nl.pindab0ter.eggbot.helpers.product
-import nl.pindab0ter.eggbot.helpers.productOf
-import nl.pindab0ter.eggbot.helpers.times
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 
@@ -17,7 +14,7 @@ object EggLayingRate {
             .plus(backup.eggLayingEpicResearchMultiplier)
             .product()
             .multiply(backup.activeSoloArtifactsFor(farm).eggLayingRateMultiplier)
-            .multiply(activeCoopArtifacts.eggLayingRateMultiplier)
+            .multiply(activeCoopArtifacts.minus(backup.activeCoopArtifactsFor(farm)).eggLayingRateMultiplier)
 
     private val eggLayingRateArtifacts = listOf(
         QUANTUM_METRONOME,
