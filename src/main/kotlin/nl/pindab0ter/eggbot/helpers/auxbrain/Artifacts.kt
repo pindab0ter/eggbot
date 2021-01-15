@@ -33,19 +33,24 @@ object Artifacts : Logging {
     // @formatter:off
     private val artifactMultipliers = hashMapOf(
         Identifier(GUSSET,            INFERIOR, COMMON)    to BigDecimal("1.05"),
-        Identifier(GUSSET,            LESSER,   COMMON)    to BigDecimal("1.13"), // Game states 10%
+        Identifier(GUSSET,            LESSER,   COMMON)    to BigDecimal("1.10"),
+        // Identifier(GUSSET,            LESSER,   RARE)      to BigDecimal("?"),
         Identifier(GUSSET,            LESSER,   EPIC)      to BigDecimal("1.12"),
-        Identifier(GUSSET,            NORMAL,   COMMON)    to BigDecimal("1.15"), // Game states 14%
+        Identifier(GUSSET,            NORMAL,   COMMON)    to BigDecimal("1.14"),
         Identifier(GUSSET,            NORMAL,   RARE)      to BigDecimal("1.15"),
+        // Identifier(GUSSET,            NORMAL,   EPIC)      to BigDecimal("?"),
+        Identifier(GUSSET,            GREATER,  COMMON)    to BigDecimal("1.20"),
         Identifier(GUSSET,            GREATER,  LEGENDARY) to BigDecimal("1.30"),
         Identifier(QUANTUM_METRONOME, INFERIOR, COMMON)    to BigDecimal("1.05"),
         Identifier(QUANTUM_METRONOME, LESSER,   COMMON)    to BigDecimal("1.10"),
         Identifier(QUANTUM_METRONOME, LESSER,   RARE)      to BigDecimal("1.12"),
         Identifier(QUANTUM_METRONOME, NORMAL,   COMMON)    to BigDecimal("1.14"),
+        Identifier(QUANTUM_METRONOME, NORMAL,   RARE)      to BigDecimal("1.17"),
         Identifier(TACHYON_DEFLECTOR, INFERIOR, COMMON)    to BigDecimal("1.05"),
         Identifier(TACHYON_DEFLECTOR, LESSER,   COMMON)    to BigDecimal("1.10"),
-        Identifier(TACHYON_STONE,     INFERIOR, COMMON)    to BigDecimal("1.01"),
-        Identifier(TACHYON_STONE,     LESSER,   COMMON)    to BigDecimal("1.02"),
+        Identifier(TACHYON_STONE,     INFERIOR, COMMON)    to BigDecimal("1.02"),
+        Identifier(TACHYON_STONE,     LESSER,   COMMON)    to BigDecimal("1.04"),
+        Identifier(TACHYON_STONE,     NORMAL,   COMMON)    to BigDecimal("1.05"),
     )
     // @formatter:on
 }
