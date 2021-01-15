@@ -15,6 +15,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
     if (Config.activity != null) setActivity(Config.activity)
     addCommands(
         Active,
+        ArtifactCheck,
         ContractIDs,
         CoopAdd,
         CoopInfo,

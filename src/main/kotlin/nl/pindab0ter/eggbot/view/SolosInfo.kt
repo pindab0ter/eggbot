@@ -32,7 +32,7 @@ fun solosInfoResponse(
 }.splitMessage(separator = BREAKPOINT)
 
 private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = appendTable {
-    title = "__**🗒️ Basic info**__"
+    title = "__**🗒️ Basic info:**__"
     displayHeaders = false
 
     column {

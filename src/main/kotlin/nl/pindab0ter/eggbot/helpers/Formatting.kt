@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.helpers
 
+import com.auxbrain.ei.Artifact
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.DECIMALS
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
 import java.math.BigDecimal
@@ -34,6 +35,8 @@ enum class NumberFormatter {
 fun Long.formatInteger(): String = INTEGER.format(this)
 fun BigDecimal.formatInteger(): String = INTEGER.format(this)
 fun BigDecimal.formatTwoDecimals(): String = DECIMALS.format(this)
+fun BigDecimal.formatPercentage(): String = times(BigDecimal(100)).formatTwoDecimals()
+fun BigDecimal.formatPlusPercentage(): String = minus(ONE).times(BigDecimal(100)).formatTwoDecimals()
 
 fun BigDecimal.asIllions(formatter: NumberFormatter = DECIMALS, shortened: Boolean = true): String {
     return when (this) {
@@ -135,17 +138,26 @@ fun paddingCharacters(current: Any, longest: Any, character: String = " "): Stri
 fun <T : Any> paddingCharacters(
     current: T,
     containsLongest: Iterable<T>,
-    character: String = " "
+    character: String = " ",
 ): String = paddingCharacters(current, containsLongest.maxByOrNull { it.toString().length }!!, character)
 
 fun <T : Any> StringBuilder.appendPaddingCharacters(
     current: T,
     longest: T,
-    character: String = " "
+    character: String = " ",
 ): StringBuilder = append(paddingCharacters(current, longest, character))
 
 fun <T : Any> StringBuilder.appendPaddingCharacters(
     current: T,
     containsLongest: Iterable<T>,
-    character: String = " "
+    character: String = " ",
 ): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
+
+val Artifact.fullName
+    get() = "${
+        level.name.toLowerCase().capitalize()
+    } ${
+        rarity.name.toLowerCase()
+    } ${
+        name.name.replace('_', ' ').toLowerCase().capitalize()
+    }"

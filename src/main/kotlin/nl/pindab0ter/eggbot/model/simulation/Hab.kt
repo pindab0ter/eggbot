@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Backup
 import nl.pindab0ter.eggbot.helpers.auxbrain.Habs
-import nl.pindab0ter.eggbot.helpers.auxbrain.Habs.capacity
+import nl.pindab0ter.eggbot.helpers.auxbrain.capacity
 import java.math.BigDecimal
 
 data class Hab(
