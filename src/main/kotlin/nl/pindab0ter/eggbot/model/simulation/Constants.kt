@@ -25,7 +25,7 @@ data class Constants(
         hatcheryRate = backup.hatcheryRateMultiplierFor(farm),
         habCapacityMultiplier = backup.habCapacityMultiplierFor(farm),
         eggLayingBonus = backup.eggLayingRateMultiplierFor(farm, coopArtifacts),
-        transportRate = backup.transportMultiplierFor(farm),
+        transportRate = backup.shippingRateFor(farm),
         tokensAvailable = farm.boostTokensReceived - farm.boostTokensGiven - farm.boostTokensSpent,
         tokensSpent = farm.boostTokensSpent,
         maxAwayTime = Silos.maxAwayTimeFor(backup, farm),

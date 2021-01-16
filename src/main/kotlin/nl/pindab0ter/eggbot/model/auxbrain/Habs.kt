@@ -16,8 +16,7 @@ import java.math.BigDecimal.ZERO
 
 fun Farm.habCapacityResearchMultiplier(): BigDecimal = habCapacityResearchMultipliers.product()
 fun Backup.habCapacityArtifactsMultiplierFor(farm: Farm): BigDecimal = artifactsFor(farm).habCapacityMultiplier
-fun Backup.habCapacityMultiplierFor(farm: Farm): BigDecimal = farm
-    .habCapacityResearchMultiplier()
+fun Backup.habCapacityMultiplierFor(farm: Farm): BigDecimal = farm.habCapacityResearchMultiplier()
     .multiply(habCapacityArtifactsMultiplierFor(farm))
 
 val habCapacityArtifacts = listOf(
@@ -36,6 +35,9 @@ val List<Artifact>.habCapacityMultiplier
     get() = filter { artifact ->
         artifact.name in habCapacityArtifacts
     }.productOf(Artifact::multiplier)
+
+val Farm.baseHabCapacity: BigDecimal
+    get() = habs.sumOf(HabLevel::capacity)
 
 // @formatter:off
 val HabLevel.capacity: BigDecimal get() = when(this) {

@@ -4,6 +4,7 @@ import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Artifact.Name.INTERSTELLAR_COMPASS
 import com.auxbrain.ei.Artifact.Name.QUANTUM_STONE
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Backup.Farm
 import com.auxbrain.ei.VehicleType
 import nl.pindab0ter.eggbot.helpers.product
 import nl.pindab0ter.eggbot.helpers.productOf
@@ -12,14 +13,18 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 
-fun Backup.transportMultiplierFor(farm: Backup.Farm): BigDecimal = farm.baseShippingRate
-    .multiply(farm.shippingRateCommonResearchMultipliers
-        .plus(shippingRateEpicResearchMultiplier)
-        .product()
-        .multiply(artifactsFor(farm).shippingRateMultiplier)
-    )
+fun Backup.shippingRateResearchMultiplierFor(farm: Farm): BigDecimal = farm.shippingRateCommonResearchMultipliers
+    .plus(shippingRateEpicResearchMultiplier)
+    .product()
 
-private val shippingRateArtifacts = listOf(
+fun Backup.shippingRateArtifactsMultiplierFor(farm: Farm): BigDecimal =
+    artifactsFor(farm).shippingRateMultiplier
+
+fun Backup.shippingRateFor(farm: Farm): BigDecimal = farm.baseShippingRate
+    .multiply(shippingRateResearchMultiplierFor(farm))
+    .multiply(shippingRateArtifactsMultiplierFor(farm))
+
+val shippingRateArtifacts = listOf(
     INTERSTELLAR_COMPASS,
     QUANTUM_STONE,
 )
@@ -31,7 +36,7 @@ private val List<Artifact>.shippingRateMultiplier
         artifact.multiplier
     }
 
-private val Backup.Farm.shippingRateCommonResearchMultipliers: List<BigDecimal>
+private val Farm.shippingRateCommonResearchMultipliers: List<BigDecimal>
     get() = listOf(
         ONE + BigDecimal(".05") * commonResearch[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
         ONE + BigDecimal(".10") * commonResearch[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
@@ -47,7 +52,7 @@ private val Backup.Farm.shippingRateCommonResearchMultipliers: List<BigDecimal>
 private val Backup.shippingRateEpicResearchMultiplier: BigDecimal
     get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
 
-private val Backup.Farm.baseShippingRate: BigDecimal
+val Farm.baseShippingRate: BigDecimal
     get() = vehicles.foldIndexed(ZERO) { index, acc, vehicleType ->
         when (vehicleType) {
             VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * hyperloopCars[index]

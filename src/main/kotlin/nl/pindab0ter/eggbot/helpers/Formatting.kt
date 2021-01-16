@@ -1,8 +1,8 @@
 package nl.pindab0ter.eggbot.helpers
 
 import com.auxbrain.ei.Artifact
-import nl.pindab0ter.eggbot.helpers.NumberFormatter.DECIMALS
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
+import nl.pindab0ter.eggbot.helpers.NumberFormatter.TWO_DECIMALS
 import java.math.BigDecimal
 import java.math.BigDecimal.*
 import java.text.DecimalFormat
@@ -18,9 +18,15 @@ enum class NumberFormatter {
     },
 
     /** Format to two decimal places */
-    DECIMALS {
+    TWO_DECIMALS {
         override fun format(number: Number): String =
             DecimalFormat(",##0.00", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
+    },
+
+    /** Format to two decimal places */
+    THREE_DECIMALS {
+        override fun format(number: Number): String =
+            DecimalFormat(",##0.000", DecimalFormatSymbols.getInstance(ENGLISH)).format(number)
     },
 
     /** Format to as little decimal places as needed, with a maximum of three */
@@ -34,11 +40,11 @@ enum class NumberFormatter {
 
 fun Long.formatInteger(): String = INTEGER.format(this)
 fun BigDecimal.formatInteger(): String = INTEGER.format(this)
-fun BigDecimal.formatTwoDecimals(): String = DECIMALS.format(this)
+fun BigDecimal.formatTwoDecimals(): String = TWO_DECIMALS.format(this)
 fun BigDecimal.formatPercentage(): String = times(BigDecimal(100)).formatTwoDecimals()
 fun BigDecimal.formatPlusPercentage(): String = minus(ONE).times(BigDecimal(100)).formatTwoDecimals()
 
-fun BigDecimal.asIllions(formatter: NumberFormatter = DECIMALS, shortened: Boolean = true): String {
+fun BigDecimal.asIllions(formatter: NumberFormatter = TWO_DECIMALS, shortened: Boolean = true): String {
     return when (this) {
         in (TEN.pow(3)..TEN.pow(6) - ONE) -> formatter.format(this / TEN.pow(3)) + if (shortened) "k" else " Kilo"
         in (TEN.pow(6)..TEN.pow(9) - ONE) -> formatter.format(this / TEN.pow(6)) + if (shortened) "M" else " Million"
