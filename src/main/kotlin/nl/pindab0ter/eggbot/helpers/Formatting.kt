@@ -1,6 +1,5 @@
 package nl.pindab0ter.eggbot.helpers
 
-import com.auxbrain.ei.Artifact
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.TWO_DECIMALS
 import java.math.BigDecimal
@@ -159,11 +158,3 @@ fun <T : Any> StringBuilder.appendPaddingCharacters(
     character: String = " ",
 ): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
 
-val Artifact.fullName
-    get() = "${
-        level.name.toLowerCase().capitalize()
-    } ${
-        rarity.name.toLowerCase()
-    } ${
-        name.name.replace('_', ' ').toLowerCase().capitalize()
-    }"
