@@ -17,6 +17,7 @@ object ArtifactCheck : EggBotCommand() {
         category = FarmersCategory
         name = "artifact-check"
         aliases = arrayOf("ac")
+        parameters = listOf(compactSwitch)
         help = "Show the artifact bonuses of all your active farms."
         sendTyping = true
         init()
@@ -31,10 +32,10 @@ object ArtifactCheck : EggBotCommand() {
         }?.mapNotNull { farmer ->
             AuxBrain.getFarmerBackup(farmer.inGameId)
         }?.forEach { backup ->
-            val farm = backup.farms.firstOrNull() { farm ->
+            val farm = backup.farms.firstOrNull { farm ->
                 farm.farmType == HOME
             } ?: return@forEach
-            artifactCheckResponse(farm, backup).forEach(event::reply)
+            artifactCheckResponse(farm, backup, parameters.getBoolean(COMPACT, false)).forEach(event::reply)
         }
     }
 }

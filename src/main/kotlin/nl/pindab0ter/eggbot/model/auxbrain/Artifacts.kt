@@ -10,6 +10,7 @@ import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Backup.Farm
 import org.apache.logging.log4j.kotlin.logger
 import java.math.BigDecimal
+import java.math.BigDecimal.ONE
 
 fun Backup.artifactsFor(farm: Farm?): List<Artifact> = artifactsDatabase?.activeArtifactSets
     ?.getOrNull(farms.indexOf(farm))?.slots?.flatMap { activeArtifactSlot ->
@@ -25,8 +26,8 @@ fun Backup.coopArtifactsFor(farm: Farm?): List<Artifact> = artifactsFor(farm).fi
 }
 
 val Artifact.multiplier: BigDecimal
-    get() = artifactMultipliers[identifier] ?: BigDecimal.ONE.also {
-        logger(Artifact::class.qualifiedName!!).warn { // TODO: Verify this works
+    get() = artifactMultipliers[identifier] ?: ONE.also {
+        logger(Artifact::class.qualifiedName!!).warn {
             "Unknown artifact: ${rarity.name} ${level.name} ${name.name}"
         }
     }
@@ -135,13 +136,9 @@ private val artifactMultipliers = hashMapOf(
 )
 // @formatter:on
 
-val Artifact.fullName
-    get() = "${
-        level.name.toLowerCase().capitalize()
-    } ${
-        rarity.name.toLowerCase()
-    } ${
-        name.name.toLowerCase()
-            .split("_")
-            .joinToString(" ", transform = String::capitalize)
-    }"
+fun Artifact.formatName() = name.name.toLowerCase()
+    .split("_")
+    .joinToString(" ", transform = String::capitalize)
+
+fun Artifact.formatFullName() = "${level.name.toLowerCase().capitalize()} ${rarity.name.toLowerCase()} ${formatName()}"
+

@@ -7,25 +7,27 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.THREE_DECIMALS
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.auxbrain.*
-import java.math.BigDecimal
+import java.math.BigDecimal.ONE
 
-fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
+fun artifactCheckResponse(farm: Farm, backup: Backup, compact: Boolean = false): List<String> {
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
 
     fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
         add(Row(label, value, suffix))
 
-    fun MutableList<Row>.addArtifactRows(artifacts: List<Artifact.Name>) = backup
-        .artifactsFor(farm).filter { artifact ->
+    fun MutableList<Row>.addArtifactRows(artifacts: List<Artifact.Name>) = backup.artifactsFor(farm)
+        .filter { artifact ->
             artifact.name in artifacts
         }.sortedByDescending { artifact ->
             artifact.multiplier
         }.forEach { artifact ->
-            val multiplier = artifact.multiplier
-            addRow(
-                label = "  + ${artifact.fullName}",
-                value = if (multiplier != BigDecimal.ONE) multiplier.formatPlusPercentage() else "Unknown",
-                suffix = if (multiplier != BigDecimal.ONE) "%" else ""
+            if (artifact.multiplier != ONE) addRow(
+                label = "  + ${if (compact) artifact.formatName() else artifact.formatFullName()}",
+                value = artifact.multiplier.formatPlusPercentage(),
+                suffix = "%"
+            ) else addRow(
+                label = "  ### ${if (compact) artifact.formatName() else artifact.formatFullName()}",
+                value = "UNKNOWN ###",
             )
         }
 
