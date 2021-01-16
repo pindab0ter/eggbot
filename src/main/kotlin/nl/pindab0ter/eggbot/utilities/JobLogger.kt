@@ -1,6 +1,6 @@
 package nl.pindab0ter.eggbot.utilities
 
-import nl.pindab0ter.eggbot.helpers.asDayHourAndMinutes
+import nl.pindab0ter.eggbot.helpers.formatDayHourAndMinutes
 import org.apache.logging.log4j.kotlin.Logging
 import org.joda.time.DateTime
 import org.quartz.JobExecutionContext
@@ -20,6 +20,6 @@ object JobLogger : JobListener, Logging {
     override fun jobWasExecuted(context: JobExecutionContext?, jobException: JobExecutionException?) =
         logger.info {
             "Finished job ${context?.jobDetail?.key?.name} in ${context?.jobRunTime}ms. " +
-                    "Next run: ${context?.nextFireTime?.let { DateTime(it.time).asDayHourAndMinutes() }}"
+                    "Next run: ${context?.nextFireTime?.let { DateTime(it.time).formatDayHourAndMinutes() }}"
         }
 }

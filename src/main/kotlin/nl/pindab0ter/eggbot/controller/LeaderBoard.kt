@@ -150,11 +150,11 @@ object LeaderBoard : EggBotCommand() {
             cells = when (board) {
                 EARNINGS_BONUS -> sortedFarmers.map { farmer ->
                     if (extended) farmer.earningsBonus.formatInteger() + "\u00A0%"
-                    else farmer.earningsBonus.asIllions(shortened = true) + if (compact) "" else "\u00A0%"
+                    else farmer.earningsBonus.formatIllions(shortened = true) + if (compact) "" else "\u00A0%"
                 }
                 SOUL_EGGS -> sortedFarmers.map { farmer ->
                     if (extended) farmer.soulEggs.formatInteger()
-                    else farmer.soulEggs.asIllions(shortened = compact)
+                    else farmer.soulEggs.formatIllions(shortened = compact)
                 }
                 PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.prophecyEggs.formatInteger() }
                 PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
@@ -165,7 +165,7 @@ object LeaderBoard : EggBotCommand() {
         if (board == EARNINGS_BONUS) column {
             header = if (compact) "Role" else "Farmer Role"
             leftPadding = if (compact) 1 else 2
-            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.asRank(shortened = compact) }
+            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.formatRank(shortened = compact) }
         }
     }
 }

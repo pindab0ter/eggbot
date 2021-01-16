@@ -4,7 +4,7 @@ import com.auxbrain.ei.Contract
 import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.NumberFormatter
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
-import nl.pindab0ter.eggbot.helpers.asIllions
+import nl.pindab0ter.eggbot.helpers.formatIllions
 import nl.pindab0ter.eggbot.model.database.Coop
 
 fun rollCallResponse(
@@ -22,9 +22,9 @@ fun rollCallResponse(
         append(coop.farmers.count())
         append("/${contract.maxCoopSize} members): ")
         appendPaddingCharacters(
-            coop.activeEarningsBonus.asIllions(NumberFormatter.INTEGER),
-            coops.map { it.activeEarningsBonus.asIllions(NumberFormatter.INTEGER) })
-        append(coop.activeEarningsBonus.asIllions(NumberFormatter.INTEGER) + " %")
+            coop.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER),
+            coops.map { it.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER) })
+        append(coop.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER) + " %")
         appendLine()
     }
     appendLine("```")

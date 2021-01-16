@@ -48,7 +48,7 @@ fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
             label = "Total capacity",
             value = farm.baseHabCapacity
                 .times(backup.habCapacityMultiplierFor(farm))
-                .asIllions(THREE_DECIMALS),
+                .formatIllions(THREE_DECIMALS),
             suffix = "🐔"
         )
     }
@@ -58,7 +58,7 @@ fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
             label = "Base capacity",
             value = farm.baseShippingRate
                 .times(backup.shippingRateResearchMultiplierFor(farm))
-                .asIllions(THREE_DECIMALS),
+                .formatIllions(THREE_DECIMALS),
             suffix = "🥚/min"
         )
 
@@ -85,7 +85,7 @@ fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
 
         addRow(
             label = "Total capacity",
-            value = backup.shippingRateFor(farm).asIllions(THREE_DECIMALS),
+            value = backup.shippingRateFor(farm).formatIllions(THREE_DECIMALS),
             suffix = "🥚/min"
         )
     }

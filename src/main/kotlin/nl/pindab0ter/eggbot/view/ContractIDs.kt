@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
 import nl.pindab0ter.eggbot.EggBot
-import nl.pindab0ter.eggbot.helpers.asDaysHoursAndMinutes
+import nl.pindab0ter.eggbot.helpers.formatDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.helpers.toDateTime
 import org.joda.time.DateTime
 import org.joda.time.Duration
@@ -18,7 +18,7 @@ fun contractIDsResponse(soloContracts: List<Contract>, coopContracts: List<Contr
             append(EggBot.eggsToEmotes[contract.egg]?.asMention ?: "(${contract.egg.name})")
             append(", _valid for ")
             append(
-                Duration(DateTime.now(), contract.expirationTime.toDateTime()).asDaysHoursAndMinutes()
+                Duration(DateTime.now(), contract.expirationTime.toDateTime()).formatDaysHoursAndMinutes()
             )
             appendLine("_")
         }

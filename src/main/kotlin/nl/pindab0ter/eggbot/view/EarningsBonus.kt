@@ -22,17 +22,17 @@ fun earningsBonusResponse(
         add(Row(label, value, suffix))
 
     val rows = mutableListOf<Row>().apply {
-        addRow("Rank:", earningsBonus.asRank(shortened = compact))
-        addRow("Backed up:", timeSinceBackup.asDaysHoursAndMinutes(compact = compact), " ago")
+        addRow("Rank:", earningsBonus.formatRank(shortened = compact))
+        addRow("Backed up:", timeSinceBackup.formatDaysHoursAndMinutes(compact = compact), " ago")
         addRow(
             "Earnings Bonus:",
             if (extended) earningsBonus.formatInteger()
-            else earningsBonus.asIllions(shortened = compact), " %"
+            else earningsBonus.formatIllions(shortened = compact), " %"
         )
         addRow(
             "Soul Eggs:",
             if (extended) soulEggs.formatInteger()
-            else soulEggs.asIllions(shortened = compact)
+            else soulEggs.formatIllions(shortened = compact)
         )
         addRow("Prophecy Eggs:", prophecyEggs.formatInteger())
         if (soulEggsResearchLevel < MAX_SOUL_EGG_RESEARCH_LEVEL)
@@ -43,7 +43,7 @@ fun earningsBonusResponse(
         addRow(
             "SE to next rank:", "+ ${
                 if (extended) soulEggsToNextRank.formatInteger()
-                else soulEggsToNextRank.asIllions(shortened = compact)
+                else soulEggsToNextRank.formatIllions(shortened = compact)
             }"
         )
         addRow("PE to next rank:", "+ ${prophecyEggsToNextRank.formatInteger()}")

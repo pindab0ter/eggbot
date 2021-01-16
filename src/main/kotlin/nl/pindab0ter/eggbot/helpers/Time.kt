@@ -20,7 +20,7 @@ operator fun Duration.div(other: Duration): Double? = try {
     null
 }
 
-fun Duration.asDaysHoursAndMinutes(compact: Boolean = false, spacing: Boolean = false): String = when (compact) {
+fun Duration.formatDaysHoursAndMinutes(compact: Boolean = false, spacing: Boolean = false): String = when (compact) {
     true -> PeriodFormatterBuilder().apply {
         appendDays()
         appendSuffix("d")
@@ -49,7 +49,7 @@ fun Duration.asDaysHoursAndMinutes(compact: Boolean = false, spacing: Boolean = 
     }
 }.toFormatter().withLocale(Locale.UK).print(this.toPeriod().normalizedStandard(PeriodType.dayTime()))
 
-fun Duration.asDaysAndHours(): String = PeriodFormatterBuilder()
+fun Duration.formatDaysAndHours(): String = PeriodFormatterBuilder()
     .appendDays()
     .appendSuffix(" day", " days")
     .appendSeparator(", ")
@@ -59,7 +59,7 @@ fun Duration.asDaysAndHours(): String = PeriodFormatterBuilder()
     .toFormatter()
     .withLocale(Locale.UK).print(this.toPeriod().normalizedStandard(PeriodType.dayTime()))
 
-fun Duration.asDays(compact: Boolean = false): String = when (compact) {
+fun Duration.formatDays(compact: Boolean = false): String = when (compact) {
     true ->
         if (toPeriod().toStandardDuration().standardDays < 1L) "< 1d"
         else PeriodFormatterBuilder()
@@ -78,7 +78,7 @@ fun Duration.asDays(compact: Boolean = false): String = when (compact) {
             .withLocale(Locale.UK).print(toPeriod().normalizedStandard(PeriodType.dayTime()))
 }
 
-fun Duration.asHourAndMinutes(): String = PeriodFormatterBuilder()
+fun Duration.formatHourAndMinutes(): String = PeriodFormatterBuilder()
     .printZeroAlways()
     .appendHours()
     .appendSeparator(":")
@@ -88,7 +88,7 @@ fun Duration.asHourAndMinutes(): String = PeriodFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this.toPeriod().normalizedStandard(PeriodType.time()))
 
-fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
+fun DateTime.foramtMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
     .appendLiteral(" ")
     .appendDayOfMonth(1)
@@ -96,7 +96,7 @@ fun DateTime.asMonthAndDay(): String = DateTimeFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this)
 
-fun DateTime.asCompact(): String = DateTimeFormatterBuilder()
+fun DateTime.formatCompact(): String = DateTimeFormatterBuilder()
     .appendYear(4, 4)
     .appendLiteral("-")
     .appendMonthOfYear(2)
@@ -106,7 +106,7 @@ fun DateTime.asCompact(): String = DateTimeFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this)
 
-fun DateTime.asDayHourAndMinutes(compact: Boolean = false): String = when (compact) {
+fun DateTime.formatDayHourAndMinutes(compact: Boolean = false): String = when (compact) {
     true -> DateTimeFormatterBuilder()
         .appendDayOfWeekShortText()
         .appendLiteral(" ")

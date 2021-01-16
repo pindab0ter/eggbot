@@ -52,8 +52,8 @@ private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = app
     column {
         cells = listOf(
             contract.name,
-            contract.finalGoal.asIllions(OPTIONAL_DECIMALS),
-            contract.lengthSeconds.toDuration().asDaysAndHours(),
+            contract.finalGoal.formatIllions(OPTIONAL_DECIMALS),
+            contract.lengthSeconds.toDuration().formatDaysAndHours(),
             "${contract.maxCoopSize} farmers",
         )
     }
@@ -78,8 +78,8 @@ private fun StringBuilder.drawCompactBasicInfo(contract: Contract): StringBuilde
         alignment = RIGHT
         cells = listOf(
             contract.name,
-            contract.finalGoal.asIllions(OPTIONAL_DECIMALS),
-            contract.lengthSeconds.toDuration().asDaysAndHours(),
+            contract.finalGoal.formatIllions(OPTIONAL_DECIMALS),
+            contract.lengthSeconds.toDuration().formatDaysAndHours(),
             "${contract.maxCoopSize} farmers",
         )
     }
@@ -119,7 +119,7 @@ private fun StringBuilder.drawCoops(
                 is Abandoned -> "Abandoned"
                 is Failed -> "Failed"
                 is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
-                is OnTrack -> status.state.timeTillFinalGoal?.asDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
+                is OnTrack -> status.state.timeTillFinalGoal?.formatDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
                 is FinishedIfBanked -> "Bank now!"
                 is Finished -> "Finished"
             }
@@ -168,7 +168,7 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is InProgress -> status.state.currentEggsLaid.asIllions()
+                is InProgress -> status.state.currentEggsLaid.formatIllions()
                 else -> ""
             }
         }
@@ -184,8 +184,8 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is Failed -> status.coopStatus.eggsLaid.asIllions()
-                is InProgress -> status.state.reportedEggsLaid.asIllions()
+                is Failed -> status.coopStatus.eggsLaid.formatIllions()
+                is InProgress -> status.state.reportedEggsLaid.formatIllions()
                 else -> ""
             }
         }
@@ -202,7 +202,7 @@ private fun StringBuilder.drawCoops(
 
         cells = statuses.map { status ->
             when (status) {
-                is InProgress -> status.state.currentEggsPerMinute.times(SIXTY).asIllions()
+                is InProgress -> status.state.currentEggsPerMinute.times(SIXTY).formatIllions()
                 else -> ""
             }
         }
@@ -243,7 +243,7 @@ private fun StringBuilder.drawCompactCoops(
                 is Abandoned -> "Empty"
                 is Failed -> "Failed"
                 is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
-                is OnTrack -> status.state.timeTillFinalGoal?.asHourAndMinutes() ?: "ERROR"
+                is OnTrack -> status.state.timeTillFinalGoal?.formatHourAndMinutes() ?: "ERROR"
                 is FinishedIfBanked -> "Bank!"
                 is Finished -> "Done"
             }

@@ -110,8 +110,8 @@ fun coopFinishedResponse(
             }.multiply(SIXTY)
 
             cells = buildList {
-                add(status.timeRemaining.asDaysHoursAndMinutes(compact, compact))
-                add(eggsLaid.asIllions() + if (!compact) " (${eggsLaidRate.asIllions()}/hr)" else "")
+                add(status.timeRemaining.formatDaysHoursAndMinutes(compact, compact))
+                add(eggsLaid.formatIllions() + if (!compact) " (${eggsLaidRate.formatIllions()}/hr)" else "")
                 if (status.public) add("This co-op is PUBLIC")
             }
         }
@@ -125,7 +125,7 @@ fun coopFinishedResponse(
         incrementColumn(suffix = ".")
         column {
             leftPadding = 1
-            cells = contract.goals.map { goal -> goal.targetAmount.toBigDecimal().asIllions(OPTIONAL_DECIMALS) }
+            cells = contract.goals.map { goal -> goal.targetAmount.toBigDecimal().formatIllions(OPTIONAL_DECIMALS) }
         }
         column {
             leftPadding = 1
@@ -170,7 +170,7 @@ fun coopFinishedResponse(
             header = "Banked"
             alignment = RIGHT
             cells = status.contributors.map { contributor ->
-                contributor.contributionAmount.toBigDecimal().asIllions()
+                contributor.contributionAmount.toBigDecimal().formatIllions()
             }
         }
 
@@ -180,7 +180,7 @@ fun coopFinishedResponse(
             header = "/hr"
             alignment = LEFT
             cells = status.contributors.map { contributor ->
-                contributor.contributionRate.toBigDecimal().multiply(SIXTY).asIllions()
+                contributor.contributionRate.toBigDecimal().multiply(SIXTY).formatIllions()
             }
         }
     }
@@ -204,7 +204,7 @@ private fun StringBuilder.drawGoals(
     incrementColumn(suffix = ".")
     column {
         leftPadding = 1
-        cells = state.goals.map { (target, _) -> target.asIllions(OPTIONAL_DECIMALS) }
+        cells = state.goals.map { (target, _) -> target.formatIllions(OPTIONAL_DECIMALS) }
     }
     column {
         leftPadding = 1
@@ -222,7 +222,7 @@ private fun StringBuilder.drawGoals(
             when (moment) {
                 null -> "More than a year"
                 Duration.ZERO -> "Goal reached!"
-                else -> moment.asDaysHoursAndMinutes(compact)
+                else -> moment.formatDaysHoursAndMinutes(compact)
             }
         }
     }
@@ -260,15 +260,15 @@ private fun StringBuilder.drawBasicInfo(
 
         cells = buildList {
             if (!state.finishedIfBanked) {
-                add(state.timeRemaining.asDaysHoursAndMinutes(compact, compact))
-                add(state.timeUpEggsLaid.asIllions())
+                add(state.timeRemaining.formatDaysHoursAndMinutes(compact, compact))
+                add(state.timeUpEggsLaid.formatIllions())
             }
-            add(state.currentEggsLaid.asIllions() + if (!compact)
-                " (${state.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
-            add(state.reportedEggsLaid.asIllions())
-            add(state.unreportedEggsLaid.asIllions())
-            add(state.currentPopulation.asIllions() + if (!compact)
-                " (${state.currentPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+            add(state.currentEggsLaid.formatIllions() + if (!compact)
+                " (${state.currentEggsPerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
+            add(state.reportedEggsLaid.formatIllions())
+            add(state.unreportedEggsLaid.formatIllions())
+            add(state.currentPopulation.formatIllions() + if (!compact)
+                " (${state.currentPopulationIncreasePerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
             add(state.tokensAvailable.toString())
             add(state.tokensSpent.toString())
             if (state.public) add("This co-op is PUBLIC")
@@ -298,7 +298,7 @@ private fun StringBuilder.drawMembers(
     column {
         header = "Current"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.formatIllions() }
     }
 
     divider()
@@ -309,7 +309,7 @@ private fun StringBuilder.drawMembers(
         alignment = RIGHT
         leftPadding = 1
 
-        cells = state.farmers.map { farmer -> farmer.reportedEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.reportedEggsLaid.formatIllions() }
     }
 
     divider()
@@ -319,13 +319,13 @@ private fun StringBuilder.drawMembers(
     column {
         header = "/hr"
         rightPadding = 2
-        cells = state.farmers.map { farmer -> farmer.currentEggsPerMinute.multiply(SIXTY).asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentEggsPerMinute.multiply(SIXTY).formatIllions() }
     }
 
     column {
         header = "Chickens"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.currentChickens.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentChickens.formatIllions() }
     }
 
     divider()
@@ -334,7 +334,7 @@ private fun StringBuilder.drawMembers(
         header = "/hr"
         rightPadding = 2
         cells = state.farmers.map { farmer ->
-            farmer.currentChickenIncreasePerMinute.multiply(SIXTY).asIllions()
+            farmer.currentChickenIncreasePerMinute.multiply(SIXTY).formatIllions()
         }
     }
 
@@ -381,7 +381,7 @@ private fun StringBuilder.drawCompactMembers(
     column {
         header = "Current"
         alignment = RIGHT
-        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.currentEggsLaid.formatIllions() }
     }
 
     divider()
@@ -391,7 +391,7 @@ private fun StringBuilder.drawCompactMembers(
 
         alignment = LEFT
 
-        cells = state.farmers.map { farmer -> farmer.reportedEggsLaid.asIllions() }
+        cells = state.farmers.map { farmer -> farmer.reportedEggsLaid.formatIllions() }
     }
 }
 
@@ -439,13 +439,13 @@ private fun StringBuilder.drawBottleNecks(
                     when {
                         moment == Duration.ZERO -> "Full!"
                         moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR ->
-                            moment.asDaysHoursAndMinutes(compact = true, spacing = true)
+                            moment.formatDaysHoursAndMinutes(compact = true, spacing = true)
                         else -> ""
                     }
                 }
                 is MaxedOut -> when (farmer.runningState.habsStatus.moment) {
                     Duration.ZERO -> "Maxed!"
-                    else -> farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(compact = true, spacing = true)
+                    else -> farmer.runningState.habsStatus.moment.formatDaysHoursAndMinutes(compact = true, spacing = true)
                 }
                 else -> ""
             }
@@ -483,7 +483,7 @@ private fun StringBuilder.drawBottleNecks(
                 moment == null -> ""
                 moment == Duration.ZERO -> "Full!"
                 moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR ->
-                    moment.asDaysHoursAndMinutes(compact = true, spacing = true)
+                    moment.formatDaysHoursAndMinutes(compact = true, spacing = true)
                 else -> ""
             }
         }
@@ -513,7 +513,7 @@ private fun StringBuilder.drawBottleNecks(
             when {
                 farmer.awayTimeRemaining <= Duration.ZERO -> "Empty!"
                 farmer.awayTimeRemaining < Duration.standardHours(12L) ->
-                    farmer.awayTimeRemaining.asDaysHoursAndMinutes(compact = true, spacing = true)
+                    farmer.awayTimeRemaining.formatDaysHoursAndMinutes(compact = true, spacing = true)
                 else -> ""
             }
         }
@@ -643,7 +643,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(
         alignment = RIGHT
         leftPadding = 2
         cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
-            "${farmer.timeSinceBackup.asDaysHoursAndMinutes(compact = true, spacing = true)} ago"
+            "${farmer.timeSinceBackup.formatDaysHoursAndMinutes(compact = true, spacing = true)} ago"
         }
     }
 
@@ -654,7 +654,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(
         alignment = RIGHT
         leftPadding = 1
         cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
-            farmer.unreportedEggsLaid.asIllions()
+            farmer.unreportedEggsLaid.formatIllions()
         }
     }
 
@@ -680,7 +680,7 @@ private fun StringBuilder.drawCompactTimeSinceLastBackup(
         leftPadding = 1
         alignment = RIGHT
         cells = sortedFarmers.map { farmer ->
-            "${farmer.timeSinceBackup.asDaysHoursAndMinutes(true, spacing = true)} ago"
+            "${farmer.timeSinceBackup.formatDaysHoursAndMinutes(true, spacing = true)} ago"
         }
     }
 }

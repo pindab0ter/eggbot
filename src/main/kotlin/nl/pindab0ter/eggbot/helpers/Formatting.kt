@@ -44,7 +44,7 @@ fun BigDecimal.formatTwoDecimals(): String = TWO_DECIMALS.format(this)
 fun BigDecimal.formatPercentage(): String = times(BigDecimal(100)).formatTwoDecimals()
 fun BigDecimal.formatPlusPercentage(): String = minus(ONE).times(BigDecimal(100)).formatTwoDecimals()
 
-fun BigDecimal.asIllions(formatter: NumberFormatter = TWO_DECIMALS, shortened: Boolean = true): String {
+fun BigDecimal.formatIllions(formatter: NumberFormatter = TWO_DECIMALS, shortened: Boolean = true): String {
     return when (this) {
         in (TEN.pow(3)..TEN.pow(6) - ONE) -> formatter.format(this / TEN.pow(3)) + if (shortened) "k" else " Kilo"
         in (TEN.pow(6)..TEN.pow(9) - ONE) -> formatter.format(this / TEN.pow(6)) + if (shortened) "M" else " Million"
@@ -90,7 +90,7 @@ fun BigDecimal.asIllions(formatter: NumberFormatter = TWO_DECIMALS, shortened: B
     }
 }
 
-fun BigDecimal.asRank(shortened: Boolean = false): String = when (this) {
+fun BigDecimal.formatRank(shortened: Boolean = false): String = when (this) {
     in (ZERO..TEN.pow(3) - ONE) -> "Farmer"
     in (TEN.pow(3)..TEN.pow(4) - ONE) -> "Farmer II"
     in (TEN.pow(4)..TEN.pow(5) - ONE) -> "Farmer III"

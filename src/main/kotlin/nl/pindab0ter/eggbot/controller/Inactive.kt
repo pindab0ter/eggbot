@@ -6,7 +6,7 @@ import com.martiansoftware.jsap.JSAP.NOT_REQUIRED
 import com.martiansoftware.jsap.JSAPResult
 import com.martiansoftware.jsap.UnflaggedOption
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.helpers.asMonthAndDay
+import nl.pindab0ter.eggbot.helpers.foramtMonthAndDay
 import nl.pindab0ter.eggbot.helpers.getIntOrNull
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.Config
@@ -42,12 +42,12 @@ object Inactive : EggBotCommand() {
         when (val days = parameters.getIntOrNull(DAYS)) {
             null -> {
                 if (discordUser.isActive) event.replyAndLog("You are not inactive.")
-                else event.replyAndLogSuccess("You are set to be inactive until **${discordUser.inactiveUntil?.asMonthAndDay()}**.")
+                else event.replyAndLogSuccess("You are set to be inactive until **${discordUser.inactiveUntil?.foramtMonthAndDay()}**.")
             }
             in Int.MIN_VALUE..0 -> event.replyAndLogWarning("The number of days must be positive.")
             else -> DateTime.now().plusDays(days.coerceAtMost(356)).let { inactiveUntil ->
                 transaction { discordUser.inactiveUntil = inactiveUntil }
-                event.replyAndLogSuccess("You will be inactive until **${inactiveUntil.asMonthAndDay()}** or until you use `${event.client.textualPrefix}${Active.name}`.")
+                event.replyAndLogSuccess("You will be inactive until **${inactiveUntil.foramtMonthAndDay()}** or until you use `${event.client.textualPrefix}${Active.name}`.")
             }
         }
     }

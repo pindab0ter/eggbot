@@ -46,7 +46,7 @@ private fun StringBuilder.drawGoals(
     incrementColumn(suffix = ".")
     column {
         leftPadding = 1
-        cells = state.goals.map { (target, _) -> target.asIllions(OPTIONAL_DECIMALS) }
+        cells = state.goals.map { (target, _) -> target.formatIllions(OPTIONAL_DECIMALS) }
     }
     column {
         leftPadding = 1
@@ -64,7 +64,7 @@ private fun StringBuilder.drawGoals(
             when (moment) {
                 null -> "More than a year"
                 Duration.ZERO -> "Goal reached!"
-                else -> moment.asDaysHoursAndMinutes(compact)
+                else -> moment.formatDaysHoursAndMinutes(compact)
             }
         }
     }
@@ -103,18 +103,18 @@ private fun StringBuilder.drawBasicInfo(
 
         cells = buildList {
             if (!state.finishedIfBanked) {
-                add(state.timeRemaining.asDaysHoursAndMinutes(compact, compact))
-                add(state.timeUpEggsLaid.asIllions())
+                add(state.timeRemaining.formatDaysHoursAndMinutes(compact, compact))
+                add(state.timeUpEggsLaid.formatIllions())
             }
-            add(state.farmer.currentEggsLaid.asIllions() + if (!compact)
-                " (${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
-            add(state.reportedEggsLaid.asIllions())
-            add(state.farmer.unreportedEggsLaid.asIllions())
-            add(state.reportedPopulation.asIllions() + if (!compact)
-                " (${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).asIllions()}/hr)" else "")
+            add(state.farmer.currentEggsLaid.formatIllions() + if (!compact)
+                " (${state.farmer.currentEggsPerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
+            add(state.reportedEggsLaid.formatIllions())
+            add(state.farmer.unreportedEggsLaid.formatIllions())
+            add(state.reportedPopulation.formatIllions() + if (!compact)
+                " (${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
             add(state.farmer.constants.tokensAvailable.toString())
             add(state.farmer.constants.tokensSpent.toString())
-            add("${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
+            add("${state.farmer.timeSinceBackup.formatDaysHoursAndMinutes(compact)} ago")
         }
     }
 }
@@ -132,13 +132,13 @@ private fun StringBuilder.drawBottleNecks(
             when {
                 moment == Duration.ZERO -> appendLine("🏠 Full! ")
                 moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR ->
-                    appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+                    appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.formatDaysHoursAndMinutes(compact)} ")
                 else -> Unit
             }
         }
         is HabsStatus.MaxedOut -> when (state.farmer.runningState.habsStatus.moment) {
             Duration.ZERO -> appendLine("🏠 Maxed! ")
-            else -> appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.asDaysHoursAndMinutes(compact)} ")
+            else -> appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.formatDaysHoursAndMinutes(compact)} ")
         }
         else -> Unit
     }
@@ -148,7 +148,7 @@ private fun StringBuilder.drawBottleNecks(
         transportBottleneckMoment == null -> Unit
         transportBottleneckMoment == Duration.ZERO -> appendLine("🚛 Full! ")
         transportBottleneckMoment < state.timeRemaining && transportBottleneckMoment < state.timeTillFinalGoal ?: ONE_YEAR ->
-            appendLine("🚛 ${transportBottleneckMoment.asDaysHoursAndMinutes(compact)} ")
+            appendLine("🚛 ${transportBottleneckMoment.formatDaysHoursAndMinutes(compact)} ")
         else -> Unit
     }
 
@@ -157,7 +157,7 @@ private fun StringBuilder.drawBottleNecks(
         state.farmer.awayTimeRemaining < Duration.standardHours(12L)
                 && state.farmer.awayTimeRemaining < state.timeRemaining
                 && state.farmer.awayTimeRemaining < state.timeTillFinalGoal ?: ONE_YEAR ->
-            appendLine("⌛ ${state.farmer.awayTimeRemaining.asDaysHoursAndMinutes(compact)}")
+            appendLine("⌛ ${state.farmer.awayTimeRemaining.formatDaysHoursAndMinutes(compact)}")
         else -> Unit
     }
     appendLine("```")
@@ -168,13 +168,13 @@ private fun StringBuilder.drawFinishedBasicInfo(
     compact: Boolean,
 ): StringBuilder = apply {
     appendLine("__**🎉 Bank now to finish!**__ ```")
-    appendLine("Time since backup: ${state.farmer.timeSinceBackup.asDaysHoursAndMinutes(compact)} ago")
+    appendLine("Time since backup: ${state.farmer.timeSinceBackup.formatDaysHoursAndMinutes(compact)} ago")
 
-    append("Current eggs:   ${state.farmer.currentEggsLaid.asIllions()} ")
-    if (!compact) append("(${state.farmer.currentEggsPerMinute.multiply(SIXTY).asIllions()}/hr) ")
+    append("Current eggs:   ${state.farmer.currentEggsLaid.formatIllions()} ")
+    if (!compact) append("(${state.farmer.currentEggsPerMinute.multiply(SIXTY).formatIllions()}/hr) ")
     appendLine()
 
-    append("Unbanked eggs:  ${state.farmer.unreportedEggsLaid.asIllions()} ")
+    append("Unbanked eggs:  ${state.farmer.unreportedEggsLaid.formatIllions()} ")
     appendLine()
 
     appendLine("```")

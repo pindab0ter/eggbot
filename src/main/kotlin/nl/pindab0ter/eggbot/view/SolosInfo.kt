@@ -47,8 +47,8 @@ private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = app
     column {
         cells = listOf(
             contract.name,
-            contract.finalGoal.asIllions(OPTIONAL_DECIMALS),
-            contract.lengthSeconds.toDuration().asDaysAndHours(),
+            contract.finalGoal.formatIllions(OPTIONAL_DECIMALS),
+            contract.lengthSeconds.toDuration().formatDaysAndHours(),
         )
     }
 }
@@ -70,8 +70,8 @@ private fun StringBuilder.drawCompactBasicInfo(contract: Contract): StringBuilde
         alignment = RIGHT
         cells = listOf(
             contract.name,
-            contract.finalGoal.asIllions(OPTIONAL_DECIMALS),
-            contract.lengthSeconds.toDuration().asDaysAndHours(),
+            contract.finalGoal.formatIllions(OPTIONAL_DECIMALS),
+            contract.lengthSeconds.toDuration().formatDaysAndHours(),
         )
     }
 }
@@ -106,7 +106,7 @@ private fun StringBuilder.drawFarmers(
         cells = states.map { state ->
             when {
                 state.willFinish ->
-                    state.timeTillFinalGoal?.asDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
+                    state.timeTillFinalGoal?.formatDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
                 state.finishedIfBanked ->
                     "Bank now!"
                 state.finished ->
@@ -139,7 +139,7 @@ private fun StringBuilder.drawFarmers(
         alignment = RIGHT
         leftPadding = 1
 
-        cells = states.map { status -> status.currentEggsLaid.asIllions() }
+        cells = states.map { status -> status.currentEggsLaid.formatIllions() }
     }
 
     divider()
@@ -150,7 +150,7 @@ private fun StringBuilder.drawFarmers(
         alignment = RIGHT
         leftPadding = 1
 
-        cells = states.map { state -> state.reportedEggsLaid.asIllions() }
+        cells = states.map { state -> state.reportedEggsLaid.formatIllions() }
     }
 
     divider()
@@ -163,7 +163,7 @@ private fun StringBuilder.drawFarmers(
         alignment = RIGHT
         leftPadding = 1
 
-        cells = states.map { state -> state.currentEggsPerMinute.times(SIXTY).asIllions() }
+        cells = states.map { state -> state.currentEggsPerMinute.times(SIXTY).formatIllions() }
     }
 
     divider(intersection = '╡')
@@ -202,7 +202,7 @@ private fun StringBuilder.drawCompactFarmers(
         cells = states.map { state ->
             when {
                 state.willFinish ->
-                    state.timeTillFinalGoal?.asDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
+                    state.timeTillFinalGoal?.formatDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
                 state.finishedIfBanked ->
                     "Bank now!"
                 state.finished ->
