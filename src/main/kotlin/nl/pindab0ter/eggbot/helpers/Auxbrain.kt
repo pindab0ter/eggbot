@@ -1,7 +1,9 @@
 package nl.pindab0ter.eggbot.helpers
 
-import com.auxbrain.ei.*
-import nl.pindab0ter.eggbot.helpers.auxbrain.Artifacts
+import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Contract
+import com.auxbrain.ei.CoopStatus
+import com.auxbrain.ei.LocalContract
 import org.joda.time.DateTime
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -9,26 +11,6 @@ import java.math.BigDecimal
 fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm ->
     farm.contractId == contractId
 }
-
-private fun Backup.activeArtifactsFor(
-    farm: Backup.Farm?,
-) = artifactsDatabase?.activeArtifactSets?.getOrNull(farms.indexOf(farm))?.slots?.flatMap { activeArtifactSlot ->
-    artifactsDatabase.inventoryItems.find { artifactInventoryItem ->
-        artifactInventoryItem.itemId == activeArtifactSlot.itemId
-    }?.artifact?.let { artifact ->
-        artifact.stones.plus(artifact.artifactBase).filterNotNull()
-    }.orEmpty()
-}
-
-fun Backup.activeSoloArtifactsFor(farm: Backup.Farm?): List<Artifact> =
-    activeArtifactsFor(farm)?.filter { artifact ->
-        Artifacts.coopArtifacts.contains(artifact.name).not()
-    } ?: emptyList()
-
-fun Backup.activeCoopArtifactsFor(farm: Backup.Farm?): List<Artifact> =
-    activeArtifactsFor(farm)?.filter { artifact ->
-        Artifacts.coopArtifacts.contains(artifact.name)
-    } ?: emptyList()
 
 val Backup.Farm.timeSinceLastStep: Duration
     get() = Duration(lastStepTime.toDateTime(), DateTime.now())

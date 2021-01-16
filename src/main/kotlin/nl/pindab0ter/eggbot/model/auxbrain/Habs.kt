@@ -1,48 +1,41 @@
-package nl.pindab0ter.eggbot.helpers.auxbrain
+package nl.pindab0ter.eggbot.model.auxbrain
 
 import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Artifact.Name.GUSSET
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Backup.Farm
 import com.auxbrain.ei.HabLevel
 import com.auxbrain.ei.HabLevel.*
-import nl.pindab0ter.eggbot.helpers.activeSoloArtifactsFor
-import nl.pindab0ter.eggbot.helpers.auxbrain.CommonResearch.*
 import nl.pindab0ter.eggbot.helpers.product
 import nl.pindab0ter.eggbot.helpers.productOf
 import nl.pindab0ter.eggbot.helpers.times
+import nl.pindab0ter.eggbot.model.auxbrain.CommonResearch.*
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 
-object Habs {
-    fun researchMultiplierFor(farm: Backup.Farm): BigDecimal = farm
-        .habCapacityResearchMultipliers.product()
+fun Farm.habCapacityResearchMultiplier(): BigDecimal = habCapacityResearchMultipliers.product()
+fun Backup.habCapacityArtifactsMultiplierFor(farm: Farm): BigDecimal = artifactsFor(farm).habCapacityMultiplier
+fun Backup.habCapacityMultiplierFor(farm: Farm): BigDecimal = farm
+    .habCapacityResearchMultiplier()
+    .multiply(habCapacityArtifactsMultiplierFor(farm))
 
-    fun multiplierFor(farm: Backup.Farm, backup: Backup): BigDecimal = farm
-        .habCapacityResearchMultipliers.product()
-        .multiply(backup.activeSoloArtifactsFor(farm).habCapacityMultiplier)
+val habCapacityArtifacts = listOf(
+    GUSSET,
+)
 
-    fun artifactsFor(farm: Backup.Farm, backup: Backup): List<Artifact> = backup.activeSoloArtifactsFor(farm)
-
-    fun multiplierFor(artifact: Artifact) = Artifacts.multiplierFor(artifact, habCapacityArtifacts)
-
-    val habCapacityArtifacts = listOf(
-        GUSSET,
+private val Farm.habCapacityResearchMultipliers: List<BigDecimal>
+    get() = listOf(
+        ONE + BigDecimal(".05") * commonResearch[HEN_HOUSE_REMODEL.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[MICROLUX_CHICKEN_SUITES.ordinal].level,
+        ONE + BigDecimal(".02") * commonResearch[GRAV_PLATING.ordinal].level,
+        ONE + BigDecimal(".02") * commonResearch[WORMHOLE_DAMPENING.ordinal].level
     )
 
-    private val Backup.Farm.habCapacityResearchMultipliers: List<BigDecimal>
-        get() = listOf(
-            ONE + BigDecimal(".05") * commonResearch[HEN_HOUSE_REMODEL.ordinal].level,
-            ONE + BigDecimal(".05") * commonResearch[MICROLUX_CHICKEN_SUITES.ordinal].level,
-            ONE + BigDecimal(".02") * commonResearch[GRAV_PLATING.ordinal].level,
-            ONE + BigDecimal(".02") * commonResearch[WORMHOLE_DAMPENING.ordinal].level
-        )
-
-    val List<Artifact>.habCapacityMultiplier
-        get() = productOf { artifact ->
-            Artifacts.multiplierFor(artifact, habCapacityArtifacts)
-        }
-}
+val List<Artifact>.habCapacityMultiplier
+    get() = filter { artifact ->
+        artifact.name in habCapacityArtifacts
+    }.productOf(Artifact::multiplier)
 
 // @formatter:off
 val HabLevel.capacity: BigDecimal get() = when(this) {

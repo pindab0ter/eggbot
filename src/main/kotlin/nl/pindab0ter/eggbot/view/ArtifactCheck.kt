@@ -1,28 +1,27 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.Backup.Farm
 import com.auxbrain.ei.HabLevel
 import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.helpers.auxbrain.Habs
-import nl.pindab0ter.eggbot.helpers.auxbrain.Habs.habCapacityMultiplier
-import nl.pindab0ter.eggbot.helpers.auxbrain.capacity
 import nl.pindab0ter.eggbot.model.Table
+import nl.pindab0ter.eggbot.model.auxbrain.*
 import java.math.BigDecimal
 
-fun artifactCheckResponse(farm: Backup.Farm, backup: Backup): List<String> {
+fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
 
     fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
         add(Row(label, value, suffix))
 
-    val habCapacityArtifacts = Habs.artifactsFor(farm, backup).filter { artifact ->
-        artifact.name in Habs.habCapacityArtifacts
+    val habCapacityArtifacts = backup.artifactsFor(farm).filter { artifact ->
+        artifact.name in habCapacityArtifacts
     }
     val rows = buildList {
         addRow(
             label = "Base capacity",
             value = (farm.habs.sumOf(HabLevel::capacity))
-                .times(Habs.researchMultiplierFor(farm))
+                .times(farm.habCapacityResearchMultiplier())
                 .formatInteger(),
             suffix = "🐔"
         )
@@ -31,12 +30,12 @@ fun artifactCheckResponse(farm: Backup.Farm, backup: Backup): List<String> {
 
         addRow(
             label = "Artifact multiplier:",
-            value = backup.activeSoloArtifactsFor(farm).habCapacityMultiplier.formatPercentage(),
+            value = backup.habCapacityArtifactsMultiplierFor(farm).formatPercentage(),
             suffix = "%"
         )
 
         habCapacityArtifacts.forEach { habCapacityArtifact ->
-            val multiplier = Habs.multiplierFor(habCapacityArtifact)
+            val multiplier = habCapacityArtifact.multiplier
             addRow(
                 label = "  + ${habCapacityArtifact.fullName}",
                 value = if (multiplier != BigDecimal.ONE) multiplier.formatPlusPercentage() else "Unknown",
@@ -49,7 +48,7 @@ fun artifactCheckResponse(farm: Backup.Farm, backup: Backup): List<String> {
         addRow(
             label = "Total capacity",
             value = (farm.habs.sumOf(HabLevel::capacity))
-                .times(Habs.multiplierFor(farm, backup))
+                .times(backup.habCapacityMultiplierFor(farm))
                 .formatInteger(),
             suffix = "🐔"
         )

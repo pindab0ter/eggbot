@@ -57,8 +57,8 @@ fun habsStatus(habs: List<Hab>, elapsed: Duration): HabsStatus {
 }
 
 fun chickenIncrease(habs: List<Hab>, constants: Constants): BigDecimal =
-    constants.internalHatcheryRate.multiply(
-        BigDecimal.ONE + habs.fullCount().multiply(constants.internalHatcherySharing)
+    constants.hatcheryRate.multiply(
+        BigDecimal.ONE + habs.fullCount().multiply(constants.hatcherySharing)
     )
 
 fun List<Hab>.fullCount(): BigDecimal = sumOf { (population, capacity) ->

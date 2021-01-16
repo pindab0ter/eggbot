@@ -16,8 +16,8 @@ import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.shouldBe
 import io.mockk.every
 import io.mockk.mockkStatic
-import nl.pindab0ter.eggbot.helpers.auxbrain.CommonResearch
-import nl.pindab0ter.eggbot.helpers.auxbrain.EpicResearch
+import nl.pindab0ter.eggbot.model.auxbrain.CommonResearch
+import nl.pindab0ter.eggbot.model.auxbrain.EpicResearch
 import nl.pindab0ter.eggbot.helpers.toDouble
 import nl.pindab0ter.eggbot.model.simulation.old.ContractSimulation
 import org.joda.time.DateTime

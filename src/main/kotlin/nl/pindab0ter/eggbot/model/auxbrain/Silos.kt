@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.helpers.auxbrain
+package nl.pindab0ter.eggbot.model.auxbrain
 
 import com.auxbrain.ei.Backup
 import org.joda.time.Duration
