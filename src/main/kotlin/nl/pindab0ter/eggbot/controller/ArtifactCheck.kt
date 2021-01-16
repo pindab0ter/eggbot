@@ -16,7 +16,10 @@ object ArtifactCheck : EggBotCommand() {
     init {
         category = FarmersCategory
         name = "artifact-check"
-        aliases = arrayOf("ac")
+        aliases = arrayOf(
+            "artifacts-check",
+            "ac",
+        )
         parameters = listOf(compactSwitch)
         help = "Show the artifact bonuses of all your active farms."
         sendTyping = true
