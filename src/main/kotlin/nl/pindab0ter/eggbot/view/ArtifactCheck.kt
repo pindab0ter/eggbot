@@ -48,7 +48,7 @@ fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
             label = "Total capacity",
             value = farm.baseHabCapacity
                 .times(backup.habCapacityMultiplierFor(farm))
-                .formatIllions(THREE_DECIMALS),
+                .formatInteger(),
             suffix = "🐔"
         )
     }
