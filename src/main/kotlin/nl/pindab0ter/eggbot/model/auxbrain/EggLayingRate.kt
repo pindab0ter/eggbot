@@ -10,16 +10,24 @@ import nl.pindab0ter.eggbot.model.auxbrain.CommonResearch.*
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 
-fun Backup.eggLayingRateMultiplierFor(
-    farm: Backup.Farm,
-    activeCoopArtifacts: List<Artifact> = emptyList(),
-): BigDecimal = farm.eggLayingCommonResearchMultipliers
+fun Backup.eggLayingRateResearchMultiplierFor(farm: Backup.Farm) = farm.eggLayingCommonResearchMultipliers
     .plus(eggLayingEpicResearchMultiplier)
     .product()
-    .multiply(artifactsFor(farm).eggLayingRateMultiplier)
-    .multiply(activeCoopArtifacts.minus(artifactsFor(farm)).eggLayingRateMultiplier)
 
-private val eggLayingRateArtifacts = listOf(
+fun Backup.eggLayingRateArtifactsMultiplierFor(
+    farm: Backup.Farm,
+    coopArtifacts: List<Artifact> = emptyList(),
+): BigDecimal =
+    artifactsFor(farm).eggLayingRateMultiplier.multiply(coopArtifacts.minus(artifactsFor(farm)).eggLayingRateMultiplier)
+
+fun Backup.eggLayingRateMultiplierFor(
+    farm: Backup.Farm,
+    coopArtifacts: List<Artifact> = emptyList(),
+): BigDecimal = eggLayingRateResearchMultiplierFor(farm)
+    .multiply(artifactsFor(farm).eggLayingRateMultiplier)
+    .multiply(coopArtifacts.minus(artifactsFor(farm)).eggLayingRateMultiplier)
+
+val eggLayingRateArtifacts = listOf(
     QUANTUM_METRONOME,
     TACHYON_STONE,
     TACHYON_DEFLECTOR,

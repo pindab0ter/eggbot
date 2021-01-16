@@ -17,8 +17,7 @@ fun Backup.shippingRateResearchMultiplierFor(farm: Farm): BigDecimal = farm.ship
     .plus(shippingRateEpicResearchMultiplier)
     .product()
 
-fun Backup.shippingRateArtifactsMultiplierFor(farm: Farm): BigDecimal =
-    artifactsFor(farm).shippingRateMultiplier
+fun Backup.shippingRateArtifactsMultiplierFor(farm: Farm): BigDecimal = artifactsFor(farm).shippingRateMultiplier
 
 fun Backup.shippingRateFor(farm: Farm): BigDecimal = farm.baseShippingRate
     .multiply(shippingRateResearchMultiplierFor(farm))

@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.view
 
+import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Backup.Farm
 import nl.pindab0ter.eggbot.helpers.*
@@ -14,35 +15,104 @@ fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
     fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
         add(Row(label, value, suffix))
 
-    val habRows = buildList {
-        addRow(
-            label = "Base capacity",
-            value = farm.baseHabCapacity
-                .times(farm.habCapacityResearchMultiplier())
-                .formatInteger(),
-            suffix = "🐔"
-        )
-
-        addRow()
-
-        addRow(
-            label = "Artifact multiplier:",
-            value = backup.habCapacityArtifactsMultiplierFor(farm).formatPercentage(),
-            suffix = "%"
-        )
-
-        backup.artifactsFor(farm).filter { artifact ->
-            artifact.name in habCapacityArtifacts
-        }.forEach { habCapacityArtifact ->
-            val multiplier = habCapacityArtifact.multiplier
+    fun MutableList<Row>.addArtifactRows(artifacts: List<Artifact.Name>) = backup
+        .artifactsFor(farm).filter { artifact ->
+            artifact.name in artifacts
+        }.sortedByDescending { artifact ->
+            artifact.multiplier
+        }.forEach { artifact ->
+            val multiplier = artifact.multiplier
             addRow(
-                label = "  + ${habCapacityArtifact.fullName}",
+                label = "  + ${artifact.fullName}",
                 value = if (multiplier != BigDecimal.ONE) multiplier.formatPlusPercentage() else "Unknown",
                 suffix = if (multiplier != BigDecimal.ONE) "%" else ""
             )
         }
 
-        addRow()
+    val eggLayingRateRows = buildList {
+        if (backup.artifactsFor(farm).filter { artifact -> artifact.name in eggLayingRateArtifacts }.count() > 0) {
+            addRow(
+                label = "Base egg laying rate",
+                value = farm.habPopulations.sumOf(Long::toBigDecimal)
+                    .times(EGG_LAYING_BASE_RATE)
+                    .times(backup.eggLayingRateResearchMultiplierFor(farm))
+                    .formatIllions(THREE_DECIMALS),
+                suffix = "🥚/min"
+            )
+
+            addRow()
+
+            addRow(
+                label = "Artifact multiplier:",
+                value = backup.eggLayingRateArtifactsMultiplierFor(farm).formatPercentage(),
+                suffix = "%"
+            )
+
+            addArtifactRows(eggLayingRateArtifacts)
+
+            addRow()
+        }
+
+        addRow(
+            label = "Total egg laying rate",
+            value = farm.habPopulations.sumOf(Long::toBigDecimal)
+                .times(EGG_LAYING_BASE_RATE)
+                .times(backup.eggLayingRateMultiplierFor(farm)).formatIllions(THREE_DECIMALS),
+            suffix = "🥚/min"
+        )
+    }
+
+    val hatcheryRateRows = buildList {
+        if (backup.artifactsFor(farm).filter { artifact -> artifact.name in hatcheryRateArtifacts }.count() > 0) {
+            addRow(
+                label = "Base hatchery rate",
+                value = backup.hatcheryRateFromResearchFor(farm)
+                    .formatIllions(THREE_DECIMALS),
+                suffix = "🐔/min"
+            )
+
+            addRow()
+
+            addRow(
+                label = "Artifact multiplier:",
+                value = backup.hatcheryRateArtifactsMultiplierFor(farm).formatPercentage(),
+                suffix = "%"
+            )
+
+            addArtifactRows(hatcheryRateArtifacts)
+
+            addRow()
+        }
+
+        addRow(
+            label = "Total hatchery rate",
+            value = backup.hatcheryRateFor(farm).formatIllions(THREE_DECIMALS),
+            suffix = "🐔/min"
+        )
+    }
+
+    val habCapacityRows = buildList {
+        if (backup.artifactsFor(farm).filter { artifact -> artifact.name in habCapacityArtifacts }.count() > 0) {
+            addRow(
+                label = "Base capacity",
+                value = farm.baseHabCapacity
+                    .times(farm.habCapacityResearchMultiplier())
+                    .formatInteger(),
+                suffix = "🐔"
+            )
+
+            addRow()
+
+            addRow(
+                label = "Artifact multiplier:",
+                value = backup.habCapacityArtifactsMultiplierFor(farm).formatPercentage(),
+                suffix = "%"
+            )
+
+            addArtifactRows(habCapacityArtifacts)
+
+            addRow()
+        }
 
         addRow(
             label = "Total capacity",
@@ -53,38 +123,31 @@ fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
         )
     }
 
-    val transportRows = buildList {
-        addRow(
-            label = "Base capacity",
-            value = farm.baseShippingRate
-                .times(backup.shippingRateResearchMultiplierFor(farm))
-                .formatIllions(THREE_DECIMALS),
-            suffix = "🥚/min"
-        )
-
-        addRow()
-
-        addRow(
-            label = "Artifact multiplier:",
-            value = backup.shippingRateArtifactsMultiplierFor(farm).formatPercentage(),
-            suffix = "%"
-        )
-
-        backup.artifactsFor(farm).filter { artifact ->
-            artifact.name in shippingRateArtifacts
-        }.forEach { habCapacityArtifact ->
-            val multiplier = habCapacityArtifact.multiplier
+    val shippingRate = buildList {
+        if (backup.artifactsFor(farm).filter { artifact -> artifact.name in shippingRateArtifacts }.count() > 0) {
             addRow(
-                label = "  + ${habCapacityArtifact.fullName}",
-                value = if (multiplier != BigDecimal.ONE) multiplier.formatPlusPercentage() else "Unknown",
-                suffix = if (multiplier != BigDecimal.ONE) "%" else ""
+                label = "Base shipping rate",
+                value = farm.baseShippingRate
+                    .times(backup.shippingRateResearchMultiplierFor(farm))
+                    .formatIllions(THREE_DECIMALS),
+                suffix = "🥚/min"
             )
+
+            addRow()
+
+            addRow(
+                label = "Artifact multiplier:",
+                value = backup.shippingRateArtifactsMultiplierFor(farm).formatPercentage(),
+                suffix = "%"
+            )
+
+            addArtifactRows(shippingRateArtifacts)
+
+            addRow()
         }
 
-        addRow()
-
         addRow(
-            label = "Total capacity",
+            label = "Total shipping rate",
             value = backup.shippingRateFor(farm).formatIllions(THREE_DECIMALS),
             suffix = "🥚/min"
         )
@@ -92,41 +155,79 @@ fun artifactCheckResponse(farm: Farm, backup: Backup): List<String> {
 
     return buildString {
         appendLine("**${backup.userName}**’s home farm:")
-        appendLine()
         appendTable {
-            title = "__**🏠 Hab capacity:**__"
-            displayHeaders = false
-            column {
-                rightPadding = 2
-                cells = habRows.map(Row::label)
-            }
-            column {
-                alignment = RIGHT
-                cells = habRows.map(Row::value)
-            }
-            column {
-                leftPadding = 1
-                cells = habRows.map(Row::suffix)
-            }
-        }
-        appendBreakpoint()
-        appendTable {
-            title = "__**🚛 Transport capacity**__"
+            title = "__**🥚 Egg laying rate:**__"
             displayHeaders = false
             topPadding = 1
             column {
                 rightPadding = 2
-                cells = transportRows.map(Row::label)
+                cells = eggLayingRateRows.map(Row::label)
             }
             column {
                 alignment = RIGHT
-                cells = transportRows.map(Row::value)
+                cells = eggLayingRateRows.map(Row::value)
             }
             column {
                 leftPadding = 1
-                cells = transportRows.map(Row::suffix)
+                cells = eggLayingRateRows.map(Row::suffix)
             }
         }
+        appendBreakpoint()
 
+        appendTable {
+            title = "__**🐔 Internal hatchery rate:**__"
+            displayHeaders = false
+            topPadding = 1
+            column {
+                rightPadding = 2
+                cells = hatcheryRateRows.map(Row::label)
+            }
+            column {
+                alignment = RIGHT
+                cells = hatcheryRateRows.map(Row::value)
+            }
+            column {
+                leftPadding = 1
+                cells = hatcheryRateRows.map(Row::suffix)
+            }
+        }
+        appendBreakpoint()
+
+        appendTable {
+            title = "__**🏠 Hab capacity:**__"
+            displayHeaders = false
+            topPadding = 1
+            column {
+                rightPadding = 2
+                cells = habCapacityRows.map(Row::label)
+            }
+            column {
+                alignment = RIGHT
+                cells = habCapacityRows.map(Row::value)
+            }
+            column {
+                leftPadding = 1
+                cells = habCapacityRows.map(Row::suffix)
+            }
+        }
+        appendBreakpoint()
+
+        appendTable {
+            title = "__**🚛 Transport capacity:**__"
+            displayHeaders = false
+            topPadding = 1
+            column {
+                rightPadding = 2
+                cells = shippingRate.map(Row::label)
+            }
+            column {
+                alignment = RIGHT
+                cells = shippingRate.map(Row::value)
+            }
+            column {
+                leftPadding = 1
+                cells = shippingRate.map(Row::suffix)
+            }
+        }
     }.splitMessage(separator = BREAKPOINT)
 }

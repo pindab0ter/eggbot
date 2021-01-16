@@ -14,12 +14,17 @@ import nl.pindab0ter.eggbot.model.auxbrain.EpicResearch.INTERNAL_HATCH_SHARING
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 
-fun Backup.hatcheryRateMultiplierFor(farm: Farm): BigDecimal =
-    farm.hatcheryRateFlatIncreases.sum()
-        .multiply(hatcheryRateMultiplier)
-        .multiply(artifactsFor(farm).hatcheryRateMultiplier)
+fun Backup.hatcheryRateFromResearchFor(farm: Farm) = farm
+    .hatcheryRateFlatIncreases.sum()
+    .multiply(hatcheryRateMultiplier)
 
-private val hatcheryRateArtifacts = listOf(
+fun Backup.hatcheryRateArtifactsMultiplierFor(farm: Farm) =
+    artifactsFor(farm).hatcheryRateMultiplier
+
+fun Backup.hatcheryRateFor(farm: Farm): BigDecimal = hatcheryRateFromResearchFor(farm)
+    .multiply(hatcheryRateArtifactsMultiplierFor(farm))
+
+val hatcheryRateArtifacts = listOf(
     CHALICE,
     LIFE_STONE,
 )

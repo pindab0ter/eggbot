@@ -11,7 +11,7 @@ import java.math.BigDecimal
 /** Base egg laying rate per chicken per minute.
  *
  * A chicken lays 1/30 of an egg per second, so 2 per minute */
-private val EGG_LAYING_BASE_RATE = BigDecimal(2)
+val EGG_LAYING_BASE_RATE = BigDecimal(2)
 private val MAX_HABS_CAPACITY = BigDecimal(2835000000L)
 
 tailrec fun catchUp(

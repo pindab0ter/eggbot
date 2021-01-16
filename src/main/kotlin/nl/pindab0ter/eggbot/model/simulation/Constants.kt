@@ -22,7 +22,7 @@ data class Constants(
         coopArtifacts: List<Artifact> = emptyList()
     ) : this(
         hatcherySharing = backup.hatcherySharingMultiplier,
-        hatcheryRate = backup.hatcheryRateMultiplierFor(farm),
+        hatcheryRate = backup.hatcheryRateFor(farm),
         habCapacityMultiplier = backup.habCapacityMultiplierFor(farm),
         eggLayingBonus = backup.eggLayingRateMultiplierFor(farm, coopArtifacts),
         transportRate = backup.shippingRateFor(farm),
