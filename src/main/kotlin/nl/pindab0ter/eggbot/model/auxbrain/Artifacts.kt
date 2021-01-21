@@ -118,15 +118,8 @@ private val artifactMultipliers = hashMapOf(
 
     Identifier(TACHYON_DEFLECTOR,    INFERIOR, COMMON)    to BigDecimal("1.05"),
     Identifier(TACHYON_DEFLECTOR,    LESSER,   COMMON)    to BigDecimal("1.10"),
-    // Identifier(TACHYON_DEFLECTOR,    LESSER,   RARE)      to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    LESSER,   EPIC)      to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    NORMAL,   COMMON)    to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    NORMAL,   RARE)      to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    NORMAL,   EPIC)      to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    GREATER,  COMMON)    to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    GREATER,  RARE)      to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    GREATER,  EPIC)      to BigDecimal("?"),
-    // Identifier(TACHYON_DEFLECTOR,    GREATER,  LEGENDARY) to BigDecimal("?"),
+    Identifier(TACHYON_DEFLECTOR,    NORMAL,   COMMON)    to BigDecimal("1.12"),
+    Identifier(TACHYON_DEFLECTOR,    GREATER,  COMMON)    to BigDecimal("1.14"),
 
     // Tachyon Stones
 
