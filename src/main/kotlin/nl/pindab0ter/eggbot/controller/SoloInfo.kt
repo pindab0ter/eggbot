@@ -3,6 +3,10 @@ package nl.pindab0ter.eggbot.controller
 import com.auxbrain.ei.LocalContract
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.javafx.JavaFx
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
 import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.controller.categories.ContractsCategory
 import nl.pindab0ter.eggbot.helpers.*
@@ -13,9 +17,11 @@ import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import nl.pindab0ter.eggbot.model.simulation.simulate
+import nl.pindab0ter.eggbot.view.createChart
 import nl.pindab0ter.eggbot.view.soloFinishedIfBankedResponse
 import nl.pindab0ter.eggbot.view.soloInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 
 object SoloInfo : EggBotCommand() {
 
@@ -83,16 +89,17 @@ object SoloInfo : EggBotCommand() {
             )
 
             val stateSeries = simulate(initialState)
-            GlobalScope.launch(Dispatchers.JavaFx) {
-                createChart(stateSeries)
-            }
-            message.delete().queue()
 
             stateSeries.lastOrNull()?.let { state ->
-                event.reply(
-                    if (state.finishedIfBanked) soloFinishedIfBankedResponse(state, compact)
-                    else soloInfoResponse(state, compact)
-                )
+                if (state.finishedIfBanked) {
+                    message.delete().queue()
+                    event.reply(soloFinishedIfBankedResponse(state, compact))
+                } else runBlocking {
+                    val file = withContext(Dispatchers.JavaFx) { createChart(stateSeries) }
+                    message.delete().queue()
+                    val fileName = "${DateTime.now().toString("YYYYMMddHHmmss")}-${farmer.inGameName}_vs_${contractId}.png"
+                    event.reply(soloInfoResponse(state, compact), file, fileName)
+                }
             } ?: event.replyAndLogWarning(
                 "Failed to simulate."
             )

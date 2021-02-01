@@ -17,6 +17,7 @@ import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import java.io.File
 import javax.imageio.ImageIO
+import kotlin.io.path.createTempFile
 import kotlin.math.E
 import kotlin.math.exp
 import kotlin.math.ln
@@ -24,7 +25,7 @@ import kotlin.math.round
 
 fun createChart(
     stateSeries: List<SoloContractState>,
-) = runBlocking {
+): File = runBlocking {
     val margins = Margins(40.5, 30.5, 50.5, 50.5)
     val chartWidth = 960.0 - margins.hMargins
     val chartHeight = 500.0 - margins.vMargins
@@ -89,6 +90,7 @@ fun createChart(
     val writableImage = WritableImage(960, 500)
     canvas.snapshot(SnapshotParameters(), writableImage)
     val renderedImage = SwingFXUtils.fromFXImage(writableImage, null)
-    val file = File("chart.png")
+    val file = createTempFile(prefix = "chart", suffix = ".png").toFile()
     ImageIO.write(renderedImage, "png", file)
+    return@runBlocking file
 }
