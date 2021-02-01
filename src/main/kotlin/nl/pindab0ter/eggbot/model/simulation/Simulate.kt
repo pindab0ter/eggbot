@@ -4,39 +4,48 @@ import nl.pindab0ter.eggbot.helpers.ONE_MINUTE
 import nl.pindab0ter.eggbot.helpers.ONE_YEAR
 import nl.pindab0ter.eggbot.helpers.advanceOneMinute
 
+fun simulate(contract: SoloContractState): List<SoloContractState> = simulate(contract, emptyList()).second
 
 tailrec fun simulate(
-    contract: SoloContractState,
-): SoloContractState = when {
-    (contract.farmer.timeUpState != null && contract.willFinish) || contract.timeElapsed >= ONE_YEAR -> contract
-    else -> simulate(
-        contract.copy(
-            farmer = contract.farmer.copy(
-                runningState = advanceOneMinute(
-                    contract.farmer.runningState,
-                    contract.farmer.constants,
-                    contract.timeElapsed
-                ),
-                goalsReachedState = when {
-                    contract.farmer.goalsReachedState == null && contract.willFinish -> contract.farmer.runningState
-                    else -> contract.farmer.goalsReachedState
-                },
-                timeUpState = when {
-                    contract.farmer.timeUpState == null && contract.timeElapsed >= contract.timeRemaining -> contract.farmer.runningState
-                    else -> contract.farmer.timeUpState
-                }
-            ),
-            goals = contract.goals.map { goal ->
-                when {
-                    goal.moment == null && contract.farmer.runningState.eggsLaid >= goal.amount -> {
-                        goal.copy(moment = contract.timeElapsed)
+    state: SoloContractState,
+    series: List<SoloContractState>,
+): Pair<SoloContractState, List<SoloContractState>> {
+    return when {
+        state.farmer.timeUpState != null && state.willFinish || state.timeElapsed >= ONE_YEAR -> state to series
+        else -> {
+            val nextState = state.copy(
+                farmer = state.farmer.copy(
+                    runningState = advanceOneMinute(
+                        state.farmer.runningState,
+                        state.farmer.constants,
+                        state.timeElapsed
+                    ),
+                    goalsReachedState = when {
+                        state.farmer.goalsReachedState == null && state.willFinish -> state.farmer.runningState
+                        else -> state.farmer.goalsReachedState
+                    },
+                    timeUpState = when {
+                        state.farmer.timeUpState == null && state.timeElapsed >= state.timeRemaining -> state.farmer.runningState
+                        else -> state.farmer.timeUpState
                     }
-                    else -> goal
-                }
-            }.toSet(),
-            timeElapsed = contract.timeElapsed + ONE_MINUTE
-        )
-    )
+                ),
+                goals = state.goals.map { goal ->
+                    when {
+                        goal.moment == null && state.farmer.runningState.eggsLaid >= goal.amount -> {
+                            goal.copy(moment = state.timeElapsed)
+                        }
+                        else -> goal
+                    }
+                }.toSet(),
+                timeElapsed = state.timeElapsed + ONE_MINUTE
+            )
+
+            simulate(
+                nextState,
+                if (nextState.timeElapsed.standardSeconds % 3600L == 0L) series.plus(nextState) else series
+            )
+        }
+    }
 }
 
 tailrec fun simulate(

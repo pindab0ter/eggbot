@@ -72,7 +72,7 @@ object SolosInfo : EggBotCommand() {
             unit = "farms",
         )
 
-        val states = farmers.asyncMap { farmer ->
+        val stateSeries = farmers.asyncMap { farmer ->
             farmer.contracts?.contracts?.find { localContract ->
                 localContract.contract?.id == contractId
             }?.let { localContract ->
@@ -94,12 +94,16 @@ object SolosInfo : EggBotCommand() {
 
         progressBar.stop()
 
-        if (states.isEmpty()) return@runBlocking event.replyAndLogWarning(
+        if (stateSeries.isEmpty()) return@runBlocking event.replyAndLogWarning(
             "Could not find any registered farmers currently attempting contract id `$contractId`."
         )
 
-        solosInfoResponse(contract, states, compact).let { messages ->
-            messages.forEach { message -> event.reply(message) }
-        }
+        stateSeries.lastOrNull()?.let { finalState ->
+            solosInfoResponse(contract, finalState, compact).let { messages ->
+                messages.forEach { message -> event.reply(message) }
+            }
+        } ?: event.replyAndLogWarning(
+            "Failed to simulate."
+        )
     }
 }

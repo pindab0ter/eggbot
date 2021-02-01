@@ -14,11 +14,13 @@ plugins {
     kotlin("jvm") version "1.5.0-RC"
     id("com.github.ben-manes.versions") version "0.38.0"
     id("com.toasttab.protokt") version "0.5.4"
+    id("org.openjfx.javafxplugin") version "0.0.9"
 }
 
 repositories {
     mavenCentral()
     jcenter()
+    maven(url = "https://kotlin.bintray.com/kotlinx/")
 }
 
 dependencies {
@@ -36,9 +38,23 @@ dependencies {
     implementation("ch.obermuhlner", "big-math", "2.3.0")
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
 
+    implementation("org.openjfx", "javafx-base", "16-ea+6")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-javafx", "1.4.2")
+    implementation("org.jetbrains.kotlinx", "kotlinx-datetime", "0.1.1")
+    implementation("io.data2viz.d2v", "core-jvm", "0.8.10")
+    implementation("io.data2viz.d2v", "color-jvm", "0.8.10")
+    implementation("io.data2viz.d2v", "axis", "0.8.10")
+    implementation("io.data2viz.d2v", "scale-jvm", "0.8.10")
+    implementation("io.data2viz.d2v", "viz", "0.8.10")
+    implementation("io.data2viz.d2v", "viz-jfx", "0.8.10")
+
     runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.14.1")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.34.0")
+}
+
+javafx {
+    modules("javafx.fxml", "javafx.swing")
 }
 
 val compileKotlin: KotlinCompile by tasks
@@ -47,7 +63,8 @@ compileKotlin.kotlinOptions {
     jvmTarget = "15"
     freeCompilerArgs = freeCompilerArgs.plus(listOf(
         "-Xopt-in=kotlin.RequiresOptIn",
-        "-Xopt-in=kotlin.ExperimentalStdlibApi"
+        "-Xopt-in=kotlin.ExperimentalStdlibApi",
+        "-Xopt-in=kotlin.io.path.ExperimentalPathApi"
     ))
 }
 

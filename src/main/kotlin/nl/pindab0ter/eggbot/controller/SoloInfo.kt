@@ -82,13 +82,19 @@ object SoloInfo : EggBotCommand() {
                 "Failed to collect all necessary information from the backup."
             )
 
-            val state = simulate(initialState)
-
+            val stateSeries = simulate(initialState)
+            GlobalScope.launch(Dispatchers.JavaFx) {
+                createChart(stateSeries)
+            }
             message.delete().queue()
 
-            event.reply(
-                if (state.finishedIfBanked) soloFinishedIfBankedResponse(state, compact)
-                else soloInfoResponse(state, compact)
+            stateSeries.lastOrNull()?.let { state ->
+                event.reply(
+                    if (state.finishedIfBanked) soloFinishedIfBankedResponse(state, compact)
+                    else soloInfoResponse(state, compact)
+                )
+            } ?: event.replyAndLogWarning(
+                "Failed to simulate."
             )
         }
     }
