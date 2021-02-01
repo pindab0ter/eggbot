@@ -5,6 +5,7 @@ import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Backup.Farm
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.THREE_DECIMALS
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.auxbrain.*
 import java.math.BigDecimal.ONE
@@ -233,5 +234,5 @@ fun artifactCheckResponse(farm: Farm, backup: Backup, compact: Boolean = false):
                 cells = shippingRate.map(Row::suffix)
             }
         }
-    }.splitMessage(separator = BREAKPOINT)
+    }.splitMessage(separator = zwsp)
 }

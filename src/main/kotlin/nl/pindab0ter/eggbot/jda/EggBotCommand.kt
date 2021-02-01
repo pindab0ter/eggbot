@@ -11,6 +11,7 @@ import nl.pindab0ter.eggbot.EggBot.adminRole
 import nl.pindab0ter.eggbot.EggBot.jdaClient
 import nl.pindab0ter.eggbot.controller.Register
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.Typography.zwj
 import nl.pindab0ter.eggbot.model.Config
 import org.apache.logging.log4j.kotlin.Logging
 
@@ -97,7 +98,7 @@ abstract class EggBotCommand : Command(), Logging {
                 event.replyAndLogError("""
                     ${result.errorMessageIterator.next().toString().replace("'", "`")}
                     The syntax for this command is: `${Config.prefix}$name ${arguments}`.
-                    For more information on this command, type `${Config.prefix}$name --‍help` or `${Config.prefix}$name -‍h`.
+                    For more information on this command, type `${Config.prefix}$name --${zwj}help` or `${Config.prefix}$name -${zwj}h`.
                     """.trimIndent()
                 )
             else -> execute(event, result)

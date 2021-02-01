@@ -4,10 +4,9 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.api.entities.ChannelType
 import net.dv8tion.jda.api.entities.User
 import nl.pindab0ter.eggbot.EggBot
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
-
-const val BREAKPOINT: Char = '\u200B'
 
 val User.isRegistered: Boolean
     get() = transaction {
@@ -19,7 +18,7 @@ val User.isAdmin: Boolean
         author.isOwner || author == EggBot.botOwner || author.roles.contains(EggBot.adminRole)
     } == true
 
-fun StringBuilder.appendBreakpoint(): StringBuilder = append(BREAKPOINT)
+fun StringBuilder.appendBreakpoint(): StringBuilder = append(zwsp)
 
 /**
  * Splits a string into multiple strings.

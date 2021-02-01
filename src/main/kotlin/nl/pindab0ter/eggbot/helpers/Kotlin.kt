@@ -31,6 +31,14 @@ suspend fun <T, R> Iterable<T>.asyncMap(
 
 fun Any?.discard(): Unit = Unit
 
+public object Typography {
+    /** The character &zwsp; – zero-width space */
+    const val zwsp = '\u200B'
+
+    /** The character &zwj; – zero-width joiner */
+    const val zwj = '\u200D'
+}
+
 /**
  * Returns a string containing this char repeated [n] times.
  * @throws [IllegalArgumentException] when n < 0.

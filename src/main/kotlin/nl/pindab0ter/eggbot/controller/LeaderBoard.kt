@@ -10,6 +10,7 @@ import nl.pindab0ter.eggbot.EggBot.emoteSoulEgg
 import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -149,8 +150,8 @@ object LeaderBoard : EggBotCommand() {
             alignment = RIGHT
             cells = when (board) {
                 EARNINGS_BONUS -> sortedFarmers.map { farmer ->
-                    if (extended) farmer.earningsBonus.formatInteger() + "\u00A0%"
-                    else farmer.earningsBonus.formatIllions(shortened = true) + if (compact) "" else "\u00A0%"
+                    if (extended) farmer.earningsBonus.formatInteger() + "$zwsp%"
+                    else farmer.earningsBonus.formatIllions(shortened = true) + if (compact) "" else "$zwsp%"
                 }
                 SOUL_EGGS -> sortedFarmers.map { farmer ->
                     if (extended) farmer.soulEggs.formatInteger()

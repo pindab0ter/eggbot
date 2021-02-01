@@ -5,6 +5,7 @@ import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.simulation.SoloContractState
@@ -29,7 +30,7 @@ fun solosInfoResponse(
         drawCompactFarmers(states.sortedWith(SoloContractState.timeUpEggsLaidComparator))
     }
 
-}.splitMessage(separator = BREAKPOINT)
+}.splitMessage(separator = zwsp)
 
 private fun StringBuilder.drawBasicInfo(contract: Contract): StringBuilder = appendTable {
     title = "__**🗒️ Basic info:**__"

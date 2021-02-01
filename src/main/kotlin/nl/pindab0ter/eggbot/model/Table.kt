@@ -158,7 +158,7 @@ class Table {
                 // Draw table header
                 appendLine(spacedColumns.renderRow {
                     when (this) {
-                        is DividerColumn -> "$border"
+                        is DividerColumn -> border.toString()
                         else -> header
                     }
                 })
@@ -167,7 +167,7 @@ class Table {
                 appendLine(spacedColumns.renderRow('═') {
                     when (this) {
                         is EmojiColumn -> borderEmoji
-                        is DividerColumn -> "$intersection"
+                        is DividerColumn -> intersection.toString()
                         else -> '═'.repeat(headerLength)
                     }
                 })

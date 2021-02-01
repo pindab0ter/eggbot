@@ -8,6 +8,7 @@ import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
@@ -48,7 +49,7 @@ fun coopInfoResponse(
             drawCompactBottleNecks(state, bottleneckedFarmers)
         }
     }
-}.splitMessage(separator = BREAKPOINT)
+}.splitMessage(separator = zwsp)
 
 fun coopFinishedIfBankedResponse(
     state: CoopContractState,
@@ -69,7 +70,7 @@ fun coopFinishedIfBankedResponse(
         appendBreakpoint()
         drawCompactTimeSinceLastBackup(state)
     }
-}.splitMessage(separator = BREAKPOINT)
+}.splitMessage(separator = zwsp)
 
 fun coopFinishedResponse(
     status: CoopStatus,
@@ -184,7 +185,7 @@ fun coopFinishedResponse(
             }
         }
     }
-}.splitMessage(separator = BREAKPOINT)
+}.splitMessage(separator = zwsp)
 
 private fun List<Farmer>.shortenedNames(): List<String> = map { farmer ->
     farmer.name.let { name ->
