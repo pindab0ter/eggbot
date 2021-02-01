@@ -176,8 +176,9 @@ class Table {
             // Draw table body
             (0 until amountOfRows).forEach { rowIndex ->
                 val renderedRow = spacedColumns.renderRow { cells[rowIndex] }
-                if (length + renderedRow.length + 3 > 2000) {
-                    append("```\u200B")
+                // Plus 3 results in wrong behaviour
+                if (length + renderedRow.length + 4 > 2000) {
+                    append("```")
                     add(toString())
                     clear()
                     appendLine("```")
