@@ -26,28 +26,37 @@ import kotlin.math.round
 fun createChart(
     stateSeries: List<SoloContractState>,
 ): File = runBlocking {
+    val canvasSize = size(960, 500)
     val margins = Margins(40.5, 30.5, 50.5, 50.5)
-    val chartWidth = 960.0 - margins.hMargins
-    val chartHeight = 500.0 - margins.vMargins
 
     val xScale = Scales.Continuous.linear {
         domain = listOf(.0, stateSeries.last().timeElapsed.standardMinutes.toDouble())
-        range = listOf(.0, chartWidth)
+        range = listOf(.0, canvasSize.width - margins.hMargins)
     }
 
     val yScale = Scales.Continuous.log(E) {
         domain = listOf(exp(.0), stateSeries.last().runningEggsLaid.toDouble())
-        range = listOf(chartHeight, .0)
+        range = listOf(canvasSize.height - margins.vMargins, .0)
     }
 
     val points = stateSeries.map { state ->
         Point(state.timeElapsed.standardMinutes.toDouble(), state.runningEggsLaid.toDouble())
     }
 
-    val canvas = Canvas(960.0, 500.0)
+    val canvas = Canvas(canvasSize.width, canvasSize.height)
+    val notQuiteWhite = Colors.rgb(220, 221, 222)
+    val darkButNotBlack = Colors.rgb(153, 170, 181)
+    val notQuiteBlack = Colors.rgb(47, 49, 54)
 
     val viz = viz {
-        size = size(960, 500)
+        size = canvasSize
+        fill = Colors.rgb(47, 49, 54)
+
+        // Background
+        rect {
+            size = canvasSize
+            fill = notQuiteBlack
+        }
 
         group {
             transform {
@@ -59,24 +68,31 @@ fun createChart(
                     translate(x = -10.0)
                 }
                 axis(Orient.LEFT, yScale) {
+                    axisStroke = notQuiteWhite
+                    tickStroke = notQuiteWhite
+                    fontColor = notQuiteWhite
                     tickFormat = { "e${round(ln(it)).toInt()}" }
                 }
             }
 
             group {
                 transform {
-                    translate(y = chartHeight + 10.0)
+                    translate(y = canvasSize.height - margins.vMargins + 10.0)
                 }
-                axis(Orient.BOTTOM, xScale)
+                axis(Orient.BOTTOM, xScale) {
+                    axisStroke = notQuiteWhite
+                    tickStroke = notQuiteWhite
+                    fontColor = notQuiteWhite
+                }
             }
 
             group {
                 path {
                     fill = null
-                    stroke = Colors.Web.steelblue
-                    strokeWidth = 1.5
+                    stroke = Colors.Web.linen
+                    strokeWidth = 2.0
 
-                    moveTo(xScale(points[0].x), yScale(points[0].y))
+                    moveTo(xScale(points.first().x), yScale(points.first().y))
                     for (point in points) {
                         lineTo(xScale(point.x), yScale(point.y))
                     }
@@ -87,7 +103,7 @@ fun createChart(
 
     JFxVizRenderer(canvas, viz)
     viz.render()
-    val writableImage = WritableImage(960, 500)
+    val writableImage = WritableImage(canvasSize.width.toInt(), canvasSize.height.toInt())
     canvas.snapshot(SnapshotParameters(), writableImage)
     val renderedImage = SwingFXUtils.fromFXImage(writableImage, null)
     val file = createTempFile(prefix = "chart", suffix = ".png").toFile()
