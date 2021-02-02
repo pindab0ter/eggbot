@@ -43,26 +43,30 @@ data class CoopContractState(
     val runningEggsLaid: BigDecimal
         get() = farmers.sumOf { farmer -> farmer.runningState.eggsLaid }
     val timeUpEggsLaid: BigDecimal
-        get() = farmers.sumOf { farmer -> farmer.timeUpState?.eggsLaid ?: BigDecimal.ZERO }
+        get() = farmers.sumOf { farmer -> farmer.finalState?.eggsLaid ?: BigDecimal.ZERO }
+    val finalGoal: BigDecimal
+        get() = goals.last().amount
     val timeUpPercentageOfFinalGoal: BigDecimal
-        get() = (timeUpEggsLaid / goals.last().amount) * 100
+        get() = (timeUpEggsLaid / finalGoal) * 100
     val timeTillFinalGoal: Duration?
         get() = goals.last().moment
     val tokensAvailable: Int
         get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
     val tokensSpent: Int
         get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
+    val endReached: Boolean
+        get() = farmers.any { farmer -> farmer.finalState != null }
     val goalsReached: Int
         get() = goals.count { (_, moment) -> moment != null }
     val willFinish: Boolean
         get() = when {
-            timeElapsed < timeRemaining -> runningEggsLaid >= goals.last().amount
-            else -> timeUpEggsLaid >= goals.last().amount
+            timeElapsed < timeRemaining -> runningEggsLaid >= finalGoal
+            else -> timeUpEggsLaid >= finalGoal
         }
     val finishedIfBanked: Boolean
-        get() = reportedEggsLaid < goals.last().amount && currentEggsLaid >= goals.last().amount
+        get() = reportedEggsLaid < finalGoal && currentEggsLaid >= finalGoal
     val finished: Boolean
-        get() = reportedEggsLaid >= goals.last().amount
+        get() = reportedEggsLaid >= finalGoal
 
     constructor(
         contract: Contract,

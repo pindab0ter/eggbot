@@ -15,7 +15,7 @@ data class SoloContractState(
     val timeRemaining: Duration,
     val timeElapsed: Duration = Duration.ZERO,
     val farmer: Farmer,
-): Comparable<SoloContractState> {
+) : Comparable<SoloContractState> {
     val reportedEggsLaid: BigDecimal
         get() = farmer.reportedState.eggsLaid
     val reportedEggsPerMinute: BigDecimal
@@ -31,18 +31,20 @@ data class SoloContractState(
     val runningEggsLaid: BigDecimal
         get() = farmer.runningState.eggsLaid
     val timeUpEggsLaid: BigDecimal
-        get() = farmer.timeUpState?.eggsLaid ?: BigDecimal.ZERO
+        get() = farmer.finalState?.eggsLaid ?: BigDecimal.ZERO
+    val finalGoal: BigDecimal
+        get() = goals.last().amount
     val timeUpPercentageOfFinalGoal: BigDecimal
-        get() = (timeUpEggsLaid / goals.last().amount) * 100
+        get() = (timeUpEggsLaid / finalGoal) * 100
     val timeTillFinalGoal: Duration?
         get() = goals.last().moment
     val willFinish: Boolean
         get() = when {
-            timeElapsed < timeRemaining -> runningEggsLaid >= goals.last().amount
-            else -> timeUpEggsLaid >= goals.last().amount
+            timeElapsed < timeRemaining -> runningEggsLaid >= finalGoal
+            else -> timeUpEggsLaid >= finalGoal
         }
     val finishedIfBanked: Boolean
-        get() = reportedEggsLaid < goals.last().amount && currentEggsLaid >= goals.last().amount
+        get() = reportedEggsLaid < finalGoal && currentEggsLaid >= finalGoal
     val finished: Boolean
         get() = reportedEggsLaid >= goals.last().amount
     val goalsReached: Int

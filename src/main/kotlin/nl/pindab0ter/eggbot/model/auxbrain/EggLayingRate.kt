@@ -17,8 +17,8 @@ fun Backup.eggLayingRateResearchMultiplierFor(farm: Backup.Farm) = farm.eggLayin
 fun Backup.eggLayingRateArtifactsMultiplierFor(
     farm: Backup.Farm,
     coopArtifacts: List<Artifact> = emptyList(),
-): BigDecimal =
-    artifactsFor(farm).eggLayingRateMultiplier.multiply(coopArtifacts.minus(artifactsFor(farm)).eggLayingRateMultiplier)
+): BigDecimal = artifactsFor(farm).eggLayingRateMultiplier
+    .multiply(coopArtifacts.minus(artifactsFor(farm)).eggLayingRateMultiplier)
 
 fun Backup.eggLayingRateMultiplierFor(
     farm: Backup.Farm,
@@ -33,15 +33,15 @@ val eggLayingRateArtifacts = listOf(
     TACHYON_DEFLECTOR,
 )
 
-private val Backup.eggLayingEpicResearchMultiplier: BigDecimal
-    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
-
 private val List<Artifact>.eggLayingRateMultiplier
     get() = filter { artifact ->
         artifact.name in eggLayingRateArtifacts
     }.productOf { artifact ->
         artifact.multiplier
     }
+
+private val Backup.eggLayingEpicResearchMultiplier: BigDecimal
+    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
 
 private val Backup.Farm.eggLayingCommonResearchMultipliers: List<BigDecimal>
     get() = listOf(
