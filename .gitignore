@@ -151,3 +151,5 @@ gradle-app.setting
 /eggbot.properties
 
 .idea/misc.xml
+
+.DS_Store
