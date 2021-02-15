@@ -40,7 +40,7 @@ object EarningsBonus : EggBotCommand() {
 
         farmers.forEach { farmer ->
             if (!farmer.inGameId.startsWith("EI"))
-                return@forEach event.replyWarning("Please migrate `${farmer.inGameName}` using `${Config.prefix}${Migrate.name}`")
+                return@forEach event.replyWarning("Please migrate `${farmer.inGameName}` using `${Config.prefix}${Migrate.name}` in a DM to ${event.jda.selfUser.asMention}.")
 
 
             val backup = AuxBrain.getFarmerBackup(farmer.inGameId)
