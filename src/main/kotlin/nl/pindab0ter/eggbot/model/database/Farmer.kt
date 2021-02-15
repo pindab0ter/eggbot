@@ -38,7 +38,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
 
     fun update(backup: Backup) {
         if (backup.clientVersion > EggBot.clientVersion) EggBot.clientVersion = backup.clientVersion
-        if (backup.game == null || backup.stats == null) return logger.warn { "Tried to update from backup but failed." }
+        if (backup.game == null || backup.stats == null) return logger.warn { "Tried to update from backup but failed. (ID: $id)" }
         if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) inGameName = backup.userName
         prestiges = backup.stats.prestigeCount
         _soulEggs = backup.game.soulEggs
