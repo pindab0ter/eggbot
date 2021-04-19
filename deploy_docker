@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Usage
+# $ ./deploy.sh ssh-config-name folder-and-pane-name
+# * ssh-config-name: The name of the SSH config set up to connect to the server to deploy to
+# * name: The name of the folder in the home directory and tmux window (must be the same)
+
+set -o errexit -o nounset -o pipefail
+ssh_config=$1
+name=$2
+echo "Building…"
+./gradlew installDist
+docker build -t pindab0ter/eggbot .
+echo "Updating ${name} on host ${ssh_config}..."
+docker context use "$ssh_config"
+if [[ $(docker ps --quiet --filter "name=$name") ]]; then
+  echo "Stopping old instance..."
+  docker stop "$name"
+fi
+docker run --name "$name" \
+  --detach \
+  --rm \
+  --volume /home/hans/TestEggBot/eggbot.properties:/opt/EggBot/eggbot.properties:ro \
+  --volume /home/hans/TestEggBot/EggBot.sqlite:/opt/EggBot/EggBot.sqlites \
+  pindab0ter/eggbot
+ssh -t "$ssh_config" tmux new-window -n "$name" -c "$name" docker logs -f "$name"
