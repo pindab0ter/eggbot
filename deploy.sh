@@ -1,11 +1,11 @@
 #!/bin/bash
+set -o errexit -o nounset -o pipefail
 
 # Usage
 # $ ./deploy.sh ssh-config-name folder-and-pane-name
 # * ssh-config-name: The name of the SSH config set up to connect to the server to deploy to
 # * name: The name of the folder in the home directory and tmux window (must be the same)
 
-set -o errexit -o nounset -o pipefail
 ./gradlew installDist
 cd build/install/EggBot
 ssh_config=$1
