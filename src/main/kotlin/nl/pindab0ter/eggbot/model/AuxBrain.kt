@@ -27,7 +27,7 @@ object AuxBrain {
         .body("data=${
             PeriodicalsRequest {
                 clientVersion = EggBot.clientVersion
-                userId = "0"
+                userId = Config.userId
             }.serialize().encodeBase64ToString()
         }")
 
@@ -36,7 +36,7 @@ object AuxBrain {
         .body("data=${
             FirstContactRequest {
                 eiUserId = userId
-                deviceId = "B.O.C.K."
+                deviceId = Config.deviceId
                 clientVersion = Config.clientVersion
             }.serialize().encodeBase64ToString()
         }")

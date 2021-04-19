@@ -21,7 +21,11 @@ object Config : Logging {
     val clientVersion: Int
     val devMode: Boolean
 
-    // IDs
+    // AuxBrain IDs
+    val userId: String
+    val deviceId: String
+
+    // Discord IDs
     val botOwnerId: String
     val guildId: String
     val adminRoleId: String
@@ -60,6 +64,9 @@ object Config : Logging {
             ) else null
             clientVersion = getOptional("client_version", "0").toInt()
             devMode = getOptional("dev_mode", "false") == "true"
+
+            userId = getRequired("user_id")
+            deviceId = getRequired("device_id")
 
             botOwnerId = getOptional("bot_owner_id", "0")
             guildId = getRequired("guild_id")
