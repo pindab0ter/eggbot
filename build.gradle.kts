@@ -23,7 +23,6 @@ wire {
 
 repositories {
     mavenCentral()
-
     maven {
         // Required for Kord and Kord Extensions
         name = "Kotlin Discord"
