@@ -42,6 +42,14 @@ fun createRollCall(
                 .minByOrNull { coop -> coop.farmers.count { farmer -> !farmer.isActive } }!!
                 .let { coop -> coop.farmers = SizedCollection(coop.farmers.plus(inactiveFarmer)) }
         }
+
+        // Designate co-op leaders
+        coops.forEach { coop ->
+            coop.leader = coop.farmers
+                .filterNot { farmer -> farmer.discordUser.optedOutOfCoopLead }
+                .maxByOrNull { farmer -> farmer.earningsBonus }
+        }
     }
+
     return coops
 }

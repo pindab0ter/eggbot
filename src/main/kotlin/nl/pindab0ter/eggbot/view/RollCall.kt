@@ -31,16 +31,21 @@ fun rollCallResponse(
 }).plus(coops.map { coop ->
     val role = coop.roleId?.let { EggBot.guild.getRoleById(it) }
     buildString {
-        appendLine("__**Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)**__")
-        coop.farmers.forEach { farmer ->
-            append(
-                EggBot.guild.getMemberById(farmer.discordUser.discordId)?.asMention
-                    ?: farmer.discordUser.discordName
-            )
-            append(" (`${farmer.inGameName}`)")
-            if (farmer.isActive.not()) append(" _Inactive_")
-            appendLine()
-        }
+        // Header
+        append("**__Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)")
+        if (coop.hasLeader) appendLine(" led by:__ ${coop.leader!!.discordUser.asMention}**")
+        else appendLine("__**")
+
+        // Body
+        coop.farmers
+            .sortedBy { farmer -> farmer.inGameName }
+            .forEach { farmer ->
+                if (farmer.isActive.not()) append("_")
+                append(farmer.discordUser.asMention)
+                append(" (`${farmer.inGameName}`)")
+                if (farmer.isActive.not()) append(" (Inactive)_")
+                appendLine()
+            }
         appendLine()
     }
 })

@@ -13,7 +13,10 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     var roleId by Coops.roleId
     var contractId by Coops.contractId
 
+    var leader: Farmer? by Farmer optionalReferencedOn Coops.leaderId
     var farmers by Farmer via CoopFarmers
+
+    val hasLeader: Boolean get() = leader != null
 
     val activeEarningsBonus: BigDecimal
         get() = farmers.sumOf { farmer ->
