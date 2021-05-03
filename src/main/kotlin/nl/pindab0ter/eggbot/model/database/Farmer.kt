@@ -56,7 +56,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
 
             return Farmer.new(if (backup.eiUserId.isNotBlank()) backup.eiUserId else backup.userId) {
                 this.discordUser = discordUser
-                inGameName = backup.userName
+                if (backup.userName.isNotBlank()) inGameName = backup.userName
                 prestiges = backup.stats.prestigeCount
                 _soulEggs = backup.game.soulEggs
                 prophecyEggs = backup.game.prophecyEggs
