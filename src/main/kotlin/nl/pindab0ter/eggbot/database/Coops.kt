@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.database
 
 import org.jetbrains.exposed.dao.IntIdTable
-import org.jetbrains.exposed.sql.ReferenceOption.*
+import org.jetbrains.exposed.sql.ReferenceOption.SET_NULL
 
 
 object Coops : IntIdTable() {

@@ -24,6 +24,7 @@ val commandClient: CommandClient = CommandClientBuilder().apply {
         EarningsBonus,
         Inactive,
         Inactives,
+        Leader,
         LeaderBoard,
         Migrate,
         Register,
