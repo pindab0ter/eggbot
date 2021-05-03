@@ -44,8 +44,10 @@ data class Farmer(
         }
     val currentChickens: BigDecimal get() = currentState?.population ?: BigDecimal.ZERO
     val currentChickenIncreasePerMinute: BigDecimal
-        get() = chickenIncrease(currentState?.habs ?: emptyList(),
-            constants).multiply(FOUR - (currentState?.habs?.fullCount() ?: BigDecimal.ZERO))
+        get() = chickenIncrease(
+            currentState?.habs ?: emptyList(),
+            constants
+        ).multiply(FOUR - (currentState?.habs?.fullCount() ?: BigDecimal.ZERO))
     val timeUpEggsLaid: BigDecimal get() = timeUpState?.eggsLaid ?: BigDecimal.ZERO
     val awayTimeRemaining: Duration get() = constants.maxAwayTime - timeSinceBackup
     val isSleeping: Boolean get() = awayTimeRemaining <= Duration.ZERO

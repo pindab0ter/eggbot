@@ -4,7 +4,8 @@ import com.auxbrain.ei.FarmType.HOME
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.martiansoftware.jsap.JSAPResult
 import nl.pindab0ter.eggbot.controller.categories.FarmersCategory
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.COMPACT
+import nl.pindab0ter.eggbot.helpers.compactSwitch
 import nl.pindab0ter.eggbot.jda.EggBotCommand
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.DiscordUser
