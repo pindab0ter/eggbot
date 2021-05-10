@@ -42,7 +42,7 @@ fun rollCallResponse(
             .forEach { farmer ->
                 if (farmer.isActive.not()) append("_")
                 append(farmer.discordUser.asMention)
-                if (farmer.inGameName.isNotEmpty()) append(" (${farmer.inGameName})")
+                if (farmer.inGameName.isNotEmpty()) append(" (`${farmer.inGameName}`)")
                 if (farmer.isActive.not()) append(" (Inactive)_")
                 appendLine()
             }
