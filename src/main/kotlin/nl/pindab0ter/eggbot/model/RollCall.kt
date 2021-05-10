@@ -46,7 +46,7 @@ fun createRollCall(
         // Designate co-op leaders
         coops.forEach { coop ->
             coop.leader = coop.farmers
-                .filterNot { farmer -> farmer.discordUser.optedOutOfCoopLead }
+                .filter { farmer -> farmer.canBeCoopLeader }
                 .maxByOrNull { farmer -> farmer.earningsBonus }
         }
     }

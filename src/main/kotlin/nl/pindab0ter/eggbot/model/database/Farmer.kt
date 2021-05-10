@@ -32,6 +32,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
     var lastUpdated by Farmers.lastUpdated
 
     val isActive: Boolean get() = discordUser.isActive
+    val canBeCoopLeader get() = discordUser.isActive && !discordUser.optedOutOfCoopLead
 
     val earningsBonus: BigDecimal
         get() = EarningsBonus(this).earningsBonus
