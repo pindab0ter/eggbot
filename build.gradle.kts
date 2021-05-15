@@ -13,22 +13,38 @@ plugins {
     application
     kotlin("jvm") version "1.5.0-RC"
     id("com.github.ben-manes.versions") version "0.38.0"
-    id("com.toasttab.protokt") version "0.5.4"
+    id("com.toasttab.protokt") version "0.6.0"
 }
 
 repositories {
     mavenCentral()
+    maven {
+        name = "Sonatype"
+        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
+    }
+    maven {
+        name = "Kotlin Discord"
+        url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
+    }
     jcenter()
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.0-RC")
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.4.3")
+    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.0")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.5.0-RC")
     implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.0.0")
     implementation("joda-time", "joda-time", "2.10.10")
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
     implementation("org.jetbrains.exposed", "exposed", "0.17.13")
     implementation("com.jagrosh", "jda-utilities-command", "3.0.5")
+    implementation("dev.kord", "kord-core", "kotlin-1.5") {
+        version {
+            strictly("kotlin-1.5-20210505.195343-2")
+        }
+    }
+    implementation("dev.kord.cache", "cache-api", "0.3.0-SNAPSHOT")
+    implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.0-20210507.225126-203")
+    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.6")
     implementation("net.dv8tion", "JDA", "4.2.0_247") {
         exclude("club.minnced", "opus-java")
     }
@@ -45,10 +61,12 @@ val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     languageVersion = "1.4"
     jvmTarget = "15"
-    freeCompilerArgs = freeCompilerArgs.plus(listOf(
-        "-Xopt-in=kotlin.RequiresOptIn",
-        "-Xopt-in=kotlin.ExperimentalStdlibApi"
-    ))
+    freeCompilerArgs = freeCompilerArgs.plus(
+        listOf(
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=kotlin.ExperimentalStdlibApi"
+        )
+    )
 }
 
 val compileJava: JavaCompile by tasks
