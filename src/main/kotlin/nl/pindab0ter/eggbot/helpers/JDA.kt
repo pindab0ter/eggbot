@@ -38,7 +38,9 @@ fun String.splitMessage(
     separator: Char = '\n',
 ): List<String> = split(separator)
     .also { blocks ->
-        require(blocks.none { it.length >= 2000 - prefix.length - postfix.length }) { "Any block cannot be larger than 2000 characters." }
+        require(blocks.none { block ->
+            block.length >= 2000 - prefix.length - postfix.length
+        }) { "Any block cannot be larger than 2000 characters." }
     }
     .fold(listOf("")) { acc, section ->
         if ("${acc.last()}$section$postfix$separator".length < 2000) acc.replaceLast { "$it$section$separator" }

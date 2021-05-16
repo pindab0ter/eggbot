@@ -446,7 +446,8 @@ private fun StringBuilder.drawBottleNecks(
                 }
                 is MaxedOut -> when (farmer.runningState.habsStatus.moment) {
                     Duration.ZERO -> "Maxed!"
-                    else -> farmer.runningState.habsStatus.moment.formatDaysHoursAndMinutes(compact = true, spacing = true)
+                    else -> farmer.runningState.habsStatus.moment
+                        .formatDaysHoursAndMinutes(compact = true, spacing = true)
                 }
                 else -> ""
             }

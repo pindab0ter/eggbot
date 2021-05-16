@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.model
 
 import nl.pindab0ter.eggbot.helpers.TableMarker
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.helpers.interleave
 import nl.pindab0ter.eggbot.helpers.renderRow
 import nl.pindab0ter.eggbot.helpers.repeat
@@ -82,7 +83,7 @@ class Table {
                     left.cellLengths.zip(right.cellLengths).let { rowLengths ->
                         val widestPair = rowLengths
                             .plus(left.header.length to right.header.length)
-                            .map { (a, b) -> a + b }.maxOrNull()!!
+                            .maxOf { (a, b) -> a + b }
 
                         ' '.repeat(widestPair - (left.headerLength + right.headerLength)) to rowLengths.map { (a, b) ->
                             ' '.repeat(widestPair - (a + b))
@@ -123,15 +124,15 @@ class Table {
     fun emojiColumn(init: EmojiColumn.() -> Unit): EmojiColumn = initColumn(EmojiColumn(), init)
 
     fun incrementColumn(suffix: String = "", init: IncrementColumn.() -> Unit = {}): IncrementColumn =
-        initColumn(IncrementColumn(), {
+        initColumn(IncrementColumn()) {
             this.suffix = suffix
             init()
-        })
+        }
 
-    fun divider(border: Char = '│', intersection: Char = '╪'): DividerColumn = initColumn(DividerColumn(), {
+    fun divider(border: Char = '│', intersection: Char = '╪'): DividerColumn = initColumn(DividerColumn()) {
         this.border = border
         this.intersection = intersection
-    })
+    }
 
     // endregion
 
@@ -176,9 +177,9 @@ class Table {
             // Draw table body
             (0 until amountOfRows).forEach { rowIndex ->
                 val renderedRow = spacedColumns.renderRow { cells[rowIndex] }
-                // Plus 3 results in wrong behaviour
-                if (length + renderedRow.length + 4 > 2000) {
-                    append("```")
+                // 20 as a healthy margin until the exact calculation is figured out
+                if (length + renderedRow.length + 20 > 2000) {
+                    append("```$zwsp")
                     add(toString())
                     clear()
                     appendLine("```")
