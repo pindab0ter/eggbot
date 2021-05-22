@@ -93,7 +93,7 @@ object LeaderBoard : EggBotCommand() {
                 values().find { board -> board.shortForm == input }
         }
 
-        override val readableName: String get() = name.toLowerCase().replace('_', '-')
+        override val readableName: String get() = name.split('_').joinToString(" ") { it.toLowerCase().capitalize() }
         val longForm: String get() = name.toLowerCase().replace('_', '-')
         val shortForm: String get() = name.toLowerCase().split('_').joinToString("") { "${it.first()}" }
     }

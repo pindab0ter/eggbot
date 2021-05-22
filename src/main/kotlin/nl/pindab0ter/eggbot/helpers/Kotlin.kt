@@ -7,6 +7,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlin.coroutines.CoroutineContext
 
 fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
+fun <T> Iterable<T>.tail(): Iterable<T> = filterIndexed { index, _ -> index > 0 }
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
 fun <T> Iterable<T>.replace(newValue: T, predicate: (T) -> Boolean): Iterable<T> {
     return map { element ->
