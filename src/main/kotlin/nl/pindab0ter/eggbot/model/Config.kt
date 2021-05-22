@@ -27,7 +27,7 @@ object Config : Logging {
 
     // Discord IDs
     val botOwnerId: String
-    val guildId: String
+    val guildId: Long
     val adminRoleId: String
 
     val botCommandsChannelId: String
@@ -69,7 +69,7 @@ object Config : Logging {
             deviceId = getRequired("device_id")
 
             botOwnerId = getOptional("bot_owner_id", "0")
-            guildId = getRequired("guild_id")
+            guildId = getRequired("guild_id").toLong()
             adminRoleId = getRequired("role.admin_id")
 
             botCommandsChannelId = getRequired("channel.bot_commands")

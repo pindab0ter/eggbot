@@ -5,7 +5,7 @@ version = "2.0.0"
 
 application {
     applicationName = "EggBot"
-    mainClass.set("nl.pindab0ter.eggbot.EggBot")
+    mainClass.set("nl.pindab0ter.eggbot.kord.MainKt")
 }
 
 plugins {

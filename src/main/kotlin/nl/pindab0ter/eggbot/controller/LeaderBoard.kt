@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.controller
 
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import com.martiansoftware.jsap.FlaggedOption
 import com.martiansoftware.jsap.JSAP.INTEGER_PARSER
 import com.martiansoftware.jsap.JSAPResult
@@ -78,7 +79,7 @@ object LeaderBoard : EggBotCommand() {
         ).forEach { response -> event.reply(response) }
     }
 
-    enum class Board {
+    enum class Board : ChoiceEnum {
         EARNINGS_BONUS, SOUL_EGGS, PROPHECY_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
 
         companion object {
@@ -92,6 +93,7 @@ object LeaderBoard : EggBotCommand() {
                 values().find { board -> board.shortForm == input }
         }
 
+        override val readableName: String get() = name.toLowerCase().replace('_', '-')
         val longForm: String get() = name.toLowerCase().replace('_', '-')
         val shortForm: String get() = name.toLowerCase().split('_').joinToString("") { "${it.first()}" }
     }
