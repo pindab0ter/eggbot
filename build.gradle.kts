@@ -32,10 +32,17 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.10")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.5.0")
-    implementation("org.apache.logging.log4j", "log4j-api-kotlin", "1.0.0")
-    implementation("joda-time", "joda-time", "2.10.10")
-    implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
+    implementation("joda-time", "joda-time", "2.10.10") // TODO: Replace with Kotlin's time library
+    implementation("ch.obermuhlner", "big-math", "2.3.0")
+
+    // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.13")
+
+    // Networking
+    implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
+    runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
+
+    // Discord
     implementation("dev.kord", "kord-core", "kotlin-1.5") {
         version {
             strictly("kotlin-1.5-SNAPSHOT")
@@ -46,13 +53,13 @@ dependencies {
             strictly("1.4.0-SNAPSHOT")
         }
     }
-    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.6")
-    implementation("ch.obermuhlner", "big-math", "2.3.0")
+
+    // Task scheduling
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
 
-    runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
+    // Logging
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.14.1")
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.34.0")
+    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.6")
 }
 
 val compileKotlin: KotlinCompile by tasks

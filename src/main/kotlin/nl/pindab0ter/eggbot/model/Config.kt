@@ -1,12 +1,13 @@
 package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Egg
-import org.apache.logging.log4j.kotlin.Logging
+import mu.KotlinLogging
 import java.io.FileInputStream
 import java.util.*
 
-object Config : Logging {
+object Config {
     private const val FILE_NAME = "eggbot.properties"
+    private val logger = KotlinLogging.logger { }
 
     val botToken: String
     val prefix: String
@@ -14,6 +15,7 @@ object Config : Logging {
     val emojiSuccess: String
     val emojiWarning: String
     val emojiError: String
+
     // val activity: Activity?
     private val statusType: String
     private val statusText: String?
