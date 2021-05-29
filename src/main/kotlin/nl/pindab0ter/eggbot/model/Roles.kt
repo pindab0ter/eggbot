@@ -1,9 +1,7 @@
 package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Contract
-import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.api.entities.Role
-import nl.pindab0ter.eggbot.EggBot
+import dev.kord.core.entity.Role
 import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.DiscordUser
@@ -28,17 +26,18 @@ fun assignRoles(
     inGameNamesToDiscordIDs.map { (inGameName, discordID) ->
         inGameName to transaction { DiscordUser.findById(discordID) }
     }.forEach { (inGameName, discordUser) ->
-        if (discordUser != null) EggBot.guild.addRoleToMember(discordUser.discordId, role).submit()
-            .handle { _, exception ->
-                if (exception == null) {
-                    successes.add(discordUser)
-                    logger.debug("Assigned @${role.name} to ${discordUser.discordTag}.")
-                } else {
-                    failures.add(inGameName)
-                    logger.warn("Failed to assign @${role.name} to ${discordUser.discordTag}. Cause: ${exception.localizedMessage}")
-                }
-            }.join()
-        else failures.add(inGameName)
+        // TODO:
+        // if (discordUser != null) EggBot.guild.addRoleToMember(discordUser.discordId, role).submit()
+        //     .handle { _, exception ->
+        //         if (exception == null) {
+        //             successes.add(discordUser)
+        //             logger.debug("Assigned @${role.name} to ${discordUser.discordTag}.")
+        //         } else {
+        //             failures.add(inGameName)
+        //             logger.warn("Failed to assign @${role.name} to ${discordUser.discordTag}. Cause: ${exception.localizedMessage}")
+        //         }
+        //     }.join()
+        // else failures.add(inGameName)
         progressCallBack()
     }
     return successes to failures
@@ -53,19 +52,21 @@ fun createCoopsAndRoles(
 ): List<Coop> = transaction {
     val coopNames = coopNames(amount, baseName)
     List(amount) { index ->
-        val roleId = if (noRole) null else EggBot.guild.roles.find { role ->
-            role.name == coopNames[index]
-        }?.id ?: EggBot.guild.createRole().run {
-            setName(coopNames[index])
-            setMentionable(true)
-            setColor(DEFAULT_ROLE_COLOR)
-            complete()
-        }.id
+        // TODO:
+        // val roleId = if (noRole) null else EggBot.guild.roles.find { role ->
+        //     role.name == coopNames[index]
+        // }?.id ?: EggBot.guild.createRole().run {
+        //     setName(coopNames[index])
+        //     setMentionable(true)
+        //     setColor(DEFAULT_ROLE_COLOR)
+        //     complete()
+        // }.id
 
         Coop.new {
             this.contractId = contract.id
             this.name = coopNames[index]
-            this.roleId = roleId
+            // TODO:
+            this.roleId = null
         }
     }
 }
@@ -82,31 +83,32 @@ private fun coopNames(amount: Int, baseName: String): List<String> = when {
     }
 }
 
-fun deleteCoopsAndRoles(
-    coopsToRoles: List<Pair<Coop, Role?>>,
-    event: CommandEvent,
-): Pair<Map<String, String?>, Map<String, String?>> {
-    val logger = logger("deleteCoopsAndRoles")
-    val successes = mutableListOf<Pair<String, String?>>()
-    val failures = mutableListOf<Pair<String, String?>>()
-
-    coopsToRoles.forEach { (coop, role) ->
-        val coopNameToRoleName = coop.name to role?.name
-        if (role != null) role.delete().submit().handle { _, exception ->
-            if (exception != null) "Failed to remove Discord role (${exception.localizedMessage})".let {
-                failures.add(coopNameToRoleName)
-                logger.warn { it }
-                event.replyWarning(it)
-            } else {
-                transaction { coop.delete() }
-                successes.add(coopNameToRoleName)
-                logger.info { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
-            }
-        }.join() else {
-            transaction { coop.delete() }
-            successes.add(coopNameToRoleName)
-            logger.info { "Co-op ${coopNameToRoleName.first} successfully removed." }
-        }
-    }
-    return successes.toMap() to failures.toMap()
-}
+// TODO:
+// fun deleteCoopsAndRoles(
+//     coopsToRoles: List<Pair<Coop, Role?>>,
+//     event: CommandEvent,
+// ): Pair<Map<String, String?>, Map<String, String?>> {
+//     val logger = logger("deleteCoopsAndRoles")
+//     val successes = mutableListOf<Pair<String, String?>>()
+//     val failures = mutableListOf<Pair<String, String?>>()
+//
+//     coopsToRoles.forEach { (coop, role) ->
+//         val coopNameToRoleName = coop.name to role?.name
+//         if (role != null) role.delete().submit().handle { _, exception ->
+//             if (exception != null) "Failed to remove Discord role (${exception.localizedMessage})".let {
+//                 failures.add(coopNameToRoleName)
+//                 logger.warn { it }
+//                 event.replyWarning(it)
+//             } else {
+//                 transaction { coop.delete() }
+//                 successes.add(coopNameToRoleName)
+//                 logger.info { "Co-op ${coopNameToRoleName.first} and role ${coopNameToRoleName.second} successfully removed." }
+//             }
+//         }.join() else {
+//             transaction { coop.delete() }
+//             successes.add(coopNameToRoleName)
+//             logger.info { "Co-op ${coopNameToRoleName.first} successfully removed." }
+//         }
+//     }
+//     return successes.toMap() to failures.toMap()
+// }

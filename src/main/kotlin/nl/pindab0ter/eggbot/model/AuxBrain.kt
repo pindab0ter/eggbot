@@ -7,7 +7,6 @@ import com.github.kittinunf.fuel.core.ResultHandler
 import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.decodeBase64
 import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
@@ -26,7 +25,9 @@ object AuxBrain {
         .header("Content-Type", "application/x-www-form-urlencoded")
         .body("data=${
             PeriodicalsRequest {
-                clientVersion = EggBot.clientVersion
+                clientVersion = Config.clientVersion
+                // TODO:
+                // clientVersion = EggBot.clientVersion
                 userId = Config.userId
             }.serialize().encodeBase64ToString()
         }")

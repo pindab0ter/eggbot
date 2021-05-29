@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
-import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
@@ -119,7 +118,9 @@ fun coopFinishedResponse(
     }
 
     appendTable {
-        title = "__${contract.egg.toEmote()} **Goals** (${contract.goals.count()}/${contract.goals.count()})__"
+        title = "__**Goals** (${contract.goals.count()}/${contract.goals.count()})__"
+        // TODO:
+        // title = "__${contract.egg.toEmote()} **Goals** (${contract.goals.count()}/${contract.goals.count()})__"
         displayHeaders = false
         topPadding = 1
 
@@ -198,7 +199,9 @@ private fun StringBuilder.drawGoals(
     state: CoopContractState,
     compact: Boolean,
 ): StringBuilder = appendTable {
-    title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
+    title = "__**Goals** (${state.goalsReached}/${state.goals.count()})__"
+    // TODO:
+    // title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 

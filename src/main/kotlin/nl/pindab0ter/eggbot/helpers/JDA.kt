@@ -1,22 +1,6 @@
 package nl.pindab0ter.eggbot.helpers
 
-import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.api.entities.ChannelType
-import net.dv8tion.jda.api.entities.User
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
-import nl.pindab0ter.eggbot.model.database.DiscordUser
-import org.jetbrains.exposed.sql.transactions.transaction
-
-val User.isRegistered: Boolean
-    get() = transaction {
-        DiscordUser.findById(id)?.farmers?.sortedBy { it.inGameName }?.isNotEmpty() == true
-    }
-
-val User.isAdmin: Boolean
-    get() = EggBot.guild.getMember(this)?.let { author ->
-        author.isOwner || author == EggBot.botOwner || author.roles.contains(EggBot.adminRole)
-    } == true
 
 fun StringBuilder.appendBreakpoint(): StringBuilder = append(zwsp)
 
@@ -53,16 +37,3 @@ fun String.splitMessage(
  * The string will be split at newlines, never exceeding 2000 characters per element.
  */
 fun String.splitCodeBlock(separator: Char = '\n'): List<String> = splitMessage("```", "```", separator)
-
-fun CommandEvent.replyInDms(messages: List<String>) {
-    var successful: Boolean? = null
-    messages.forEachIndexed { i, message ->
-        replyInDm(message, {
-            successful = (successful ?: true) && true
-            if (i == messages.size - 1 && isFromType(ChannelType.TEXT)) reactSuccess()
-        }, {
-            if (successful == null) replyWarning("Help cannot be sent because you are blocking Direct Messages.")
-            successful = false
-        })
-    }
-}

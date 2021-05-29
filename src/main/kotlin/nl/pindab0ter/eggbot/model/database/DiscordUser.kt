@@ -1,6 +1,5 @@
 package nl.pindab0ter.eggbot.model.database
 
-import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmers
 import org.jetbrains.exposed.dao.Entity
@@ -17,12 +16,14 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val optedOutOfCoopLead: Boolean get() = optedOutOfCoopLeadAt != null
     val farmers by Farmer referrersOn Farmers.discordId
 
-    val asMention: String get() = guild.getMemberById(discordId)?.asMention ?: discordName
+    // TODO:
+    // val asMention: String get() = guild.getMemberById(discordId)?.asMention ?: discordName
     val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
 
-    fun updateTag() = guild.getMemberById(discordId)?.user?.asTag.takeIf { it != discordTag }?.let { tag ->
-        discordTag = tag
-    }
+    // TODO:
+    // fun updateTag() = guild.getMemberById(discordId)?.user?.asTag.takeIf { it != discordTag }?.let { tag ->
+    //     discordTag = tag
+    // }
 
     fun optOutOfCoopLead() {
         optedOutOfCoopLeadAt = DateTime.now()

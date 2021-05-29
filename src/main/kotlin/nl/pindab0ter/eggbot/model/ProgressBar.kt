@@ -1,10 +1,11 @@
 package nl.pindab0ter.eggbot.model
 
+import dev.kord.core.behavior.edit
+import dev.kord.core.entity.Message
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import net.dv8tion.jda.api.entities.Message
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
 import org.apache.logging.log4j.kotlin.Logging
 import java.util.concurrent.atomic.AtomicBoolean
@@ -35,20 +36,22 @@ class ProgressBar(
         var i = 0
         while (running.get()) when {
             dirty.getAndSet(false) -> {
-                message.editMessage(buildString {
-                    if (statusText != null) appendLine(statusText)
-                    appendLine(drawProgressBar(counter.get(), goal.get(), unit))
-                }).queue()
+                message.edit {
+                    content = (buildString {
+                        if (statusText != null) appendLine(statusText)
+                        appendLine(drawProgressBar(counter.get(), goal.get(), unit))
+                    })
+                }
                 i = 0
             }
             else -> {
                 if (i >= TIME_OUT) running.set(false)
-                else if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.sendTyping().queue()
+                else if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.type()
                 delay(1000)
             }
         }
         try {
-            message.delete().queue()
+            message.delete()
         } catch (exception: Exception) {
             logger.error("Failed to delete message: ${exception.message}")
         }

@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.model.database
 
 import com.auxbrain.ei.Backup
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
@@ -38,7 +37,8 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
         get() = EarningsBonus(this).earningsBonus
 
     fun update(backup: Backup) {
-        if (backup.clientVersion > EggBot.clientVersion) EggBot.clientVersion = backup.clientVersion
+        // TODO:
+        // if (backup.clientVersion > EggBot.clientVersion) EggBot.clientVersion = backup.clientVersion
         if (backup.game == null || backup.stats == null) return logger.warn { "Tried to update from backup but failed." }
         if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) inGameName = backup.userName
         prestiges = backup.stats.prestigeCount

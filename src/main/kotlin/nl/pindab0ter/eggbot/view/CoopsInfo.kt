@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
-import nl.pindab0ter.eggbot.EggBot.guild
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
@@ -22,7 +21,9 @@ fun coopsInfoResponse(
     statuses: List<CoopContractStatus>,
     compact: Boolean,
 ) = buildString {
-    appendLine("`${guild.name}` vs. _${contract.name}_:")
+    appendLine("`` vs. _${contract.name}_:")
+    // TODO:
+    // appendLine("`${guild.name}` vs. _${contract.name}_:")
     appendLine()
 
     if (!compact) {

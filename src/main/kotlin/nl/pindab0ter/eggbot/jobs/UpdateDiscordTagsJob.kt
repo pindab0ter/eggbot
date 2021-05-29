@@ -8,9 +8,9 @@ import org.quartz.JobExecutionContext
 
 
 class UpdateDiscordTagsJob : Job, Logging {
-
     override fun execute(context: JobExecutionContext?): Unit = transaction {
         logger.info { "Updating Discord user's tags…" }
-        DiscordUser.all().toList().forEach { discordUser -> discordUser.updateTag() }
+        // TODO:
+        // DiscordUser.all().toList().forEach { discordUser -> discordUser.updateTag() }
     }
 }

@@ -12,6 +12,7 @@ import java.sql.Connection
 @KordPreview
 suspend fun main() {
     connectToDatabase()
+
     ExtensibleBot(Config.botToken) {
         extensions {
             add(::EggBotExtension)

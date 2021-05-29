@@ -5,16 +5,98 @@ import com.kotlindiscord.kord.extensions.commands.converters.optionalInt
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
+import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.commands.slash.converters.defaultingEnumChoice
 import dev.kord.common.annotation.KordPreview
-import nl.pindab0ter.eggbot.controller.LeaderBoard
-import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.EARNINGS_BONUS
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
+import nl.pindab0ter.eggbot.helpers.formatIllions
+import nl.pindab0ter.eggbot.helpers.formatInteger
+import nl.pindab0ter.eggbot.helpers.formatRank
+import nl.pindab0ter.eggbot.helpers.table
 import nl.pindab0ter.eggbot.helpers.publicFollowUp
+import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.*
+import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
 object LeaderBoard {
+    enum class Board : ChoiceEnum {
+        EARNINGS_BONUS, SOUL_EGGS, PROPHECY_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
+
+        override val readableName: String
+            get() = name.split("_").joinToString(" ") { it.toLowerCase().capitalize() }
+    }
+
+    private fun formatLeaderBoard(
+        farmers: List<Farmer>,
+        board: Board,
+        top: Int?,
+        compact: Boolean,
+    ): List<String> = table {
+        val sortedFarmers = when (board) {
+            EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
+            SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
+            PROPHECY_EGGS -> farmers.sortedByDescending { farmer -> farmer.prophecyEggs }
+            PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.prestiges }
+            DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
+            ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
+        }.let { sortedFarmers ->
+            if (top != null) sortedFarmers.take(top) else sortedFarmers
+        }
+        val shortenedNames = sortedFarmers.map { farmer ->
+            farmer.inGameName.let { name ->
+                if (name.length <= 10) name
+                else "${name.substring(0 until 9)}…"
+            }
+        }
+
+        title = "__**${
+            when (board) {
+                EARNINGS_BONUS -> "💵 Earnings Bonus"
+                SOUL_EGGS -> "Soul Eggs"
+                PROPHECY_EGGS -> "Prophecy Eggs"
+                // TODO:
+                // SOUL_EGGS -> "${emoteSoulEgg?.asMention ?: "🥚"} Soul Eggs"
+                // PROPHECY_EGGS -> "${emoteProphecyEgg?.asMention ?: "🥚"} Prophecy Eggs"
+                PRESTIGES -> "🥨 Prestiges"
+                DRONE_TAKEDOWNS -> "✈🚫 Drone Takedowns"
+                ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"
+            }
+        }${if (!compact) " Leader Board" else ""}**__"
+        displayHeaders = true
+        if (compact) incrementColumn() else incrementColumn(":")
+        column {
+            header = "Name"
+            leftPadding = 1
+            rightPadding = if (compact) 1 else 2
+            cells = if (compact) shortenedNames else sortedFarmers.map { farmer -> farmer.inGameName }
+        }
+        column {
+            header = when (board) {
+                EARNINGS_BONUS -> "Earnings Bonus" + if (compact) "" else "  " // Added spacing for percent suffix
+                SOUL_EGGS -> "Soul Eggs"
+                PROPHECY_EGGS -> "Prophecy Eggs"
+                PRESTIGES -> "Prestiges"
+                DRONE_TAKEDOWNS -> "Drone Takedowns"
+                ELITE_DRONE_TAKEDOWNS -> "Elite Drone Takedowns"
+            }
+            alignment = RIGHT
+            cells = when (board) {
+                EARNINGS_BONUS -> sortedFarmers.map { farmer -> farmer.earningsBonus.formatIllions(shortened = true) + if (compact) "" else "$zwsp%" }
+                SOUL_EGGS -> sortedFarmers.map { farmer -> farmer.soulEggs.formatIllions(shortened = compact) }
+                PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.prophecyEggs.formatInteger() }
+                PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
+                DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
+                ELITE_DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
+            }
+        }
+        if (board == EARNINGS_BONUS) column {
+            header = if (compact) "Role" else "Farmer Role"
+            leftPadding = if (compact) 1 else 2
+            cells = sortedFarmers.map { farmer -> farmer.earningsBonus.formatRank(shortened = compact) }
+        }
+    }
 
     class LeaderBoardArguments : Arguments() {
         val top: Int? by optionalInt(
@@ -22,7 +104,7 @@ object LeaderBoard {
             description = "How many players to show",
             outputError = false,
         )
-        val board: LeaderBoard.Board by defaultingEnumChoice(
+        val board: Board by defaultingEnumChoice(
             displayName = "board",
             description = "Which board to show",
             typeName = "leaderBoard",
@@ -49,12 +131,11 @@ object LeaderBoard {
                 content = "There are no registered farmers."
             }
 
-            publicFollowUp(LeaderBoard.formatLeaderBoard(
+            publicFollowUp(formatLeaderBoard(
                 farmers = farmers,
                 board = arguments.board,
                 top = arguments.top?.takeIf { it > 0 },
                 compact = arguments.compact,
-                extended = false
             ))
         }
     }

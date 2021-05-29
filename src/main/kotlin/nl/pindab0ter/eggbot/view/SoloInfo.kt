@@ -1,6 +1,5 @@
 package nl.pindab0ter.eggbot.view
 
-import nl.pindab0ter.eggbot.EggBot.toEmote
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
@@ -39,7 +38,9 @@ private fun StringBuilder.drawGoals(
     state: SoloContractState,
     compact: Boolean,
 ): StringBuilder = appendTable {
-    title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
+    title = "__**Goals** (${state.goalsReached}/${state.goals.count()})__"
+    // TODO:
+    // title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 

@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Egg
-import net.dv8tion.jda.api.entities.Activity
 import org.apache.logging.log4j.kotlin.Logging
 import java.io.FileInputStream
 import java.util.*
@@ -15,7 +14,7 @@ object Config : Logging {
     val emojiSuccess: String
     val emojiWarning: String
     val emojiError: String
-    val activity: Activity?
+    // val activity: Activity?
     private val statusType: String
     private val statusText: String?
     val clientVersion: Int
@@ -54,14 +53,14 @@ object Config : Logging {
             emojiError = getOptional("emoji.error", "🚫")
             statusType = getOptional("status_type", "DEFAULT")
             statusText = getOptional("status_text")
-            activity = if (statusText != null) Activity.of(
-                when (statusType) {
-                    "STREAMING" -> Activity.ActivityType.STREAMING
-                    "LISTENING" -> Activity.ActivityType.LISTENING
-                    "WATCHING" -> Activity.ActivityType.WATCHING
-                    else -> Activity.ActivityType.DEFAULT
-                }, statusText
-            ) else null
+            // activity = if (statusText != null) Activity.of(
+            //     when (statusType) {
+            //         "STREAMING" -> Activity.ActivityType.STREAMING
+            //         "LISTENING" -> Activity.ActivityType.LISTENING
+            //         "WATCHING" -> Activity.ActivityType.WATCHING
+            //         else -> Activity.ActivityType.DEFAULT
+            //     }, statusText
+            // ) else null
             clientVersion = getOptional("client_version", "0").toInt()
             devMode = getOptional("dev_mode", "false") == "true"
 

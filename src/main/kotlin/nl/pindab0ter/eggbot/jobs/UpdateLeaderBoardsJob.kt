@@ -1,12 +1,5 @@
 package nl.pindab0ter.eggbot.jobs
 
-import nl.pindab0ter.eggbot.EggBot.dronesLeaderBoardChannel
-import nl.pindab0ter.eggbot.EggBot.earningsBonusLeaderBoardChannel
-import nl.pindab0ter.eggbot.EggBot.eliteDronesLeaderBoardChannel
-import nl.pindab0ter.eggbot.EggBot.prestigesLeaderBoardChannel
-import nl.pindab0ter.eggbot.EggBot.soulEggsLeaderBoardChannel
-import nl.pindab0ter.eggbot.controller.LeaderBoard
-import nl.pindab0ter.eggbot.controller.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -29,26 +22,27 @@ class UpdateLeaderBoardsJob : Job, Logging {
 
         logger.info { "Updating leader boards…" }
 
-        listOf(
-            earningsBonusLeaderBoardChannel to EARNINGS_BONUS,
-            soulEggsLeaderBoardChannel to SOUL_EGGS,
-            prestigesLeaderBoardChannel to PRESTIGES,
-            dronesLeaderBoardChannel to DRONE_TAKEDOWNS,
-            eliteDronesLeaderBoardChannel to ELITE_DRONE_TAKEDOWNS
-        ).forEach { (channel, category) ->
-            channel.history.retrievePast(100).complete().let { messages ->
-                channel.purgeMessages(messages)
-            }
-
-            LeaderBoard.formatLeaderBoard(
-                farmers,
-                category,
-                top = null,
-                compact = false,
-                extended = true
-            ).forEach { message ->
-                channel.sendMessage(message).queue()
-            }
-        }
+        // TODO:
+        // listOf(
+        //     earningsBonusLeaderBoardChannel to EARNINGS_BONUS,
+        //     soulEggsLeaderBoardChannel to SOUL_EGGS,
+        //     prestigesLeaderBoardChannel to PRESTIGES,
+        //     dronesLeaderBoardChannel to DRONE_TAKEDOWNS,
+        //     eliteDronesLeaderBoardChannel to ELITE_DRONE_TAKEDOWNS
+        // ).forEach { (channel, category) ->
+        //     channel.history.retrievePast(100).complete().let { messages ->
+        //         channel.purgeMessages(messages)
+        //     }
+        //
+        //     LeaderBoard.formatLeaderBoard(
+        //         farmers,
+        //         category,
+        //         top = null,
+        //         compact = false,
+        //         extended = true
+        //     ).forEach { message ->
+        //         channel.sendMessage(message).queue()
+        //     }
+        // }
     }
 }
