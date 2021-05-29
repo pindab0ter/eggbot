@@ -26,7 +26,6 @@ repositories {
         name = "Kotlin Discord"
         url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
     }
-    jcenter()
 }
 
 dependencies {
