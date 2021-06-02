@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.kord.commands
 
-import com.kotlindiscord.kord.extensions.commands.converters.coalescedString
-import com.kotlindiscord.kord.extensions.commands.converters.string
+import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.EPHEMERAL
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC

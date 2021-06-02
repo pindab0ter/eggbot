@@ -36,15 +36,16 @@ dependencies {
 
     // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.13")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.34.0")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
     runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
 
     // Discord
-    implementation("dev.kord", "kord-core", "kotlin-1.5") {
+    implementation("dev.kord", "kord-core", "0.7.x") {
         version {
-            strictly("kotlin-1.5-SNAPSHOT")
+            strictly("0.7.x-SNAPSHOT")
         }
     }
     implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.0") {
