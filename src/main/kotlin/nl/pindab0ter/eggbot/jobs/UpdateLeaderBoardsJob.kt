@@ -1,13 +1,12 @@
 package nl.pindab0ter.eggbot.jobs
 
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.model.database.Farmer
-import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job
 import org.quartz.JobExecutionContext
 
-class UpdateLeaderBoardsJob : Job, Logging {
-
+class UpdateLeaderBoardsJob : Job {
     override fun execute(context: JobExecutionContext?) {
         UpdateFarmers().execute(context)
 
@@ -44,5 +43,9 @@ class UpdateLeaderBoardsJob : Job, Logging {
         //         channel.sendMessage(message).queue()
         //     }
         // }
+    }
+
+    companion object {
+        val logger = KotlinLogging.logger { }
     }
 }

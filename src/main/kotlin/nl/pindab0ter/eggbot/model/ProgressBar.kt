@@ -6,8 +6,8 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
-import org.apache.logging.log4j.kotlin.Logging
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
@@ -20,12 +20,13 @@ class ProgressBar(
     private var statusText: String? = null,
     private var unit: String = "",
     coroutineContext: CoroutineContext,
-) : Logging {
+) {
     private var goal: AtomicInteger = AtomicInteger(goal)
     private var running: AtomicBoolean = AtomicBoolean(true)
     private var counter: AtomicInteger = AtomicInteger(0)
     private var dirty: AtomicBoolean = AtomicBoolean(true)
     private var job: Job
+    private val logger = KotlinLogging.logger { }
 
     init {
         job = loop(coroutineContext)

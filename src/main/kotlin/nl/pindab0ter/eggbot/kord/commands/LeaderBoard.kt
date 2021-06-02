@@ -8,16 +8,13 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.commands.slash.converters.defaultingEnumChoice
 import dev.kord.common.annotation.KordPreview
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
-import nl.pindab0ter.eggbot.helpers.formatIllions
-import nl.pindab0ter.eggbot.helpers.formatInteger
-import nl.pindab0ter.eggbot.helpers.formatRank
-import nl.pindab0ter.eggbot.helpers.table
-import nl.pindab0ter.eggbot.helpers.publicFollowUp
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
+import java.util.*
 
 @KordPreview
 object LeaderBoard {
@@ -25,7 +22,13 @@ object LeaderBoard {
         EARNINGS_BONUS, SOUL_EGGS, PROPHECY_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
 
         override val readableName: String
-            get() = name.split("_").joinToString(" ") { it.toLowerCase().capitalize() }
+            get() = name.split("_").joinToString(" ") { word ->
+                word.lowercase(Locale.getDefault())
+                    .replaceFirstChar { letter ->
+                        if (letter.isLowerCase()) letter.titlecase(Locale.getDefault())
+                        else letter.toString()
+                    }
+            }
     }
 
     private fun formatLeaderBoard(

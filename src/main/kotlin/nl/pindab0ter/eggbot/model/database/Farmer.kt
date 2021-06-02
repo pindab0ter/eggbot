@@ -1,19 +1,19 @@
 package nl.pindab0ter.eggbot.model.database
 
 import com.auxbrain.ei.Backup
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.toDateTime
 import nl.pindab0ter.eggbot.model.EarningsBonus
-import org.apache.logging.log4j.kotlin.Logging
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
 import java.math.BigDecimal
 
-class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
+class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val inGameId: String get() = id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
     var inGameName by Farmers.inGameName
@@ -51,7 +51,9 @@ class Farmer(id: EntityID<String>) : Entity<String>(id), Logging {
         lastUpdated = backup.approxTime.toDateTime()
     }
 
-    companion object : EntityClass<String, Farmer>(Farmers), Logging {
+    companion object : EntityClass<String, Farmer>(Farmers) {
+        val logger = KotlinLogging.logger { }
+
         fun new(discordUser: DiscordUser, backup: Backup): Farmer? {
             if (backup.game == null || backup.stats == null) return null.also { logger.warn { "Tried to register from backup but failed." } }
 

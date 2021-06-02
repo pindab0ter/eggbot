@@ -8,9 +8,10 @@ import com.auxbrain.ei.Artifact.Rarity
 import com.auxbrain.ei.Artifact.Rarity.*
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Backup.Farm
-import org.apache.logging.log4j.kotlin.logger
+import mu.KotlinLogging.logger
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
+import java.util.*
 
 fun Backup.artifactsFor(farm: Farm?): List<Artifact> = artifactsDatabase?.activeArtifactSets
     ?.getOrNull(farms.indexOf(farm))?.slots?.flatMap { activeArtifactSlot ->
@@ -129,9 +130,12 @@ private val artifactMultipliers = hashMapOf(
 )
 // @formatter:on
 
-fun Artifact.formatName() = name.name.toLowerCase()
+fun Artifact.formatName() = name.name.lowercase(Locale.getDefault())
     .split("_")
     .joinToString(" ", transform = String::capitalize)
 
-fun Artifact.formatFullName() = "${level.name.toLowerCase().capitalize()} ${rarity.name.toLowerCase()} ${formatName()}"
+fun Artifact.formatFullName() =
+    "${
+        level.name.lowercase(Locale.getDefault()).capitalize()
+    } ${rarity.name.lowercase(Locale.getDefault())} ${formatName()}"
 

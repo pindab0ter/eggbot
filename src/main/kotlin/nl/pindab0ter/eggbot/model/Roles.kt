@@ -2,10 +2,10 @@ package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Contract
 import dev.kord.core.entity.Role
+import mu.KotlinLogging.logger
 import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.DiscordUser
-import org.apache.logging.log4j.kotlin.logger
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.awt.Color
 import kotlin.math.ceil
