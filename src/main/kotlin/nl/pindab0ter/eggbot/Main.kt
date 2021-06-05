@@ -4,6 +4,7 @@ import com.kotlindiscord.kord.extensions.ExtensibleBot
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Snowflake
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.kord.extensions.CommandLoggerExtension
 import nl.pindab0ter.eggbot.kord.extensions.EggBotExtension
 import nl.pindab0ter.eggbot.model.Config
 import org.jetbrains.exposed.sql.Database
@@ -16,6 +17,7 @@ suspend fun main() {
 
     ExtensibleBot(Config.botToken) {
         extensions {
+            add(::CommandLoggerExtension)
             add(::EggBotExtension)
         }
 
