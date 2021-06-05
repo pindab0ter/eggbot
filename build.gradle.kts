@@ -78,7 +78,7 @@ val compileJava: JavaCompile by tasks
 compileJava.enabled = false
 
 configurations.forEach { configuration ->
-    // Workaround the Gradle bug resolving multi platform dependencies.
+    // Workaround the Gradle bug resolving multi-platform dependencies.
     // https://github.com/square/okio/issues/647
     if (configuration.name.contains("proto", ignoreCase = true)) {
         configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "java-runtime"))

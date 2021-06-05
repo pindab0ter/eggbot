@@ -3,7 +3,9 @@ package nl.pindab0ter.eggbot.model
 import com.auxbrain.ei.Egg
 import mu.KotlinLogging
 import java.io.FileInputStream
+import java.io.FileNotFoundException
 import java.util.*
+import kotlin.system.exitProcess
 
 object Config {
     private const val FILE_NAME = "eggbot.properties"
@@ -45,7 +47,12 @@ object Config {
 
     init {
         Properties().apply {
-            load(FileInputStream(FILE_NAME))
+            try {
+                load(FileInputStream(FILE_NAME))
+            } catch (exception: FileNotFoundException) {
+                logger.error { "Could not find $FILE_NAME. Please make a copy of $FILE_NAME.example" }
+                exitProcess(1)
+            }
 
             botToken = getRequired("bot_token")
             prefix = getOptional("prefix", "!")
