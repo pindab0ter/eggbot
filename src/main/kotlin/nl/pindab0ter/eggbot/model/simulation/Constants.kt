@@ -19,7 +19,7 @@ data class Constants(
     constructor(
         backup: Backup,
         farm: Backup.Farm,
-        coopArtifacts: List<Artifact> = emptyList()
+        coopArtifacts: List<Artifact> = emptyList(),
     ) : this(
         hatcherySharing = backup.hatcherySharingMultiplier,
         hatcheryRate = backup.hatcheryRateFor(farm),

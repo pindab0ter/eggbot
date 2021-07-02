@@ -32,7 +32,7 @@ suspend fun <T, R> Iterable<T>.asyncMap(
 
 fun Any?.discard(): Unit = Unit
 
-public object Typography {
+object Typography {
     /** The character &zwsp; – zero-width space */
     const val zwsp = '\u200B'
 

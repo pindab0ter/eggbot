@@ -56,7 +56,7 @@ data class Farmer(
         operator fun invoke(
             backup: Backup,
             contractId: String,
-            activeCoopArtifacts: List<Artifact> = emptyList()
+            activeCoopArtifacts: List<Artifact> = emptyList(),
         ): Farmer? {
             val farm = backup.farmFor(contractId) ?: return null
             val constants = Constants(backup, farm, activeCoopArtifacts)

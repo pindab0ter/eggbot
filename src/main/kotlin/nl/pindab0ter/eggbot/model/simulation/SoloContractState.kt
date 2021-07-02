@@ -15,7 +15,7 @@ data class SoloContractState(
     val timeRemaining: Duration,
     val timeElapsed: Duration = Duration.ZERO,
     val farmer: Farmer,
-): Comparable<SoloContractState> {
+) : Comparable<SoloContractState> {
     val reportedEggsLaid: BigDecimal
         get() = farmer.reportedState.eggsLaid
     val reportedEggsPerMinute: BigDecimal

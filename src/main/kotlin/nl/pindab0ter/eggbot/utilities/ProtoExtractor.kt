@@ -67,8 +67,8 @@ fun main(args: Array<String>) {
                 .map { classGroups ->
                     Property(
                         name = classGroups["name"]!!.value,
-                        index = classGroups["index"]!!.value.first().toInt(),
-                        type = classGroups["reference"]?.value ?: classGroups["primitive"]!!.value.first().toInt()
+                        index = classGroups["index"]!!.value.first().code,
+                        type = classGroups["reference"]?.value ?: classGroups["primitive"]!!.value.first().code
                             .toType(),
                         repeated = classGroups["repeated"]!!.value.first() == '\u0003'
                     )
@@ -81,7 +81,7 @@ fun main(args: Array<String>) {
                 .map { enumGroups ->
                     Constant(
                         name = enumGroups["name"]!!.value,
-                        index = enumGroups["index"]?.value?.first()?.toInt() ?: -1
+                        index = enumGroups["index"]?.value?.first()?.code ?: -1
                     )
                 }.toList()
         )
