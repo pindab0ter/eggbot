@@ -10,6 +10,7 @@ import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Coops
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmers
+import nl.pindab0ter.eggbot.jda.EyeReaction
 import nl.pindab0ter.eggbot.jda.IncomingCommand
 import nl.pindab0ter.eggbot.jda.commandClient
 import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
@@ -51,6 +52,7 @@ object EggBot : Logging {
         )
         .disableCache(ACTIVITY, CLIENT_STATUS, EMOTE, MEMBER_OVERRIDES, VOICE_STATE)
         .addEventListeners(IncomingCommand)
+        .addEventListeners(EyeReaction)
         .build()
     val guild: Guild by lazy {
         jdaClient.getGuildById(Config.guildId) ?: throw Exception("Could not find guild with ID ${Config.guildId}")
