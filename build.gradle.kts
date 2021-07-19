@@ -11,9 +11,9 @@ application {
 plugins {
     idea
     application
-    kotlin("jvm") version "1.5.10"
-    id("com.github.ben-manes.versions") version "0.38.0"
-    id("com.toasttab.protokt") version "0.6.2"
+    kotlin("jvm") version "1.5.21"
+    id("com.github.ben-manes.versions") version "0.39.0"
+    id("com.toasttab.protokt") version "0.6.3"
 }
 
 repositories {
@@ -29,37 +29,29 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.10")
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.5.0")
+    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.21")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.5.1")
     implementation("joda-time", "joda-time", "2.10.10") // TODO: Replace with Kotlin's time library
     implementation("ch.obermuhlner", "big-math", "2.3.0")
 
     // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.13")
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.34.0")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.1")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
     runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
 
     // Discord
-    implementation("dev.kord", "kord-core", "0.7.x") {
-        version {
-            strictly("0.7.x-SNAPSHOT")
-        }
-    }
-    implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.0") {
-        version {
-            strictly("1.4.0-SNAPSHOT")
-        }
-    }
+    implementation("dev.kord", "kord-core", "0.7.3")
+    implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.1")
 
     // Task scheduling
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
 
     // Logging
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.14.1")
-    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.6")
+    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.10")
 }
 
 val compileKotlin: KotlinCompile by tasks

@@ -8,6 +8,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.UserBehavior
+import dev.kord.rest.builder.interaction.embed
 
 @KordPreview
 object Post {
@@ -65,7 +66,7 @@ object Post {
                 val post = Post(arguments.title, event.interaction.user, arguments.body)
                 posts.add(post)
 
-                ephemeralFollowUp("New post created.")
+                ephemeralFollowUp { content = "New post created." }
             }
         }
 

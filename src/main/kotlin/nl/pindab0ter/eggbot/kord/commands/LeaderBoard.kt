@@ -105,7 +105,6 @@ object LeaderBoard {
         val top: Int? by optionalInt(
             displayName = "top",
             description = "How many players to show",
-            outputError = false,
         )
         val board: Board by defaultingEnumChoice(
             displayName = "board",
