@@ -2,10 +2,10 @@ package nl.pindab0ter.eggbot.kord.extensions
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.optional.Optional
+import dev.kord.core.cache.data.OptionData
 import dev.kord.core.entity.interaction.*
-import dev.kord.core.entity.interaction.OptionValue.*
 import dev.kord.core.event.interaction.InteractionCreateEvent
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 
@@ -17,7 +17,7 @@ class CommandLoggerExtension : Extension() {
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {
-                logger.trace { "${event.interaction.userName()}: /${event.interaction.command.input()}" }
+                logger.trace { "${event.interaction.userName()}: ${event.interaction.induceUserInput()}" }
             }
         }
     }
@@ -29,11 +29,8 @@ class CommandLoggerExtension : Extension() {
         fun Interaction.userName(): String = buildString {
             when (this@userName) {
                 is DmInteraction -> append(user.username)
-                is GuildInteraction -> runBlocking {
-                    launch {
-                        append(member.asMember().username)
-                    }
-                }
+                is GuildInteraction -> runBlocking { append(member.asMember().username) }
+                is ButtonInteraction, is SelectMenuInteraction -> Unit
             }
         }
 
@@ -41,16 +38,21 @@ class CommandLoggerExtension : Extension() {
          * Get the input the user gave for this interaction, reconstructed.
          */
         @KordPreview
-        fun InteractionCommand.input(): String = buildString {
-            append("$rootName ")
-            if (this@input is SubCommand) append("$name ")
-            options.entries.forEach { option ->
-                append("${option.key}: ")
-                when (val optionValue = option.value) {
-                    is RoleOptionValue, is UserOptionValue, is ChannelOptionValue -> TODO()
-                    is IntOptionValue, is StringOptionValue, is BooleanOptionValue -> append(optionValue.value)
+        fun Interaction.induceUserInput(): String = buildString {
+            data.data.run {
+                when (name) {
+                    is Optional.Value -> append("/${name.value} ")
+                    else -> return@buildString
                 }
-                if (option != options.entries.last()) append(" ")
+                append(options.value?.joinToString(" ") { option: OptionData ->
+                    when {
+                        option.value is Optional.Value -> "${option.value.value!!.name}: ${option.value.value!!.value}"
+                        option.values is Optional.Value -> option.values.value!!.joinToString(" ") { commandArgument ->
+                            "${commandArgument.name}: ${commandArgument.value}"
+                        }
+                        else -> ""
+                    }
+                })
             }
         }
     }
