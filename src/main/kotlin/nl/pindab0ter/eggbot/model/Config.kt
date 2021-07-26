@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot.model
 
 import com.auxbrain.ei.Egg
+import com.auxbrain.ei.Egg.*
+import dev.kord.common.entity.Snowflake
 import mu.KotlinLogging
 import java.io.FileInputStream
 import java.io.FileNotFoundException
@@ -29,21 +31,21 @@ object Config {
     val deviceId: String
 
     // Discord IDs
-    val botOwnerId: String
-    val guildId: Long
-    val adminRoleId: String
+    val botOwner: Snowflake
+    val guild: Snowflake
+    val adminRole: Snowflake
 
-    val botCommandsChannelId: String
-    val earningsBonusLeaderBoardChannelId: String
-    val soulEggsLeaderBoardChannelId: String
-    val prestigesLeaderBoardChannelId: String
-    val dronesLeaderBoardChannelId: String
-    val eliteDronesLeaderBoardChannelId: String
+    val botCommandsChannel: Snowflake
+    val earningsBonusLeaderBoardChannel: Snowflake
+    val soulEggsLeaderBoardChannel: Snowflake
+    val prestigesLeaderBoardChannel: Snowflake
+    val dronesLeaderBoardChannel: Snowflake
+    val eliteDronesLeaderBoardChannel: Snowflake
 
-    val eggsToEmoteIds: Map<Egg, String?>
-    val emoteGoldenEggId: String?
-    val emoteSoulEggId: String?
-    val emoteProphecyEggId: String?
+    val eggsToEmotes: Map<Egg, Snowflake?>
+    val emoteGoldenEgg: Snowflake?
+    val emoteSoulEgg: Snowflake?
+    val emoteProphecyEgg: Snowflake?
 
     init {
         Properties().apply {
@@ -76,50 +78,50 @@ object Config {
             userId = getRequired("user_id")
             deviceId = getRequired("device_id")
 
-            botOwnerId = getOptional("bot_owner_id", "0")
-            guildId = getRequired("guild_id").toLong()
-            adminRoleId = getRequired("role.admin_id")
+            botOwner = getOptional("bot_owner_id", "0").let(::Snowflake)
+            guild = getRequired("guild_id").let(::Snowflake)
+            adminRole = getRequired("role.admin_id").let(::Snowflake)
 
-            botCommandsChannelId = getRequired("channel.bot_commands")
-            earningsBonusLeaderBoardChannelId = getRequired("channel.leader_board.earnings_bonus")
-            soulEggsLeaderBoardChannelId = getRequired("channel.leader_board.soul_eggs")
-            prestigesLeaderBoardChannelId = getRequired("channel.leader_board.prestiges")
-            dronesLeaderBoardChannelId = getRequired("channel.leader_board.drone_takedowns")
-            eliteDronesLeaderBoardChannelId = getRequired("channel.leader_board.elite_drone_takedowns")
+            botCommandsChannel = getRequired("channel.bot_commands").let(::Snowflake)
+            earningsBonusLeaderBoardChannel = getRequired("channel.leader_board.earnings_bonus").let(::Snowflake)
+            soulEggsLeaderBoardChannel = getRequired("channel.leader_board.soul_eggs").let(::Snowflake)
+            prestigesLeaderBoardChannel = getRequired("channel.leader_board.prestiges").let(::Snowflake)
+            dronesLeaderBoardChannel = getRequired("channel.leader_board.drone_takedowns").let(::Snowflake)
+            eliteDronesLeaderBoardChannel = getRequired("channel.leader_board.elite_drone_takedowns").let(::Snowflake)
 
             // @formatter:off
-                eggsToEmoteIds = mapOf (
-                    Egg.UNKNOWN_EGG    to getOptional("emote.default"),
-                    Egg.EDIBLE         to getOptional("emote.edible"),
-                    Egg.SUPERFOOD      to getOptional("emote.superfood"),
-                    Egg.MEDICAL        to getOptional("emote.medical"),
-                    Egg.ROCKET_FUEL    to getOptional("emote.rocket_fuel"),
-                    Egg.SUPER_MATERIAL to getOptional("emote.super_material"),
-                    Egg.FUSION         to getOptional("emote.fusion"),
-                    Egg.QUANTUM        to getOptional("emote.quantum"),
-                    Egg.IMMORTALITY    to getOptional("emote.immortality"),
-                    Egg.TACHYON        to getOptional("emote.tachyon"),
-                    Egg.GRAVITON       to getOptional("emote.graviton"),
-                    Egg.DILITHIUM      to getOptional("emote.dilithium"),
-                    Egg.PRODIGY        to getOptional("emote.prodigy"),
-                    Egg.TERRAFORM      to getOptional("emote.terraform"),
-                    Egg.ANTIMATTER     to getOptional("emote.antimatter"),
-                    Egg.DARK_MATTER    to getOptional("emote.dark_matter"),
-                    Egg.AI             to getOptional("emote.ai"),
-                    Egg.NEBULA         to getOptional("emote.nebula"),
-                    Egg.UNIVERSE       to getOptional("emote.universe"),
-                    Egg.ENLIGHTENMENT  to getOptional("emote.enlightenment"),
-                    Egg.CHOCOLATE      to getOptional("emote.chocolate"),
-                    Egg.EASTER         to getOptional("emote.easter"),
-                    Egg.WATER_BALLOON  to getOptional("emote.water_balloon"),
-                    Egg.FIREWORK       to getOptional("emote.firework"),
-                    Egg.PUMPKIN        to getOptional("emote.pumpkin")
-                )
-                // @formatter:on
+            eggsToEmotes = mapOf (
+                UNKNOWN_EGG    to getOptional("emote.default"),
+                EDIBLE         to getOptional("emote.edible"),
+                SUPERFOOD      to getOptional("emote.superfood"),
+                MEDICAL        to getOptional("emote.medical"),
+                ROCKET_FUEL    to getOptional("emote.rocket_fuel"),
+                SUPER_MATERIAL to getOptional("emote.super_material"),
+                FUSION         to getOptional("emote.fusion"),
+                QUANTUM        to getOptional("emote.quantum"),
+                IMMORTALITY    to getOptional("emote.immortality"),
+                TACHYON        to getOptional("emote.tachyon"),
+                GRAVITON       to getOptional("emote.graviton"),
+                DILITHIUM      to getOptional("emote.dilithium"),
+                PRODIGY        to getOptional("emote.prodigy"),
+                TERRAFORM      to getOptional("emote.terraform"),
+                ANTIMATTER     to getOptional("emote.antimatter"),
+                DARK_MATTER    to getOptional("emote.dark_matter"),
+                AI             to getOptional("emote.ai"),
+                NEBULA         to getOptional("emote.nebula"),
+                UNIVERSE       to getOptional("emote.universe"),
+                ENLIGHTENMENT  to getOptional("emote.enlightenment"),
+                CHOCOLATE      to getOptional("emote.chocolate"),
+                EASTER         to getOptional("emote.easter"),
+                WATER_BALLOON  to getOptional("emote.water_balloon"),
+                FIREWORK       to getOptional("emote.firework"),
+                PUMPKIN        to getOptional("emote.pumpkin")
+            ).mapValues {  it.value?.let(::Snowflake) }
+            // @formatter:on
 
-            emoteGoldenEggId = getOptional("emote.gold")
-            emoteSoulEggId = getOptional("emote.soul")
-            emoteProphecyEggId = getOptional("emote.prophecy")
+            emoteGoldenEgg = getOptional("emote.gold")?.let(::Snowflake)
+            emoteSoulEgg = getOptional("emote.soul")?.let(::Snowflake)
+            emoteProphecyEgg = getOptional("emote.prophecy")?.let(::Snowflake)
 
             logger.info("Config loaded")
         }

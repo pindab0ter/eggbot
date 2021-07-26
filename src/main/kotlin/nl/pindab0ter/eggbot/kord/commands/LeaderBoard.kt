@@ -8,8 +8,10 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.defaultingEnumChoice
 import dev.kord.common.annotation.KordPreview
-import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.*
+import nl.pindab0ter.eggbot.helpers.emoteMention
+import nl.pindab0ter.eggbot.helpers.publicFollowUp
+import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.EARNINGS_BONUS
+import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.leaderboardResponse
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -63,6 +65,7 @@ object LeaderBoard {
                 board = arguments.board,
                 top = arguments.top?.takeIf { it > 0 },
                 compact = arguments.compact,
+                context = this,
             ))
         }
     }

@@ -22,7 +22,7 @@ suspend fun main() {
 
         slashCommands {
             enabled = true
-            // defaultGuild = Snowflake(Config.guildId)
+            // defaultGuild = Config.guild
         }
     }.start()
 }

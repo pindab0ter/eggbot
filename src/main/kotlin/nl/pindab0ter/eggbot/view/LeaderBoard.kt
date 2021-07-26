@@ -1,18 +1,21 @@
 package nl.pindab0ter.eggbot.view
 
+import com.kotlindiscord.kord.extensions.commands.CommandContext
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.*
+import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.database.Farmer
 
 @KordPreview
-fun leaderboardResponse(
+suspend fun leaderboardResponse(
     farmers: List<Farmer>,
     board: LeaderBoard.Board,
     top: Int?,
     compact: Boolean,
+    context: CommandContext,
 ): List<String> = table {
     val sortedFarmers = when (board) {
         EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
@@ -31,11 +34,8 @@ fun leaderboardResponse(
 
     val boardTitle = when (board) {
         EARNINGS_BONUS -> "💵 Earnings Bonus"
-        SOUL_EGGS -> "Soul Eggs"
-        PROPHECY_EGGS -> "Prophecy Eggs"
-        // TODO:
-        // SOUL_EGGS -> "${emoteSoulEgg?.asMention ?: "🥚"} Soul Eggs"
-        // PROPHECY_EGGS -> "${emoteProphecyEgg?.asMention ?: "🥚"} Prophecy Eggs"
+        SOUL_EGGS -> "${context.emoteMention(Config.emoteSoulEgg) ?: "🥚"} Soul Eggs"
+        PROPHECY_EGGS -> "${context.emoteMention(Config.emoteProphecyEgg) ?: "🥚"} Prophecy Eggs"
         PRESTIGES -> "🥨 Prestiges"
         DRONE_TAKEDOWNS -> "✈🚫 Drone Takedowns"
         ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"
