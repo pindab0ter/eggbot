@@ -8,6 +8,7 @@ import dev.kord.core.entity.interaction.*
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
 class CommandLoggerExtension : Extension() {
@@ -17,7 +18,7 @@ class CommandLoggerExtension : Extension() {
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {
-                logger.trace { "${event.interaction.userName()}: ${event.interaction.induceUserInput()}" }
+                logger.trace { "${event.interaction.userName()}: ${event.interaction.userInput()}" }
             }
         }
     }
@@ -26,19 +27,23 @@ class CommandLoggerExtension : Extension() {
         /**
          * Get the username of the user that initiated this interaction.
          */
-        fun Interaction.userName(): String = buildString {
-            when (this@userName) {
-                is DmInteraction -> append(user.username)
-                is GuildInteraction -> runBlocking { append(member.asMember().username) }
-                is ButtonInteraction, is SelectMenuInteraction -> Unit
+        fun Interaction.userName(): String? = when (this@userName) {
+            is DmInteraction -> {
+                user.username
+            }
+            is GuildInteraction -> runBlocking {
+                member.asMemberOrNull()?.username ?: user.asUserOrNull()?.username
+            }
+            is ButtonInteraction, is SelectMenuInteraction -> runBlocking {
+                user.asMemberOrNull(Config.guild)?.username ?: user.asUserOrNull()?.username
             }
         }
 
         /**
-         * Get the input the user gave for this interaction, reconstructed.
+         * Reconstruct the user input for this interaction.
          */
         @KordPreview
-        fun Interaction.induceUserInput(): String = buildString {
+        fun Interaction.userInput(): String = buildString {
             data.data.run {
                 when (name) {
                     is Optional.Value -> append("/${name.value} ")
