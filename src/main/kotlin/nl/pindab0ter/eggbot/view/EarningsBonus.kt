@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot.view
 
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
+import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
 import nl.pindab0ter.eggbot.model.EarningsBonus
 import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_PROPHECY_EGG_RESEARCH_LEVEL
 import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_SOUL_EGG_RESEARCH_LEVEL
@@ -13,26 +15,32 @@ fun earningsBonusResponse(
     farmer: Farmer,
     earningsBonusObject: EarningsBonus,
     timeSinceBackup: Duration,
-    compact: Boolean,
-    extended: Boolean,
+    displayMode: DisplayMode,
 ): List<String> = earningsBonusObject.run {
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
 
     fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
         add(Row(label, value, suffix))
 
+    val compact = displayMode == COMPACT
+
     val rows = mutableListOf<Row>().apply {
         addRow("Rank:", earningsBonus.formatRank(shortened = compact))
         addRow("Backed up:", timeSinceBackup.formatDaysHoursAndMinutes(compact = compact), " ago")
         addRow(
             "Earnings Bonus:",
-            if (extended) earningsBonus.formatInteger()
-            else earningsBonus.formatIllions(shortened = compact), " %"
+            when (displayMode) {
+                EXTENDED -> earningsBonus.formatInteger()
+                else -> earningsBonus.formatIllions(shortened = compact)
+            },
+            "%"
         )
         addRow(
             "Soul Eggs:",
-            if (extended) soulEggs.formatInteger()
-            else soulEggs.formatIllions(shortened = compact)
+            when (displayMode) {
+                EXTENDED -> soulEggs.formatInteger()
+                else -> soulEggs.formatIllions(shortened = compact)
+            }
         )
         addRow("Prophecy Eggs:", prophecyEggs.formatInteger())
         if (soulEggsResearchLevel < MAX_SOUL_EGG_RESEARCH_LEVEL)
@@ -42,8 +50,10 @@ fun earningsBonusResponse(
         addRow("Prestiges:", farmer.prestiges.formatInteger())
         addRow(
             "SE to next rank:", "+ ${
-                if (extended) soulEggsToNextRank.formatInteger()
-                else soulEggsToNextRank.formatIllions(shortened = compact)
+                when (displayMode) {
+                    EXTENDED -> soulEggsToNextRank.formatInteger()
+                    else -> soulEggsToNextRank.formatIllions(shortened = compact)
+                }
             }"
         )
         addRow("PE to next rank:", "+ ${prophecyEggsToNextRank.formatInteger()}")

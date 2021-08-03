@@ -8,10 +8,9 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.defaultingEnumChoice
 import dev.kord.common.annotation.KordPreview
-import nl.pindab0ter.eggbot.helpers.emoteMention
-import nl.pindab0ter.eggbot.helpers.publicFollowUp
+import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
+import nl.pindab0ter.eggbot.helpers.publicWarnAndLog
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.EARNINGS_BONUS
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.leaderboardResponse
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -36,8 +35,8 @@ object LeaderBoard {
         val board: Board by defaultingEnumChoice(
             displayName = "board",
             description = "Which board to show",
-            typeName = "leaderBoard",
             defaultValue = EARNINGS_BONUS,
+            typeName = Board::name.name,
         )
         val compact: Boolean by defaultingBoolean(
             displayName = "compact",
@@ -56,11 +55,11 @@ object LeaderBoard {
                 Farmer.all().toList().sortedByDescending { it.earningsBonus }
             }
 
-            if (farmers.isEmpty()) publicFollowUp {
+            if (farmers.isEmpty()) return@action publicWarnAndLog {
                 content = "There are no registered farmers."
             }
 
-            publicFollowUp(leaderboardResponse(
+            publicMultipartFollowUp(leaderboardResponse(
                 farmers = farmers,
                 board = arguments.board,
                 top = arguments.top?.takeIf { it > 0 },

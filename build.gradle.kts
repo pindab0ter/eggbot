@@ -11,9 +11,9 @@ application {
 plugins {
     idea
     application
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.5.30-M1"
     id("com.github.ben-manes.versions") version "0.39.0"
-    id("com.toasttab.protokt") version "0.6.3"
+    id("com.toasttab.protokt") version "0.6.4"
 }
 
 repositories {
@@ -29,7 +29,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.21")
+    implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.30-M1")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.5.1")
     implementation("joda-time", "joda-time", "2.10.10") // TODO: Replace with Kotlin's time library
     implementation("ch.obermuhlner", "big-math", "2.3.0")
@@ -43,7 +43,7 @@ dependencies {
     runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
 
     // Discord
-    implementation("dev.kord", "kord-core", "0.7.3")
+    implementation("dev.kord", "kord-core", "0.7.4")
     implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.1")
 
     // Task scheduling
