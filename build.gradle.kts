@@ -43,8 +43,8 @@ dependencies {
     runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
 
     // Discord
-    implementation("dev.kord", "kord-core", "0.7.4")
-    implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.1")
+    implementation("dev.kord", "kord-core", "0.8.0-M3")
+    implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.4-RC2")
 
     // Task scheduling
     implementation("org.quartz-scheduler", "quartz", "2.3.2")

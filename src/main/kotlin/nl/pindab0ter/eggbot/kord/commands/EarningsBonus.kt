@@ -1,9 +1,9 @@
 package nl.pindab0ter.eggbot.kord.commands
 
-import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingEnum
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
+import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.optionalEnumChoice
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
@@ -19,13 +19,11 @@ import org.jetbrains.exposed.sql.transactions.transaction
 @KordPreview
 object EarningsBonus {
     class EarningsBonusArguments : Arguments() {
-        // TODO: Currently as of kord-extensions v1.4.1 results in an Invalid Request Body error
-        // val displayMode: DisplayMode by defaultingEnum(
-        //     displayName = "display mode",
-        //     description = "Use compact to better fit mobile devices or extended to show numbers in non-scientific notation.",
-        //     defaultValue = DisplayMode.REGULAR,
-        //     typeName = DisplayMode::name.name,
-        // )
+        val displayMode: DisplayMode? by optionalEnumChoice(
+            displayName = "displaymode",
+            description = "Use compact to better fit mobile devices or extended to show numbers in non-scientific notation.",
+            typeName = DisplayMode::name.name,
+        )
     }
 
     val command: suspend SlashCommand<out EarningsBonusArguments>.() -> Unit = {
@@ -33,19 +31,20 @@ object EarningsBonus {
         description = "Shows your Farmer Role, EB and how much SE or PE till your next rank."
         autoAck = PUBLIC
 
+        lateinit var discordUser: DiscordUser
+        lateinit var farmers: List<Farmer>
+
+        check {
+            discordUser = transaction { DiscordUser.findById(event.interaction.user.id.asString) }
+                ?: return@check fail("You have not registered yet. Please do so using `/register`.")
+
+            farmers = transaction { discordUser.farmers.toList().sortedBy(Farmer::inGameName) }
+            failIf("You have no Egg, Inc. accounts associated with your Discord account. Please register one using `/register`.") {
+                farmers.isEmpty()
+            }
+        }
+
         action {
-            val farmers = transaction {
-                DiscordUser.findById(event.interaction.user.id.asString)
-                    ?.farmers
-                    ?.toList()
-                    ?.sortedBy(Farmer::inGameName)
-                    .orEmpty()
-            }
-
-            if (farmers.isEmpty()) publicWarnAndLog {
-                content = "You have no farmers associated with your Discord account. Please register using `/register`."
-            }
-
             farmers.forEach { farmer ->
                 val backup = AuxBrain.getFarmerBackup(farmer.inGameId) ?: return@forEach publicWarnAndLog {
                     content = "Could not get information on `${farmer.inGameName}`"
@@ -55,8 +54,7 @@ object EarningsBonus {
                     farmer,
                     EarningsBonus(farmer),
                     backup.timeSinceBackup,
-                    DisplayMode.REGULAR
-                    // arguments.displayMode
+                    arguments.displayMode
                 ))
             }
         }

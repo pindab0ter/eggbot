@@ -15,7 +15,7 @@ fun earningsBonusResponse(
     farmer: Farmer,
     earningsBonusObject: EarningsBonus,
     timeSinceBackup: Duration,
-    displayMode: DisplayMode,
+    displayMode: DisplayMode?,
 ): List<String> = earningsBonusObject.run {
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
 

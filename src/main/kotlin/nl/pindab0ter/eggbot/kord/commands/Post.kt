@@ -8,7 +8,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.UserBehavior
-import dev.kord.rest.builder.interaction.embed
+import dev.kord.rest.builder.message.create.embed
 
 @KordPreview
 object Post {

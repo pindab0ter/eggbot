@@ -6,7 +6,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.interaction.PublicInteractionResponseBehavior
 import dev.kord.core.behavior.interaction.followUp
-import dev.kord.rest.builder.interaction.PublicFollowupMessageCreateBuilder
+import dev.kord.rest.builder.message.create.PublicFollowupMessageCreateBuilder
 import mu.KotlinLogging
 
 @OptIn(KordPreview::class)
@@ -36,7 +36,7 @@ suspend inline fun <T : Arguments> SlashCommandContext<T>.publicWarnAndLog(
 }
 
 enum class DisplayMode : ChoiceEnum {
-    REGULAR, COMPACT, EXTENDED;
+    COMPACT, EXTENDED;
 
     override val readableName: String
         get() = name.lowercase()
