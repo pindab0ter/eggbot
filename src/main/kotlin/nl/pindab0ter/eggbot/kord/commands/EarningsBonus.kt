@@ -5,10 +5,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.optionalEnumChoice
 import dev.kord.common.annotation.KordPreview
-import nl.pindab0ter.eggbot.helpers.DisplayMode
-import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
-import nl.pindab0ter.eggbot.helpers.publicWarnAndLog
-import nl.pindab0ter.eggbot.helpers.timeSinceBackup
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.EarningsBonus
 import nl.pindab0ter.eggbot.model.database.DiscordUser
@@ -36,10 +33,10 @@ object EarningsBonus {
 
         check {
             discordUser = transaction { DiscordUser.findById(event.interaction.user.id.asString) }
-                ?: return@check fail("You have not registered yet. Please do so using `/register`.")
+                ?: return@check failAndLog("You have not registered yet. Please do so using `/register`.")
 
             farmers = transaction { discordUser.farmers.toList().sortedBy(Farmer::inGameName) }
-            failIf("You have no Egg, Inc. accounts associated with your Discord account. Please register one using `/register`.") {
+            failAndLogIf("You have no Egg, Inc. accounts associated with your Discord account. Please register one using `/register`.") {
                 farmers.isEmpty()
             }
         }
