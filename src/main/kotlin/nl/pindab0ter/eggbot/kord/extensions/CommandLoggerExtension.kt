@@ -49,7 +49,7 @@ class CommandLoggerExtension : Extension() {
                     is Optional.Value -> append("/${name.value} ")
                     else -> return@buildString
                 }
-                append(options.value?.joinToString(" ") { option: OptionData ->
+                if (options is Optional.Value) append(options.value!!.joinToString(" ") { option: OptionData ->
                     when {
                         option.value is Optional.Value -> "${option.value.value!!.name}: ${option.value.value!!.value}"
                         option.values is Optional.Value -> option.values.value!!.joinToString(" ") { commandArgument ->
