@@ -9,6 +9,13 @@ import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
 suspend fun main() = ExtensibleBot(Config.botToken) {
+    intents {
+        +Intent.DirectMessages
+        +Intent.DirectMessageTyping
+        +Intent.GuildMessages
+        +Intent.GuildMessageTyping
+    }
+
     extensions {
         add(::CommandLoggerExtension)
         add(::EggBotExtension)
