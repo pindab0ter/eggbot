@@ -20,8 +20,6 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
     // Use Europe/London because it moves with Daylight Saving Time
     val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
 
-    logger.info { "Starting scheduler…" }
-
     if (!Config.devMode) scheduleJob(
         newJob(UpdateFarmers::class.java)
             .withIdentity("update_farmers")
@@ -51,6 +49,9 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
             )
             .build()
     )
+
     listenerManager.addJobListener(JobLogger)
     start()
+
+    logger.info { "Scheduler started" }
 }
