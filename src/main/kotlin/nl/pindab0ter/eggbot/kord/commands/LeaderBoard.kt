@@ -10,6 +10,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.defaulti
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.optionalEnumChoice
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.DisplayMode
+import nl.pindab0ter.eggbot.helpers.displayModeChoice
 import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.EARNINGS_BONUS
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -39,11 +40,7 @@ object LeaderBoard {
             defaultValue = EARNINGS_BONUS,
             typeName = Board::name.name,
         )
-        val displayMode: DisplayMode? by optionalEnumChoice(
-            displayName = "displaymode",
-            description = "Use compact to better fit mobile devices or extended to show numbers in non-scientific notation.",
-            typeName = DisplayMode::name.name,
-        )
+        val displayMode: DisplayMode? by displayModeChoice()
     }
 
     val command: suspend SlashCommand<out LeaderBoardArguments>.() -> Unit = {

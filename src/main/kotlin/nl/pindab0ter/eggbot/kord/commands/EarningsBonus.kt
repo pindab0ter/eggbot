@@ -6,6 +6,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.optionalEnumChoice
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.DisplayMode
+import nl.pindab0ter.eggbot.helpers.displayModeChoice
 import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
 import nl.pindab0ter.eggbot.helpers.timeSinceBackup
 import nl.pindab0ter.eggbot.model.AuxBrain
@@ -18,11 +19,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 @KordPreview
 object EarningsBonus {
     class EarningsBonusArguments : Arguments() {
-        val displayMode: DisplayMode? by optionalEnumChoice(
-            displayName = "displaymode",
-            description = "Use compact to better fit mobile devices or extended to show numbers in non-scientific notation.",
-            typeName = DisplayMode::name.name,
-        )
+        val displayMode: DisplayMode? by displayModeChoice()
     }
 
     val command: suspend SlashCommand<out EarningsBonusArguments>.() -> Unit = {
