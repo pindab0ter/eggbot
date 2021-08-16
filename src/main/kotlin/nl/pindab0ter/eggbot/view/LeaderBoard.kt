@@ -3,6 +3,9 @@ package nl.pindab0ter.eggbot.view
 import com.kotlindiscord.kord.extensions.commands.CommandContext
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
+import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
+import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.*
 import nl.pindab0ter.eggbot.model.Config
@@ -14,9 +17,12 @@ suspend fun leaderboardResponse(
     farmers: List<Farmer>,
     board: LeaderBoard.Board,
     top: Int?,
-    compact: Boolean,
+    displayMode: DisplayMode?,
     context: CommandContext,
 ): List<String> = table {
+
+    val compact = displayMode == COMPACT;
+
     val sortedFarmers = when (board) {
         EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
         SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
@@ -25,6 +31,7 @@ suspend fun leaderboardResponse(
         DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
         ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
     }.let { sortedFarmers -> if (top != null) sortedFarmers.take(top) else sortedFarmers }
+
     val shortenedNames = sortedFarmers.map { farmer ->
         farmer.inGameName.let { name ->
             if (name.length <= 10) name
@@ -60,10 +67,22 @@ suspend fun leaderboardResponse(
             DRONE_TAKEDOWNS -> "Drone Takedowns"
             ELITE_DRONE_TAKEDOWNS -> "Elite Drone Takedowns"
         }
+
         alignment = Table.AlignedColumn.Alignment.RIGHT
+
         cells = when (board) {
-            EARNINGS_BONUS -> sortedFarmers.map { farmer -> farmer.earningsBonus.formatIllions(shortened = true) + if (compact) "" else "${Typography.zwsp}%" }
-            SOUL_EGGS -> sortedFarmers.map { farmer -> farmer.soulEggs.formatIllions(shortened = compact) }
+            EARNINGS_BONUS -> sortedFarmers.map { farmer ->
+                when (displayMode) {
+                    EXTENDED -> "${farmer.earningsBonus.formatInteger()}$zwsp%"
+                    else -> "${farmer.earningsBonus.formatIllions(shortened = compact)}${if (compact) "" else "$zwsp%"}"
+                }
+            }
+            SOUL_EGGS -> sortedFarmers.map { farmer ->
+                when (displayMode) {
+                    EXTENDED -> farmer.soulEggs.formatInteger()
+                    else -> farmer.soulEggs.formatIllions(shortened = compact)
+                }
+            }
             PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.prophecyEggs.formatInteger() }
             PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
             DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.droneTakedowns.formatInteger() }

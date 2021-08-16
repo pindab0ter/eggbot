@@ -7,7 +7,9 @@ import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.defaultingEnumChoice
+import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.optionalEnumChoice
 import dev.kord.common.annotation.KordPreview
+import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.EARNINGS_BONUS
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -37,10 +39,10 @@ object LeaderBoard {
             defaultValue = EARNINGS_BONUS,
             typeName = Board::name.name,
         )
-        val compact: Boolean by defaultingBoolean(
-            displayName = "compact",
-            description = "Use a narrower output to better fit mobile devices",
-            defaultValue = false,
+        val displayMode: DisplayMode? by optionalEnumChoice(
+            displayName = "displaymode",
+            description = "Use compact to better fit mobile devices or extended to show numbers in non-scientific notation.",
+            typeName = DisplayMode::name.name,
         )
     }
 
@@ -61,7 +63,7 @@ object LeaderBoard {
                 farmers = farmers,
                 board = arguments.board,
                 top = arguments.top?.takeIf { it > 0 },
-                compact = arguments.compact,
+                displayMode = arguments.displayMode,
                 context = this,
             ))
         }
