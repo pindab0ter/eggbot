@@ -52,6 +52,7 @@ dependencies {
     // Logging
     runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.14.1")
     implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.10")
+    implementation("io.sentry", "sentry", "5.0.1")
 }
 
 val compileKotlin: KotlinCompile by tasks

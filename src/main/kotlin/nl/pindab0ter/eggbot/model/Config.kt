@@ -47,6 +47,9 @@ object Config {
     val emoteSoulEgg: Snowflake?
     val emoteProphecyEgg: Snowflake?
 
+    // Sentry
+    val sentryDsn: String?
+
     init {
         Properties().apply {
             try {
@@ -122,6 +125,8 @@ object Config {
             emoteGoldenEgg = getOptional("emote.gold")?.let(::Snowflake)
             emoteSoulEgg = getOptional("emote.soul")?.let(::Snowflake)
             emoteProphecyEgg = getOptional("emote.prophecy")?.let(::Snowflake)
+
+            sentryDsn = getOptional("sentry.dsn")
 
             logger.info("Config loaded")
         }
