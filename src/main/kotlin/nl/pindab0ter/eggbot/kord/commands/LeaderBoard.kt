@@ -8,8 +8,6 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
 import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.defaultingEnumChoice
 import dev.kord.common.annotation.KordPreview
-import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.failAndLogIf
 import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.EARNINGS_BONUS
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -55,7 +53,7 @@ object LeaderBoard {
 
         check {
             farmers = transaction { Farmer.all().toList().sortedByDescending { it.earningsBonus } }
-            failAndLogIf("There are no registered farmers.") { farmers.isEmpty() }
+            failIf("There are no registered farmers.") { farmers.isEmpty() }
         }
 
         action {
