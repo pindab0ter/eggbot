@@ -7,6 +7,7 @@ import com.github.kittinunf.fuel.core.ResultHandler
 import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
+import com.github.kittinunf.result.getOrNull
 import nl.pindab0ter.eggbot.helpers.decodeBase64
 import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
@@ -64,16 +65,20 @@ object AuxBrain {
             handler(PeriodicalsResponse.deserialize(response.body().decodeBase64()).periodicals?.contracts?.contracts)
         }.discard()
 
-    fun getContracts(): List<Contract>? =
-        periodicalsRequest().responseObject(ContractsDeserializer).third.component1()
+    fun getContracts(): List<Contract> =
+        periodicalsRequest().responseObject(ContractsDeserializer).third.component1().orEmpty()
+            .filter { contract -> contract.id != "first-contract" }
 
     fun getContract(contractId: String): Contract? =
-        getContracts()?.find { contract ->
+        getContracts().find { contract ->
             contract.id == contractId
         }
 
     fun getCoopStatus(contractId: String, coopId: String): CoopStatus? =
-        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third.component1()
+        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third.getOrNull()
+            ?.takeUnless { coopStatus ->
+                coopStatus.totalAmount == 0.0 && coopStatus.contributors.isEmpty() && coopStatus.secondsRemaining == 0.0
+            }
 
     fun getFarmerBackup(userId: String, handler: ResultHandler<Backup>): CancellableRequest = when {
         userId.startsWith("EI") -> firstContactRequest(userId).responseObject(BackupDeserializer, handler)
