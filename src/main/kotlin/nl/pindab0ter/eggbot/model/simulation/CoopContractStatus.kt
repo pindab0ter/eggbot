@@ -51,9 +51,8 @@ sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopCont
             coopStatus.gracePeriodSecondsRemaining <= 0.0 && coopStatus.eggsLaid < contract.finalGoal ->
                 Failed(coopStatus)
             else -> runBlocking(Dispatchers.Default) {
-                val backups = coopStatus.contributors.asyncMap(this.coroutineContext) { contributionInfo ->
-                    AuxBrain.getFarmerBackup(contributionInfo.userId)
-                        .also { progressCallback() }
+                val backups = coopStatus.contributors.asyncMap(coroutineContext) { contributionInfo ->
+                    AuxBrain.getFarmerBackup(contributionInfo.userId).also { progressCallback() }
                 }.filterNotNull()
                 val activeCoopArtifacts = backups.flatMap { backup ->
                     backup.coopArtifactsFor(backup.farmFor(contract.id))
