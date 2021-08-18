@@ -7,7 +7,7 @@ import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
 import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.kord.commands.LeaderBoard
-import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.Board.*
+import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -15,7 +15,7 @@ import nl.pindab0ter.eggbot.model.database.Farmer
 @KordPreview
 suspend fun leaderboardResponse(
     farmers: List<Farmer>,
-    board: LeaderBoard.Board,
+    leaderBoard: LeaderBoard,
     top: Int?,
     displayMode: DisplayMode?,
     context: CommandContext,
@@ -23,7 +23,7 @@ suspend fun leaderboardResponse(
 
     val compact = displayMode == COMPACT;
 
-    val sortedFarmers = when (board) {
+    val sortedFarmers = when (leaderBoard) {
         EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
         SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
         PROPHECY_EGGS -> farmers.sortedByDescending { farmer -> farmer.prophecyEggs }
@@ -39,7 +39,7 @@ suspend fun leaderboardResponse(
         }
     }
 
-    val boardTitle = when (board) {
+    val boardTitle = when (leaderBoard) {
         EARNINGS_BONUS -> "💵 Earnings Bonus"
         SOUL_EGGS -> "${context.emoteMention(Config.emoteSoulEgg) ?: "🥚"} Soul Eggs"
         PROPHECY_EGGS -> "${context.emoteMention(Config.emoteProphecyEgg) ?: "🥚"} Prophecy Eggs"
@@ -59,7 +59,7 @@ suspend fun leaderboardResponse(
     }
 
     column {
-        header = when (board) {
+        header = when (leaderBoard) {
             EARNINGS_BONUS -> "Earnings Bonus" + if (compact) "" else "  " // Added spacing for percent suffix
             SOUL_EGGS -> "Soul Eggs"
             PROPHECY_EGGS -> "Prophecy Eggs"
@@ -70,7 +70,7 @@ suspend fun leaderboardResponse(
 
         alignment = Table.AlignedColumn.Alignment.RIGHT
 
-        cells = when (board) {
+        cells = when (leaderBoard) {
             EARNINGS_BONUS -> sortedFarmers.map { farmer ->
                 when (displayMode) {
                     EXTENDED -> "${farmer.earningsBonus.formatInteger()}$zwsp%"
@@ -90,7 +90,7 @@ suspend fun leaderboardResponse(
         }
     }
 
-    if (board == EARNINGS_BONUS) column {
+    if (leaderBoard == EARNINGS_BONUS) column {
         header = if (compact) "Role" else "Farmer Role"
         leftPadding = if (compact) 1 else 2
         cells = sortedFarmers.map { farmer -> farmer.earningsBonus.formatRank(shortened = compact) }
