@@ -33,12 +33,12 @@ class ContractChoiceConverter(
         return true
     }
 
-    override suspend fun toSlashOption(arg: Argument<*>): OptionsBuilder =
-        StringChoiceBuilder(arg.displayName, arg.description).apply {
-            required = true
-
-            this@ContractChoiceConverter.choices.forEach { choice(it.key, it.value.name) }
-        }
+    override suspend fun toSlashOption(arg: Argument<*>): OptionsBuilder = StringChoiceBuilder(
+        name = arg.displayName,
+        description = arg.description).apply {
+        required = true
+        this@ContractChoiceConverter.choices.forEach { choice(it.key, it.value.name) }
+    }
 }
 
 /**
@@ -46,19 +46,12 @@ class ContractChoiceConverter(
  *
  * @see ContractChoiceConverter
  */
-@Suppress("NOTHING_TO_INLINE")
-inline fun Arguments.contractChoice(
-    noinline validator: Validator<Contract> = null,
-): SingleConverter<Contract> {
+fun Arguments.contractChoice(): SingleConverter<Contract> {
     val choices = AuxBrain.getContracts().toTypedArray()
 
     return arg(
         displayName = "contract",
         description = "Select an Egg, Inc. contract.",
-
-        converter = ContractChoiceConverter(
-            choices = choices,
-            validator = validator,
-        )
+        converter = ContractChoiceConverter(choices = choices)
     )
 }

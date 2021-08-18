@@ -2,11 +2,11 @@ package nl.pindab0ter.eggbot.kord.commands
 
 import com.auxbrain.ei.Contract
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
-import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.annotation.KordPreview
+import nl.pindab0ter.eggbot.helpers.coopIdChoice
 import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
 import nl.pindab0ter.eggbot.kord.converters.contractChoice
@@ -21,10 +21,7 @@ import nl.pindab0ter.eggbot.view.coopInfoResponse
 
 class CoopArguments : Arguments() {
     val contract: Contract by contractChoice()
-    val coopId: String by string(
-        displayName = "coop",
-        description = "The code of the co-op to check up on."
-    )
+    val coopId: String by coopIdChoice()
     val compact: Boolean by defaultingBoolean(
         displayName = "compact",
         description = "Better fit output for mobile devices",
