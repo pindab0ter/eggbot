@@ -4,7 +4,7 @@ import dev.kord.common.entity.Snowflake
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.database.DiscordUsers
 import nl.pindab0ter.eggbot.database.Farmers
-import nl.pindab0ter.eggbot.helpers.guild
+import nl.pindab0ter.eggbot.helpers.configuredGuild
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
@@ -21,13 +21,13 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
 
     val mention: String
         get() = runBlocking {
-            guild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.mention ?: discordName
+            configuredGuild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.mention ?: discordName
         }
     val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
     val snowflake: Snowflake = Snowflake(discordId)
 
     fun updateTag() = runBlocking {
-        guild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.tag.takeIf { it != discordTag }?.let { tag ->
+        configuredGuild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.tag.takeIf { it != discordTag }?.let { tag ->
             discordTag = tag
         }
     }

@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.model.database
 
 import com.auxbrain.ei.Backup
+import dev.kord.common.entity.Snowflake
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.database.CoopFarmers
 import nl.pindab0ter.eggbot.database.Farmers
@@ -16,6 +17,12 @@ import java.math.BigDecimal
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val inGameId: String get() = id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
+    private var _discordId by Farmers.discordId
+    var discordId: Snowflake
+        get() = Snowflake(_discordId.value)
+        set(snowflake) {
+            _discordId = EntityID(snowflake.toString(), Farmers)
+        }
     var inGameName by Farmers.inGameName
     var coops by Coop via CoopFarmers
 

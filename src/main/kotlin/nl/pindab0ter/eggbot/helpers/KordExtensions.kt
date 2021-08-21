@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.helpers
 
 import com.kotlindiscord.kord.extensions.commands.converters.OptionalConverter
+import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommandContext
@@ -31,7 +32,13 @@ fun Arguments.displayModeChoice(): OptionalConverter<DisplayMode?> = optionalEnu
     typeName = DisplayMode::name.name,
 )
 
-fun Arguments.coopIdChoice() = string(
+fun Arguments.compact() = defaultingBoolean(
+    displayName = "compact",
+    description = "Better fit output for mobile devices",
+    defaultValue = false,
+)
+
+fun Arguments.coopId() = string(
     displayName = "coop",
     description = "The co-op ID. Can be found in either `#roll-call` or in-game under \"CO-OP INFO\" in the current egg information screen."
 )

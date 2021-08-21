@@ -11,7 +11,7 @@ import dev.kord.core.entity.Guild
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.model.Config
 
-val guild: Guild? get() = runBlocking { getKoin().get<Kord>().getGuild(Config.guild) }
+val configuredGuild: Guild? get() = runBlocking { getKoin().get<Kord>().getGuild(Config.guild) }
 
 suspend fun CommandContext.emoteMention(snowflake: Snowflake?): String? = snowflake?.let {
     getGuild()?.asGuildOrNull()?.getEmojiOrNull(snowflake)?.mention
