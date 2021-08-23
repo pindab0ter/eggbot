@@ -55,25 +55,15 @@ dependencies {
     implementation("io.sentry", "sentry", "5.1.0-beta.9")
 }
 
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    languageVersion = "1.5"
-    jvmTarget = "11"
-    freeCompilerArgs = freeCompilerArgs.plus(
-        listOf(
-            "-Xopt-in=kotlin.RequiresOptIn",
-            "-Xopt-in=kotlin.ExperimentalStdlibApi",
-        )
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions.languageVersion = "1.5"
+    kotlinOptions.jvmTarget = "11"
+    kotlinOptions.freeCompilerArgs += listOf(
+        "-Xopt-in=kotlin.RequiresOptIn",
+        "-Xopt-in=kotlin.ExperimentalStdlibApi",
     )
 }
 
-val compileJava: JavaCompile by tasks
-compileJava.enabled = false
-
-configurations.forEach { configuration ->
-    // Workaround the Gradle bug resolving multi-platform dependencies.
-    // https://github.com/square/okio/issues/647
-    if (configuration.name.contains("proto", ignoreCase = true)) {
-        configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "java-runtime"))
-    }
+tasks.withType<JavaCompile>().configureEach {
+    enabled = false
 }
