@@ -18,6 +18,7 @@
     <logger name="nl.pindab0ter.eggbot" level="TRACE"/>
     <logger name="org.quartz" level="WARN"/>
     <logger name="com.kotlindiscord.kord.extensions.i18n" level="WARN"/>
+    <logger name="dev.kord.gateway" level="INFO"/>
 
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
