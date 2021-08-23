@@ -50,7 +50,7 @@ dependencies {
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
 
     // Logging
-    runtimeOnly("org.apache.logging.log4j", "log4j-slf4j-impl", "2.14.1")
+    runtimeOnly("ch.qos.logback", "logback-classic", "1.2.3")
     implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.10")
     implementation("io.sentry", "sentry", "5.1.0-beta.9")
 }
