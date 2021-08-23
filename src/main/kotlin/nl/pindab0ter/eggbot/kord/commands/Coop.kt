@@ -30,17 +30,19 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import nl.pindab0ter.eggbot.model.database.Farmer.Companion as DatabaseFarmer
 import nl.pindab0ter.eggbot.model.simulation.Farmer as SimulationFarmer
 
-class CoopArguments : Arguments() {
+class CoopArguments : Arguments()
+
+class CoopInfoArguments : Arguments() {
     val contract: Contract by contractChoice()
     val coopId: String by coopId()
     val compact: Boolean by compact()
 }
 
-class AddCoopArguments : Arguments() {
+class CoopAddArguments : Arguments() {
     val contract: Contract by contractChoice()
     val coopId: String by coopId()
     val createRole: Boolean by boolean(
-        displayName = "create role",
+        displayName = "create-role",
         description = "Whether to create a role for this co-op."
     )
     val force: Boolean by boolean(
@@ -52,50 +54,55 @@ class AddCoopArguments : Arguments() {
 @KordPreview
 val coopCommand: suspend SlashCommand<out CoopArguments>.() -> Unit = {
     name = "coop"
-    description = "Shows info on a specific co-op, displaying the current status and player contribution."
-    autoAck = PUBLIC
+    description = "Perform actions to do with single co-ops."
 
-    action {
-        val contract = arguments.contract
-        val coopStatus = AuxBrain.getCoopStatus(arguments.contract.id, arguments.coopId)
-            ?: return@action publicFollowUp {
-                content = "No co-op found for contract __${contract.name}__ with ID `${arguments.coopId}`"
-            }.discard()
-        val compact = arguments.compact
+    subCommand(::CoopInfoArguments) {
+        name = "info"
+        description = "See the current status and player contribution of a specific co-op."
+        autoAck = PUBLIC
 
-        when (val status = CoopContractStatus(contract, coopStatus, arguments.coopId)) {
-            is Abandoned -> publicFollowUp {
-                content = """
+        action {
+            val contract = arguments.contract
+            val coopStatus = AuxBrain.getCoopStatus(arguments.contract.id, arguments.coopId)
+                ?: return@action publicFollowUp {
+                    content = "No co-op found for contract __${contract.name}__ with ID `${arguments.coopId}`"
+                }.discard()
+            val compact = arguments.compact
+
+            when (val status = CoopContractStatus(contract, coopStatus, arguments.coopId)) {
+                is Abandoned -> publicFollowUp {
+                    content = """
                         `${status.coopStatus.coopId}` vs. __${contract.name}__:
                             
                         This co-op has no members.""".trimIndent()
-            }
+                }
 
-            is Failed -> publicFollowUp {
-                content = """
+                is Failed -> publicFollowUp {
+                    content = """
                         `${status.coopStatus.coopId}` vs. __${contract.name}__:
                             
                         This co-op has not reached their final goal.""".trimIndent()
-            }
+                }
 
-            is Finished -> publicMultipartFollowUp(coopFinishedResponse(coopStatus, contract, compact))
+                is Finished -> publicMultipartFollowUp(coopFinishedResponse(coopStatus, contract, compact))
 
-            is InProgress -> {
-                val sortedState = status.state.copy(
-                    farmers = status.state.farmers.sortedByDescending(SimulationFarmer::currentEggsLaid)
-                )
+                is InProgress -> {
+                    val sortedState = status.state.copy(
+                        farmers = status.state.farmers.sortedByDescending(SimulationFarmer::currentEggsLaid)
+                    )
 
-                publicMultipartFollowUp(when (status) {
-                    is InProgress.FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
-                    else -> coopInfoResponse(sortedState, compact)
-                })
+                    publicMultipartFollowUp(when (status) {
+                        is InProgress.FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
+                        else -> coopInfoResponse(sortedState, compact)
+                    })
+                }
             }
         }
     }
 
-    subCommand(::AddCoopArguments) {
+    subCommand(::CoopAddArguments) {
         name = "add"
-        description = "Registers an _already existing_ co-op so it shows up in the co-ops info listing."
+        description = "Register a co-op so it shows up in the co-ops info listing."
         autoAck = PUBLIC
 
         action {

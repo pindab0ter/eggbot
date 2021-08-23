@@ -40,5 +40,5 @@ fun Arguments.compact() = defaultingBoolean(
 
 fun Arguments.coopId() = string(
     displayName = "coop",
-    description = "The co-op ID. Can be found in either `#roll-call` or in-game under \"CO-OP INFO\" in the current egg information screen."
+    description = "The co-op ID. Can be found in `#roll-call` or in-game."
 )
