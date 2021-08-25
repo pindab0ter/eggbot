@@ -13,12 +13,14 @@ import nl.pindab0ter.eggbot.model.Config
 @KordPreview
 class CommandLoggerExtension : Extension() {
     val logger = KotlinLogging.logger { }
-    override val name: String = "EggBotExtension"
+    override val name: String = "CommandLoggerExtension"
 
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {
-                logger.trace { "${event.interaction.userName()}: ${event.interaction.userInput()}" }
+                if (event.interaction is ApplicationCommandInteraction) logger.trace {
+                    "${event.interaction.userName()}: ${event.interaction.userInput()}"
+                }
             }
         }
     }
@@ -27,16 +29,8 @@ class CommandLoggerExtension : Extension() {
         /**
          * Get the username of the user that initiated this interaction.
          */
-        fun Interaction.userName(): String? = when (this@userName) {
-            is DmInteraction -> {
-                user.username
-            }
-            is GuildInteraction -> runBlocking {
-                member.asMemberOrNull()?.username ?: user.asUserOrNull()?.username
-            }
-            is ButtonInteraction, is SelectMenuInteraction -> runBlocking {
-                user.asMemberOrNull(Config.guild)?.username ?: user.asUserOrNull()?.username
-            }
+        fun Interaction.userName(): String = runBlocking {
+            user.asMemberOrNull(Config.guild)?.displayName ?: user.asUser().username
         }
 
         /**
