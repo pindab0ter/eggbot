@@ -3,11 +3,16 @@ package nl.pindab0ter.eggbot.kord.commands
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
 import com.kotlindiscord.kord.extensions.commands.converters.impl.boolean
+import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
+import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType
+import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.*
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permission.*
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.createRole
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
@@ -45,9 +50,10 @@ class CoopAddArguments : Arguments() {
         displayName = "create-role",
         description = "Whether to create a role for this co-op."
     )
-    val force: Boolean by boolean(
+    val force: Boolean by defaultingBoolean(
         displayName = "force",
-        description = "Add the co-op even if it doesn't exist (yet)."
+        description = "Add the co-op even if it doesn't exist (yet).",
+        defaultValue = false,
     )
 }
 
@@ -59,27 +65,30 @@ val coopCommand: suspend SlashCommand<out CoopArguments>.() -> Unit = {
     subCommand(::CoopInfoArguments) {
         name = "info"
         description = "See the current status and player contribution of a specific co-op."
-        autoAck = PUBLIC
+        autoAck = NONE
 
         action {
             val contract = arguments.contract
             val coopStatus = AuxBrain.getCoopStatus(arguments.contract.id, arguments.coopId)
-                ?: return@action publicFollowUp {
-                    content = "No co-op found for contract __${contract.name}__ with ID `${arguments.coopId}`"
+                ?: return@action ack(true).also {
+                    ephemeralFollowUp {
+                        content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
+                    }
                 }.discard()
             val compact = arguments.compact
 
+            ack(false)
             when (val status = CoopContractStatus(contract, coopStatus, arguments.coopId)) {
                 is Abandoned -> publicFollowUp {
                     content = """
-                        `${status.coopStatus.coopId}` vs. __${contract.name}__:
+                        `${status.coopStatus.coopId}` vs. _${contract.name}_:
                             
                         This co-op has no members.""".trimIndent()
                 }
 
                 is Failed -> publicFollowUp {
                     content = """
-                        `${status.coopStatus.coopId}` vs. __${contract.name}__:
+                        `${status.coopStatus.coopId}` vs. _${contract.name}_:
                             
                         This co-op has not reached their final goal.""".trimIndent()
                 }
@@ -103,7 +112,10 @@ val coopCommand: suspend SlashCommand<out CoopArguments>.() -> Unit = {
     subCommand(::CoopAddArguments) {
         name = "add"
         description = "Register a co-op so it shows up in the co-ops info listing."
-        autoAck = PUBLIC
+        requiredPerms += listOf(
+            ManageRoles,
+            ManageChannels,
+        )
 
         action {
             val contract = arguments.contract
@@ -131,7 +143,7 @@ val coopCommand: suspend SlashCommand<out CoopArguments>.() -> Unit = {
             // Fetch the co-op status to see if it exists
             val coopStatus: CoopStatus? = AuxBrain.getCoopStatus(arguments.contract.id, coopId)
             if (coopStatus == null && !arguments.force) return@action ephemeralFollowUp {
-                content = "$emojiWarning No co-op found for contract __${contract.name}__ with ID `${coopId}`"
+                content = "$emojiWarning No co-op found for contract _${contract.name}_ with ID `${coopId}`"
             }.discard()
 
             // Create the co-op
@@ -143,8 +155,8 @@ val coopCommand: suspend SlashCommand<out CoopArguments>.() -> Unit = {
             }
 
             // Finish if no role needs to be created
-            if (!arguments.createRole) return@action publicFollowUp {
-                content = "Registered co-op `${coop.id}` for contract `${coop.contractId}`."
+            if (!arguments.createRole) return@action ephemeralFollowUp {
+                content = "Registered co-op `${coop.name}` for contract _${contract.name}_."
             }.discard()
 
             // Create the role
@@ -156,8 +168,8 @@ val coopCommand: suspend SlashCommand<out CoopArguments>.() -> Unit = {
             }
 
             // Finish if the role does not need assigning
-            if (coopStatus == null) return@action publicFollowUp {
-                content = "Registered co-op `${coop.id}` for contract `${coop.contractId}`, with the role ${role.mention}"
+            if (coopStatus == null) return@action ephemeralFollowUp {
+                content = "Registered co-op `${coop.id}` for contract _${contract.name}_, with the role ${role.mention}"
             }.discard()
 
             val successes = mutableListOf<Member>()
@@ -175,9 +187,9 @@ val coopCommand: suspend SlashCommand<out CoopArguments>.() -> Unit = {
                 } ?: failures.add(contributor.userName)
             }
 
-            publicFollowUp {
+            ephemeralFollowUp {
                 content = buildString {
-                    appendLine("Registered co-op `${coopStatus.coopId}` for contract `${coopStatus.contractId}`.")
+                    appendLine("Registered co-op `${coopStatus.coopId}` for contract _${contract.name}_.")
                     if (successes.isNotEmpty()) {
                         appendLine()
                         appendLine("The following players have been assigned the role ${role.mention}:")
