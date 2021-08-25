@@ -6,7 +6,7 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import java.sql.Connection
 
 internal fun connectToDatabase() {
-    val logger = KotlinLogging.logger("Exposed")
+    val logger = KotlinLogging.logger {}
     Database.connect(
         url = "jdbc:sqlite:./EggBot.sqlite",
         driver = "org.sqlite.JDBC",

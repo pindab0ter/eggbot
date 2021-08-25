@@ -16,7 +16,7 @@ import java.util.*
 import java.util.Calendar.FRIDAY
 
 internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply {
-    val logger = KotlinLogging.logger("Quartz")
+    val logger = KotlinLogging.logger {}
     // Use Europe/London because it moves with Daylight Saving Time
     val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
 
