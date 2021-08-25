@@ -60,14 +60,17 @@ object AuxBrain {
             }.serialize().encodeBase64ToString()
         }")
 
-    fun getContracts(handler: (List<Contract>?) -> Unit) = periodicalsRequest()
-        .response { _, response, _ ->
-            handler(PeriodicalsResponse.deserialize(response.body().decodeBase64()).periodicals?.contracts?.contracts)
-        }.discard()
-
-    fun getContracts(): List<Contract> =
-        periodicalsRequest().responseObject(ContractsDeserializer).third.component1().orEmpty()
+    fun <T> getContracts(handler: (List<Contract>) -> T): CancellableRequest = periodicalsRequest().response { _, response, _ ->
+        val contracts = PeriodicalsResponse.deserialize(response.body()
+            .decodeBase64()).periodicals?.contracts?.contracts
+            .orEmpty()
             .filter { contract -> contract.id != "first-contract" }
+        handler(contracts)
+    }
+
+    fun getContracts(): List<Contract> = periodicalsRequest().responseObject(ContractsDeserializer).third.component1()
+        .orEmpty()
+        .filter { contract -> contract.id != "first-contract" }
 
     fun getContract(contractId: String): Contract? =
         getContracts().find { contract ->

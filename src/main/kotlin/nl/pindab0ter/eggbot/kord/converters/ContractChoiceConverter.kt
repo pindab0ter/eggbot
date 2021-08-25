@@ -47,11 +47,13 @@ class ContractChoiceConverter(
  * @see ContractChoiceConverter
  */
 fun Arguments.contractChoice(): SingleConverter<Contract> {
-    val choices = AuxBrain.getContracts().toTypedArray()
+    val contracts = AuxBrain.getContracts().sortedByDescending { contract ->
+        contract.expirationTime
+    }.toTypedArray()
 
     return arg(
         displayName = "contract",
         description = "Select an Egg, Inc. contract.",
-        converter = ContractChoiceConverter(choices = choices)
+        converter = ContractChoiceConverter(choices = contracts)
     )
 }
