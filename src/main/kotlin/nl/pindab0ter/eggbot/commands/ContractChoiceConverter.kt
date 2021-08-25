@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.kord.converters
+package nl.pindab0ter.eggbot.commands
 
 
 import com.auxbrain.ei.Contract

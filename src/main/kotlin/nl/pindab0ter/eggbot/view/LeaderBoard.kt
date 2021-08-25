@@ -6,8 +6,8 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
 import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
-import nl.pindab0ter.eggbot.kord.commands.LeaderBoard
-import nl.pindab0ter.eggbot.kord.commands.LeaderBoard.*
+import nl.pindab0ter.eggbot.commands.LeaderBoard
+import nl.pindab0ter.eggbot.commands.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -21,7 +21,7 @@ suspend fun leaderboardResponse(
     context: CommandContext,
 ): List<String> = table {
 
-    val compact = displayMode == COMPACT;
+    val compact = displayMode == COMPACT
 
     val sortedFarmers = when (leaderBoard) {
         EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }

@@ -1,9 +1,9 @@
-package nl.pindab0ter.eggbot.kord.extensions
+package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.kord.commands.*
+import nl.pindab0ter.eggbot.commands.*
 
 @KordPreview
 class EggBotExtension : Extension() {

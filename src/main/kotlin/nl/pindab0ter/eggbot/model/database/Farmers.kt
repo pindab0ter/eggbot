@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.database
+package nl.pindab0ter.eggbot.model.database
 
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE

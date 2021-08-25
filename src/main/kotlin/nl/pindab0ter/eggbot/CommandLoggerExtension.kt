@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.kord.extensions
+package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import dev.kord.common.annotation.KordPreview

@@ -3,8 +3,6 @@ package nl.pindab0ter.eggbot
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import dev.kord.common.annotation.KordPreview
 import dev.kord.gateway.Intent
-import nl.pindab0ter.eggbot.kord.extensions.CommandLoggerExtension
-import nl.pindab0ter.eggbot.kord.extensions.EggBotExtension
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview

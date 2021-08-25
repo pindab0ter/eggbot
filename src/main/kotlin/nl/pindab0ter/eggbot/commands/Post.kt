@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.kord.commands
+package nl.pindab0ter.eggbot.commands
 
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string

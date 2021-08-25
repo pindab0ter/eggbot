@@ -1,8 +1,6 @@
 package nl.pindab0ter.eggbot.model.database
 
 import dev.kord.common.entity.Snowflake
-import nl.pindab0ter.eggbot.database.CoopFarmers
-import nl.pindab0ter.eggbot.database.Coops
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass

@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.utilities
+package nl.pindab0ter.eggbot.jobs
 
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.formatDayHourAndMinutes

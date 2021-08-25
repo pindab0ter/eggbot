@@ -3,8 +3,6 @@ package nl.pindab0ter.eggbot.model.database
 import com.auxbrain.ei.Backup
 import dev.kord.common.entity.Snowflake
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.database.CoopFarmers
-import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.toDateTime

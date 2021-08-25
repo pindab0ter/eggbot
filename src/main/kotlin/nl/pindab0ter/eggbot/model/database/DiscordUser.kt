@@ -2,8 +2,6 @@ package nl.pindab0ter.eggbot.model.database
 
 import dev.kord.common.entity.Snowflake
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.database.DiscordUsers
-import nl.pindab0ter.eggbot.database.Farmers
 import nl.pindab0ter.eggbot.helpers.configuredGuild
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
