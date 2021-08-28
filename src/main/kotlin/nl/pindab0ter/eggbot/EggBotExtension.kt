@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import dev.kord.common.annotation.KordPreview
+import nl.pindab0ter.eggbot.commands.manageCommand
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.commands.*
 
@@ -11,8 +12,9 @@ class EggBotExtension : Extension() {
     override val name: String = "EggBotExtension"
 
     override suspend fun setup() {
+        slashCommand(manageCommand)
         slashCommand(::LeaderBoardArguments, leaderBoardCommand)
         slashCommand(::EarningsBonusArguments, earningsBonusCommand)
-        slashCommand(::CoopArguments, coopCommand)
+        slashCommand(::CoopInfoArguments, coopInfoCommand)
     }
 }
