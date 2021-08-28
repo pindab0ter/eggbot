@@ -20,6 +20,11 @@
     <logger name="com.kotlindiscord.kord" level="INFO"/>
     <logger name="com.kotlindiscord.kord.extensions.i18n" level="OFF"/>
 
+    <!-- Set to DEBUG to debug:
+        dev.kord.rest.request.KtorRequestException: REST request returned with HTTP 400 Bad Request. InvalidFormBody: Invalid Form Body
+    -->
+    <logger name="[R]:[KTOR]:[ExclusionRequestRateLimiter]" level="INFO"/>
+
     <root level="INFO">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="FILE"/>

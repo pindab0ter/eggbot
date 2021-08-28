@@ -2,12 +2,17 @@ package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.CommandArgument.*
+import dev.kord.common.entity.CommandGroup
+import dev.kord.common.entity.Option
+import dev.kord.common.entity.SubCommand
 import dev.kord.common.entity.optional.Optional
 import dev.kord.core.cache.data.OptionData
-import dev.kord.core.entity.interaction.*
+import dev.kord.core.entity.interaction.Interaction
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
@@ -18,9 +23,7 @@ class CommandLoggerExtension : Extension() {
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {
-                if (event.interaction is ApplicationCommandInteraction) logger.trace {
-                    "${event.interaction.userName()}: ${event.interaction.userInput()}"
-                }
+                logger.trace { "${event.interaction.userName()}: ${event.interaction.userInput()}" }
             }
         }
     }
@@ -39,19 +42,36 @@ class CommandLoggerExtension : Extension() {
         @KordPreview
         fun Interaction.userInput(): String = buildString {
             data.data.run {
-                when (name) {
-                    is Optional.Value -> append("/${name.value} ")
-                    else -> return@buildString
-                }
-                if (options is Optional.Value) append(options.value!!.joinToString(" ") { option: OptionData ->
+                append("/${name.value ?: "[null]"} ")
+                append(options.value.orEmpty().joinToString { option: OptionData ->
                     when {
                         option.value is Optional.Value -> "${option.value.value!!.name}: ${option.value.value!!.value}"
-                        option.values is Optional.Value -> option.values.value!!.joinToString(" ") { commandArgument ->
-                            "${commandArgument.name}: ${commandArgument.value}"
-                        }
+                        option.values is Optional.Value -> option.values.value!!.formatOptions()
+                        option.subCommands is Optional.Value -> option.subCommands.value!!.formatOptions()
                         else -> ""
                     }
                 })
+            }
+        }
+
+        private fun List<Option>.formatOptions(): String = joinToString(" ") { option ->
+            when (option) {
+                is SubCommand -> "${option.name} ${option.options.value?.formatOptions()}"
+                is CommandGroup -> "${option.name} ${option.options.value?.formatOptions()}"
+                is StringArgument -> "${option.name}: ${option.value}"
+                is IntegerArgument -> "${option.name}: ${option.value}"
+                is NumberArgument -> "${option.name}: ${option.value}"
+                is BooleanArgument -> "${option.name}: ${option.value}"
+                is UserArgument -> runBlocking {
+                    "${option.name}: ${configuredGuild?.getMemberOrNull(option.value)?.displayName?.let { "@${it}" } ?: "(id = ${option.value.asString})"}"
+                }
+                is ChannelArgument -> runBlocking {
+                    "${option.name}: ${configuredGuild?.getChannelOrNull(option.value)?.name?.let { "#${it}" } ?: "(id = ${option.value.asString})"}"
+                }
+                is RoleArgument -> runBlocking {
+                    "${option.name}: ${configuredGuild?.getRoleOrNull(option.value)?.name?.let { "@${it}" } ?: "(id = ${option.value.asString})"}"
+                }
+                is MentionableArgument -> "${option.name}: ${option.value}"
             }
         }
     }

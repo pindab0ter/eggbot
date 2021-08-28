@@ -36,23 +36,23 @@ dependencies {
 
     // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.13")
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.1")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.2")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
     runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
 
     // Discord
-    implementation("dev.kord", "kord-core", "0.8.0-M5")
+    implementation("dev.kord", "kord-core", "0.8.x-SNAPSHOT")
     implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.4.4-RC4")
 
     // Task scheduling
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
 
     // Logging
-    runtimeOnly("ch.qos.logback", "logback-classic", "1.2.3")
-    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.10")
-    implementation("io.sentry", "sentry", "5.1.0-beta.9")
+    runtimeOnly("ch.qos.logback", "logback-classic", "1.3.0-alpha10")
+    implementation("io.github.microutils", "kotlin-logging-jvm", "2.0.11")
+    implementation("io.sentry", "sentry", "5.1.2")
 }
 
 tasks.withType<KotlinCompile>().configureEach {
