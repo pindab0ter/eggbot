@@ -12,6 +12,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.createRole
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
@@ -34,6 +35,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
     name = "manage"
     description = "Add and remove co-ops and roll calls."
+
+    guild(Config.guild)
+    allowUser(Config.botOwner)
+    allowRole(Config.adminRole)
 
     group("role") {
         description = "Manage roles"
