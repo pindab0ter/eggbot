@@ -15,6 +15,8 @@ import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.createRole
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
+import dev.kord.rest.json.JsonErrorCode
+import dev.kord.rest.request.KtorRequestException
 import kotlinx.coroutines.flow.firstOrNull
 import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.helpers.coopId
@@ -30,8 +32,95 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
 val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
+    name = "manage"
+    description = "Add and remove co-ops and roll calls."
+
+    group("role") {
+        description = "Manage roles"
+
+        class AddRoleArguments : Arguments() {
+            val member: Member by member(
+                displayName = "member",
+                description = "The member to assign the role to",
+                requiredGuild = { Config.guild },
+                useReply = true,
+            )
+        }
+
+        class RemoveRoleArguments : Arguments() {
+            val member: Member by member(
+                displayName = "member",
+                description = "The member to assign the role to",
+                requiredGuild = { Config.guild },
+                useReply = true,
+            )
+            val role: Role by role(
+                displayName = "role",
+                description = "The role to remove",
+                requiredGuild = { Config.guild },
+            )
+        }
+
+        class DeleteRoleArguments : Arguments() {
+            val role: Role by role(
+                displayName = "role",
+                description = "The role to remove",
+                requiredGuild = { Config.guild },
+            )
+        }
+
+        subCommand(::AddRoleArguments) {
+            name = "add"
+            description = "Add a test role to someone"
+            autoAck = EPHEMERAL
+
+            action {
+                guild?.createRole {
+                    name = "Test Role"
+                    hoist = true
+                }?.let { role ->
+                    arguments.member.addRole(role.id)
+                    ephemeralFollowUp { content = "Successfully added ${role.mention} to ${arguments.member.mention}." }
+                } ?: ephemeralFollowUp { content = "Failed to create role for ${arguments.member.mention}." }
+            }
+        }
+
+        subCommand(::RemoveRoleArguments) {
+            name = "remove"
+            description = "Remove a specific role from someone"
+            autoAck = EPHEMERAL
+
+            action {
+                arguments.member.removeRole(arguments.role.id)
+                ephemeralFollowUp { content = "Successfully removed ${arguments.role.mention} to ${arguments.member.mention}" }
+            }
+        }
+
+        subCommand(::DeleteRoleArguments) {
+            name = "delete"
+            description = "Delete a specific role"
+            autoAck = EPHEMERAL
+            requirePermissions(Permission.ManageRoles)
+
+            action {
+                val roleName = "`@${arguments.role.name}`"
+                try {
+                    arguments.role.delete()
+                    ephemeralFollowUp { content = "Successfully deleted $roleName." }
+                } catch (exception: KtorRequestException) {
+                    if (exception.error?.code == JsonErrorCode.PermissionLack) ephemeralFollowUp {
+                        content = "Failed to delete role ${arguments.role.mention}. The bot’s role must be higher than the role it’s trying to delete."
+                    } else ephemeralFollowUp {
+                        content = exception.error?.message ?: exception.localizedMessage
+                    }
+                }
+            }
+        }
+    }
 
     group("coop") {
+        description = "Manage single coops"
+
         class AddCoopArguments : Arguments() {
             val contract: Contract by contractChoice()
             val coopId: String by coopId()
@@ -147,9 +236,11 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
     } // Coops Group
 
     group("roll-call") {
+        description = "Manage roll calls"
+
         subCommand {
             name = "create"
-            description = ""
+            description = "Create teams for a contract"
 
             check {
 
@@ -162,7 +253,7 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
 
         subCommand {
             name = "clear"
-            description = ""
+            description = "Remove all teams for a contract"
 
             check {
 
