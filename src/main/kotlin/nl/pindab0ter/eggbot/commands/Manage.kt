@@ -2,18 +2,16 @@ package nl.pindab0ter.eggbot.commands
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
-import com.kotlindiscord.kord.extensions.commands.converters.impl.boolean
-import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
-import com.kotlindiscord.kord.extensions.commands.converters.impl.member
-import com.kotlindiscord.kord.extensions.commands.converters.impl.role
+import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.EPHEMERAL
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.Permission
-import dev.kord.common.entity.Snowflake
+import dev.kord.common.entity.Permission.ManageChannels
+import dev.kord.common.entity.Permission.ManageRoles
 import dev.kord.core.behavior.createRole
+import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
 import dev.kord.rest.json.JsonErrorCode
@@ -78,6 +76,7 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
             name = "add"
             description = "Add a test role to someone"
             autoAck = EPHEMERAL
+            requirePermissions(ManageRoles)
 
             action {
                 guild?.createRole {
@@ -94,6 +93,7 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
             name = "remove"
             description = "Remove a specific role from someone"
             autoAck = EPHEMERAL
+            requirePermissions(ManageRoles)
 
             action {
                 arguments.member.removeRole(arguments.role.id)
@@ -105,7 +105,7 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
             name = "delete"
             description = "Delete a specific role"
             autoAck = EPHEMERAL
-            requirePermissions(Permission.ManageRoles)
+            requirePermissions(ManageRoles)
 
             action {
                 val roleName = "`@${arguments.role.name}`"
@@ -120,8 +120,67 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
                     }
                 }
             }
+        } // Delete Role
+    } // Role group
+
+    group("channel") {
+        description = "Manage channels"
+
+        class CreateChannelArguments : Arguments() {
+            val channelName by string(
+                displayName = "name",
+                description = "The name for the channel",
+            )
+            val parentChannel by optionalChannel(
+                displayName = "parent",
+                description = "The parent channel",
+                requiredGuild = { Config.guild },
+            )
         }
-    }
+
+        class DeleteChannelArguments : Arguments() {
+            val channel by channel(
+                displayName = "channel",
+                description = "The channel to delete",
+                requiredGuild = { Config.guild },
+            )
+        }
+
+        subCommand(::CreateChannelArguments) {
+            name = "create"
+            description = "Create a channel"
+            autoAck = EPHEMERAL
+            requirePermissions(ManageChannels)
+
+            action {
+                val channel = guild?.createTextChannel(arguments.channelName) {
+                    parentId = arguments.parentChannel?.id
+                    reason = "Created by bot"
+                } ?: return@action ephemeralFollowUp {
+                    content = "Failed to create channel ${arguments.channelName}"
+                }.discard()
+
+                ephemeralFollowUp {
+                    content = "Created channel ${channel.mention}"
+                }
+            }
+        } // Create channel
+
+        subCommand(::DeleteChannelArguments) {
+            name = "delete"
+            description = "Delete a channel"
+            autoAck = EPHEMERAL
+            requirePermissions(ManageChannels)
+
+            action {
+                val channelName = arguments.channel.mention
+                arguments.channel.delete("Deleted by ${user.mention} through bot")
+                ephemeralFollowUp {
+                    content = "Succesfully deleted channel $channelName"
+                }
+            }
+        } // Delete channel
+    } // Channel group
 
     group("coop") {
         description = "Manage single coops"
@@ -144,8 +203,8 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
             name = "add"
             description = "Register a co-op so it shows up in the co-ops info listing."
             requiredPerms += listOf(
-                Permission.ManageRoles,
-                Permission.ManageChannels,
+                ManageRoles,
+                ManageChannels,
             )
 
             action {
