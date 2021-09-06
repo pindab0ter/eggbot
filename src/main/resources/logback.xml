@@ -11,7 +11,7 @@
         <file>EggBot.log</file>
         <append>true</append>
         <encoder>
-            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] %logger{0} - %msg%n</pattern>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss} [%-5p] %logger - %msg%n</pattern>
         </encoder>
     </appender>
 
