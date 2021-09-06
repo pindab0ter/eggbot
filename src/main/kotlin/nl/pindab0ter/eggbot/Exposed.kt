@@ -1,12 +1,18 @@
 package nl.pindab0ter.eggbot
 
 import mu.KotlinLogging
+import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.transactions.TransactionManager
 import java.sql.Connection
 
 internal fun connectToDatabase() {
     val logger = KotlinLogging.logger {}
+    Flyway.configure()
+        .dataSource("jdbc:sqlite:./EggBot.sqlite", null, null)
+        .load().apply {
+            migrate()
+        }
     Database.connect(
         url = "jdbc:sqlite:./EggBot.sqlite",
         driver = "org.sqlite.JDBC",

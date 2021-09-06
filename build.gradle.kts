@@ -41,6 +41,7 @@ dependencies {
     // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.13")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.2")
+    implementation("org.flywaydb", "flyway-core", "7.15.0")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
