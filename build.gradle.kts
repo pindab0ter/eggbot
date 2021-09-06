@@ -12,19 +12,23 @@ plugins {
     idea
     application
     kotlin("jvm") version "1.5.30"
-    id("com.github.ben-manes.versions") version "0.39.0"
     id("com.toasttab.protokt") version "0.6.4"
+    id("com.github.ben-manes.versions") version "0.39.0"
 }
 
 repositories {
     mavenCentral()
+
     maven {
-        name = "Sonatype"
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
-    }
-    maven {
+        // Required for Kord
         name = "Kotlin Discord"
         url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
+    }
+
+    maven {
+        // Required for Kord Extensions
+        name = "Sonatype"
+        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 
