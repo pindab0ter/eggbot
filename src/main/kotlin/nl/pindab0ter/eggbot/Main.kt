@@ -2,16 +2,16 @@ package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import dev.kord.common.annotation.KordPreview
-import dev.kord.gateway.Intent
+import dev.kord.gateway.Intent.*
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
 suspend fun main() = ExtensibleBot(Config.botToken) {
     intents {
-        +Intent.DirectMessages
-        +Intent.DirectMessageTyping
-        +Intent.GuildMessages
-        +Intent.GuildMessageTyping
+        +DirectMessages
+        +DirectMessageTyping
+        +GuildMessages
+        +GuildMessageTyping
     }
 
     extensions {
