@@ -1,32 +1,3 @@
-CREATE TABLE Contracts
-(
-    id         TEXT             NOT NULL,
-    name       TEXT             NOT NULL,
-    final_goal DOUBLE PRECISION NOT NULL
-);
-
-CREATE TABLE CoopFarmers
-(
-    farmer TEXT    NOT NULL
-        REFERENCES Farmers
-            ON UPDATE CASCADE ON DELETE SET NULL,
-    coop   INTEGER NOT NULL
-        REFERENCES Coops
-            ON UPDATE CASCADE ON DELETE SET NULL
-);
-
-CREATE TABLE Coops
-(
-    id          INT
-        PRIMARY KEY,
-    name        TEXT NOT NULL,
-    contract_id TEXT NOT NULL,
-    role_id     TEXT,
-    leader_id   TEXT
-                     REFERENCES Farmers
-                         ON UPDATE CASCADE ON DELETE SET NULL
-);
-
 CREATE TABLE DiscordUsers
 (
     discord_id                TEXT NOT NULL
@@ -52,6 +23,28 @@ CREATE TABLE Farmers
     drone_takedowns       INTEGER NOT NULL,
     elite_drone_takedowns INTEGER NOT NULL,
     last_updated          INTEGER NOT NULL
+);
+
+CREATE TABLE CoopFarmers
+(
+    farmer TEXT    NOT NULL
+        REFERENCES Farmers
+            ON UPDATE CASCADE ON DELETE SET NULL,
+    coop   INTEGER NOT NULL
+        REFERENCES Coops
+            ON UPDATE CASCADE ON DELETE SET NULL
+);
+
+CREATE TABLE Coops
+(
+    id          INT
+        PRIMARY KEY,
+    name        TEXT NOT NULL,
+    contract_id TEXT NOT NULL,
+    role_id     TEXT,
+    leader_id   TEXT
+         REFERENCES Farmers
+             ON UPDATE CASCADE ON DELETE SET NULL
 );
 
 CREATE VIEW InGameNamesToDiscordNames AS
