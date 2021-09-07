@@ -67,14 +67,6 @@ object Config {
             emojiError = getOptional("emoji.error", "🚫")
             statusType = getOptional("status_type", "DEFAULT")
             statusText = getOptional("status_text")
-            // activity = if (statusText != null) Activity.of(
-            //     when (statusType) {
-            //         "STREAMING" -> Activity.ActivityType.STREAMING
-            //         "LISTENING" -> Activity.ActivityType.LISTENING
-            //         "WATCHING" -> Activity.ActivityType.WATCHING
-            //         else -> Activity.ActivityType.DEFAULT
-            //     }, statusText
-            // ) else null
             clientVersion = getOptional("client_version", "0").toInt()
             devMode = getOptional("dev_mode", "false") == "true"
 
