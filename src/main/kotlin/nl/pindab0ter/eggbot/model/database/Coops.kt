@@ -12,8 +12,8 @@ object Coops : IntIdTable() {
     val leaderId = reference("leader_id", Farmers, CASCADE, SET_NULL).nullable()
     val roleId = text("role_id").nullable()
     val channelId = text("channel_id").nullable()
-    val createdAt = datetime("createdAt").default(DateTime.now())
-    val modifiedAt = datetime("modifiedAt").default(DateTime.now())
+    val createdAt = datetime("created_at").default(DateTime.now())
+    val updated_at = datetime("updated_at").default(DateTime.now())
 
     init {
         this.index(true, name, contractId)

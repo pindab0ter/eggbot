@@ -8,6 +8,6 @@ object DiscordUsers : IdTable<String>() {
     val discordTag = text("discord_tag")
     val inactiveUntil = datetime("inactive_until").nullable()
     val optedOutOfCoopLeadAt = datetime("opted_out_of_coop_lead_at").nullable()
-    val createdAt = Farmers.datetime("createdAt").default(DateTime.now())
-    val modifiedAt = Farmers.datetime("modifiedAt").default(DateTime.now())
+    val createdAt = Farmers.datetime("created_at").default(DateTime.now())
+    val updated_at = Farmers.datetime("updated_at").default(DateTime.now())
 }

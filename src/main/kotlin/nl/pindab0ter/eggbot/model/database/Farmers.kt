@@ -16,6 +16,6 @@ object Farmers : IdTable<String>() {
     val prophecyBonus = integer("prophecy_bonus")
     val droneTakedowns = long("drone_takedowns")
     val eliteDroneTakedowns = long("elite_drone_takedowns")
-    val createdAt = datetime("createdAt").default(DateTime.now())
-    val modifiedAt = datetime("modifiedAt").default(DateTime.now())
+    val createdAt = datetime("created_at").default(DateTime.now())
+    val updated_at = datetime("updated_at").default(DateTime.now())
 }

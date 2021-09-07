@@ -15,7 +15,7 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     private var optedOutOfCoopLeadAt by DiscordUsers.optedOutOfCoopLeadAt
     val optedOutOfCoopLead: Boolean get() = optedOutOfCoopLeadAt != null
     var createdAt by DiscordUsers.createdAt
-    var updatedAt by DiscordUsers.modifiedAt
+    var updatedAt by DiscordUsers.updated_at
 
     val farmers by Farmer referrersOn Farmers.discordId
 

@@ -24,7 +24,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
             _channelId = snowflake?.asString
         }
     var createdAt by Coops.createdAt
-    var updatedAt by Coops.modifiedAt
+    var updatedAt by Coops.updated_at
 
     var farmers by Farmer via CoopFarmers
 
