@@ -2,12 +2,13 @@ package nl.pindab0ter.eggbot.model.database
 
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
+import org.jetbrains.exposed.sql.statements.StatementType
 import org.joda.time.DateTime
 
 object Farmers : IdTable<String>() {
-    override val id = text("in_game_id").uniqueIndex().entityId()
+    override val id = text("in_game_id").entityId()
     val discordId = reference("discord_id", DiscordUsers, CASCADE, CASCADE)
-    val inGameName = text("in_game_name").uniqueIndex()
+    val inGameName = text("in_game_name")
     val prestiges = long("prestiges")
     val soulEggs = double("soul_eggs")
     val soulBonus = integer("soul_bonus")
@@ -15,5 +16,6 @@ object Farmers : IdTable<String>() {
     val prophecyBonus = integer("prophecy_bonus")
     val droneTakedowns = long("drone_takedowns")
     val eliteDroneTakedowns = long("elite_drone_takedowns")
-    val lastUpdated = datetime("last_updated").default(DateTime.now())
+    val createdAt = datetime("createdAt").default(DateTime.now())
+    val modifiedAt = datetime("modifiedAt").default(DateTime.now())
 }

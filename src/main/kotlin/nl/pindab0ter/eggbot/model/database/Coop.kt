@@ -9,19 +9,26 @@ import java.math.BigDecimal
 
 class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
+    var contractId by Coops.contractId
+    var leader: Farmer? by Farmer optionalReferencedOn Coops.leaderId
     private var _roleId by Coops.roleId
     var roleId: Snowflake?
         get() = this._roleId?.let { Snowflake(it) }
         set(snowflake) {
             _roleId = snowflake?.asString
         }
-    var contractId by Coops.contractId
+    private var _channelId by Coops.channelId
+    var channelId: Snowflake?
+        get() = this._channelId?.let { Snowflake(it) }
+        set(snowflake) {
+            _channelId = snowflake?.asString
+        }
+    var createdAt by Coops.createdAt
+    var updatedAt by Coops.modifiedAt
 
-    var leader: Farmer? by Farmer optionalReferencedOn Coops.leaderId
     var farmers by Farmer via CoopFarmers
 
     val hasLeader: Boolean get() = leader != null
-
     val activeEarningsBonus: BigDecimal
         get() = farmers.sumOf { farmer ->
             if (farmer.isActive) farmer.earningsBonus

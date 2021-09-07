@@ -11,12 +11,15 @@ import org.joda.time.DateTime
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val discordId: String get() = id.value
     var discordTag by DiscordUsers.discordTag
-    val discordName: String get() = discordTag.substring(0, discordTag.length - 5)
     var inactiveUntil by DiscordUsers.inactiveUntil
     private var optedOutOfCoopLeadAt by DiscordUsers.optedOutOfCoopLeadAt
     val optedOutOfCoopLead: Boolean get() = optedOutOfCoopLeadAt != null
+    var createdAt by DiscordUsers.createdAt
+    var updatedAt by DiscordUsers.modifiedAt
+
     val farmers by Farmer referrersOn Farmers.discordId
 
+    val discordName: String get() = discordTag.substring(0, discordTag.length - 5)
     val mention: String
         get() = runBlocking {
             configuredGuild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.mention ?: discordName
@@ -28,14 +31,6 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
         configuredGuild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.tag.takeIf { it != discordTag }?.let { tag ->
             discordTag = tag
         }
-    }
-
-    fun optOutOfCoopLead() {
-        optedOutOfCoopLeadAt = DateTime.now()
-    }
-
-    fun optInToCoopLead() {
-        optedOutOfCoopLeadAt = null
     }
 
     companion object : EntityClass<String, DiscordUser>(DiscordUsers)

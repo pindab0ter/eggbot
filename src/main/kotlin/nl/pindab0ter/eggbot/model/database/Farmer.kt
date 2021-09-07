@@ -6,10 +6,12 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.toDateTime
+import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.EarningsBonus
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
+import org.joda.time.DateTime
 import java.math.BigDecimal
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
@@ -33,7 +35,8 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var prophecyEggResearchLevel by Farmers.prophecyBonus
     var droneTakedowns by Farmers.droneTakedowns
     var eliteDroneTakedowns by Farmers.eliteDroneTakedowns
-    var lastUpdated by Farmers.lastUpdated
+    var createdAt by Farmers.createdAt
+    var updatedAt by Farmers.modifiedAt
 
     val isActive: Boolean get() = discordUser.isActive
     val canBeCoopLeader get() = discordUser.isActive && !discordUser.optedOutOfCoopLead
@@ -52,7 +55,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
         droneTakedowns = backup.stats.droneTakedowns
         eliteDroneTakedowns = backup.stats.droneTakedownsElite
-        lastUpdated = backup.approxTime.toDateTime()
+        updatedAt = backup.approxTime.toDateTime()
     }
 
     companion object : EntityClass<String, Farmer>(Farmers) {
@@ -71,7 +74,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
                 prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel
                 droneTakedowns = backup.stats.droneTakedowns
                 eliteDroneTakedowns = backup.stats.droneTakedownsElite
-                lastUpdated = backup.approxTime.toDateTime()
+                updatedAt = backup.approxTime.toDateTime()
             }
         }
     }
