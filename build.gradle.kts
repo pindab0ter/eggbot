@@ -34,13 +34,13 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.5.30")
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.5.1")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.5.2")
     implementation("joda-time", "joda-time", "2.10.10") // TODO: Replace with Kotlin's time library
     implementation("ch.obermuhlner", "big-math", "2.3.0")
 
     // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.13")
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.2")
+    runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.3")
     implementation("org.flywaydb", "flyway-core", "7.15.0")
 
     // Networking
