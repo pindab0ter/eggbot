@@ -23,7 +23,7 @@ object Config {
     // val activity: Activity?
     private val statusType: String
     private val statusText: String?
-    val clientVersion: Int
+    var clientVersion: Int
     val devMode: Boolean
 
     // AuxBrain IDs
