@@ -2,7 +2,7 @@
 -- DiscordUsers --
 ------------------
 
-CREATE TABLE DiscordUsers_backup
+CREATE TEMPORARY TABLE DiscordUsers_temp
 (
     discord_id                TEXT NOT NULL
         PRIMARY KEY,
@@ -11,7 +11,7 @@ CREATE TABLE DiscordUsers_backup
     opted_out_of_coop_lead_at INTEGER
 );
 
-INSERT INTO DiscordUsers_backup
+INSERT INTO DiscordUsers_temp
 SELECT *
 FROM DiscordUsers;
 
@@ -30,9 +30,9 @@ CREATE TABLE DiscordUsers
 
 INSERT INTO DiscordUsers
 SELECT *, (STRFTIME('%s', 'now') * 1000), (STRFTIME('%s', 'now') * 1000)
-FROM DiscordUsers_backup;
+FROM DiscordUsers_temp;
 
-DROP TABLE DiscordUsers_backup;
+DROP TABLE DiscordUsers_temp;
 
 
 
@@ -40,7 +40,7 @@ DROP TABLE DiscordUsers_backup;
 -- Farmers --
 -------------
 
-CREATE TABLE Farmers_backup
+CREATE TEMPORARY TABLE Farmers_temp
 (
     in_game_id            TEXT    NOT NULL
         PRIMARY KEY,
@@ -58,7 +58,7 @@ CREATE TABLE Farmers_backup
     last_updated          INTEGER NOT NULL
 );
 
-INSERT INTO Farmers_backup
+INSERT INTO Farmers_temp
 SELECT *
 FROM Farmers;
 
@@ -97,9 +97,9 @@ SELECT in_game_id,
        elite_drone_takedowns,
        (STRFTIME('%s', 'now') * 1000),
        last_updated
-FROM Farmers_backup;
+FROM Farmers_temp;
 
-DROP TABLE Farmers_backup;
+DROP TABLE Farmers_temp;
 
 
 
@@ -107,10 +107,10 @@ DROP TABLE Farmers_backup;
 -- Coops --
 -----------
 
-CREATE TABLE Coops_backup
+CREATE TEMPORARY TABLE Coops_temp
 (
-    id          INT
-        PRIMARY KEY,
+    id          INTEGER
+        PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL,
     contract_id TEXT NOT NULL,
     role_id     TEXT,
@@ -119,7 +119,7 @@ CREATE TABLE Coops_backup
              ON UPDATE CASCADE ON DELETE SET NULL
 );
 
-INSERT INTO Coops_backup
+INSERT INTO Coops_temp
 SELECT *
 FROM Coops;
 
@@ -127,8 +127,8 @@ DROP TABLE Coops;
 
 CREATE TABLE Coops
 (
-    id          INT
-        PRIMARY KEY,
+    id          INTEGER
+        PRIMARY KEY AUTOINCREMENT,
     name        TEXT    NOT NULL,
     contract_id TEXT    NOT NULL,
     leader_id   TEXT
@@ -149,6 +149,6 @@ SELECT id,
        NULL,
        (STRFTIME('%s', 'now') * 1000),
        (STRFTIME('%s', 'now') * 1000)
-FROM Coops_backup;
+FROM Coops_temp;
 
-DROP TABLE Coops_backup;
+DROP TABLE Coops_temp;

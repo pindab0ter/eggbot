@@ -29,16 +29,16 @@ CREATE TABLE CoopFarmers
 (
     farmer TEXT    NOT NULL
         REFERENCES Farmers
-            ON UPDATE CASCADE ON DELETE SET NULL,
+            ON UPDATE CASCADE ON DELETE CASCADE,
     coop   INTEGER NOT NULL
         REFERENCES Coops
-            ON UPDATE CASCADE ON DELETE SET NULL
+            ON UPDATE CASCADE ON DELETE CASCADE
 );
 
 CREATE TABLE Coops
 (
-    id          INT
-        PRIMARY KEY,
+    id          INTEGER
+        PRIMARY KEY AUTOINCREMENT,
     name        TEXT NOT NULL,
     contract_id TEXT NOT NULL,
     role_id     TEXT,
