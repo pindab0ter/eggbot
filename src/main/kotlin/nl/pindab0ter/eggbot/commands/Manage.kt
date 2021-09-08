@@ -5,6 +5,7 @@ import com.auxbrain.ei.CoopStatus
 import com.kotlindiscord.kord.extensions.commands.converters.impl.*
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.EPHEMERAL
+import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
@@ -14,9 +15,11 @@ import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
+import dev.kord.core.entity.channel.Channel
 import dev.kord.rest.json.JsonErrorCode
 import dev.kord.rest.request.KtorRequestException
 import kotlinx.coroutines.flow.firstOrNull
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.helpers.coopId
 import nl.pindab0ter.eggbot.helpers.discard
@@ -31,6 +34,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
 val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
+    val log = KotlinLogging.logger {}
+
     name = "manage"
     description = "Add and remove co-ops and roll calls."
 
@@ -38,7 +43,7 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
     allowUser(Config.botOwner)
     allowRole(Config.adminRole)
 
-    group("role") {
+    group("roles") {
         description = "Manage roles"
 
         class AddRoleArguments : Arguments() {
@@ -123,7 +128,7 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
         } // Delete Role
     } // Role group
 
-    group("channel") {
+    group("channels") {
         description = "Manage channels"
 
         class CreateChannelArguments : Arguments() {
@@ -182,20 +187,26 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
         } // Delete channel
     } // Channel group
 
-    group("coop") {
+    group("coops") {
         description = "Manage single coops"
 
         class AddCoopArguments : Arguments() {
             val contract: Contract by contractChoice()
             val coopId: String by coopId()
-            val createRole: Boolean by boolean(
+            val createRole: Boolean by defaultingBoolean(
                 displayName = "create-role",
-                description = "Whether to create a role for this co-op."
+                description = "Whether to create a role for this co-op. Defaults to ‘yes’.",
+                defaultValue = true,
             )
-            val force: Boolean by defaultingBoolean(
-                displayName = "force",
-                description = "Add the co-op even if it doesn't exist (yet).",
-                defaultValue = false,
+            val createChannel: Boolean by defaultingBoolean(
+                displayName = "create-channel",
+                description = "Whether to create a role for this co-op. Defaults to ‘yes’.",
+                defaultValue = true,
+            )
+            val preEmptive: Boolean by defaultingBoolean(
+                displayName = "pre-emptive",
+                description = "Add the co-op even if it doesn’t exist (yet).",
+                defaultValue = true
             )
         }
 
@@ -206,13 +217,14 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
                 ManageRoles,
                 ManageChannels,
             )
+            autoAck = PUBLIC
 
             action {
                 val contract = arguments.contract
                 val coopId = arguments.coopId.lowercase()
 
                 // Check if roles can be created if required
-                if (configuredGuild == null && arguments.createRole) return@action ephemeralFollowUp {
+                if (configuredGuild == null && arguments.createRole) return@action publicFollowUp {
                     content = "${Config.emojiWarning} Could not get server info. Please try without creating roles or contact the bot maintainer."
                 }.discard()
 
@@ -221,21 +233,25 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
                         Coop.find {
                             (Coops.name eq coopId) and (Coops.contractId eq contract.id)
                         }.empty().not()
-                    }) return@action ephemeralFollowUp { content = "Co-op is already registered." }.discard()
+                    }) return@action publicFollowUp { content = "Co-op is already registered." }.discard()
 
                 // Check if a role with the same name exists
                 if (arguments.createRole) configuredGuild?.roles?.firstOrNull { role -> role.name == coopId }
                     ?.let { role ->
-                        return@action ephemeralFollowUp {
+                        return@action publicFollowUp {
                             content = "${Config.emojiWarning} The role ${role.mention} already exists."
                         }.discard()
                     }
 
                 // Fetch the co-op status to see if it exists
                 val coopStatus: CoopStatus? = AuxBrain.getCoopStatus(arguments.contract.id, coopId)
-                if (coopStatus == null && !arguments.force) return@action ephemeralFollowUp {
+
+                if (coopStatus == null && !arguments.preEmptive) return@action publicFollowUp {
+                    // Finish if the co-op status couldn't be found;
+                    // it most likely doesn't exist yet and this co-op is added in anticipation
                     content = "${Config.emojiWarning} No co-op found for contract _${contract.name}_ with ID `${coopId}`"
                 }.discard()
+
 
                 // Create the co-op
                 val coop = transaction {
@@ -246,44 +262,60 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
                 }
 
                 // Finish if no role needs to be created
-                if (!arguments.createRole) return@action ephemeralFollowUp {
+                if (!arguments.createRole) return@action publicFollowUp {
                     content = "Registered co-op `${coop.name}` for contract _${contract.name}_."
                 }.discard()
 
                 // Create the role
-                val role: Role = configuredGuild!!.createRole {
+                val role = guild?.createRole {
                     name = coopId
                     color = Color(15, 212, 57)
-                    hoist = false
+                    // TODO: Change back to false
+                    hoist = true
                     mentionable = true
                 }
 
+                // TODO: Try/Catch PermissionLack
+                val channel = if (arguments.createChannel) guild?.createTextChannel(coop.name) {
+                    parentId = Config.coopsGroupChannel
+                    name = coopId
+                    topic = "_${coop.name}_ vs. _${contract.name}_"
+                } else null
+
+                transaction {
+                    // TODO: Notify on fail
+                    if (role != null) coop.roleId = role.id
+                    if (channel != null) coop.channelId = channel.id
+                }
+
+                // TODO: Build a string saying whether the channel was created, the role was created an assigned
                 // Finish if the role does not need assigning
-                if (coopStatus == null) return@action ephemeralFollowUp {
-                    content = "Registered co-op `${coop.id}` for contract _${contract.name}_, with the role ${role.mention}"
+                if (coopStatus == null && !arguments.preEmptive) return@action publicFollowUp {
+                    content = "Registered co-op `${coop.id}` for contract _${contract.name}_"
+                    // content = "Registered co-op `${coop.id}` for contract _${contract.name}_, with the role ${role.mention}"
                 }.discard()
 
                 val successes = mutableListOf<Member>()
                 val failures = mutableListOf<String>()
 
                 // Assign the role to each member
-                coopStatus.contributors.map { contributor ->
-                    transaction {
+                coopStatus?.contributors?.map { contributor ->
+                    val member = transaction {
                         Farmer.find { Farmers.id eq contributor.userId }.firstOrNull()
-                    }?.let { farmer ->
-                        configuredGuild?.getMemberOrNull(farmer.discordId)?.let { member ->
-                            member.addRole(role.id)
-                            successes.add(member)
-                        } ?: failures.add(farmer.inGameName)
-                    } ?: failures.add(contributor.userName)
+                    }?.discordId?.let { configuredGuild?.getMemberOrNull(it) }
+
+                    if (member != null && role != null) {
+                        member.addRole(role.id)
+                        successes.add(member)
+                    } else failures.add(contributor.userName)
                 }
 
-                ephemeralFollowUp {
+                publicFollowUp {
                     content = buildString {
-                        appendLine("Registered co-op `${coopStatus.coopId}` for contract _${contract.name}_.")
+                        appendLine("Registered co-op `${coopStatus?.coopId ?: arguments.coopId}` for contract _${contract.name}_.")
                         if (successes.isNotEmpty()) {
                             appendLine()
-                            appendLine("The following players have been assigned the role ${role.mention}:")
+                            appendLine("The following players have been assigned the role ${role?.mention}:")
                             successes.forEach { member -> appendLine(member.mention) }
                         }
                         if (failures.isNotEmpty()) {
@@ -297,8 +329,71 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
                 }
             }
         } // Coops Add
+
+        class RemoveCoopArguments : Arguments() {
+            val coopId: String? by optionalString(
+                displayName = "name",
+                description = "The co-op ID. Can be found in #roll-call or in-game."
+            )
+            val channel: Channel? by optionalChannel(
+                displayName = "channel",
+                description = "The channel associated with the co-op to remove",
+                requiredGuild = { Config.guild }
+            )
+            val role: Role? by optionalRole(
+                displayName = "role",
+                description = "The role associated with the co-op to remove",
+                requiredGuild = { Config.guild }
+            )
+        }
+
+        subCommand(::RemoveCoopArguments) {
+            name = "remove"
+            description = "Remove a coop"
+            requiredPerms += listOf(
+                ManageRoles,
+                ManageChannels,
+            )
+            autoAck = PUBLIC
+
+            action {
+                // TODO: Error if more than one method of selecing a co-op
+
+                val coop: Coop = when {
+                    arguments.coopId != null -> transaction {
+                        Coop.find { Coops.name eq arguments.coopId!! }.firstOrNull()
+                    }
+                    arguments.channel != null -> transaction {
+                        Coop.find { Coops.channelId eq arguments.channel!!.id.asString }.firstOrNull()
+                    }
+                    arguments.role != null -> transaction {
+                        Coop.find { Coops.roleId eq arguments.role!!.id.asString }.firstOrNull()
+                    }
+                    else -> return@action publicFollowUp {
+                        content = "You must choose a co-op to remove"
+                    }.discard()
+                } ?: return@action publicFollowUp {
+                    content = "Could not find that co-op"
+                }.discard()
+
+                // TODO: Both CoopFarmers' foreign keys must cascade on delete
+
+                val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
+                val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
+
+                role?.delete()
+                channel?.delete()
+                transaction { coop.delete() }
+
+                publicFollowUp {
+                    content = "Succesfully deleted co-op"
+                }
+            }
+        }
+
     } // Coops Group
 
+    // TODO: Move to it's own slash command group
     group("roll-call") {
         description = "Manage roll calls"
 
