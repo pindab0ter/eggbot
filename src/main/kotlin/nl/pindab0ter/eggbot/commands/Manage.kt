@@ -382,8 +382,6 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
                     content = "Could not find that co-op"
                 }.discard()
 
-                // TODO: Both CoopFarmers' foreign keys must cascade on delete
-
                 val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
                 val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
 
