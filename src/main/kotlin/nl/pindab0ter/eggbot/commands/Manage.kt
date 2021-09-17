@@ -357,7 +357,13 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
             autoAck = PUBLIC
 
             action {
-                // TODO: Error if more than one method of selecing a co-op
+                if (listOf(
+                        arguments.coopId != null,
+                        arguments.channel != null,
+                        arguments.role != null,
+                ).count { it } > 2) return@action publicFollowUp {
+                    content = "Please use only one method to choose a co-op to remove"
+                }.discard()
 
                 val coop: Coop = when {
                     arguments.coopId != null -> transaction {
