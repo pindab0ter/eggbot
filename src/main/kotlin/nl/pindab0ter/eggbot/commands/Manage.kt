@@ -33,18 +33,18 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
-val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
+val adminCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
     val log = KotlinLogging.logger {}
 
-    name = "manage"
-    description = "Add and remove co-ops and roll calls."
+    name = "admin"
+    description = "All tools available to admins"
 
     guild(Config.guild)
     allowUser(Config.botOwner)
     allowRole(Config.adminRole)
 
-    group("roles") {
-        description = "Manage roles"
+    group("role") {
+        description = "Add and remove roles"
 
         class AddRoleArguments : Arguments() {
             val member: Member by member(
@@ -129,7 +129,7 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
     } // Role group
 
     group("channels") {
-        description = "Manage channels"
+        description = "Add and remove channels"
 
         class CreateChannelArguments : Arguments() {
             val channelName by string(
@@ -187,20 +187,20 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
         } // Delete channel
     } // Channel group
 
-    group("coops") {
-        description = "Manage single coops"
+    group("coop") {
+        description = "Add and remove co-ops"
 
         class AddCoopArguments : Arguments() {
             val contract: Contract by contractChoice()
             val coopId: String by coopId()
             val createRole: Boolean by defaultingBoolean(
                 displayName = "create-role",
-                description = "Whether to create a role for this co-op. Defaults to ‘yes’.",
+                description = "Whether to create a role for this co-op. Defaults to ‘True’.",
                 defaultValue = true,
             )
             val createChannel: Boolean by defaultingBoolean(
                 displayName = "create-channel",
-                description = "Whether to create a role for this co-op. Defaults to ‘yes’.",
+                description = "Whether to create a channel for this co-op. Defaults to ‘True’.",
                 defaultValue = true,
             )
             val preEmptive: Boolean by defaultingBoolean(
@@ -397,7 +397,6 @@ val manageCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
 
     } // Coops Group
 
-    // TODO: Move to it's own slash command group
     group("roll-call") {
         description = "Manage roll calls"
 
