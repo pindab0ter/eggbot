@@ -47,7 +47,7 @@ class CommandLoggerExtension : Extension() {
                     when {
                         option.value is Optional.Value -> "${option.value.value!!.name}: ${option.value.value!!.value}"
                         option.values is Optional.Value -> option.values.value!!.formatOptions()
-                        option.subCommands is Optional.Value -> option.subCommands.value!!.formatOptions()
+                        option.subCommands is Optional.Value -> "${name.value} ${option.subCommands.value!!.formatOptions()}"
                         else -> ""
                     }
                 })

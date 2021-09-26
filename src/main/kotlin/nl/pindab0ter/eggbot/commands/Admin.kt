@@ -25,7 +25,7 @@ val adminCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
 
     group("channel", channelGroup)
 
-    group("coop", coopGroup)
+    group("co-op", coopGroup)
 
     group("roll-call", rollCallGroup)
 }

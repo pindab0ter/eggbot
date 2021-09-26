@@ -7,7 +7,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChanne
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType
+import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
 import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
@@ -62,7 +62,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             Permission.ManageRoles,
             Permission.ManageChannels,
         )
-        autoAck = AutoAckType.PUBLIC
+        autoAck = PUBLIC
 
         action {
             val contract = arguments.contract
@@ -130,7 +130,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             }
 
             val responseBuilder = StringBuilder().apply {
-                append("Registered co-op `${coop.id}` for contract _${contract.name}_")
+                append("Registered co-op `${coop.name}` for contract _${contract.name}_")
 
                 if (role != null) append(", with the role ${role.mention}")
                 if (channel != null) {
@@ -198,13 +198,13 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
     }
 
     subCommand(::RemoveCoopArguments) {
-        name = "remove"
-        description = "Remove a coop"
+        name = "delete"
+        description = "Delete a coop and it's corresponding role and/or channel"
         requiredPerms += listOf(
             Permission.ManageRoles,
             Permission.ManageChannels,
         )
-        autoAck = AutoAckType.PUBLIC
+        autoAck = PUBLIC
 
         action {
             if (listOf(
