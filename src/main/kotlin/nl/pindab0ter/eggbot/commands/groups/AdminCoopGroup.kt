@@ -14,7 +14,6 @@ import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
-import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.flow.firstOrNull
@@ -144,7 +143,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
                 content = responseBuilder.toString()
             }.discard()
 
-            val successes = mutableListOf<Member>()
+            val successes = mutableListOf<String>()
             val failures = mutableListOf<String>()
 
             // Assign the role to each member
@@ -155,7 +154,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
 
                 if (member != null && role != null) {
                     member.addRole(role.id)
-                    successes.add(member)
+                    successes.add(member.mention)
                 } else failures.add(contributor.userName)
             }
 
@@ -163,7 +162,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
                 if (successes.isNotEmpty()) {
                     appendLine()
                     appendLine("The following players have been assigned the role ${role?.mention}:")
-                    successes.forEach { member -> appendLine(member.mention) }
+                    successes.forEach { mention -> appendLine(mention) }
                 }
                 if (failures.isNotEmpty()) {
                     appendLine()
@@ -241,7 +240,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             transaction { coop.delete() }
 
             publicFollowUp {
-                content = "Succesfully deleted co-op"
+                content = "Successfully deleted co-op"
             }
         }
     }
