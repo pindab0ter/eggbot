@@ -36,7 +36,7 @@ object Config {
     val adminRole: Snowflake
 
     val botCommandsChannel: Snowflake
-    val rollCalChannel: Snowflake?
+    val rollCallChannel: Snowflake?
     val coopsGroupChannel: Snowflake?
     val earningsBonusLeaderBoardChannel: Snowflake
     val soulEggsLeaderBoardChannel: Snowflake
@@ -80,7 +80,7 @@ object Config {
             adminRole = getRequired("role.admin_id").let(::Snowflake)
 
             botCommandsChannel = getRequired("channel.bot_commands").let(::Snowflake)
-            rollCalChannel = getOptional("channel.roll_call")?.let(::Snowflake)
+            rollCallChannel = getOptional("channel.roll_call")?.let(::Snowflake)
             coopsGroupChannel = getOptional("channel.coops_group")?.let(::Snowflake)
 
             earningsBonusLeaderBoardChannel = getRequired("channel.leader_board.earnings_bonus").let(::Snowflake)

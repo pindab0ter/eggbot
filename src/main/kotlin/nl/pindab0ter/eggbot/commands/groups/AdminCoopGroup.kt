@@ -62,9 +62,9 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             val contract = arguments.contract
             val coopId = arguments.coopId.lowercase()
 
-            // Check if roles can be created if required
-            if (configuredGuild == null && arguments.createRole) return@action publicFollowUp {
-                content = "${Config.emojiWarning} Could not get server info. Please try without creating roles or contact the bot maintainer."
+            // Check if roles or channels can be created if required
+            if (configuredGuild == null && (arguments.createRole || arguments.createChannel)) return@action publicFollowUp {
+                content = "${Config.emojiWarning} Could not get server info. Please try without creating roles or channels or else please contact the bot maintainer."
             }.discard()
 
             // Check if co-op is already registered
