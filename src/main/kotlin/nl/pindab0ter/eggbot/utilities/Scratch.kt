@@ -1,5 +1,4 @@
-package nl.pindab0ter.eggbot
-
+package nl.pindab0ter.eggbot.utilities
 
 fun main() {
 }
