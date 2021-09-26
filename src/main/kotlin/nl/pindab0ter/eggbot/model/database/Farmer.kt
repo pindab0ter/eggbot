@@ -36,7 +36,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var droneTakedowns by Farmers.droneTakedowns
     var eliteDroneTakedowns by Farmers.eliteDroneTakedowns
     var createdAt by Farmers.createdAt
-    var updatedAt by Farmers.updated_at
+    var updatedAt by Farmers.updatedAt
 
     val isActive: Boolean get() = discordUser.isActive
     val canBeCoopLeader get() = discordUser.isActive && !discordUser.optedOutOfCoopLead
