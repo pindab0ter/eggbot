@@ -9,6 +9,7 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.rest.builder.message.create.embed
+import nl.pindab0ter.eggbot.EggBotExtension
 
 private data class Post(
     val title: String,
