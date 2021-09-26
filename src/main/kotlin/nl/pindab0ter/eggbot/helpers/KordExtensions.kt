@@ -42,3 +42,15 @@ fun Arguments.coopId() = string(
     displayName = "coop",
     description = "The co-op ID. Can be found in #roll-call or in-game."
 )
+
+fun Arguments.createRole() = defaultingBoolean(
+    displayName = "create-role",
+    description = "Whether to create a role for this co-op. Defaults to ‘True’.",
+    defaultValue = true,
+)
+
+fun Arguments.createChannel() = defaultingBoolean(
+    displayName = "create-channel",
+    description = "Whether to create a channel for this co-op. Defaults to ‘True’.",
+    defaultValue = true,
+)

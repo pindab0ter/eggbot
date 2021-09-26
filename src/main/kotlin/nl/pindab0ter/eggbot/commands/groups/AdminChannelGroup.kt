@@ -5,9 +5,11 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChanne
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType
+import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.*
 import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createTextChannel
 import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.model.Config
@@ -39,8 +41,8 @@ val channelGroup: suspend SlashGroup.() -> Unit = {
     subCommand(::CreateChannelArguments) {
         name = "create"
         description = "Create a channel"
-        autoAck = AutoAckType.EPHEMERAL
-        requirePermissions(Permission.ManageChannels)
+        autoAck = EPHEMERAL
+        requirePermissions(ManageChannels)
 
         action {
             val channel = guild?.createTextChannel(arguments.channelName) {
@@ -59,8 +61,8 @@ val channelGroup: suspend SlashGroup.() -> Unit = {
     subCommand(::DeleteChannelArguments) {
         name = "delete"
         description = "Delete a channel"
-        autoAck = AutoAckType.EPHEMERAL
-        requirePermissions(Permission.ManageChannels)
+        autoAck = EPHEMERAL
+        requirePermissions(ManageChannels)
 
         action {
             val channelName = arguments.channel.data.name

@@ -4,9 +4,11 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.member
 import com.kotlindiscord.kord.extensions.commands.converters.impl.role
 import com.kotlindiscord.kord.extensions.commands.parser.Arguments
 import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType
+import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.*
 import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createRole
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
@@ -52,8 +54,8 @@ val roleGroup: suspend SlashGroup.() -> Unit = {
     subCommand(::AddRoleArguments) {
         name = "add"
         description = "Add a test role to someone"
-        autoAck = AutoAckType.EPHEMERAL
-        requirePermissions(Permission.ManageRoles)
+        autoAck = EPHEMERAL
+        requirePermissions(ManageRoles)
 
         action {
             guild?.createRole {
@@ -69,8 +71,8 @@ val roleGroup: suspend SlashGroup.() -> Unit = {
     subCommand(::RemoveRoleArguments) {
         name = "remove"
         description = "Remove a specific role from someone"
-        autoAck = AutoAckType.EPHEMERAL
-        requirePermissions(Permission.ManageRoles)
+        autoAck = EPHEMERAL
+        requirePermissions(ManageRoles)
 
         action {
             arguments.member.removeRole(arguments.role.id)
@@ -81,8 +83,8 @@ val roleGroup: suspend SlashGroup.() -> Unit = {
     subCommand(::DeleteRoleArguments) {
         name = "delete"
         description = "Delete a specific role"
-        autoAck = AutoAckType.EPHEMERAL
-        requirePermissions(Permission.ManageRoles)
+        autoAck = EPHEMERAL
+        requirePermissions(ManageRoles)
 
         action {
             val roleName = "`@${arguments.role.name}`"

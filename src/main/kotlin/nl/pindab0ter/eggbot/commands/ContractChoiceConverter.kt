@@ -46,7 +46,7 @@ class ContractChoiceConverter(
  *
  * @see ContractChoiceConverter
  */
-fun Arguments.contractChoice(): SingleConverter<Contract> {
+fun Arguments.contract(): SingleConverter<Contract> {
     val contracts = AuxBrain.getContracts().sortedByDescending { contract ->
         contract.expirationTime
     }.toTypedArray()

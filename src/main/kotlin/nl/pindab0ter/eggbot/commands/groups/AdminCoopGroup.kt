@@ -12,14 +12,17 @@ import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.flow.firstOrNull
-import nl.pindab0ter.eggbot.commands.contractChoice
+import nl.pindab0ter.eggbot.commands.contract
 import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.helpers.coopId
+import nl.pindab0ter.eggbot.helpers.createRole
+import nl.pindab0ter.eggbot.helpers.createChannel
 import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
@@ -35,18 +38,10 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
     description = "Add and remove co-ops"
 
     class AddCoopArguments : Arguments() {
-        val contract: Contract by contractChoice()
+        val contract: Contract by contract()
         val coopId: String by coopId()
-        val createRole: Boolean by defaultingBoolean(
-            displayName = "create-role",
-            description = "Whether to create a role for this co-op. Defaults to ‘True’.",
-            defaultValue = true,
-        )
-        val createChannel: Boolean by defaultingBoolean(
-            displayName = "create-channel",
-            description = "Whether to create a channel for this co-op. Defaults to ‘True’.",
-            defaultValue = true,
-        )
+        val createRole: Boolean by createRole()
+        val createChannel: Boolean by createChannel()
         val preEmptive: Boolean by defaultingBoolean(
             displayName = "pre-emptive",
             description = "Add the co-op even if it doesn't exist (yet).",
@@ -58,8 +53,8 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
         name = "add"
         description = "Register a co-op so it shows up in the co-ops info listing."
         requiredPerms += listOf(
-            Permission.ManageRoles,
-            Permission.ManageChannels,
+            ManageRoles,
+            ManageChannels,
         )
         autoAck = PUBLIC
 
@@ -200,8 +195,8 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
         name = "delete"
         description = "Delete a coop and it's corresponding role and/or channel"
         requiredPerms += listOf(
-            Permission.ManageRoles,
-            Permission.ManageChannels,
+            ManageRoles,
+            ManageChannels,
         )
         autoAck = PUBLIC
 
