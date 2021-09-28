@@ -44,7 +44,7 @@ dependencies {
 val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     languageVersion = "1.4"
-    jvmTarget = "15"
+    jvmTarget = "11"
     freeCompilerArgs = freeCompilerArgs.plus(listOf(
         "-Xopt-in=kotlin.RequiresOptIn",
         "-Xopt-in=kotlin.ExperimentalStdlibApi"
