@@ -1,15 +1,17 @@
-package nl.pindab0ter.eggbot.commands
+package nl.pindab0ter.eggbot.converters
 
 
 import com.auxbrain.ei.Contract
+import com.kotlindiscord.kord.extensions.commands.Argument
+import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.CommandContext
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceConverter
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.Validator
-import com.kotlindiscord.kord.extensions.commands.parser.Argument
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceConverter
 import com.kotlindiscord.kord.extensions.parser.StringParser
 import dev.kord.common.annotation.KordPreview
+import dev.kord.core.entity.interaction.OptionValue
+import dev.kord.core.kordLogger
 import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import nl.pindab0ter.eggbot.model.AuxBrain
@@ -28,6 +30,14 @@ class ContractChoiceConverter(
         val arg: String = named ?: parser?.parseNext()?.data ?: return false
 
         parsed = choices.values.firstOrNull { contract -> contract.name == arg }
+            ?: throw Exception("Could not get contract information")
+
+        return true
+    }
+
+    override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
+        kordLogger.debug { option }
+        parsed = choices.values.firstOrNull { contract -> contract.name == option.value }
             ?: throw Exception("Could not get contract information")
 
         return true

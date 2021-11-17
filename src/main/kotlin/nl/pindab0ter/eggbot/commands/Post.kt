@@ -1,15 +1,14 @@
 package nl.pindab0ter.eggbot.commands
 
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.EphemeralSlashCommand
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.coalescedString
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.EPHEMERAL
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
-import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.behavior.UserBehavior
 import dev.kord.rest.builder.message.create.embed
-import nl.pindab0ter.eggbot.EggBotExtension
 
 private data class Post(
     val title: String,
@@ -33,19 +32,18 @@ class CreateArguments : Arguments() {
 }
 
 @KordPreview
-val postCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
+val postCommand: suspend EphemeralSlashCommand<out Arguments>.() -> Unit = {
     name = "post"
     description = "create a post."
 
-    subCommand(::GetArguments) {
+    ephemeralSubCommand(::GetArguments) {
         name = "get"
         description = "Get a post by title"
-        autoAck = PUBLIC
 
         action {
             val post = getPostByTitle(arguments.title)
 
-            publicFollowUp {
+            respond {
                 content =
                     if (post == null) "No post found with that title"
                     else """
@@ -57,26 +55,24 @@ val postCommand: suspend SlashCommand<out Arguments>.() -> Unit = {
         }
     }
 
-    subCommand(::CreateArguments) {
+    ephemeralSubCommand(::CreateArguments) {
         name = "create"
         description = "Create a new post"
-        autoAck = EPHEMERAL
 
         action {
             val post = Post(arguments.title, event.interaction.user, arguments.body)
             posts.add(post)
 
-            ephemeralFollowUp { content = "New post created." }
+            respond { content = "New post created." }
         }
     }
 
-    subCommand {
+    ephemeralSubCommand {
         name = "index"
         description = "Get all post titles."
-        autoAck = PUBLIC
 
         action {
-            publicFollowUp {
+            respond {
                 embed {
                     title = "Posts"
                     field {

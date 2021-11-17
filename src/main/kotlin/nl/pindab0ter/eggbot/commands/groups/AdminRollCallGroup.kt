@@ -1,10 +1,11 @@
 package nl.pindab0ter.eggbot.commands.groups
 
 import com.auxbrain.ei.Contract
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
-import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.Permission.ManageChannels
@@ -12,11 +13,12 @@ import dev.kord.common.entity.Permission.ManageRoles
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.commands.contract
+import nl.pindab0ter.eggbot.converters.contract
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.database.Coops
 import nl.pindab0ter.eggbot.view.rollCallResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -32,7 +34,7 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
         val basename: String by string(
             displayName = "name",
             description = "The base for the team names",
-            validator = { arg, value ->
+            validator = { _, value ->
                 !value.contains(Regex("\\s"))
             }
         )
@@ -40,18 +42,21 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
         val createChannels: Boolean by createChannel()
     }
 
-    subCommand(::CreateRollCallArguments) {
+    class ClearRollCallArguments : Arguments() {
+        val contract: Contract by contract()
+    }
+
+    publicSubCommand(::CreateRollCallArguments) {
         name = "create"
         description = "Create teams for a contract"
         requiredPerms += listOf(
             ManageRoles,
             ManageChannels,
         )
-        autoAck = PUBLIC
 
         action {
             // Check if roles or channels can be created if required
-            if (configuredGuild == null && (arguments.createRoles || arguments.createChannels)) return@action publicFollowUp {
+            if (configuredGuild == null && (arguments.createRoles || arguments.createChannels)) return@action respond {
                 content = "${Config.emojiWarning} Could not get server info. Please try without creating roles or channels or else please contact the bot maintainer."
             }.discard()
 
@@ -97,20 +102,32 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
                     }
             }
 
-            publicMultipartFollowUp(rollCallResponse(arguments.contract, coops))
+            multipartRespond(rollCallResponse(arguments.contract, coops))
         }
     }
 
-    subCommand {
+    publicSubCommand(::ClearRollCallArguments) {
         name = "clear"
         description = "Remove all teams for a contract"
-
-        check {
-
-        }
+        requiredPerms += listOf(
+            ManageRoles,
+            ManageChannels,
+        )
 
         action {
+            val coops = transaction {
+                Coop.find { Coops.contractId eq arguments.contract.id }
+            }
+
+            if (coops.empty()) return@action respond {
+                content = "No co-ops found for _${arguments.contract.name}_."
+            }.discard()
+
             // TODO: Remove channels
+            // TODO: Delete all roles
+            // TODO: Delete all channels
+            // TODO: Delete all database entries
+            // TODO: Response
         }
     }
 }

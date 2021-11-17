@@ -1,14 +1,14 @@
 package nl.pindab0ter.eggbot.commands.groups
 
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.channel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.*
-import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.types.respond
+
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createTextChannel
 import nl.pindab0ter.eggbot.helpers.discard
@@ -38,36 +38,34 @@ val channelGroup: suspend SlashGroup.() -> Unit = {
         )
     }
 
-    subCommand(::CreateChannelArguments) {
+    ephemeralSubCommand(::CreateChannelArguments) {
         name = "create"
         description = "Create a channel"
-        autoAck = EPHEMERAL
-        requirePermissions(ManageChannels)
+        requireBotPermissions(ManageChannels)
 
         action {
             val channel = guild?.createTextChannel(arguments.channelName) {
                 parentId = arguments.parentChannel?.id
                 reason = "Created by bot"
-            } ?: return@action ephemeralFollowUp {
+            } ?: return@action respond {
                 content = "Failed to create channel ${arguments.channelName}"
             }.discard()
 
-            ephemeralFollowUp {
+            respond {
                 content = "Created channel ${channel.mention}"
             }
         }
     }
 
-    subCommand(::DeleteChannelArguments) {
+    ephemeralSubCommand(::DeleteChannelArguments) {
         name = "delete"
         description = "Delete a channel"
-        autoAck = EPHEMERAL
-        requirePermissions(ManageChannels)
+        requireBotPermissions(ManageChannels)
 
         action {
             val channelName = arguments.channel.data.name
             arguments.channel.delete("Deleted by ${user.mention} through bot")
-            ephemeralFollowUp {
+            respond {
                 content = "Succesfully deleted channel $channelName"
             }
         }

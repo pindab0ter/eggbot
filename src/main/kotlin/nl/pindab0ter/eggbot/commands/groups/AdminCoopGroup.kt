@@ -2,23 +2,23 @@ package nl.pindab0ter.eggbot.commands.groups
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
-import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.Color
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.flow.firstOrNull
-import nl.pindab0ter.eggbot.commands.contract
+import nl.pindab0ter.eggbot.converters.contract
 import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.helpers.coopId
 import nl.pindab0ter.eggbot.helpers.createRole
@@ -49,21 +49,20 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
         )
     }
 
-    subCommand(::AddCoopArguments) {
+    ephemeralSubCommand(::AddCoopArguments) {
         name = "add"
         description = "Register a co-op so it shows up in the co-ops info listing."
         requiredPerms += listOf(
             ManageRoles,
             ManageChannels,
         )
-        autoAck = PUBLIC
 
         action {
             val contract = arguments.contract
             val coopId = arguments.coopId.lowercase()
 
             // Check if roles or channels can be created if required
-            if (configuredGuild == null && (arguments.createRole || arguments.createChannel)) return@action publicFollowUp {
+            if (configuredGuild == null && (arguments.createRole || arguments.createChannel)) return@action respond {
                 content = "${Config.emojiWarning} Could not get server info. Please try without creating roles or channels or else please contact the bot maintainer."
             }.discard()
 
@@ -72,12 +71,12 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
                     Coop.find {
                         (Coops.name eq coopId) and (Coops.contractId eq contract.id)
                     }.empty().not()
-                }) return@action publicFollowUp { content = "Co-op is already registered." }.discard()
+                }) return@action respond { content = "Co-op is already registered." }.discard()
 
             // Check if a role with the same name exists
             if (arguments.createRole) configuredGuild?.roles?.firstOrNull { role -> role.name == coopId }
                 ?.let { role ->
-                    return@action publicFollowUp {
+                    return@action respond {
                         content = "${Config.emojiWarning} The role ${role.mention} already exists."
                     }.discard()
                 }
@@ -85,7 +84,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             // Fetch the co-op status to see if it exists
             val coopStatus: CoopStatus? = AuxBrain.getCoopStatus(arguments.contract.id, coopId)
 
-            if (coopStatus == null && !arguments.preEmptive) return@action publicFollowUp {
+            if (coopStatus == null && !arguments.preEmptive) return@action respond {
                 // Finish if the co-op status couldn't be found;
                 // it most likely doesn't exist yet and this co-op is added in anticipation
                 content = "${Config.emojiWarning} No co-op found for contract _${contract.name}_ with ID `${coopId}`"
@@ -101,7 +100,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             }
 
             // Finish if no role needs to be created
-            if (!arguments.createRole) return@action publicFollowUp {
+            if (!arguments.createRole) return@action respond {
                 content = "Registered co-op `${coop.name}` for contract _${contract.name}_."
             }.discard()
 
@@ -134,7 +133,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             }
 
             // Finish if the role does not need assigning
-            if (coopStatus == null && !arguments.preEmptive) return@action publicFollowUp {
+            if (coopStatus == null && !arguments.preEmptive) return@action respond {
                 content = responseBuilder.toString()
             }.discard()
 
@@ -168,7 +167,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
                 }
             }
 
-            publicFollowUp {
+            respond {
                 content = responseBuilder.toString()
             }
         }
@@ -191,14 +190,13 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
         )
     }
 
-    subCommand(::RemoveCoopArguments) {
+    ephemeralSubCommand(::RemoveCoopArguments) {
         name = "delete"
         description = "Delete a coop and it's corresponding role and/or channel"
         requiredPerms += listOf(
             ManageRoles,
             ManageChannels,
         )
-        autoAck = PUBLIC
 
         action {
             if (listOf(
@@ -206,7 +204,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
                     arguments.channel != null,
                     arguments.role != null
                 ).count { it } > 2
-            ) return@action publicFollowUp {
+            ) return@action respond {
                 content = "Please use only one method to choose a co-op to remove"
             }.discard()
 
@@ -220,10 +218,10 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
                 arguments.role != null -> transaction {
                     Coop.find { Coops.roleId eq arguments.role!!.id.asString }.firstOrNull()
                 }
-                else -> return@action publicFollowUp {
+                else -> return@action respond {
                     content = "You must choose a co-op to remove"
                 }.discard()
-            } ?: return@action publicFollowUp {
+            } ?: return@action respond {
                 content = "Could not find that co-op"
             }.discard()
 
@@ -234,7 +232,7 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             channel?.delete()
             transaction { coop.delete() }
 
-            publicFollowUp {
+            respond {
                 content = "Successfully deleted co-op"
             }
         }

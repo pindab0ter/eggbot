@@ -1,12 +1,12 @@
 package nl.pindab0ter.eggbot.commands
 
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
-import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommand
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.displayModeChoice
-import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
+import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.helpers.timeSinceBackup
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.EarningsBonus
@@ -20,11 +20,10 @@ class EarningsBonusArguments : Arguments() {
 }
 
 @KordPreview
-val earningsBonusCommand: suspend SlashCommand<out EarningsBonusArguments>.() -> Unit = {
+val earningsBonusCommand: suspend PublicSlashCommand<out EarningsBonusArguments>.() -> Unit = {
     name = "earnings-bonus"
     description = "Shows your Farmer Role, EB and how much SE or PE till your next rank."
-    autoAck = PUBLIC
-
+    
     lateinit var discordUser: DiscordUser
     lateinit var farmers: List<Farmer>
 
@@ -41,10 +40,10 @@ val earningsBonusCommand: suspend SlashCommand<out EarningsBonusArguments>.() ->
     action {
         farmers.forEach { farmer ->
             when (val backup = AuxBrain.getFarmerBackup(farmer.inGameId)) {
-                null -> publicFollowUp {
+                null -> respond {
                     content = "Could not get information on EggBot user with in-game ID: `${farmer.inGameName}`"
                 }
-                else -> publicMultipartFollowUp(earningsBonusResponse(
+                else -> multipartRespond(earningsBonusResponse(
                     farmer,
                     EarningsBonus(farmer),
                     backup.timeSinceBackup,

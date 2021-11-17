@@ -1,19 +1,22 @@
 package nl.pindab0ter.eggbot.helpers
 
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
+import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommandContext
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.OptionalConverter
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.SlashCommandContext
-import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
-import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.optionalEnumChoice
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 
 @OptIn(KordPreview::class)
-suspend fun <T : Arguments> SlashCommandContext<T>.publicMultipartFollowUp(messages: List<String>) {
-    publicFollowUp {
+suspend fun <A : Arguments> PublicSlashCommandContext<A>.multipartRespond(messages: List<String>) {
+    respond {
         content = messages.first()
     }
+
     messages.tail().forEach { message ->
         channel.createMessage(message)
     }

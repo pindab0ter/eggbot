@@ -1,15 +1,15 @@
 package nl.pindab0ter.eggbot.commands
 
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
+import com.kotlindiscord.kord.extensions.commands.application.slash.SlashCommand
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.defaultingEnumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalInt
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.PUBLIC
-import com.kotlindiscord.kord.extensions.commands.slash.SlashCommand
-import com.kotlindiscord.kord.extensions.commands.slash.converters.ChoiceEnum
-import com.kotlindiscord.kord.extensions.commands.slash.converters.impl.defaultingEnumChoice
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.displayModeChoice
-import nl.pindab0ter.eggbot.helpers.publicMultipartFollowUp
+import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.leaderboardResponse
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -39,10 +39,9 @@ class LeaderBoardArguments : Arguments() {
 }
 
 @KordPreview
-val leaderBoardCommand: suspend SlashCommand<out LeaderBoardArguments>.() -> Unit = {
+val leaderBoardCommand: suspend SlashCommand<PublicSlashCommandContext<LeaderBoardArguments>, out LeaderBoardArguments>.() -> Unit = {
     name = "leader-board"
     description = "View leader boards. Defaults to the Earnings Bonus leader board."
-    autoAck = PUBLIC
 
     lateinit var farmers: List<Farmer>
 
@@ -52,7 +51,7 @@ val leaderBoardCommand: suspend SlashCommand<out LeaderBoardArguments>.() -> Uni
     }
 
     action {
-        publicMultipartFollowUp(leaderboardResponse(
+        multipartRespond(leaderboardResponse(
             farmers = farmers,
             leaderBoard = arguments.leaderBoard,
             top = arguments.top?.takeIf { it > 0 },

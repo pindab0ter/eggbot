@@ -1,6 +1,7 @@
-package nl.pindab0ter.eggbot
+package nl.pindab0ter.eggbot.extensions
 
 import com.kotlindiscord.kord.extensions.extensions.Extension
+import com.kotlindiscord.kord.extensions.extensions.event
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.CommandArgument.*
 import dev.kord.common.entity.CommandGroup

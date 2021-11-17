@@ -1,13 +1,12 @@
 package nl.pindab0ter.eggbot.commands.groups
 
+import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.application.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.member
 import com.kotlindiscord.kord.extensions.commands.converters.impl.role
-import com.kotlindiscord.kord.extensions.commands.parser.Arguments
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType
-import com.kotlindiscord.kord.extensions.commands.slash.AutoAckType.*
-import com.kotlindiscord.kord.extensions.commands.slash.SlashGroup
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.Permission
 import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createRole
 import dev.kord.core.entity.Member
@@ -51,11 +50,10 @@ val roleGroup: suspend SlashGroup.() -> Unit = {
         )
     }
 
-    subCommand(::AddRoleArguments) {
+    ephemeralSubCommand(::AddRoleArguments) {
         name = "add"
         description = "Add a test role to someone"
-        autoAck = EPHEMERAL
-        requirePermissions(ManageRoles)
+        requireBotPermissions(ManageRoles)
 
         action {
             guild?.createRole {
@@ -63,38 +61,36 @@ val roleGroup: suspend SlashGroup.() -> Unit = {
                 hoist = true
             }?.let { role ->
                 arguments.member.addRole(role.id)
-                ephemeralFollowUp { content = "Successfully added ${role.mention} to ${arguments.member.mention}." }
-            } ?: ephemeralFollowUp { content = "Failed to create role for ${arguments.member.mention}." }
+                respond { content = "Successfully added ${role.mention} to ${arguments.member.mention}." }
+            } ?: respond { content = "Failed to create role for ${arguments.member.mention}." }
         }
     }
 
-    subCommand(::RemoveRoleArguments) {
+    ephemeralSubCommand(::RemoveRoleArguments) {
         name = "remove"
         description = "Remove a specific role from someone"
-        autoAck = EPHEMERAL
-        requirePermissions(ManageRoles)
+        requireBotPermissions(ManageRoles)
 
         action {
             arguments.member.removeRole(arguments.role.id)
-            ephemeralFollowUp { content = "Successfully removed ${arguments.role.mention} to ${arguments.member.mention}" }
+            respond { content = "Successfully removed ${arguments.role.mention} to ${arguments.member.mention}" }
         }
     }
 
-    subCommand(::DeleteRoleArguments) {
+    ephemeralSubCommand(::DeleteRoleArguments) {
         name = "delete"
         description = "Delete a specific role"
-        autoAck = EPHEMERAL
-        requirePermissions(ManageRoles)
+        requireBotPermissions(ManageRoles)
 
         action {
             val roleName = "`@${arguments.role.name}`"
             try {
                 arguments.role.delete()
-                ephemeralFollowUp { content = "Successfully deleted $roleName." }
+                respond { content = "Successfully deleted $roleName." }
             } catch (exception: KtorRequestException) {
-                if (exception.error?.code == JsonErrorCode.PermissionLack) ephemeralFollowUp {
+                if (exception.error?.code == JsonErrorCode.PermissionLack) respond {
                     content = "Failed to delete role ${arguments.role.mention}. The bot’s role must be higher than the role it’s trying to delete."
-                } else ephemeralFollowUp {
+                } else respond {
                     content = exception.error?.message ?: exception.localizedMessage
                 }
             }
