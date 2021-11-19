@@ -76,12 +76,14 @@ fun coopFinishedResponse(
     contract: Contract,
     compact: Boolean,
 ) = buildString {
-    append("""
+    append(
+        """
         `${status.coopId}` vs. __${contract.name}__:
 
         This co-op has successfully finished their contract! ${Config.emojiSuccess}
 
-        """.trimIndent())
+        """.trimIndent()
+    )
 
     appendTable {
         title = "__**🗒️ Basic info**__"
@@ -267,12 +269,16 @@ private fun StringBuilder.drawBasicInfo(
                 add(state.timeRemaining.formatDaysHoursAndMinutes(compact, compact))
                 add(state.timeUpEggsLaid.formatIllions())
             }
-            add(state.currentEggsLaid.formatIllions() + if (!compact)
-                " (${state.currentEggsPerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
+            add(
+                state.currentEggsLaid.formatIllions() + if (!compact)
+                    " (${state.currentEggsPerMinute.multiply(SIXTY).formatIllions()}/hr)" else ""
+            )
             add(state.reportedEggsLaid.formatIllions())
             add(state.unreportedEggsLaid.formatIllions())
-            add(state.currentPopulation.formatIllions() + if (!compact)
-                " (${state.currentPopulationIncreasePerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
+            add(
+                state.currentPopulation.formatIllions() + if (!compact)
+                    " (${state.currentPopulationIncreasePerMinute.multiply(SIXTY).formatIllions()}/hr)" else ""
+            )
             add(state.tokensAvailable.toString())
             add(state.tokensSpent.toString())
             if (state.public) add("This co-op is PUBLIC")
@@ -442,7 +448,7 @@ private fun StringBuilder.drawBottleNecks(
                     val moment = farmer.runningState.habsStatus.moment
                     when {
                         moment == Duration.ZERO -> "Full!"
-                        moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR ->
+                        moment < state.timeRemaining && moment < (state.timeTillFinalGoal ?: ONE_YEAR) ->
                             moment.formatDaysHoursAndMinutes(compact = true, spacing = true)
                         else -> ""
                     }
@@ -467,7 +473,7 @@ private fun StringBuilder.drawBottleNecks(
                     val moment = farmer.runningState.habsStatus.moment
                     when {
                         moment == Duration.ZERO -> "🛑"
-                        moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR -> "⚠️"
+                        moment < state.timeRemaining && moment < (state.timeTillFinalGoal ?: ONE_YEAR) -> "⚠️"
                         else -> "➖"
                     }
                 }
@@ -487,7 +493,7 @@ private fun StringBuilder.drawBottleNecks(
             when {
                 moment == null -> ""
                 moment == Duration.ZERO -> "Full!"
-                moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR ->
+                moment < state.timeRemaining && moment < (state.timeTillFinalGoal ?: ONE_YEAR) ->
                     moment.formatDaysHoursAndMinutes(compact = true, spacing = true)
                 else -> ""
             }
@@ -502,7 +508,7 @@ private fun StringBuilder.drawBottleNecks(
             when {
                 moment == null -> "➖"
                 moment == Duration.ZERO -> "🛑"
-                moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR -> "⚠️"
+                moment < state.timeRemaining && moment < (state.timeTillFinalGoal ?: ONE_YEAR) -> "⚠️"
                 else -> "➖"
             }
         }
@@ -529,12 +535,10 @@ private fun StringBuilder.drawBottleNecks(
         leftPadding = 1
         cells = bottleneckedFarmers.map { (farmer, _) ->
             when {
-                farmer.awayTimeRemaining <= Duration.ZERO ->
-                    "🛑"
+                farmer.awayTimeRemaining <= Duration.ZERO -> "🛑"
                 farmer.awayTimeRemaining < Duration.standardHours(12L)
                         && farmer.awayTimeRemaining < state.timeRemaining
-                        && farmer.awayTimeRemaining < state.timeTillFinalGoal ?: ONE_YEAR ->
-                    "⚠️"
+                        && farmer.awayTimeRemaining < (state.timeTillFinalGoal ?: ONE_YEAR) -> "⚠️"
                 else -> "➖"
             }
         }
@@ -565,7 +569,7 @@ private fun StringBuilder.drawCompactBottleNecks(
                     val moment = farmer.runningState.habsStatus.moment
                     when {
                         moment == Duration.ZERO -> "🛑"
-                        moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR -> "⚠️"
+                        moment < state.timeRemaining && moment < (state.timeTillFinalGoal ?: ONE_YEAR) -> "⚠️"
                         else -> "➖"
                     }
                 }
@@ -582,7 +586,7 @@ private fun StringBuilder.drawCompactBottleNecks(
             val moment = farmer.runningState.transportBottleneck ?: Duration.ZERO
             when {
                 moment == Duration.ZERO -> "🛑"
-                moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR -> "⚠️"
+                moment < state.timeRemaining && moment < (state.timeTillFinalGoal ?: ONE_YEAR) -> "⚠️"
                 else -> "➖"
             }
         }
@@ -597,8 +601,7 @@ private fun StringBuilder.drawCompactBottleNecks(
                 farmer.awayTimeRemaining == Duration.ZERO -> "🛑"
                 farmer.awayTimeRemaining < Duration.standardHours(12L)
                         && farmer.awayTimeRemaining < state.timeRemaining
-                        && farmer.awayTimeRemaining < state.timeTillFinalGoal ?: ONE_YEAR ->
-                    "⚠️"
+                        && farmer.awayTimeRemaining < (state.timeTillFinalGoal ?: ONE_YEAR) -> "⚠️"
                 else -> "➖"
             }
         }
