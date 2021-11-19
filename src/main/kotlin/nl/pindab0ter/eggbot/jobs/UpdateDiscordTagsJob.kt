@@ -1,22 +1,32 @@
 package nl.pindab0ter.eggbot.jobs
 
-import dev.kord.core.Kord
 import dev.kord.gateway.PrivilegedIntent
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.helpers.asyncMap
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import org.jetbrains.exposed.sql.transactions.transaction
-import org.koin.java.KoinJavaComponent.inject
 import org.quartz.Job
 import org.quartz.JobExecutionContext
+import kotlin.system.measureTimeMillis
 
 
 class UpdateDiscordTagsJob : Job {
-    val kord: Kord by inject(Kord::class.java)
 
     @OptIn(PrivilegedIntent::class)
-    override fun execute(context: JobExecutionContext?): Unit = transaction {
-        logger.info { "Updating Discord user's tags…" }
-        DiscordUser.all().toList().forEach { discordUser -> discordUser.updateTag() }
+    override fun execute(context: JobExecutionContext?) {
+        val discordUsers = transaction { DiscordUser.all().toList() }
+
+        val timeTakenMillis = measureTimeMillis {
+            runBlocking {
+                discordUsers.asyncMap { discordUser ->
+                    transaction { launch { discordUser.updateTag() } }
+                }
+            }
+        }
+
+        logger.info { "Updated Discord user’s tags in ${timeTakenMillis}ms" }
     }
 
     companion object {

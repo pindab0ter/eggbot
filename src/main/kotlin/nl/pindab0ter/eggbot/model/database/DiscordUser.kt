@@ -9,28 +9,26 @@ import org.jetbrains.exposed.dao.EntityID
 import org.joda.time.DateTime
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
-    val discordId: String get() = id.value
+    private val discordId: String get() = id.value
+    val snowflake: Snowflake = Snowflake(discordId)
+
+    suspend fun asMemberOrNull() = configuredGuild?.getMemberOrNull(snowflake)?.asMemberOrNull()
+
     var discordTag by DiscordUsers.discordTag
+
     var inactiveUntil by DiscordUsers.inactiveUntil
+    val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
+
     private var optedOutOfCoopLeadAt by DiscordUsers.optedOutOfCoopLeadAt
     val optedOutOfCoopLead: Boolean get() = optedOutOfCoopLeadAt != null
+
     var createdAt by DiscordUsers.createdAt
     var updatedAt by DiscordUsers.updated_at
 
     val farmers by Farmer referrersOn Farmers.discordId
 
-    val discordName: String get() = discordTag.substring(0, discordTag.length - 5)
-    val mention: String
-        get() = runBlocking {
-            configuredGuild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.mention ?: discordName
-        }
-    val isActive: Boolean get() = inactiveUntil?.isBeforeNow ?: true
-    val snowflake: Snowflake = Snowflake(discordId)
-
-    fun updateTag() = runBlocking {
-        configuredGuild?.getMemberOrNull(snowflake)?.asMemberOrNull()?.tag.takeIf { it != discordTag }?.let { tag ->
-            discordTag = tag
-        }
+    suspend fun updateTag() = asMemberOrNull()?.tag.takeIf { it != discordTag }?.let { tag ->
+        discordTag = tag
     }
 
     companion object : EntityClass<String, DiscordUser>(DiscordUsers)
