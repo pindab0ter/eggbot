@@ -22,6 +22,7 @@ import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.rollCallResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -49,7 +50,7 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
             displayName = "name",
             description = "The base for the team names",
             validator = { _, value ->
-                !value.contains(Regex("\\s"))
+                value.contains(' ')
             }
         )
         val createRoles: Boolean by createRole()
@@ -71,8 +72,8 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
         action {
             // Check if roles or channels can be created if required
             if (configuredGuild == null && (arguments.createRoles || arguments.createChannels)) return@action respond {
-                content =
-                    "${Config.emojiWarning} Could not get server info. Please try without creating roles or channels or else please contact the bot maintainer."
+                content = "${Config.emojiWarning} Could not get server info. " +
+                        "Please try without creating roles or channels or else please contact the bot maintainer."
             }.discard()
 
             val coops = transaction {
@@ -82,18 +83,15 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
                         Coop.new {
                             this.contractId = arguments.contract.id
                             this.name = name
-                            this.leader = farmers
-                                .filter { farmer -> farmer.canBeCoopLeader }
-                                .maxByOrNull { farmer -> farmer.earningsBonus }
-                            this.farmers = farmers
-                        }
+                            this.leader = farmers.filter(Farmer::canBeCoopLeader).maxByOrNull(Farmer::earningsBonus)
+                                ?: farmers.maxByOrNull(Farmer::earningsBonus)
+                        }.also { it.farmers = farmers }
                     }
                     // Then create roles and channels for all the successfully created co-ops
                     .onEach { coop ->
+                        // TODO: Progress bar?
+
                         runBlocking {
-
-                            // TODO: Progress bar?
-
                             // Create and assign roles
                             if (arguments.createRoles) configuredGuild?.createRole {
                                 name = coop.name
@@ -101,7 +99,7 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
                                 color = DEFAULT_ROLE_COLOR
                             }?.let { role ->
                                 coop.roleId = role.id
-                                coop.farmers.forEach { farmer ->
+                                coop.farmers.map { farmer ->
                                     configuredGuild
                                         ?.getMemberOrNull(farmer.discordUser.snowflake)
                                         ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
@@ -131,10 +129,10 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
 
         action {
             val coops = transaction {
-                Coop.find { Coops.contractId eq arguments.contract.id }
+                Coop.find { Coops.contractId eq arguments.contract.id }.toList()
             }
 
-            if (coops.empty()) return@action respond {
+            if (coops.isEmpty()) return@action respond {
                 content = "No co-ops found for _${arguments.contract.name}_."
             }.discard()
 
@@ -177,6 +175,8 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
                             deletionStatus.type == ROLE && deletionStatus.deleted
                         }
                     }
+
+                    appendLine("Cleared the roll-call for __${arguments.contract.name}__:")
                     appendLine("Successfully deleted $successfullyDeletedChannels channels and $successfullyDeletedRoles roles.")
 
                     statuses
@@ -189,7 +189,7 @@ val rollCallGroup: suspend SlashGroup.() -> Unit = {
                         .filter { (_, statuses) -> statuses.isNotEmpty() }
                         .sortedWith(compareBy { it.first })
                         .let { failedToDelete ->
-                            appendLine("Failed to delete:")
+                            if (failedToDelete.isNotEmpty()) appendLine("Failed to delete:")
                             failedToDelete.forEach { (coopName, types) ->
                                 append("For `$coopName`: ")
                                 when (types.size) {

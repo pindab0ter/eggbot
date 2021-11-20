@@ -9,6 +9,6 @@ object CoopFarmers : Table() {
     val coop = reference("coop", Coops, CASCADE, CASCADE)
 
     init {
-        this.index(true, farmer, coop)
+        index(true, farmer, coop)
     }
 }

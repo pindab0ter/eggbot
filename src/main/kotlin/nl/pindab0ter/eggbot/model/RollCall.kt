@@ -2,6 +2,9 @@ package nl.pindab0ter.eggbot.model
 
 import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Farmer
+import nl.pindab0ter.eggbot.model.database.Farmers
+import org.jetbrains.exposed.dao.load
+import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.ceil
@@ -17,7 +20,7 @@ fun createRollCall(
     baseName: String,
     maxCoopSize: Int,
 ): List<Pair<String, SizedCollection<Farmer>>> = transaction {
-    val farmers = Farmer.all().toList()
+    val farmers = Farmer.all().with(Farmer::discordUser).toList()
     val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
     val inactiveFarmers = farmers.filter { !it.isActive }.sortedBy { it.earningsBonus }
     val preferredCoopSize: Int =
@@ -58,7 +61,7 @@ fun createRollCall(
 }
 
 private fun coopNames(amount: Int, baseName: String): List<String> = when {
-    amount <= 26 -> ('a' until 'a' + amount).map { char -> "$char$baseName" }
+    amount <= 26 -> ('a' until 'a' + amount).map { char -> "$char-$baseName" }
     else -> {
         val chunks = ceil(amount.div(26.0)).toInt()
         val chunkSize = floor(amount.toDouble().div(chunks)).toInt()

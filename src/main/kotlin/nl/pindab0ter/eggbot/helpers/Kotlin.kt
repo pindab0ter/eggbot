@@ -16,7 +16,7 @@ fun <T> Iterable<T>.replace(newValue: T, predicate: (T) -> Boolean): Iterable<T>
 inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
     other: Iterable<R>,
     transform: (a: T, b: R) -> V,
-): List<V> = flatMap { a: T -> other.map { b -> transform(a, b) } }
+): List<V> = flatMap { a: T -> other.map { b: R -> transform(a, b) } }
 
 fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
     zip(other).flatMap(Pair<T, T>::toList) + if (size > other.size) drop(other.size) else other.drop(size)

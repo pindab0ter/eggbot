@@ -45,7 +45,8 @@ class ContractChoiceConverter(
 
     override suspend fun toSlashOption(arg: Argument<*>): OptionsBuilder = StringChoiceBuilder(
         name = arg.displayName,
-        description = arg.description).apply {
+        description = arg.description
+    ).apply {
         required = true
         this@ContractChoiceConverter.choices.forEach { choice(it.key, it.value.name) }
     }

@@ -5,12 +5,13 @@ import nl.pindab0ter.eggbot.helpers.NumberFormatter
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
 import nl.pindab0ter.eggbot.helpers.formatIllions
 import nl.pindab0ter.eggbot.model.database.Coop
+import org.jetbrains.exposed.sql.transactions.transaction
 
 fun rollCallResponse(
     contract: Contract,
     coops: List<Coop>,
-): List<String> = listOf(buildString {
-    appendLine("Co-ops generated for `${contract.id}`:")
+): List<String> = transaction { listOf(buildString {
+    appendLine("Co-ops generated for __${contract.name}__:")
 
     append("```")
     coops.forEach { coop ->
@@ -27,7 +28,8 @@ fun rollCallResponse(
         appendLine()
     }
     appendLine("```")
-}).plus(coops.map { coop ->
+})}
+    // .plus(coops.map { coop ->
     // TODO:
     // val role = coop.roleId?.let { EggBot.guild.getRoleById(it) }
     // buildString {
@@ -48,5 +50,5 @@ fun rollCallResponse(
     //         }
     //     appendLine()
     // }
-    ""
-})
+    // ""
+// })}

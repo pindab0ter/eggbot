@@ -228,10 +228,13 @@ val coopGroup: suspend SlashGroup.() -> Unit = {
             val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
             val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
 
+            // TODO: Add reason
+            // TODO: Catch error
             role?.delete()
             channel?.delete()
             transaction { coop.delete() }
 
+            // TODO: Add info on fail/success of role/channel deletion
             respond {
                 content = "Successfully deleted co-op"
             }

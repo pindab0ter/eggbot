@@ -9,8 +9,8 @@ import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
+import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
-import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress
 import nl.pindab0ter.eggbot.view.coopFinishedIfBankedResponse
 import nl.pindab0ter.eggbot.view.coopFinishedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
@@ -36,7 +36,7 @@ val coopInfoCommand: suspend PublicSlashCommand<CoopInfoArguments>.() -> Unit = 
         val compact = arguments.compact
 
         when (val status = CoopContractStatus(contract, coopStatus, arguments.coopId)) {
-            is CoopContractStatus.NotFound -> TODO()
+            is NotFound -> TODO()
             is Abandoned -> respond {
                 content = """
                         `${status.coopStatus.coopId}` vs. _${contract.name}_:
