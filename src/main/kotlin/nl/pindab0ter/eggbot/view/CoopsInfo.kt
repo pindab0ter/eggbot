@@ -21,9 +21,7 @@ fun coopsInfoResponse(
     statuses: List<CoopContractStatus>,
     compact: Boolean,
 ) = buildString {
-    appendLine("`` vs. _${contract.name}_:")
-    // TODO:
-    // appendLine("`${guild.name}` vs. _${contract.name}_:")
+    appendLine("`${configuredGuild?.name}` vs. _${contract.name}_:")
     appendLine()
 
     if (!compact) {
