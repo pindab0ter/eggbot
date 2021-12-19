@@ -15,7 +15,7 @@ import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
-val channelGroup: suspend SlashGroup.() -> Unit = {
+val adminChannelGroup: suspend SlashGroup.() -> Unit = {
     description = "Add and remove channels"
 
     class CreateChannelArguments : Arguments() {

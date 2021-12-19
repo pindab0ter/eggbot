@@ -39,7 +39,7 @@ private enum class Type {
 }
 
 @KordPreview
-val rollCallGroup: suspend SlashGroup.() -> Unit = {
+val adminRollCallGroup: suspend SlashGroup.() -> Unit = {
     description = "Manage roll calls"
 
     val logger = KotlinLogging.logger { }

@@ -34,7 +34,7 @@ import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
-val coopGroup: suspend SlashGroup.() -> Unit = {
+val adminCoopGroup: suspend SlashGroup.() -> Unit = {
     description = "Add and remove co-ops"
 
     class AddCoopArguments : Arguments() {

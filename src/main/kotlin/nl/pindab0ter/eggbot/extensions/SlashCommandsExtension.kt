@@ -4,7 +4,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import dev.kord.common.annotation.KordPreview
-import nl.pindab0ter.eggbot.commands.adminCommand
+import nl.pindab0ter.eggbot.commands.groups.adminCommandGroup
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.commands.*
 
@@ -14,7 +14,7 @@ class SlashCommandsExtension : Extension() {
     override val name: String = "EggBotExtension"
 
     override suspend fun setup() {
-        ephemeralSlashCommand(adminCommand)
+        publicSlashCommand(adminCommandGroup)
         publicSlashCommand(::LeaderBoardArguments, leaderBoardCommand)
         publicSlashCommand(::EarningsBonusArguments, earningsBonusCommand)
         publicSlashCommand(::CoopInfoArguments, coopInfoCommand)

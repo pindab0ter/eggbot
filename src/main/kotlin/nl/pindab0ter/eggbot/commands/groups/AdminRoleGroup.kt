@@ -16,7 +16,7 @@ import dev.kord.rest.request.KtorRequestException
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
-val roleGroup: suspend SlashGroup.() -> Unit = {
+val adminRoleGroup: suspend SlashGroup.() -> Unit = {
     description = "Add and remove roles"
 
     class AddRoleArguments : Arguments() {
