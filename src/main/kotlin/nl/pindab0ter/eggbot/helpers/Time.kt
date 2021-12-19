@@ -88,7 +88,7 @@ fun Duration.formatHourAndMinutes(): String = PeriodFormatterBuilder()
     .withLocale(Locale.UK)
     .print(this.toPeriod().normalizedStandard(PeriodType.time()))
 
-fun DateTime.foramtMonthAndDay(): String = DateTimeFormatterBuilder()
+fun DateTime.formatMonthAndDay(): String = DateTimeFormatterBuilder()
     .appendMonthOfYearText()
     .appendLiteral(" ")
     .appendDayOfMonth(1)
