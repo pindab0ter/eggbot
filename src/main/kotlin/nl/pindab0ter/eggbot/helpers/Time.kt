@@ -1,7 +1,9 @@
 package nl.pindab0ter.eggbot.helpers
 
 import org.joda.time.DateTime
+import org.joda.time.DateTime.now
 import org.joda.time.Duration
+import org.joda.time.Interval
 import org.joda.time.PeriodType
 import org.joda.time.format.DateTimeFormatterBuilder
 import org.joda.time.format.PeriodFormatterBuilder
@@ -105,6 +107,20 @@ fun DateTime.formatCompact(): String = DateTimeFormatterBuilder()
     .toFormatter()
     .withLocale(Locale.UK)
     .print(this)
+
+fun DateTime.formatDaysAndHoursUntil(other: DateTime): String? = when {
+    this.isAfter(other) -> null
+    else -> PeriodFormatterBuilder().run {
+        appendDays()
+        appendSuffix(" ")
+        appendSuffix("day", "days")
+
+        appendPrefix(" ")
+        appendHours()
+        appendSuffix(" ")
+        appendSuffix("hour", "hours")
+    }.toFormatter().withLocale(Locale.UK).print(Interval(this, other).toPeriod())
+}
 
 fun DateTime.formatDayHourAndMinutes(compact: Boolean = false): String = when (compact) {
     true -> DateTimeFormatterBuilder()

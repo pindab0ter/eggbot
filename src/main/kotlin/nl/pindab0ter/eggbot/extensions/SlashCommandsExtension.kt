@@ -15,6 +15,7 @@ class SlashCommandsExtension : Extension() {
 
     override suspend fun setup() {
         publicSlashCommand(adminCommandGroup)
+        ephemeralSlashCommand(selfGroup)
         publicSlashCommand(::LeaderBoardArguments, leaderBoardCommand)
         publicSlashCommand(::EarningsBonusArguments, earningsBonusCommand)
         publicSlashCommand(::CoopInfoArguments, coopInfoCommand)
