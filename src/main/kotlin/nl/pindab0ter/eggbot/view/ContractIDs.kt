@@ -15,7 +15,11 @@ fun contractIDsResponse(soloContracts: List<Contract>, coopContracts: List<Contr
         this@printContracts.forEach { contract ->
             append("**`${contract.id}`**: ")
             append("${contract.name} ")
-            append(EggBot.eggsToEmotes[contract.egg]?.asMention ?: "(${contract.egg.name})")
+            append("(")
+            append(EggBot.eggsToEmotes[contract.egg]?.asMention ?: contract.egg.name)
+            if (contract.maxCoopSize > 1) append(", max ${contract.maxCoopSize} farmers")
+            else append(", solo")
+            append(")")
             append(", _valid for ")
             append(
                 Duration(DateTime.now(), contract.expirationTime.toDateTime()).formatDaysHoursAndMinutes()
