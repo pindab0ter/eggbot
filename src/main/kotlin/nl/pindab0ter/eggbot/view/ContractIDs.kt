@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
+import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.formatDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.helpers.toDateTime
 import org.joda.time.DateTime
@@ -14,8 +15,12 @@ fun contractIDsResponse(soloContracts: List<Contract>, coopContracts: List<Contr
         this@printContracts.forEach { contract ->
             append("**`${contract.id}`**: ")
             append("${contract.name} ")
-            //TODO: append(EggBot.eggsToEmotes[contract.egg]?.asMention ?: "(${contract.egg.name})")
+            append("(")
+            //TODO: append(EggBot.eggsToEmotes[contract.egg]?.asMention ?: contract.egg.name)
             append("(${contract.egg.name})")
+            if (contract.maxCoopSize > 1) append(", max ${contract.maxCoopSize} farmers")
+            else append(", solo")
+            append(")")
             append(", _valid for ")
             append(
                 Duration(DateTime.now(), contract.expirationTime.toDateTime()).formatDaysHoursAndMinutes()
