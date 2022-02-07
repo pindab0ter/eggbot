@@ -50,9 +50,9 @@ fun createCoopsAndRoles(
     amount: Int,
     baseName: String,
     noRole: Boolean,
-): List<Coop> = transaction {
+): List<Coop> {
     val coopNames = coopNames(amount, baseName)
-    List(amount) { index ->
+    return List(amount) { index ->
         val roleId = if (noRole) null else EggBot.guild.roles.find { role ->
             role.name == coopNames[index]
         }?.id ?: EggBot.guild.createRole().run {
