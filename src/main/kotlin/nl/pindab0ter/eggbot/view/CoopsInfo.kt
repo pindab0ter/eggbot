@@ -121,7 +121,8 @@ private fun StringBuilder.drawCoops(
                 is Abandoned -> "Abandoned"
                 is Failed -> "Failed"
                 is NotOnTrack -> "${status.state.timeUpPercentageOfFinalGoal.formatTwoDecimals()}%"
-                is OnTrack -> status.state.timeTillFinalGoal?.formatDaysHoursAndMinutes(compact = true, spacing = true) ?: "ERROR"
+                is OnTrack -> status.state.timeTillFinalGoal?.formatDaysHoursAndMinutes(compact = true, spacing = true)
+                    ?: "ERROR"
                 is FinishedIfBanked -> "Bank now!"
                 is Finished -> "Finished"
             }
@@ -286,7 +287,7 @@ private fun StringBuilder.drawCompactCoops(
     }
 }
 
-private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.EmojiColumn.() -> Unit = {}) {
+private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Table.Column.() -> Unit = {}) {
     fun CoopContractStatus.currentEggsLaid(): BigDecimal = when (this) {
         is InProgress -> state.currentEggsLaid
         else -> ZERO
@@ -307,15 +308,18 @@ private fun Table.overtakersColumn(statuses: List<CoopContractStatus>, init: Tab
 
     val overtakers: List<String> = statuses.map { status ->
         when {
-            status.willOvertake() -> "⬆️"
-            status.isSlowerThanAny() -> "⬇️"
-            else -> "➖"
+            status.willOvertake() -> "↑"
+            status.isSlowerThanAny() -> "↓"
+            else -> " "
         }
     }
 
-    if (overtakers.any { it != "➖" }) emojiColumn {
-        header = if (Random.nextBoolean()) "🏃‍♂️" else "🏃‍♀️"
+    if (overtakers.any { it != " " }) column {
         cells = overtakers
+
+        leftPadding = 1
+        rightPadding = 1
+
         init()
     }
 }
