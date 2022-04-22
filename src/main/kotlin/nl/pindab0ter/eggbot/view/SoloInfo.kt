@@ -107,12 +107,16 @@ private fun StringBuilder.drawBasicInfo(
                 add(state.timeRemaining.formatDaysHoursAndMinutes(compact, compact))
                 add(state.timeUpEggsLaid.formatIllions())
             }
-            add(state.farmer.currentEggsLaid.formatIllions() + if (!compact)
-                " (${state.farmer.currentEggsPerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
+            add(
+                state.farmer.currentEggsLaid.formatIllions() + if (!compact)
+                    " (${state.farmer.currentEggsPerMinute.multiply(SIXTY).formatIllions()}/hr)" else ""
+            )
             add(state.reportedEggsLaid.formatIllions())
             add(state.farmer.unreportedEggsLaid.formatIllions())
-            add(state.reportedPopulation.formatIllions() + if (!compact)
-                " (${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).formatIllions()}/hr)" else "")
+            add(
+                state.reportedPopulation.formatIllions() + if (!compact)
+                    " (${state.reportedPopulationIncreasePerMinute.multiply(SIXTY).formatIllions()}/hr)" else ""
+            )
             add(state.farmer.constants.tokensAvailable.toString())
             add(state.farmer.constants.tokensSpent.toString())
             add("${state.farmer.timeSinceBackup.formatDaysHoursAndMinutes(compact)} ago")

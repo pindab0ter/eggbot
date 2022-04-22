@@ -46,13 +46,14 @@ val adminRollCallGroup: suspend SlashGroup.() -> Unit = {
 
     class CreateRollCallArguments : Arguments() {
         val contract: Contract by contract()
-        val basename: String by string(
-            displayName = "name",
-            description = "The base for the team names",
-            validator = { _, value ->
-                value.contains(' ')
+        val basename: String by string {
+            name = "name"
+            description = "The base for the team names"
+            validate {
+                // TODO: Verify this works
+                if (value.contains(' ')) fail("Team names cannot contain spaces")
             }
-        )
+        }
         val createRoles: Boolean by createRole()
         val createChannels: Boolean by createChannel()
     }

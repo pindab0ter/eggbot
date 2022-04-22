@@ -20,34 +20,34 @@ val adminRoleGroup: suspend SlashGroup.() -> Unit = {
     description = "Add and remove roles"
 
     class AddRoleArguments : Arguments() {
-        val member: Member by member(
-            displayName = "member",
-            description = "The member to assign the role to",
-            requiredGuild = { Config.guild },
-            useReply = true,
-        )
+        val member: Member by member {
+            name = "member"
+            description = "The member to assign the role to"
+            requiredGuild = { Config.guild }
+            useReply = true
+        }
     }
 
     class RemoveRoleArguments : Arguments() {
-        val member: Member by member(
-            displayName = "member",
-            description = "The member to assign the role to",
-            requiredGuild = { Config.guild },
-            useReply = true,
-        )
-        val role: Role by role(
-            displayName = "role",
-            description = "The role to remove",
-            requiredGuild = { Config.guild },
-        )
+        val member: Member by member {
+            name = "member"
+            description = "The member to assign the role to"
+            requiredGuild = { Config.guild }
+            useReply = true
+        }
+        val role: Role by role {
+            name = "role"
+            description = "The role to remove"
+            requiredGuild = { Config.guild }
+        }
     }
 
     class DeleteRoleArguments : Arguments() {
-        val role: Role by role(
-            displayName = "role",
-            description = "The role to remove",
-            requiredGuild = { Config.guild },
-        )
+        val role: Role by role {
+            name = "role"
+            description = "The role to remove"
+            requiredGuild = { Config.guild }
+        }
     }
 
     ephemeralSubCommand(::AddRoleArguments) {

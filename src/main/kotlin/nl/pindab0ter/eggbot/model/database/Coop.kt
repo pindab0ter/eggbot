@@ -21,7 +21,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     var roleId: Snowflake?
         get() = this._roleId?.let { Snowflake(it) }
         set(snowflake) {
-            _roleId = snowflake?.asString
+            _roleId = snowflake?.toString()
         }
     val role: Role?
         get() = this@Coop.roleId?.let {
@@ -32,7 +32,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     var channelId: Snowflake?
         get() = this._channelId?.let { Snowflake(it) }
         set(snowflake) {
-            _channelId = snowflake?.asString
+            _channelId = snowflake?.toString()
         }
     val channel: Channel?
         get() = this@Coop.channelId?.let {

@@ -157,9 +157,11 @@ fun artifactCheckResponse(farm: Farm, backup: Backup, compact: Boolean = false):
     }
 
     return buildString {
-        appendLine("**${backup.userName}**’s home farm (last updated ${
-            backup.timeSinceBackup.formatDaysHoursAndMinutes(compact = true, spacing = true)
-        } ago):")
+        appendLine(
+            "**${backup.userName}**’s home farm (last updated ${
+                backup.timeSinceBackup.formatDaysHoursAndMinutes(compact = true, spacing = true)
+            } ago):"
+        )
         appendTable {
             title = "__**🥚 Egg laying rate:**__"
             displayHeaders = false

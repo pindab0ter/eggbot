@@ -23,12 +23,12 @@ class EarningsBonusArguments : Arguments() {
 val earningsBonusCommand: suspend PublicSlashCommand<out EarningsBonusArguments>.() -> Unit = {
     name = "earnings-bonus"
     description = "Shows your Farmer Role, EB and how much SE or PE till your next rank."
-    
+
     lateinit var discordUser: DiscordUser
     lateinit var farmers: List<Farmer>
 
     check {
-        discordUser = transaction { DiscordUser.findById(event.interaction.user.id.asString) }
+        discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
             ?: return@check fail("You have not registered yet. Please do so using `/register`.")
 
         farmers = transaction { discordUser.farmers.toList().sortedBy(Farmer::inGameName) }
@@ -43,12 +43,14 @@ val earningsBonusCommand: suspend PublicSlashCommand<out EarningsBonusArguments>
                 null -> respond {
                     content = "Could not get information on EggBot user with in-game ID: `${farmer.inGameName}`"
                 }
-                else -> multipartRespond(earningsBonusResponse(
-                    farmer,
-                    EarningsBonus(farmer),
-                    backup.timeSinceBackup,
-                    arguments.displayMode
-                ))
+                else -> multipartRespond(
+                    earningsBonusResponse(
+                        farmer,
+                        EarningsBonus(farmer),
+                        backup.timeSinceBackup,
+                        arguments.displayMode
+                    )
+                )
             }
         }
     }

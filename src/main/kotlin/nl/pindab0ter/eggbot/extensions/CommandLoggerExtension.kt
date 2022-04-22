@@ -63,16 +63,17 @@ class CommandLoggerExtension : Extension() {
                 is IntegerArgument -> "${option.name}: ${option.value}"
                 is NumberArgument -> "${option.name}: ${option.value}"
                 is BooleanArgument -> "${option.name}: ${option.value}"
+                is MentionableArgument -> "${option.name}: ${option.value}"
+                is AutoCompleteArgument -> "${option.name}: ${option.value}"
                 is UserArgument -> runBlocking {
-                    "${option.name}: ${configuredGuild?.getMemberOrNull(option.value)?.displayName?.let { "@${it}" } ?: "(id = ${option.value.asString})"}"
+                    "${option.name}: ${configuredGuild?.getMemberOrNull(option.value)?.displayName?.let { "@${it}" } ?: "(id = ${option.value})"}"
                 }
                 is ChannelArgument -> runBlocking {
-                    "${option.name}: ${configuredGuild?.getChannelOrNull(option.value)?.name?.let { "#${it}" } ?: "(id = ${option.value.asString})"}"
+                    "${option.name}: ${configuredGuild?.getChannelOrNull(option.value)?.name?.let { "#${it}" } ?: "(id = ${option.value})"}"
                 }
                 is RoleArgument -> runBlocking {
-                    "${option.name}: ${configuredGuild?.getRoleOrNull(option.value)?.name?.let { "@${it}" } ?: "(id = ${option.value.asString})"}"
+                    "${option.name}: ${configuredGuild?.getRoleOrNull(option.value)?.name?.let { "@${it}" } ?: "(id = ${option.value})"}"
                 }
-                is MentionableArgument -> "${option.name}: ${option.value}"
             }
         }
     }

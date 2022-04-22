@@ -58,10 +58,12 @@ val coopInfoCommand: suspend PublicSlashCommand<CoopInfoArguments>.() -> Unit = 
                     farmers = status.state.farmers.sortedByDescending(SimulationFarmer::currentEggsLaid)
                 )
 
-                multipartRespond(when (status) {
-                    is InProgress.FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
-                    else -> coopInfoResponse(sortedState, compact)
-                })
+                multipartRespond(
+                    when (status) {
+                        is InProgress.FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
+                        else -> coopInfoResponse(sortedState, compact)
+                    }
+                )
             }
         }
     }

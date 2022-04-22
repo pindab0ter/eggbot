@@ -25,16 +25,16 @@ enum class LeaderBoard : ChoiceEnum {
 }
 
 class LeaderBoardArguments : Arguments() {
-    val top: Int? by optionalInt(
-        displayName = "top",
-        description = "How many players to show",
-    )
-    val leaderBoard: LeaderBoard by defaultingEnumChoice(
-        displayName = "board",
-        description = "Which board to show",
-        defaultValue = LeaderBoard.EARNINGS_BONUS,
-        typeName = LeaderBoard::name.name,
-    )
+    val top: Int? by optionalInt {
+        name = "top"
+        description = "How many players to show"
+    }
+    val leaderBoard: LeaderBoard by defaultingEnumChoice {
+        name = "board"
+        description = "Which board to show"
+        defaultValue = LeaderBoard.EARNINGS_BONUS
+        typeName = LeaderBoard::name.name
+    }
     val displayMode: DisplayMode? by displayModeChoice()
 }
 
@@ -51,12 +51,14 @@ val leaderBoardCommand: suspend SlashCommand<PublicSlashCommandContext<LeaderBoa
     }
 
     action {
-        multipartRespond(leaderboardResponse(
-            farmers = farmers,
-            leaderBoard = arguments.leaderBoard,
-            top = arguments.top?.takeIf { it > 0 },
-            displayMode = arguments.displayMode,
-            context = this,
-        ))
+        multipartRespond(
+            leaderboardResponse(
+                farmers = farmers,
+                leaderBoard = arguments.leaderBoard,
+                top = arguments.top?.takeIf { it > 0 },
+                displayMode = arguments.displayMode,
+                context = this,
+            )
+        )
     }
 }

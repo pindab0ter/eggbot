@@ -26,8 +26,10 @@ data class CoopContractState(
         }
     val currentPopulationIncreasePerMinute: BigDecimal
         get() = farmers.sumOf { farmer ->
-            chickenIncrease(farmer.currentState?.habs ?: emptyList(),
-                farmer.constants).multiply(FOUR - (farmer.currentState?.habs?.fullCount() ?: BigDecimal.ZERO))
+            chickenIncrease(
+                farmer.currentState?.habs ?: emptyList(),
+                farmer.constants
+            ).multiply(FOUR - (farmer.currentState?.habs?.fullCount() ?: BigDecimal.ZERO))
 
         }
     val currentEggsLaid: BigDecimal

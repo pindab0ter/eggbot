@@ -13,7 +13,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime.now
 
 class SetInactiveArguments : Arguments() {
-    val days by int("days", "How many days you want to say yourself inactive as.")
+    val days by int {
+        name = "days"
+        description = "How many days you want to say yourself inactive as."
+    }
 }
 
 @KordPreview
@@ -27,7 +30,7 @@ val selfActivityGroup: suspend SlashGroup.() -> Unit = {
         lateinit var discordUser: DiscordUser
 
         check {
-            discordUser = transaction { DiscordUser.findById(event.interaction.user.id.asString) }
+            discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
                 ?: return@check fail("You have not registered yet. Please do so using `/register`.")
         }
 
@@ -50,7 +53,7 @@ val selfActivityGroup: suspend SlashGroup.() -> Unit = {
         lateinit var discordUser: DiscordUser
 
         check {
-            discordUser = transaction { DiscordUser.findById(event.interaction.user.id.asString) }
+            discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
                 ?: return@check fail("You have not registered yet. Please do so using `/register`.")
         }
 
@@ -75,7 +78,7 @@ val selfActivityGroup: suspend SlashGroup.() -> Unit = {
         lateinit var discordUser: DiscordUser
 
         check {
-            discordUser = transaction { DiscordUser.findById(event.interaction.user.id.asString) }
+            discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
                 ?: return@check fail("You have not registered yet. Please do so using `/register`.")
         }
 

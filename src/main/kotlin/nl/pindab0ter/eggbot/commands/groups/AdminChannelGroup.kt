@@ -19,23 +19,23 @@ val adminChannelGroup: suspend SlashGroup.() -> Unit = {
     description = "Add and remove channels"
 
     class CreateChannelArguments : Arguments() {
-        val channelName by string(
-            displayName = "name",
-            description = "The name for the channel",
-        )
-        val parentChannel by optionalChannel(
-            displayName = "parent",
-            description = "The parent channel",
-            requiredGuild = { Config.guild },
-        )
+        val channelName by string {
+            name = "name"
+            description = "The name for the channel"
+        }
+        val parentChannel by optionalChannel {
+            name = "parent"
+            description = "The parent channel"
+            requiredGuild = { Config.guild }
+        }
     }
 
     class DeleteChannelArguments : Arguments() {
-        val channel by channel(
-            displayName = "channel",
-            description = "The channel to delete",
-            requiredGuild = { Config.guild },
-        )
+        val channel by channel {
+            name = "channel"
+            description = "The channel to delete"
+            requiredGuild = { Config.guild }
+        }
     }
 
     ephemeralSubCommand(::CreateChannelArguments) {

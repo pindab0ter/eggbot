@@ -10,45 +10,47 @@ import org.jetbrains.exposed.sql.transactions.transaction
 fun rollCallResponse(
     contract: Contract,
     coops: List<Coop>,
-): List<String> = transaction { listOf(buildString {
-    appendLine("Co-ops generated for __${contract.name}__:")
+): List<String> = transaction {
+    listOf(buildString {
+        appendLine("Co-ops generated for __${contract.name}__:")
 
-    append("```")
-    coops.forEach { coop ->
-        append(coop.name)
-        appendPaddingCharacters(coop.name, coops.map { it.name })
-        append(" (")
-        appendPaddingCharacters(coop.farmers.count(), coops.map { it.farmers.count() })
-        append(coop.farmers.count())
-        append("/${contract.maxCoopSize} members): ")
-        appendPaddingCharacters(
-            coop.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER),
-            coops.map { it.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER) })
-        append(coop.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER) + " %")
-        appendLine()
-    }
-    appendLine("```")
-})}
-    // .plus(coops.map { coop ->
-    // TODO:
-    // val role = coop.roleId?.let { EggBot.guild.getRoleById(it) }
-    // buildString {
-    //     // Header
-    //     append("**__Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)")
-    //     if (coop.hasLeader) appendLine(" led by:__ ${coop.leader!!.discordUser.asMention}**")
-    //     else appendLine("__**")
-    //
-    //     // Body
-    //     coop.farmers
-    //         .sortedBy { farmer -> farmer.inGameName }
-    //         .forEach { farmer ->
-    //             if (farmer.isActive.not()) append("_")
-    //             append(farmer.discordUser.asMention)
-    //             if (farmer.inGameName.isNotEmpty()) append(" (`${farmer.inGameName}`)")
-    //             if (farmer.isActive.not()) append(" (Inactive)_")
-    //             appendLine()
-    //         }
-    //     appendLine()
-    // }
-    // ""
+        append("```")
+        coops.forEach { coop ->
+            append(coop.name)
+            appendPaddingCharacters(coop.name, coops.map { it.name })
+            append(" (")
+            appendPaddingCharacters(coop.farmers.count(), coops.map { it.farmers.count() })
+            append(coop.farmers.count())
+            append("/${contract.maxCoopSize} members): ")
+            appendPaddingCharacters(
+                coop.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER),
+                coops.map { it.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER) })
+            append(coop.activeEarningsBonus.formatIllions(NumberFormatter.INTEGER) + " %")
+            appendLine()
+        }
+        appendLine("```")
+    })
+}
+// .plus(coops.map { coop ->
+// TODO:
+// val role = coop.roleId?.let { EggBot.guild.getRoleById(it) }
+// buildString {
+//     // Header
+//     append("**__Co-op ${role?.asMention ?: coop.name} (`${coop.name}`)")
+//     if (coop.hasLeader) appendLine(" led by:__ ${coop.leader!!.discordUser.asMention}**")
+//     else appendLine("__**")
+//
+//     // Body
+//     coop.farmers
+//         .sortedBy { farmer -> farmer.inGameName }
+//         .forEach { farmer ->
+//             if (farmer.isActive.not()) append("_")
+//             append(farmer.discordUser.asMention)
+//             if (farmer.inGameName.isNotEmpty()) append(" (`${farmer.inGameName}`)")
+//             if (farmer.isActive.not()) append(" (Inactive)_")
+//             appendLine()
+//         }
+//     appendLine()
+// }
+// ""
 // })}

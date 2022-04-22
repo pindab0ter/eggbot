@@ -24,45 +24,55 @@ object AuxBrain {
 
     private fun periodicalsRequest(): Request = PERIODICALS_BETA_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
-        .body("data=${
-            PeriodicalsRequest {
-                clientVersion = Config.clientVersion
-                // TODO:
-                // clientVersion = EggBot.clientVersion
-                userId = Config.userId
-            }.serialize().encodeBase64ToString()
-        }")
+        .body(
+            "data=${
+                PeriodicalsRequest {
+                    clientVersion = Config.clientVersion
+                    // TODO:
+                    // clientVersion = EggBot.clientVersion
+                    userId = Config.userId
+                }.serialize().encodeBase64ToString()
+            }"
+        )
 
     private fun firstContactRequest(userId: String): Request = FIRST_CONTACT_BETA_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
-        .body("data=${
-            FirstContactRequest {
-                eiUserId = userId
-                deviceId = Config.deviceId
-                clientVersion = Config.clientVersion
-            }.serialize().encodeBase64ToString()
-        }")
+        .body(
+            "data=${
+                FirstContactRequest {
+                    eiUserId = userId
+                    deviceId = Config.deviceId
+                    clientVersion = Config.clientVersion
+                }.serialize().encodeBase64ToString()
+            }"
+        )
 
     private fun oldFirstContactRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
-        .body("data=${
-            FirstContactRequest {
-                this.userId = userId
-            }.serialize().encodeBase64ToString()
-        }")
+        .body(
+            "data=${
+                FirstContactRequest {
+                    this.userId = userId
+                }.serialize().encodeBase64ToString()
+            }"
+        )
 
     private fun coopStatusRequest(contractId: String, coopId: String) = COOP_STATUS_BETA_URL.httpPost()
         .header("Content-Type", "application/x-www-form-urlencoded")
-        .body("data=${
-            CoopStatusRequest {
-                this.contractId = contractId
-                this.coopId = coopId
-            }.serialize().encodeBase64ToString()
-        }")
+        .body(
+            "data=${
+                CoopStatusRequest {
+                    this.contractId = contractId
+                    this.coopId = coopId
+                }.serialize().encodeBase64ToString()
+            }"
+        )
 
     fun <T> getContracts(handler: (List<Contract>) -> T): CancellableRequest = periodicalsRequest().response { _, response, _ ->
-        val contracts = PeriodicalsResponse.deserialize(response.body()
-            .decodeBase64()).periodicals?.contracts?.contracts
+        val contracts = PeriodicalsResponse.deserialize(
+            response.body()
+                .decodeBase64()
+        ).periodicals?.contracts?.contracts
             .orEmpty()
             .filter { contract -> contract.id != "first-contract" }
         handler(contracts)

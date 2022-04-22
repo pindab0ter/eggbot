@@ -42,11 +42,11 @@ val adminCoopGroup: suspend SlashGroup.() -> Unit = {
         val coopId: String by coopId()
         val createRole: Boolean by createRole()
         val createChannel: Boolean by createChannel()
-        val preEmptive: Boolean by defaultingBoolean(
-            displayName = "pre-emptive",
-            description = "Add the co-op even if it doesn't exist (yet).",
+        val preEmptive: Boolean by defaultingBoolean {
+            name = "pre-emptive"
+            description = "Add the co-op even if it doesn't exist (yet)."
             defaultValue = true
-        )
+        }
     }
 
     ephemeralSubCommand(::AddCoopArguments) {
@@ -174,20 +174,20 @@ val adminCoopGroup: suspend SlashGroup.() -> Unit = {
     }
 
     class RemoveCoopArguments : Arguments() {
-        val coopId: String? by optionalString(
-            displayName = "name",
+        val coopId: String? by optionalString {
+            name = "name"
             description = "The co-op ID. Can be found in #roll-call or in-game."
-        )
-        val channel: Channel? by optionalChannel(
-            displayName = "channel",
-            description = "The channel associated with the co-op to remove",
+        }
+        val channel: Channel? by optionalChannel {
+            name = "channel"
+            description = "The channel associated with the co-op to remove"
             requiredGuild = { Config.guild }
-        )
-        val role: Role? by optionalRole(
-            displayName = "role",
-            description = "The role associated with the co-op to remove",
+        }
+        val role: Role? by optionalRole {
+            name = "role"
+            description = "The role associated with the co-op to remove"
             requiredGuild = { Config.guild }
-        )
+        }
     }
 
     ephemeralSubCommand(::RemoveCoopArguments) {
@@ -213,10 +213,10 @@ val adminCoopGroup: suspend SlashGroup.() -> Unit = {
                     Coop.find { Coops.name eq arguments.coopId!! }.firstOrNull()
                 }
                 arguments.channel != null -> transaction {
-                    Coop.find { Coops.channelId eq arguments.channel!!.id.asString }.firstOrNull()
+                    Coop.find { Coops.channelId eq arguments.channel!!.id.toString() }.firstOrNull()
                 }
                 arguments.role != null -> transaction {
-                    Coop.find { Coops.roleId eq arguments.role!!.id.asString }.firstOrNull()
+                    Coop.find { Coops.roleId eq arguments.role!!.id.toString() }.firstOrNull()
                 }
                 else -> return@action respond {
                     content = "You must choose a co-op to remove"
