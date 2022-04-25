@@ -7,6 +7,7 @@ import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.commands.groups.adminCommandGroup
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.commands.*
+import nl.pindab0ter.eggbot.commands.groups.postGroup
 
 @KordPreview
 class SlashCommandsExtension : Extension() {
@@ -19,5 +20,6 @@ class SlashCommandsExtension : Extension() {
         publicSlashCommand(::LeaderBoardArguments, leaderBoardCommand)
         publicSlashCommand(::EarningsBonusArguments, earningsBonusCommand)
         publicSlashCommand(::CoopInfoArguments, coopInfoCommand)
+        ephemeralSlashCommand(postGroup)
     }
 }

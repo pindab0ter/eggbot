@@ -1,4 +1,4 @@
-package nl.pindab0ter.eggbot.commands
+package nl.pindab0ter.eggbot.commands.groups
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.EphemeralSlashCommand
@@ -37,7 +37,7 @@ class CreateArguments : Arguments() {
 }
 
 @KordPreview
-val postCommand: suspend EphemeralSlashCommand<out Arguments>.() -> Unit = {
+val postGroup: suspend EphemeralSlashCommand<out Arguments>.() -> Unit = {
     name = "post"
     description = "create a post."
 
