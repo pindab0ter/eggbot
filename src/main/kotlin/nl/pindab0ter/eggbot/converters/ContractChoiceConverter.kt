@@ -8,8 +8,8 @@ import com.kotlindiscord.kord.extensions.commands.CommandContext
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceConverter
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.Validator
+import com.kotlindiscord.kord.extensions.commands.converters.builders.ConverterBuilder
 import com.kotlindiscord.kord.extensions.parser.StringParser
-import dev.kord.common.annotation.KordPreview
 import dev.kord.core.entity.interaction.OptionValue
 import dev.kord.core.kordLogger
 import dev.kord.rest.builder.interaction.OptionsBuilder
@@ -19,11 +19,15 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 /**
  * Choice converter for AuxBrain contracts.
  */
-@OptIn(KordPreview::class)
 class ContractChoiceConverter(
-    choices: Array<Contract>,
     override var validator: Validator<Contract> = null,
-) : ChoiceConverter<Contract>(choices.associateBy { contract -> contract.name }) {
+) : ChoiceConverter<Contract>(
+    choices = AuxBrain
+        .getContracts()
+        .sortedByDescending { contract -> contract.expirationTime }
+        .toTypedArray()
+        .associateBy { contract -> contract.name }
+) {
     override val signatureTypeString: String = Contract::name.name
 
     override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
@@ -52,19 +56,39 @@ class ContractChoiceConverter(
     }
 }
 
+class ContractConverterBuilder : ConverterBuilder<Contract>() {
+    override fun build(arguments: Arguments): SingleConverter<Contract> {
+        return arguments.arg(
+            displayName = name,
+            description = description,
+
+            converter = ContractChoiceConverter(
+                validator = validator,
+            ).withBuilder(this)
+        )
+    }
+}
+
+fun Arguments.contract(
+    body: ContractConverterBuilder.() -> Unit
+): SingleConverter<Contract> {
+    val builder = ContractConverterBuilder()
+
+    body(builder)
+
+    builder.validateArgument()
+
+    return builder.build(this)
+}
+
 /**
  * Creates a contract choice converter, for a defined set of single arguments.
  *
  * @see ContractChoiceConverter
  */
 fun Arguments.contract(): SingleConverter<Contract> {
-    val contracts = AuxBrain.getContracts().sortedByDescending { contract ->
-        contract.expirationTime
-    }.toTypedArray()
-
-    return arg(
-        displayName = "contract",
-        description = "Select an Egg, Inc. contract.",
-        converter = ContractChoiceConverter(choices = contracts)
-    )
+    return contract {
+        name = "contract"
+        description = "Select an Egg, Inc. contract."
+    }
 }
