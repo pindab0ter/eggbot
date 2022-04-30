@@ -80,15 +80,3 @@ fun Arguments.contract(
 
     return builder.build(this)
 }
-
-/**
- * Creates a contract choice converter, for a defined set of single arguments.
- *
- * @see ContractChoiceConverter
- */
-fun Arguments.contract(): SingleConverter<Contract> {
-    return contract {
-        name = "contract"
-        description = "Select an Egg, Inc. contract."
-    }
-}
