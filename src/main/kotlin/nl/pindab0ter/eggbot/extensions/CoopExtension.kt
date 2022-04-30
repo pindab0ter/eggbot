@@ -18,9 +18,9 @@ import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
+import dev.kord.rest.request.RestRequestException
 import kotlinx.coroutines.flow.firstOrNull
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.converters.contract
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
@@ -38,7 +38,7 @@ class CoopExtension : Extension() {
     override suspend fun setup() {
         publicSlashCommand {
 
-            name = "co-op"
+            name = "coop"
             description = "Commands to manage co-ops"
 
             guild(Config.guild)
@@ -199,8 +199,8 @@ class CoopExtension : Extension() {
             }
 
             ephemeralSubCommand(::RemoveCoopArguments) {
-                name = "delete"
-                description = "Delete a coop and it's corresponding role and/or channel"
+                name = "remove"
+                description = "Remove a coop and it's corresponding role and/or channel (does not affect the co-op in-game)"
                 requiredPerms += listOf(
                     ManageRoles,
                     ManageChannels,
@@ -236,15 +236,29 @@ class CoopExtension : Extension() {
                     val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
                     val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
 
-                    // TODO: Add reason
-                    // TODO: Catch error
-                    role?.delete()
-                    channel?.delete()
-                    transaction { coop.delete() }
-
-                    // TODO: Add info on fail/success of role/channel deletion
-                    respond {
-                        content = "Successfully deleted co-op"
+                    try {
+                        val roleName = role?.name
+                        val channelName = channel?.name
+                        role?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
+                        channel?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
+                        transaction { coop.delete() }
+                        respond {
+                            content = buildString {
+                                append("Successfully deleted co-op")
+                                if (roleName != null || channelName != null) {
+                                    append(" as well as")
+                                    if (roleName != null) {
+                                        append(" role `@$roleName`")
+                                        if (channelName != null) append(" and")
+                                    }
+                                    if (channelName != null) append(" channel ${channelName}")
+                                }
+                            }
+                        }
+                    } catch (_: RestRequestException) {
+                        return@action respond {
+                            content = "Could not remove the co-op"
+                        }.discard()
                     }
                 }
             }
