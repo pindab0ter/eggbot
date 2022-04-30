@@ -6,9 +6,9 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
 import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
-import nl.pindab0ter.eggbot.commands.LeaderBoard
-import nl.pindab0ter.eggbot.commands.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.model.LeaderBoard
+import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.database.Farmer
 

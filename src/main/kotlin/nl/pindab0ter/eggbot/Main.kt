@@ -3,8 +3,7 @@ package nl.pindab0ter.eggbot
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import dev.kord.common.annotation.KordPreview
 import dev.kord.gateway.Intent.*
-import nl.pindab0ter.eggbot.extensions.CommandLoggerExtension
-import nl.pindab0ter.eggbot.extensions.SlashCommandsExtension
+import nl.pindab0ter.eggbot.extensions.*
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
@@ -17,8 +16,15 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
     }
 
     extensions {
+        // add(::AdminExtension)
         add(::CommandLoggerExtension)
-        add(::SlashCommandsExtension)
+        add(::CoopExtension)
+        add(::CoopInfoExtension)
+        add(::EarningsBonusExtension)
+        add(::EarningsBonusExtension)
+        add(::LeaderBoardExtension)
+        add(::PostExtension)
+        add(::SelfExtension)
 
         if (Config.sentryDsn != null) sentry {
             enable = true

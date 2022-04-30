@@ -6,11 +6,11 @@ import kotlin.text.RegexOption.DOT_MATCHES_ALL
 const val START = "ei.proto\u0012\u0002ei\u001A\u000Ccommon.proto"
 const val END = "\u0000\u0000\u0000\u0000"
 
-val componentPattern = """(?:\x0A.{0,2}?)(?<name>[A-Za-z]+)(?<body>.*?)(?=(?:\x0A.[A-Z][a-z]|$))"""
+val componentPattern = """\x0A.{0,2}?(?<name>[A-Za-z]+)(?<body>.*?)(?=\x0A.[A-Z][a-z]|$)"""
     .toRegex(DOT_MATCHES_ALL)
-val classPattern = """[a-z0-9_]{3,}"""
+val classPattern = """[a-z\d_]{3,}"""
     .toRegex()
-val propertyPattern = """(?:\x0A.)(?<name>[A-Za-z0-9_]+).(?<index>.).*?(?<repeated>.)\x28(?<primitive>.)(?:\x32.\..+?\.(?<reference>[A-Za-z.]*))?"""
+val propertyPattern = """\x0A.(?<name>\w+).(?<index>.).*?(?<repeated>.)\x28(?<primitive>.)(?:\x32.\..+?\.(?<reference>[A-Za-z.]*))?"""
     .toRegex(DOT_MATCHES_ALL)
 val constantPattern = """(?<name>[A-Z_]{2,})\x10(?<index>.).*?(?:\x0A|$)"""
     .toRegex(DOT_MATCHES_ALL)
