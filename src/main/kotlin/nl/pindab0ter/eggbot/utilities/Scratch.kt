@@ -13,7 +13,7 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
         beforeStart {
             connectToDatabase()
 
-            // Scratch here
+            logger.info { "Scratch here…" }
 
             exitProcess(0)
         }

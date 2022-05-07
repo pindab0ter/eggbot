@@ -1,7 +1,6 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
-import nl.pindab0ter.eggbot.EggBot
 import nl.pindab0ter.eggbot.helpers.formatDaysHoursAndMinutes
 import nl.pindab0ter.eggbot.helpers.toDateTime
 import org.joda.time.DateTime
