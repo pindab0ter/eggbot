@@ -3,17 +3,18 @@ package nl.pindab0ter.eggbot.model
 import com.auxbrain.ei.*
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.ResponseDeserializable
-import com.github.kittinunf.fuel.core.ResultHandler
-import com.github.kittinunf.fuel.core.requests.CancellableRequest
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.result.getOrNull
-import nl.pindab0ter.eggbot.helpers.decodeBase64
-import nl.pindab0ter.eggbot.helpers.discard
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
+import org.joda.time.Instant
+import org.joda.time.Period.minutes
 
 
 object AuxBrain {
+    private val logger = KotlinLogging.logger("AuxBrain")
+
     private const val PERIODICALS_URL = "http://www.auxbrain.com/ei/get_periodicals"
     private const val PERIODICALS_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/get_periodicals"
     private const val COOP_STATUS_URL = "http://www.auxbrain.com/ei/coop_status"
@@ -22,86 +23,46 @@ object AuxBrain {
     private const val FIRST_CONTACT_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
     private const val ARTIFACTS_CONFIGURATION_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei_afx/config"
 
-    private fun periodicalsRequest(): Request = PERIODICALS_BETA_URL.httpPost()
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(
-            "data=${
-                PeriodicalsRequest {
-                    clientVersion = Config.clientVersion
-                    // TODO:
-                    // clientVersion = EggBot.clientVersion
-                    userId = Config.userId
-                }.serialize().encodeBase64ToString()
-            }"
-        )
+    ///////////////
+    // Contracts //
+    ///////////////
 
-    private fun firstContactRequest(userId: String): Request = FIRST_CONTACT_BETA_URL.httpPost()
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(
-            "data=${
-                FirstContactRequest {
-                    eiUserId = userId
-                    deviceId = Config.deviceId
-                    clientVersion = Config.clientVersion
-                }.serialize().encodeBase64ToString()
-            }"
-        )
+    private var contracts: Map<String, Contract> = emptyMap()
+    private var lastContractsUpdate: Instant = Instant.EPOCH
 
-    private fun oldFirstContactRequest(userId: String): Request = FIRST_CONTACT_URL.httpPost()
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(
-            "data=${
-                FirstContactRequest {
-                    this.userId = userId
-                }.serialize().encodeBase64ToString()
-            }"
-        )
+    private fun periodicalsRequest(): Request {
+        val data = PeriodicalsRequest {
+            clientVersion = Config.clientVersion
+            // TODO: Dynamically update the clientVersion
+            // clientVersion = EggBot.clientVersion
+            userId = Config.userId
+        }.serialize().encodeBase64ToString()
 
-    private fun coopStatusRequest(contractId: String, coopId: String) = COOP_STATUS_BETA_URL.httpPost()
-        .header("Content-Type", "application/x-www-form-urlencoded")
-        .body(
-            "data=${
-                CoopStatusRequest {
-                    this.contractId = contractId
-                    this.coopId = coopId
-                }.serialize().encodeBase64ToString()
-            }"
-        )
-
-    fun <T> getContracts(handler: (List<Contract>) -> T): CancellableRequest = periodicalsRequest().response { _, response, _ ->
-        val contracts = PeriodicalsResponse.deserialize(
-            response.body()
-                .decodeBase64()
-        ).periodicals?.contracts?.contracts
-            .orEmpty()
-            .filter { contract -> contract.id != "first-contract" }
-        handler(contracts)
+        return PERIODICALS_BETA_URL.httpPost()
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body("data=$data")
     }
 
-    fun getContracts(): List<Contract> = periodicalsRequest().responseObject(ContractsDeserializer).third.component1()
-        .orEmpty()
-        .filter { contract -> contract.id != "first-contract" }
+    private fun getCachedContracts(): Map<String, Contract> {
+        if (lastContractsUpdate.isBefore(Instant.now().minus(minutes(5).toStandardDuration()))) {
+            logger.info { "Fetching contracts..." }
 
-    fun getContract(contractId: String): Contract? =
-        getContracts().find { contract ->
-            contract.id == contractId
+            periodicalsRequest().responseObject(ContractsDeserializer).third.component1()?.let { contracts ->
+                this.contracts = contracts
+                    .filter { contract -> contract.id != "first-contract" }
+                    .associateBy { contract -> contract.id }
+                lastContractsUpdate = Instant.now()
+            }
+        } else {
+            logger.info { "Using cached contracts..." }
         }
 
-    fun getCoopStatus(contractId: String, coopId: String): CoopStatus? =
-        coopStatusRequest(contractId, coopId).responseObject(CoopStatusDeserializer).third.getOrNull()
-            ?.takeUnless { coopStatus ->
-                coopStatus.totalAmount == 0.0 && coopStatus.contributors.isEmpty() && coopStatus.secondsRemaining == 0.0
-            }
-
-    fun getFarmerBackup(userId: String, handler: ResultHandler<Backup>): CancellableRequest = when {
-        userId.startsWith("EI") -> firstContactRequest(userId).responseObject(BackupDeserializer, handler)
-        else -> oldFirstContactRequest(userId).responseObject(OldBackupDeserializer, handler)
+        return contracts
     }
 
-    fun getFarmerBackup(userId: String): Backup? = when {
-        userId.startsWith("EI") -> firstContactRequest(userId).responseObject(BackupDeserializer).third.component1()
-        else -> oldFirstContactRequest(userId).responseObject(OldBackupDeserializer).third.component1()
-    }
+    fun getContracts(): List<Contract> = getCachedContracts().values.toList()
+
+    fun getContract(contractId: String): Contract? = getCachedContracts()[contractId]
 
     private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
         override fun deserialize(content: String): List<Contract>? {
@@ -109,10 +70,24 @@ object AuxBrain {
         }
     }
 
-    private object CoopStatusDeserializer : ResponseDeserializable<CoopStatus> {
-        override fun deserialize(content: String): CoopStatus? {
-            return content.decodeBase64()?.let { CoopStatusResponse.deserialize(it).coopStatus }
-        }
+    /////////////
+    // Backups //
+    /////////////
+
+    private fun firstContactRequest(userId: String): Request {
+        val data = FirstContactRequest {
+            eiUserId = userId
+            deviceId = Config.deviceId
+            clientVersion = Config.clientVersion
+        }.serialize().encodeBase64ToString()
+
+        return FIRST_CONTACT_BETA_URL.httpPost()
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body("data=$data")
+    }
+
+    fun getFarmerBackup(userId: String): Backup? {
+        return firstContactRequest(userId).responseObject(BackupDeserializer).third.component1()
     }
 
     private object BackupDeserializer : ResponseDeserializable<Backup> {
@@ -121,9 +96,32 @@ object AuxBrain {
         }
     }
 
-    private object OldBackupDeserializer : ResponseDeserializable<Backup> {
-        override fun deserialize(content: String): Backup? {
-            return content.decodeBase64()?.let { FirstContact.deserialize(it).backup }
+    ////////////
+    // Co-ops //
+    ////////////
+
+    private fun coopStatusRequest(contractId: String, coopId: String): Request {
+        val data = CoopStatusRequest {
+            this.contractId = contractId
+            this.coopId = coopId
+        }.serialize().encodeBase64ToString()
+
+        return COOP_STATUS_BETA_URL.httpPost()
+            .header("Content-Type", "application/x-www-form-urlencoded")
+            .body("data=$data")
+    }
+
+    fun getCoopStatus(contractId: String, coopId: String): CoopStatus? = coopStatusRequest(contractId, coopId)
+        .responseObject(CoopStatusDeserializer)
+        .third
+        .getOrNull()
+        ?.takeUnless { coopStatus ->
+            coopStatus.totalAmount == 0.0 && coopStatus.contributors.isEmpty() && coopStatus.secondsRemaining == 0.0
+        }
+
+    private object CoopStatusDeserializer : ResponseDeserializable<CoopStatus> {
+        override fun deserialize(content: String): CoopStatus? {
+            return content.decodeBase64()?.let { CoopStatusResponse.deserialize(it).coopStatus }
         }
     }
 }
