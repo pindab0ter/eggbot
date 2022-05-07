@@ -124,9 +124,10 @@ private val artifactMultipliers = hashMapOf(
 )
 // @formatter:on
 
-fun Artifact.formatName() = name.name.toLowerCase()
+fun Artifact.formatName() = name.name.lowercase()
     .split("_")
-    .joinToString(" ", transform = String::capitalize)
+    .joinToString(" ") { artifactName -> artifactName.replaceFirstChar(Char::titlecase) }
 
-fun Artifact.formatFullName() = "${level.name.toLowerCase().capitalize()} ${rarity.name.toLowerCase()} ${formatName()}"
+fun Artifact.formatFullName() =
+    "${level.name.lowercase().replaceFirstChar(Char::titlecase)} ${rarity.name.lowercase()} ${formatName()}"
 

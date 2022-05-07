@@ -49,9 +49,9 @@ data class CoopContractState(
     val timeTillFinalGoal: Duration?
         get() = goals.last().moment
     val tokensAvailable: Int
-        get() = farmers.sumBy { farmer -> farmer.constants.tokensAvailable }
+        get() = farmers.sumOf { farmer -> farmer.constants.tokensAvailable }
     val tokensSpent: Int
-        get() = farmers.sumBy { farmer -> farmer.constants.tokensSpent }
+        get() = farmers.sumOf { farmer -> farmer.constants.tokensSpent }
     val goalsReached: Int
         get() = goals.count { (_, moment) -> moment != null }
     val willFinish: Boolean

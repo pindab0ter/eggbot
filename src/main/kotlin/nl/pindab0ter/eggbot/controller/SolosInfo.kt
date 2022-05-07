@@ -15,7 +15,6 @@ import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import nl.pindab0ter.eggbot.model.simulation.simulate
 import nl.pindab0ter.eggbot.view.solosInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
-import kotlin.time.ExperimentalTime
 
 object SolosInfo : EggBotCommand() {
 
@@ -31,9 +30,8 @@ object SolosInfo : EggBotCommand() {
         init()
     }
 
-    @ExperimentalTime
     override fun execute(event: CommandEvent, parameters: JSAPResult) = runBlocking {
-        val contractId = parameters.getString(CONTRACT_ID).toLowerCase()
+        val contractId = parameters.getString(CONTRACT_ID).lowercase()
         val compact = parameters.getBoolean(COMPACT, false)
 
         val message = event.channel.sendMessage("Looking up contract information ").complete()

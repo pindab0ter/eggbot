@@ -46,7 +46,7 @@ object Migrate : EggBotCommand() {
             else event.replyInDmAndLog("Migrating is only allowed in DMs to protect your in-game ID. Please give it a go here and delete your previous message!")
         }
 
-        val eggIncId = parameters.getString(EGG_INC_ID).toUpperCase()
+        val eggIncId = parameters.getString(EGG_INC_ID).uppercase()
 
         val farmer: Farmer? = transaction {
             val discordUser: DiscordUser = DiscordUser.findById(event.author.id)

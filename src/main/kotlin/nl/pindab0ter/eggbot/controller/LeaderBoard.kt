@@ -63,7 +63,7 @@ object LeaderBoard : EggBotCommand() {
 
         val top = parameters.getIntOrNull(TOP)
 
-        if (top != null && top < 1) return event.replyAndLogWarning("${TOP.capitalize()} must be a positive number.")
+        if (top != null && top < 1) return event.replyAndLogWarning("${TOP.replaceFirstChar(Char::titlecase)} must be a positive number.")
 
         val board = parameters.getStringOrNull(BOARD)?.let { input ->
             Board.getByString(input)
@@ -92,8 +92,8 @@ object LeaderBoard : EggBotCommand() {
                 values().find { board -> board.shortForm == input }
         }
 
-        val longForm: String get() = name.toLowerCase().replace('_', '-')
-        val shortForm: String get() = name.toLowerCase().split('_').joinToString("") { "${it.first()}" }
+        val longForm: String get() = name.lowercase().replace('_', '-')
+        val shortForm: String get() = name.lowercase().split('_').joinToString("") { "${it.first()}" }
     }
 
     fun formatLeaderBoard(

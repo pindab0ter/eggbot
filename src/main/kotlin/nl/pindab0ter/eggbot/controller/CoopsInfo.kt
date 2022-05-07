@@ -18,7 +18,6 @@ import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.Companion.timeTi
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.math.BigDecimal
-import kotlin.time.ExperimentalTime
 
 object CoopsInfo : EggBotCommand() {
 
@@ -34,7 +33,6 @@ object CoopsInfo : EggBotCommand() {
         init()
     }
 
-    @ExperimentalTime
     override fun execute(event: CommandEvent, parameters: JSAPResult) = runBlocking {
         val contractId = parameters.getString(CONTRACT_ID)
         val compact = parameters.getBoolean(COMPACT, false)
@@ -57,7 +55,7 @@ object CoopsInfo : EggBotCommand() {
         }
 
         val progressBar = ProgressBar(
-            goal = coopStatuses.sumBy { coopStatus ->
+            goal = coopStatuses.sumOf { coopStatus ->
                 if ((coopStatus?.eggsLaid ?: BigDecimal.ZERO) < contract.goals.last().targetAmount.toBigDecimal()) {
                     coopStatus?.contributors?.count() ?: 0
                 } else 0

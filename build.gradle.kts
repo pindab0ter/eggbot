@@ -18,7 +18,10 @@ plugins {
 
 repositories {
     mavenCentral()
-    jcenter()
+    maven {
+        name = "JCenter"
+        url = uri("https://jcenter.bintray.com/")
+    }
     maven {
         name = "m2-dv8tion"
         url = uri("https://m2.dv8tion.net/releases")
@@ -45,23 +48,15 @@ dependencies {
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.3")
 }
 
-val compileKotlin: KotlinCompile by tasks
-compileKotlin.kotlinOptions {
-    languageVersion = "1.4"
-    jvmTarget = "11"
-    freeCompilerArgs = freeCompilerArgs.plus(listOf(
-        "-Xopt-in=kotlin.RequiresOptIn",
-        "-Xopt-in=kotlin.ExperimentalStdlibApi"
-    ))
-}
-
-val compileJava: JavaCompile by tasks
-compileJava.enabled = false
-
-configurations.forEach { configuration ->
-    // Workaround the Gradle bug resolving multi platform dependencies.
-    // https://github.com/square/okio/issues/647
-    if (configuration.name.contains("proto", ignoreCase = true)) {
-        configuration.attributes.attribute(Usage.USAGE_ATTRIBUTE, objects.named(Usage::class.java, "java-runtime"))
+tasks {
+    withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+        }
     }
+
+        withType<JavaCompile>().configureEach {
+            enabled = false
+        }
 }

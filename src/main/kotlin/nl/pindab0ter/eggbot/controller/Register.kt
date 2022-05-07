@@ -91,7 +91,7 @@ object Register : EggBotCommand() {
             ).also { rollback() }
 
             // Check if the in-game name matches with the in-game name belonging to the in-game ID's account
-            if (!listOf(backup.userId, backup.eiUserId).contains(registrant.inGameId) || registrant.inGameName.toLowerCase() != backup.userName.toLowerCase()) return@transaction event.replyAndLogWarning(
+            if (!listOf(backup.userId, backup.eiUserId).contains(registrant.inGameId) || registrant.inGameName.lowercase() != backup.userName.lowercase()) return@transaction event.replyAndLogWarning(
                 """
                 The in-game name you entered (`${registrant.inGameName}`) does not match the name on record (`${backup.userName}`)
                 If this is you, please register with `${event.client.textualPrefix}$name ${backup.userId} ${backup.userName}`
