@@ -35,7 +35,7 @@ repositories {
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.6.0")
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.6.1")
-    implementation("joda-time", "joda-time", "2.10.14") // TODO: Replace with Kotlin's time library
+    implementation("joda-time", "joda-time", "2.10.14")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
 
     // Database
