@@ -15,7 +15,6 @@ import dev.kord.rest.request.RestRequestException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
-import nl.pindab0ter.eggbot.converters.contract
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.CHANNEL
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.ROLE
 import nl.pindab0ter.eggbot.helpers.*
@@ -23,7 +22,6 @@ import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
-import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.rollCallResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -87,10 +85,8 @@ class RollCallExtension : Extension() {
                             // First create all co-ops
                             .map { (name, farmers) ->
                                 Coop.new {
-                                    contractId = arguments.contract.id
+                                    this.contractId = arguments.contract.id
                                     this.name = name
-                                    leader = farmers.filter(Farmer::canBeCoopLeader).maxByOrNull(Farmer::earningsBonus)
-                                        ?: farmers.maxByOrNull(Farmer::earningsBonus)
                                 }.also { it.farmers = farmers }
                             }
                             // Then create roles and channels for all the successfully created co-ops

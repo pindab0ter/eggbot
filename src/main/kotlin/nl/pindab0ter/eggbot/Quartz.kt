@@ -1,11 +1,10 @@
 package nl.pindab0ter.eggbot
 
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.jobs.UpdateDiscordTagsJob
+import nl.pindab0ter.eggbot.jobs.JobLogger
 import nl.pindab0ter.eggbot.jobs.UpdateFarmers
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
 import nl.pindab0ter.eggbot.model.Config
-import nl.pindab0ter.eggbot.jobs.JobLogger
 import org.quartz.CronScheduleBuilder.weeklyOnDayAndHourAndMinute
 import org.quartz.JobBuilder.newJob
 import org.quartz.SimpleScheduleBuilder.simpleSchedule
@@ -26,15 +25,6 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
             .build(),
         newTrigger()
             .withIdentity("quarter_daily_farmer_update")
-            .withSchedule(simpleSchedule().withIntervalInHours(6).repeatForever())
-            .build()
-    )
-    if (!Config.devMode) scheduleJob(
-        newJob(UpdateDiscordTagsJob::class.java)
-            .withIdentity("update_discord_tags")
-            .build(),
-        newTrigger()
-            .withIdentity("quarter_daily_discord_tags_update")
             .withSchedule(simpleSchedule().withIntervalInHours(6).repeatForever())
             .build()
     )

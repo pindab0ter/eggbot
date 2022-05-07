@@ -11,11 +11,10 @@ import nl.pindab0ter.eggbot.model.EarningsBonus
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
-import org.joda.time.DateTime
 import java.math.BigDecimal
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
-    val inGameId: String get() = id.value
+    val inGameId: String get() = this.id.value
     var discordUser by DiscordUser referencedOn Farmers.discordId
     private var _discordId by Farmers.discordId
     var discordId: Snowflake
@@ -39,7 +38,6 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var updatedAt by Farmers.updatedAt
 
     val isActive: Boolean get() = discordUser.isActive
-    val canBeCoopLeader get() = discordUser.isActive && !discordUser.optedOutOfCoopLead
 
     val earningsBonus: BigDecimal
         get() = EarningsBonus(this).earningsBonus

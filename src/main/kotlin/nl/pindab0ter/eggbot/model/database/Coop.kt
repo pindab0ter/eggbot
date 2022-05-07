@@ -5,7 +5,6 @@ import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.configuredGuild
-import nl.pindab0ter.eggbot.model.Config
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -15,7 +14,6 @@ import java.math.BigDecimal
 class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
     var contractId by Coops.contractId
-    var leader: Farmer? by Farmer optionalReferencedOn Coops.leaderId
 
     private var _roleId by Coops.roleId
     var roleId: Snowflake?
@@ -40,7 +38,6 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
         }
 
     var farmers by Farmer via CoopFarmers
-    val hasLeader: Boolean get() = leader != null
     val activeEarningsBonus: BigDecimal
         get() = farmers.sumOf { farmer ->
             if (farmer.isActive) farmer.earningsBonus
