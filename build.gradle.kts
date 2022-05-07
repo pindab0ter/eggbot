@@ -12,7 +12,7 @@ plugins {
     idea
     application
     kotlin("jvm") version "1.6.21"
-    id("com.toasttab.protokt") version "0.8.0"
+    id("com.toasttab.protokt") version "0.8.1"
     id("com.github.ben-manes.versions") version "0.42.0"
 }
 
@@ -41,7 +41,7 @@ dependencies {
     // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.14")
     runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.3")
-    implementation("org.flywaydb", "flyway-core", "8.5.9")
+    implementation("org.flywaydb", "flyway-core", "8.5.10")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
@@ -57,18 +57,18 @@ dependencies {
     // Logging
     runtimeOnly("ch.qos.logback", "logback-classic", "1.2.11")
     implementation("io.github.microutils", "kotlin-logging-jvm", "2.1.21")
-    implementation("io.sentry", "sentry", "6.0.0-alpha.6")
+    implementation("io.sentry", "sentry", "6.0.0-beta.3")
 }
 
-tasks.withType<KotlinCompile>().configureEach {
-    kotlinOptions.languageVersion = "1.6"
-    kotlinOptions.jvmTarget = "17"
-    kotlinOptions.freeCompilerArgs += listOf(
-        "-Xopt-in=kotlin.RequiresOptIn",
-        "-Xopt-in=kotlin.ExperimentalStdlibApi",
-    )
-}
+tasks {
+    withType<KotlinCompile>().configureEach {
+        kotlinOptions {
+            jvmTarget = "1.8"
+            freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
+        }
+    }
 
-tasks.withType<JavaCompile>().configureEach {
-    enabled = false
+    withType<JavaCompile>().configureEach {
+        enabled = false
+    }
 }

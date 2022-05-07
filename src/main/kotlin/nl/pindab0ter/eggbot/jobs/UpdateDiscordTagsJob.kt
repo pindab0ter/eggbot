@@ -1,6 +1,5 @@
 package nl.pindab0ter.eggbot.jobs
 
-import dev.kord.gateway.PrivilegedIntent
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
@@ -14,7 +13,6 @@ import kotlin.system.measureTimeMillis
 
 class UpdateDiscordTagsJob : Job {
 
-    @OptIn(PrivilegedIntent::class)
     override fun execute(context: JobExecutionContext?) {
         val discordUsers = transaction { DiscordUser.all().toList() }
 

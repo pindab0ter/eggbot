@@ -2,10 +2,7 @@ package nl.pindab0ter.eggbot.model
 
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Message
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
 import java.util.concurrent.atomic.AtomicBoolean
@@ -14,6 +11,7 @@ import kotlin.coroutines.CoroutineContext
 import kotlin.math.roundToInt
 
 
+@OptIn(DelicateCoroutinesApi::class)
 class ProgressBar(
     goal: Int,
     private var message: Message,
