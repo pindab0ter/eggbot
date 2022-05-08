@@ -43,9 +43,22 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         get() = EarningsBonus(this).earningsBonus
 
     fun update(backup: Backup) {
-        if (backup.clientVersion > Config.clientVersion) Config.clientVersion = backup.clientVersion.also { logger.info { "Updated to client version $it." } }
-        if (backup.game == null || backup.stats == null) return logger.warn { "Tried to update from backup but failed." }
-        if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) inGameName = backup.userName
+        if (backup.clientVersion > Config.clientVersion) {
+            logger.info { "Updated to client version ${backup.clientVersion}." }
+            Config.clientVersion = backup.clientVersion
+        }
+
+        if (backup.game == null || backup.stats == null) {
+            logger.warn { "Tried to update from backup but failed." }
+            return
+        }
+
+        if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) {
+            inGameName = backup.userName
+        } else {
+            logger.warn { "Found an invalid in-game name: ${backup.userName} for {${backup.userId}" }
+        }
+
         prestiges = backup.stats.prestigeCount
         _soulEggs = backup.game.soulEggs
         prophecyEggs = backup.game.prophecyEggs
@@ -60,9 +73,12 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         val logger = KotlinLogging.logger { }
 
         fun new(discordUser: DiscordUser, backup: Backup): Farmer? {
-            if (backup.game == null || backup.stats == null) return null.also { logger.warn { "Tried to register from backup but failed." } }
+            if (backup.game == null || backup.stats == null) {
+                logger.warn { "Tried to register from backup but failed." }
+                return null
+            }
 
-            return Farmer.new(if (backup.eiUserId.isNotBlank()) backup.eiUserId else backup.userId) {
+            return Farmer.new(backup.eiUserId.ifBlank { backup.userId }) {
                 this.discordUser = discordUser
                 if (backup.userName.isNotBlank()) inGameName = backup.userName
                 prestiges = backup.stats.prestigeCount

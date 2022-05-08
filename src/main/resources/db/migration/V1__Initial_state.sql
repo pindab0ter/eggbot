@@ -10,7 +10,7 @@ CREATE TABLE DiscordUsers
 
 CREATE TABLE Farmers
 (
-    in_game_id            TEXT     NOT NULL
+    egg_inc_id            TEXT     NOT NULL
         PRIMARY KEY,
     discord_id            TEXT     NOT NULL
         REFERENCES DiscordUsers

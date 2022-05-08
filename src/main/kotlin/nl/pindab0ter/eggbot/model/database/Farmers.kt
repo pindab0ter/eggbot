@@ -5,8 +5,9 @@ import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
 import org.joda.time.DateTime
 
 object Farmers : IdTable<String>() {
-    override val id = text("in_game_id").entityId().primaryKey()
+    override val id = text("egg_inc_id").entityId().primaryKey()
     val discordId = reference("discord_id", DiscordUsers, CASCADE, CASCADE)
+    // TODO: Remove stats from the database
     val inGameName = text("in_game_name")
     val prestiges = long("prestiges")
     val soulEggs = double("soul_eggs")
