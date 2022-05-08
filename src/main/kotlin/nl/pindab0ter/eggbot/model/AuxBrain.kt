@@ -15,20 +15,40 @@ import org.joda.time.Period.minutes
 object AuxBrain {
     private val logger = KotlinLogging.logger("AuxBrain")
 
-    private const val PERIODICALS_URL = "http://www.auxbrain.com/ei/get_periodicals"
-    private const val PERIODICALS_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/get_periodicals"
-    private const val COOP_STATUS_URL = "http://www.auxbrain.com/ei/coop_status"
-    private const val COOP_STATUS_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
-    private const val FIRST_CONTACT_URL = "http://www.auxbrain.com/ei/first_contact"
-    private const val FIRST_CONTACT_BETA_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
-    private const val ARTIFACTS_CONFIGURATION_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei_afx/config"
+    private const val PERIODICALS_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/get_periodicals"
+    private const val COOP_STATUS_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
+    private const val FIRST_CONTACT_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
 
     ///////////////
     // Contracts //
     ///////////////
 
-    private var contracts: Map<String, Contract> = emptyMap()
-    private var lastContractsUpdate: Instant = Instant.EPOCH
+    private var contractsUpdateValidUntil: Instant = Instant.EPOCH
+    private val contracts: MutableMap<String, Contract> = mutableMapOf()
+        get() = if (contractsUpdateValidUntil.isBefore(Instant.now())) {
+            logger.info { "Contracts cache miss" }
+
+            val contracts = periodicalsRequest()
+                .responseObject(ContractsDeserializer)
+                .third
+                .component1()
+                .orEmpty()
+
+            if (contracts.isEmpty()) {
+                logger.warn { "Could not get contracts from AuxBrain" }
+            }
+
+            contracts
+                .filter { contract -> contract.id != "first-contract" }
+                .forEach { contract ->
+                    field[contract.id] = contract
+                }
+            contractsUpdateValidUntil = Instant.now().plus(minutes(5).toStandardDuration())
+            field
+        } else {
+            logger.info { "Contracts cache hit" }
+            field
+        }
 
     private fun periodicalsRequest(): Request {
         val data = PeriodicalsRequest {
@@ -38,31 +58,14 @@ object AuxBrain {
             userId = Config.userId
         }.serialize().encodeBase64ToString()
 
-        return PERIODICALS_BETA_URL.httpPost()
+        return PERIODICALS_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body("data=$data")
     }
 
-    private fun getCachedContracts(): Map<String, Contract> {
-        if (lastContractsUpdate.isBefore(Instant.now().minus(minutes(5).toStandardDuration()))) {
-            logger.info { "Fetching contracts..." }
+    fun getContracts(): List<Contract> = contracts.values.toList()
 
-            periodicalsRequest().responseObject(ContractsDeserializer).third.component1()?.let { contracts ->
-                this.contracts = contracts
-                    .filter { contract -> contract.id != "first-contract" }
-                    .associateBy { contract -> contract.id }
-                lastContractsUpdate = Instant.now()
-            }
-        } else {
-            logger.info { "Using cached contracts..." }
-        }
-
-        return contracts
-    }
-
-    fun getContracts(): List<Contract> = getCachedContracts().values.toList()
-
-    fun getContract(contractId: String): Contract? = getCachedContracts()[contractId]
+    fun getContract(contractId: String): Contract? = contracts[contractId]
 
     private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
         override fun deserialize(content: String): List<Contract>? {
@@ -74,6 +77,13 @@ object AuxBrain {
     // Backups //
     /////////////
 
+    data class FarmerBackupCache(
+        val validUntil: Instant,
+        val farmerBackup: Backup
+    )
+
+    private val cachedFarmerBackups: MutableMap<String, FarmerBackupCache> = mutableMapOf()
+
     private fun firstContactRequest(userId: String): Request {
         val data = FirstContactRequest {
             eiUserId = userId
@@ -81,13 +91,32 @@ object AuxBrain {
             clientVersion = Config.clientVersion
         }.serialize().encodeBase64ToString()
 
-        return FIRST_CONTACT_BETA_URL.httpPost()
+        return FIRST_CONTACT_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body("data=$data")
     }
 
-    fun getFarmerBackup(userId: String): Backup? {
-        return firstContactRequest(userId).responseObject(BackupDeserializer).third.component1()
+    fun getFarmerBackup(userId: String): Backup? = cachedFarmerBackups[userId]
+        ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
+        ?.let { cachedFarmerBackup ->
+            logger.info { "Farmer backup cache hit" }
+            return cachedFarmerBackup.farmerBackup
+        } ?: run {
+
+        logger.info { "Farmer backup cache miss" }
+
+        val retrievedFarmerBackup = firstContactRequest(userId)
+            .responseObject(BackupDeserializer)
+            .third
+            .component1()
+
+        if (retrievedFarmerBackup == null) logger.warn { "Could not get backup for ID `$userId` from AuxBrain" }
+        else cachedFarmerBackups[userId] = FarmerBackupCache(
+            validUntil = Instant.now().plus(minutes(5).toStandardDuration()),
+            farmerBackup = retrievedFarmerBackup,
+        )
+
+        retrievedFarmerBackup
     }
 
     private object BackupDeserializer : ResponseDeserializable<Backup> {
@@ -106,7 +135,7 @@ object AuxBrain {
             this.coopId = coopId
         }.serialize().encodeBase64ToString()
 
-        return COOP_STATUS_BETA_URL.httpPost()
+        return COOP_STATUS_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
             .body("data=$data")
     }
