@@ -16,7 +16,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime.now
 
 @KordPreview
-class ActivityExtension : Extension() {
+class ActivityCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 

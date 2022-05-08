@@ -17,7 +17,7 @@ import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
-class CommandLoggerExtension : Extension() {
+class CommandLogger : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = "CommandLoggerExtension"
 

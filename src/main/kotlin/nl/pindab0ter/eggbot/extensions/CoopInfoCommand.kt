@@ -19,7 +19,7 @@ import nl.pindab0ter.eggbot.view.coopFinishedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 
 @KordPreview
-class CoopInfoExtension : Extension() {
+class CoopInfoCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 

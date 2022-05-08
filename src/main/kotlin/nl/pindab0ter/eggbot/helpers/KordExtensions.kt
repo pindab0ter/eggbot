@@ -29,7 +29,7 @@ enum class DisplayMode : ChoiceEnum {
 }
 
 fun Arguments.displayModeChoice() = optionalEnumChoice<DisplayMode> {
-    name = "displaymode"
+    name = "display-mode"
     description = "Use compact to better fit mobile devices or extended to show numbers in non-scientific notation."
     typeName = DisplayMode::name.name
 }

@@ -15,7 +15,7 @@ import mu.KotlinLogging
 /**
  * This class is for testing purposes only.
  */
-class PostExtension : Extension() {
+class PostCommands : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 

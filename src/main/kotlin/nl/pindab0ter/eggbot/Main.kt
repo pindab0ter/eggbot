@@ -17,15 +17,15 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
 
     extensions {
         // add(::AdminExtension)
-        add(::CommandLoggerExtension)
-        add(::CoopExtension)
-        add(::CoopInfoExtension)
-        add(::EarningsBonusExtension)
-        add(::EarningsBonusExtension)
-        add(::LeaderBoardExtension)
-        add(::PostExtension)
-        add(::RegisterExtension)
-        add(::SelfExtension)
+        add(::CommandLogger)
+        add(::CoopCommand)
+        add(::CoopInfoCommand)
+        add(::EarningsBonusCommand)
+        add(::EarningsBonusCommand)
+        add(::LeaderBoardCommand)
+        add(::PostCommands)
+        add(::RegisterCommand)
+        add(::ActivityCommand)
 
         if (Config.sentryDsn != null) sentry {
             enable = true

@@ -15,7 +15,7 @@ import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
-class RegisterExtension : Extension() {
+class RegisterCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 

@@ -18,7 +18,7 @@ import dev.kord.rest.request.KtorRequestException
 import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.model.Config
 
-class AdminExtension : Extension() {
+class AdminCommand : Extension() {
     override val name: String = javaClass.simpleName
 
     override suspend fun setup() {

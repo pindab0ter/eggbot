@@ -17,7 +17,7 @@ import nl.pindab0ter.eggbot.view.earningsBonusResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
-class EarningsBonusExtension : Extension() {
+class EarningsBonusCommand : Extension() {
     override val name: String = javaClass.simpleName
 
     override suspend fun setup() {

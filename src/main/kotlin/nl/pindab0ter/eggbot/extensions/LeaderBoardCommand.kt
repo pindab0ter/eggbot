@@ -17,7 +17,7 @@ import nl.pindab0ter.eggbot.view.leaderboardResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
-class LeaderBoardExtension : Extension() {
+class LeaderBoardCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 

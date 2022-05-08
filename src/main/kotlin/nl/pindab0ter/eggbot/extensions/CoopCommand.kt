@@ -31,7 +31,7 @@ import nl.pindab0ter.eggbot.model.database.Farmers
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
-class CoopExtension : Extension() {
+class CoopCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
