@@ -2,32 +2,34 @@ package nl.pindab0ter.eggbot.extensions
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
+import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalChannel
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalRole
-import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalString
+import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.Color
 import dev.kord.common.entity.Permission.ManageChannels
 import dev.kord.common.entity.Permission.ManageRoles
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
-import dev.kord.core.entity.Role
-import dev.kord.core.entity.channel.Channel
 import dev.kord.rest.request.RestRequestException
 import kotlinx.coroutines.flow.firstOrNull
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.configuredGuild
+import nl.pindab0ter.eggbot.helpers.contract
+import nl.pindab0ter.eggbot.helpers.createChannel
+import nl.pindab0ter.eggbot.helpers.createRole
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -42,18 +44,23 @@ class CoopCommand : Extension() {
             description = "Commands to manage co-ops"
 
             guild(Config.guild)
-            allowUser(Config.botOwner)
-            allowRole(Config.adminRole)
 
             class AddCoopArguments : Arguments() {
                 val contract: Contract by contract()
-                val coopId: String by coopId()
+                val coopId: String by string {
+                    name = "coop"
+                    description = "The co-op ID. Can be found in #roll-call or in-game."
+
+                    validate {
+                        failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
+                    }
+                }
                 val createRole: Boolean by createRole()
                 val createChannel: Boolean by createChannel()
                 val preEmptive: Boolean by defaultingBoolean {
                     name = "pre-emptive"
                     description = "Add the co-op even if it doesn't exist (yet)."
-                    defaultValue = true
+                    defaultValue = false
                 }
             }
 
@@ -69,35 +76,28 @@ class CoopCommand : Extension() {
                     val contract = arguments.contract
                     val coopId = arguments.coopId.lowercase()
 
-                    // Check if roles or channels can be created if required
-                    if (configuredGuild == null && (arguments.createRole || arguments.createChannel)) return@action respond {
-                        content = "${Config.emojiWarning} Could not get server info. Please try without creating roles or channels or else please contact the bot maintainer."
-                    }.discard()
-
                     // Check if co-op is already registered
-                    if (transaction {
-                            Coop.find {
-                                (Coops.name eq coopId) and (Coops.contractId eq contract.id)
-                            }.empty().not()
-                        }) return@action respond { content = "Co-op is already registered." }.discard()
+                    transaction {
+                        Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contract.id) }.firstOrNull()
+                    }?.let { coop ->
+                        respond { content = "Co-op `${coop.name}` is already registered for _${contract.name}_." }
+                        return@action
+                    }
 
                     // Check if a role with the same name exists
-                    if (arguments.createRole) configuredGuild?.roles?.firstOrNull { role -> role.name == coopId }
-                        ?.let { role ->
-                            return@action respond {
-                                content = "${Config.emojiWarning} The role ${role.mention} already exists."
-                            }.discard()
-                        }
+                    if (arguments.createRole) configuredGuild?.roles?.firstOrNull { role -> role.name == coopId }?.let { role ->
+                        respond { content = "**Error:** The role ${role.mention} already exists." }
+                        return@action
+                    }
 
                     // Fetch the co-op status to see if it exists
                     val coopStatus: CoopStatus? = AuxBrain.getCoopStatus(arguments.contract.id, coopId)
 
-                    if (coopStatus == null && !arguments.preEmptive) return@action respond {
-                        // Finish if the co-op status couldn't be found;
-                        // it most likely doesn't exist yet and this co-op is added in anticipation
-                        content = "${Config.emojiWarning} No co-op found for contract _${contract.name}_ with ID `${coopId}`"
-                    }.discard()
-
+                    // Finish if the co-op status couldn't be found, and it isn't being created pre-emptively
+                    if (coopStatus == null && !arguments.preEmptive) {
+                        respond { content = "No co-op found for contract _${contract.name}_ with ID `${coopId}`" }
+                        return@action
+                    }
 
                     // Create the co-op
                     val coop = transaction {
@@ -108,9 +108,16 @@ class CoopCommand : Extension() {
                     }
 
                     // Finish if no role needs to be created
-                    if (!arguments.createRole) return@action respond {
-                        content = "Registered co-op `${coop.name}` for contract _${contract.name}_."
-                    }.discard()
+                    if (!arguments.createRole) {
+                        respond {
+                            content = buildString {
+                                append("Registered co-op `${coop.name}` for contract _${contract.name}_")
+                                if (arguments.preEmptive && coopStatus == null) append(", even though the co-op was not found")
+                                append(".")
+                            }
+                        }
+                        return@action
+                    }
 
                     // Create the role
                     val role = guild?.createRole {
@@ -132,18 +139,14 @@ class CoopCommand : Extension() {
 
                     val responseBuilder = StringBuilder().apply {
                         append("Registered co-op `${coop.name}` for contract _${contract.name}_")
-
                         if (role != null) append(", with the role ${role.mention}")
                         if (channel != null) {
                             if (role != null) append(" and ") else append(", ")
-                            append("the channel ${channel.mention}.")
-                        } else append(".")
+                            append("the channel ${channel.mention}")
+                        }
+                        if (coopStatus == null && arguments.preEmptive) append(", even though the co-op was not found")
+                        append(".")
                     }
-
-                    // Finish if the role does not need assigning
-                    if (coopStatus == null && !arguments.preEmptive) return@action respond {
-                        content = responseBuilder.toString()
-                    }.discard()
 
                     val successes = mutableListOf<String>()
                     val failures = mutableListOf<String>()
@@ -182,19 +185,26 @@ class CoopCommand : Extension() {
             }
 
             class RemoveCoopArguments : Arguments() {
-                val coopId: String? by optionalString {
+                val coopId: String by string {
                     name = "name"
                     description = "The co-op ID. Can be found in #roll-call or in-game."
-                }
-                val channel: Channel? by optionalChannel {
-                    name = "channel"
-                    description = "The channel associated with the co-op to remove"
-                    requiredGuild = { Config.guild }
-                }
-                val role: Role? by optionalRole {
-                    name = "role"
-                    description = "The role associated with the co-op to remove"
-                    requiredGuild = { Config.guild }
+
+                    validate {
+                        failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
+                    }
+
+                    autoComplete {
+                        val coopInput: String = command.options["name"]?.value as String? ?: ""
+
+                        val coops = transaction {
+                            Coop
+                                .find { Coops.name like "$coopInput%" }
+                                .limit(25)
+                                .orderBy(Coops.name to SortOrder.ASC)
+                                .associate { coop -> Pair(coop.name, coop.name) }
+                        }
+                        suggestStringMap(coops)
+                    }
                 }
             }
 
@@ -206,32 +216,20 @@ class CoopCommand : Extension() {
                     ManageChannels,
                 )
 
-                action {
-                    if (listOf(
-                            arguments.coopId != null,
-                            arguments.channel != null,
-                            arguments.role != null
-                        ).count { it } > 2
-                    ) return@action respond {
-                        content = "Please use only one method to choose a co-op to remove"
-                    }.discard()
+                check {
+                    hasRole(Config.adminRole)
+                    passIf(event.interaction.user.id == Config.botOwner)
+                }
 
-                    val coop: Coop = when {
-                        arguments.coopId != null -> transaction {
-                            Coop.find { Coops.name eq arguments.coopId!! }.firstOrNull()
-                        }
-                        arguments.channel != null -> transaction {
-                            Coop.find { Coops.channelId eq arguments.channel!!.id.toString() }.firstOrNull()
-                        }
-                        arguments.role != null -> transaction {
-                            Coop.find { Coops.roleId eq arguments.role!!.id.toString() }.firstOrNull()
-                        }
-                        else -> return@action respond {
-                            content = "You must choose a co-op to remove"
-                        }.discard()
-                    } ?: return@action respond {
-                        content = "Could not find that co-op"
-                    }.discard()
+                action {
+                    val coop: Coop? = transaction {
+                        Coop.find { Coops.name eq arguments.coopId }.firstOrNull()
+                    }
+
+                    if (coop == null) {
+                        respond { content = "Could not find that co-op" }
+                        return@action
+                    }
 
                     val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
                     val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
@@ -256,9 +254,7 @@ class CoopCommand : Extension() {
                             }
                         }
                     } catch (_: RestRequestException) {
-                        return@action respond {
-                            content = "Could not remove the co-op"
-                        }.discard()
+                        respond { content = "Could not remove the co-op" }
                     }
                 }
             }
