@@ -9,7 +9,13 @@ import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.suggestStringMap
+import dev.kord.common.entity.optional.firstOrNull
 import nl.pindab0ter.eggbot.converters.contract
+import nl.pindab0ter.eggbot.model.AuxBrain
+import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.database.Coops
+import org.jetbrains.exposed.sql.transactions.transaction
 
 suspend fun <A : Arguments> PublicSlashCommandContext<A>.multipartRespond(messages: List<String>) {
     respond {
@@ -48,22 +54,25 @@ fun Arguments.contract(): SingleConverter<Contract> = contract {
 fun Arguments.coopId() = string {
     name = "coop"
     description = "The co-op ID. Can be found in #roll-call or in-game."
+
     autoComplete {
-        // TODO: Implement auto-complete by adding contracts to the database since the contract argument in the
-        //  AutoCompleteInteractionCreateEvent is only available by name.
-        //
-        // val contractName = it.interaction.data.data.options.firstOrNull { optionData ->
-        //     optionData.name == "contract"
-        // }?.value?.value?.value as String?
-        //
-        // if (contractName !== null) {
-        //     val coops = transaction {
-        //         val contract = Coop.find { Contracts.name eq contractName }.firstOrNull()
-        //         Coop.find { Coops.contractId eq (/* inner join on Contracts */) }.associate { coop -> Pair(coop.name, coop.name) }
-        //     }
-        //     suggestStringMap(coops)
-        // }
+        val contractName = it.interaction.data.data.options.firstOrNull { optionData ->
+            optionData.name == "contract"
+        }?.value?.value?.value as String?
+
+        if (contractName !== null) {
+            val coops = transaction {
+                val contract = AuxBrain.getContracts().find { contract -> contract.name == contractName }
+                if (contract != null) {
+                    Coop.find { Coops.contractId eq contract.id }.associate { coop -> Pair(coop.name, coop.name) }
+                } else {
+                    emptyMap()
+                }
+            }
+            suggestStringMap(coops)
+        }
     }
+
     validate {
         failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
     }

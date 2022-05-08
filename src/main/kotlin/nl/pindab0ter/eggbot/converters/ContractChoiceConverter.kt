@@ -11,7 +11,6 @@ import com.kotlindiscord.kord.extensions.commands.converters.Validator
 import com.kotlindiscord.kord.extensions.commands.converters.builders.ConverterBuilder
 import com.kotlindiscord.kord.extensions.parser.StringParser
 import dev.kord.core.entity.interaction.OptionValue
-import dev.kord.core.kordLogger
 import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import nl.pindab0ter.eggbot.model.AuxBrain
@@ -40,8 +39,7 @@ class ContractChoiceConverter(
     }
 
     override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
-        kordLogger.debug { option }
-        parsed = choices.values.firstOrNull { contract -> contract.name == option.value }
+        parsed = choices.values.firstOrNull { contract -> contract.name.trim() == option.value }
             ?: throw Exception("Could not get contract information")
 
         return true
