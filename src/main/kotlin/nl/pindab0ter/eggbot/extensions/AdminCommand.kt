@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.extensions
 
+import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
 import com.kotlindiscord.kord.extensions.commands.application.slash.group
@@ -28,8 +29,11 @@ class AdminCommand : Extension() {
             description = "All tools available to admins"
 
             guild(Config.guild)
-            allowUser(Config.botOwner)
-            allowRole(Config.adminRole)
+
+            check {
+                hasRole(Config.adminRole)
+                passIf(event.interaction.user.id == Config.botOwner)
+            }
 
             group("role") {
                 description = "Add and remove roles"

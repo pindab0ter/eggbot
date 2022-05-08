@@ -40,6 +40,8 @@ class CoopCommand : Extension() {
     override suspend fun setup() {
         publicSlashCommand {
 
+            // TODO: Break up into add-coop and remove-coop
+
             name = "coop"
             description = "Commands to manage co-ops"
 

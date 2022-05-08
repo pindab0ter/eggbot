@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.extensions
 
 import com.auxbrain.ei.Contract
+import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
@@ -45,8 +46,12 @@ class RollCallExtension : Extension() {
             description = "Manage roll calls"
 
             guild(Config.guild)
-            allowUser(Config.botOwner)
-            allowRole(Config.adminRole)
+            locking = true
+
+            check {
+                hasRole(Config.adminRole)
+                passIf(event.interaction.user.id == Config.botOwner)
+            }
 
             class CreateRollCallArguments : Arguments() {
                 val contract: Contract by contract()
