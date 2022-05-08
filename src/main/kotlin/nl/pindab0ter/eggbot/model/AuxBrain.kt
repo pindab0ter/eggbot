@@ -13,7 +13,7 @@ import org.joda.time.Period.minutes
 
 
 object AuxBrain {
-    private val logger = KotlinLogging.logger("AuxBrain")
+    private val logger = KotlinLogging.logger {}
 
     private const val PERIODICALS_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/get_periodicals"
     private const val COOP_STATUS_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
@@ -26,7 +26,7 @@ object AuxBrain {
     private var contractsUpdateValidUntil: Instant = Instant.EPOCH
     private val contracts: MutableMap<String, Contract> = mutableMapOf()
         get() = if (contractsUpdateValidUntil.isBefore(Instant.now())) {
-            logger.info { "Contracts cache miss" }
+            logger.trace { "Contracts cache miss" }
 
             val contracts = periodicalsRequest()
                 .responseObject(ContractsDeserializer)
@@ -46,7 +46,7 @@ object AuxBrain {
             contractsUpdateValidUntil = Instant.now().plus(minutes(5).toStandardDuration())
             field
         } else {
-            logger.info { "Contracts cache hit" }
+            logger.trace { "Contracts cache hit" }
             field
         }
 
@@ -99,11 +99,11 @@ object AuxBrain {
     fun getFarmerBackup(userId: String): Backup? = cachedFarmerBackups[userId]
         ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
         ?.let { cachedFarmerBackup ->
-            logger.info { "Farmer backup cache hit" }
+            logger.trace { "Farmer backup cache hit" }
             return cachedFarmerBackup.farmerBackup
         } ?: run {
 
-        logger.info { "Farmer backup cache miss" }
+        logger.trace { "Farmer backup cache miss" }
 
         val retrievedFarmerBackup = firstContactRequest(userId)
             .responseObject(BackupDeserializer)
