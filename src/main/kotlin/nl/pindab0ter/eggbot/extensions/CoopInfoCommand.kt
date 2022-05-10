@@ -76,29 +76,35 @@ class CoopInfoCommand : Extension() {
         }
 
         publicSlashCommand(::CoopInfoArguments) {
-            name = "info"
+            name = "coop"
             description = "See the current status and player contribution of a specific co-op."
 
             action {
                 val contract = arguments.contract
                 val coopStatus = AuxBrain.getCoopStatus(arguments.contract.id, arguments.coopId)
-                    ?: return@action respond {
-                        content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
-                    }.discard()
                 val compact = arguments.compact
 
-                when (val status = CoopContractStatus(contract, coopStatus, arguments.coopId)) {
-                    is NotFound -> TODO()
+                if (coopStatus == null) {
+                    respond {
+                        content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
+                    }.discard()
+                    return@action
+                }
+
+                when (val coopContractStatus = CoopContractStatus(contract, coopStatus, arguments.coopId)) {
+                    is NotFound -> respond {
+                        content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
+                    }
                     is Abandoned -> respond {
                         content = """
-                                `${status.coopStatus.coopId}` vs. _${contract.name}_:
+                                `${coopContractStatus.coopStatus.coopId}` vs. _${contract.name}_:
                                     
                                 This co-op has no members.""".trimIndent()
                     }
 
                     is Failed -> respond {
                         content = """
-                                `${status.coopStatus.coopId}` vs. _${contract.name}_:
+                                `${coopContractStatus.coopStatus.coopId}` vs. _${contract.name}_:
                                     
                                 This co-op has not reached their final goal.""".trimIndent()
                     }
@@ -106,12 +112,12 @@ class CoopInfoCommand : Extension() {
                     is Finished -> multipartRespond(coopFinishedResponse(coopStatus, contract, compact))
 
                     is InProgress -> {
-                        val sortedState = status.state.copy(
-                            farmers = status.state.farmers.sortedByDescending(Farmer::currentEggsLaid)
+                        val sortedState = coopContractStatus.state.copy(
+                            farmers = coopContractStatus.state.farmers.sortedByDescending(Farmer::currentEggsLaid)
                         )
 
                         multipartRespond(
-                            when (status) {
+                            when (coopContractStatus) {
                                 is InProgress.FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
                                 else -> coopInfoResponse(sortedState, compact)
                             }
