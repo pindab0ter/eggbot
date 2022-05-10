@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.view
 
+import com.auxbrain.ei.Backup
 import com.kotlindiscord.kord.extensions.commands.CommandContext
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.*
@@ -10,30 +11,28 @@ import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Table
-import nl.pindab0ter.eggbot.model.database.Farmer
 
 @KordPreview
 suspend fun leaderboardResponse(
-    farmers: List<Farmer>,
+    farmers: List<Backup>,
     leaderBoard: LeaderBoard,
     top: Int?,
     displayMode: DisplayMode?,
     context: CommandContext,
 ): List<String> = table {
-
     val compact = displayMode == COMPACT
 
     val sortedFarmers = when (leaderBoard) {
-        EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.earningsBonus }
-        SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.soulEggs }
-        PROPHECY_EGGS -> farmers.sortedByDescending { farmer -> farmer.prophecyEggs }
-        PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.prestiges }
-        DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
-        ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
+        EARNINGS_BONUS -> farmers.sortedByDescending { farmer -> farmer.game?.earningsBonus }
+        SOUL_EGGS -> farmers.sortedByDescending { farmer -> farmer.game?.soulEggs }
+        PROPHECY_EGGS -> farmers.sortedByDescending { farmer -> farmer.game?.prophecyEggs }
+        PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.stats?.prestigeCount }
+        DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.stats?.droneTakedowns }
+        ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.stats?.droneTakedownsElite }
     }.let { sortedFarmers -> if (top != null) sortedFarmers.take(top) else sortedFarmers }
 
     val shortenedNames = sortedFarmers.map { farmer ->
-        farmer.inGameName.let { name ->
+        farmer.userName.let { name ->
             if (name.length <= 10) name
             else "${name.substring(0 until 9)}…"
         }
@@ -55,7 +54,7 @@ suspend fun leaderboardResponse(
         header = "Name"
         leftPadding = 1
         rightPadding = if (compact) 1 else 2
-        cells = if (compact) shortenedNames else sortedFarmers.map { farmer -> farmer.inGameName }
+        cells = if (compact) shortenedNames else sortedFarmers.map { farmer -> farmer.userName }
     }
 
     column {
@@ -73,27 +72,27 @@ suspend fun leaderboardResponse(
         cells = when (leaderBoard) {
             EARNINGS_BONUS -> sortedFarmers.map { farmer ->
                 when (displayMode) {
-                    EXTENDED -> "${farmer.earningsBonus.formatInteger()}$zwsp%"
-                    else -> "${farmer.earningsBonus.formatIllions(shortened = compact)}${if (compact) "" else "$zwsp%"}"
+                    EXTENDED -> "${farmer.game?.earningsBonus?.formatInteger()}$zwsp%"
+                    else -> "${farmer.game?.earningsBonus?.formatIllions(shortened = compact)}${if (compact) "" else "$zwsp%"}"
                 }
             }
             SOUL_EGGS -> sortedFarmers.map { farmer ->
                 when (displayMode) {
-                    EXTENDED -> farmer.soulEggs.formatInteger()
-                    else -> farmer.soulEggs.formatIllions(shortened = compact)
-                }
+                    EXTENDED -> farmer.game?.soulEggs?.toBigDecimal()?.formatInteger()
+                    else -> farmer.game?.soulEggs?.toBigDecimal()?.formatIllions(shortened = compact)
+                } ?: ""
             }
-            PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.prophecyEggs.formatInteger() }
-            PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
-            DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
-            ELITE_DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
+            PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.game?.prophecyEggs?.formatInteger() ?: "" }
+            PRESTIGES -> sortedFarmers.map { farmer -> farmer.stats?.prestigeCount?.formatInteger() ?: "" }
+            DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.stats?.droneTakedowns?.formatInteger() ?: "" }
+            ELITE_DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.stats?.droneTakedownsElite?.formatInteger() ?: "" }
         }
     }
 
     if (leaderBoard == EARNINGS_BONUS) column {
         header = if (compact) "Role" else "Farmer Role"
         leftPadding = if (compact) 1 else 2
-        cells = sortedFarmers.map { farmer -> farmer.earningsBonus.formatRank(shortened = compact) }
+        cells = sortedFarmers.map { farmer -> farmer.game?.earningsBonus?.formatRank(shortened = compact) ?: "" }
     }
 }
 

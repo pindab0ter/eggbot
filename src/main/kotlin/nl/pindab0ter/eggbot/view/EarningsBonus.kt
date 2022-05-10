@@ -1,32 +1,27 @@
 package nl.pindab0ter.eggbot.view
 
+import com.auxbrain.ei.Backup
+import nl.pindab0ter.eggbot.MAX_PROPHECY_EGG_RESEARCH_LEVEL
+import nl.pindab0ter.eggbot.MAX_SOUL_EGG_RESEARCH_LEVEL
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
 import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
-import nl.pindab0ter.eggbot.model.EarningsBonus
-import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_PROPHECY_EGG_RESEARCH_LEVEL
-import nl.pindab0ter.eggbot.model.EarningsBonus.Companion.MAX_SOUL_EGG_RESEARCH_LEVEL
 import nl.pindab0ter.eggbot.model.Table
-import nl.pindab0ter.eggbot.model.database.Farmer
-import org.joda.time.Duration
 
 
 fun earningsBonusResponse(
-    farmer: Farmer,
-    earningsBonusObject: EarningsBonus,
-    timeSinceBackup: Duration,
+    farmer: Backup,
     displayMode: DisplayMode?,
-): List<String> = earningsBonusObject.run {
+): List<String> = farmer.game.run {
+    if (this == null) throw IllegalStateException("Backup is not in a valid state")
+
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
-
-    fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") =
-        add(Row(label, value, suffix))
-
+    fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") = add(Row(label, value, suffix))
     val compact = displayMode == COMPACT
 
     val rows = mutableListOf<Row>().apply {
         addRow("Rank:", earningsBonus.formatRank(shortened = compact))
-        addRow("Backed up:", timeSinceBackup.formatDaysHoursAndMinutes(compact = compact), " ago")
+        addRow("Backed up:", farmer.timeSinceBackup.formatDaysHoursAndMinutes(compact = compact), " ago")
         addRow(
             "Earnings Bonus:",
             when (displayMode) {
@@ -38,16 +33,16 @@ fun earningsBonusResponse(
         addRow(
             "Soul Eggs:",
             when (displayMode) {
-                EXTENDED -> soulEggs.formatInteger()
-                else -> soulEggs.formatIllions(shortened = compact)
+                EXTENDED -> soulEggs.toString()
+                else -> soulEggs.toBigDecimal().formatIllions(shortened = compact)
             }
         )
         addRow("Prophecy Eggs:", prophecyEggs.formatInteger())
-        if (soulEggsResearchLevel < MAX_SOUL_EGG_RESEARCH_LEVEL)
-            addRow("Soul Bonus:", soulEggsResearchLevel.formatInteger(), "/140")
-        if (prophecyEggsResearchLevel < MAX_PROPHECY_EGG_RESEARCH_LEVEL)
-            addRow("Prophecy Bonus:", prophecyEggsResearchLevel.formatInteger(), "/5")
-        addRow("Prestiges:", farmer.prestiges.formatInteger())
+        if (soulEggResearchLevel < MAX_SOUL_EGG_RESEARCH_LEVEL)
+            addRow("Soul Bonus:", soulEggResearchLevel.formatInteger(), "/140")
+        if (prophecyEggResearchLevel < MAX_PROPHECY_EGG_RESEARCH_LEVEL)
+            addRow("Prophecy Bonus:", prophecyEggResearchLevel.formatInteger(), "/5")
+        addRow("Prestiges:", farmer.stats?.prestigeCount?.formatInteger() ?: "?")
         addRow(
             "SE to next rank:", "+ ${
                 when (displayMode) {
@@ -60,7 +55,7 @@ fun earningsBonusResponse(
     }
 
     return table {
-        title = "Earnings bonus for **${farmer.inGameName}**"
+        title = "Earnings bonus for **${farmer.userName}**"
         displayHeaders = false
         column {
             rightPadding = 2

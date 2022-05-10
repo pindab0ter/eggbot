@@ -2,8 +2,6 @@ package nl.pindab0ter.eggbot.model
 
 import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Farmer
-import nl.pindab0ter.eggbot.model.database.Farmers
-import org.jetbrains.exposed.dao.load
 import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.transactions.transaction

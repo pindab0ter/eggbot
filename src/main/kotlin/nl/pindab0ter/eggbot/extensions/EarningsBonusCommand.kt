@@ -8,9 +8,7 @@ import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.displayModeChoice
 import nl.pindab0ter.eggbot.helpers.multipartRespond
-import nl.pindab0ter.eggbot.helpers.timeSinceBackup
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.EarningsBonus
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.earningsBonusResponse
@@ -34,7 +32,7 @@ class EarningsBonusCommand : Extension() {
             lateinit var farmers: List<Farmer>
 
             check {
-                discordUser = transaction<DiscordUser?> { DiscordUser.findById(event.interaction.user.id.toString()) }
+                discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
                     ?: return@check fail("You have not registered yet. Please do so using `/register`.")
 
                 farmers = transaction { discordUser.farmers.toList().sortedBy(Farmer::inGameName) }
@@ -45,18 +43,11 @@ class EarningsBonusCommand : Extension() {
 
             action {
                 farmers.forEach { farmer ->
-                    when (val backup = AuxBrain.getFarmerBackup(farmer.inGameId)) {
-                        null -> respond {
-                            content = "Could not get information on EggBot user with in-game ID: `${farmer.inGameName}`"
-                        }
-                        else -> multipartRespond(
-                            earningsBonusResponse(
-                                farmer,
-                                EarningsBonus(farmer),
-                                backup.timeSinceBackup,
-                                arguments.displayMode
-                            )
-                        )
+                    try {
+                        val backup = AuxBrain.getFarmerBackup(farmer.inGameId)
+                        multipartRespond(earningsBonusResponse(backup!!, arguments.displayMode))
+                    } catch (e: IllegalStateException) {
+                        respond { content = "Could not get information on EggBot user with in-game ID: `${farmer.inGameName}`" }
                     }
                 }
             }

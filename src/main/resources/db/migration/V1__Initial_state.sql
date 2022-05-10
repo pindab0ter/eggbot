@@ -16,11 +16,11 @@ CREATE TABLE Farmers
         REFERENCES DiscordUsers
             ON DELETE CASCADE,
     in_game_name          TEXT     NOT NULL,
-    prestiges             BIGINT   NOT NULL,
     soul_eggs             REAL     NOT NULL,
     soul_bonus            INTEGER  NOT NULL,
     prophecy_eggs         BIGINT   NOT NULL,
     prophecy_bonus        INTEGER  NOT NULL,
+    prestiges             BIGINT   NOT NULL,
     drone_takedowns       INTEGER  NOT NULL,
     elite_drone_takedowns INTEGER  NOT NULL,
     created_at            DATETIME NOT NULL,

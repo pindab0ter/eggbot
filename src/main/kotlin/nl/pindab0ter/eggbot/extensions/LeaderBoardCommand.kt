@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.extensions
 
+import com.auxbrain.ei.Backup
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.defaultingEnumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalInt
@@ -9,7 +10,9 @@ import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.displayModeChoice
+import nl.pindab0ter.eggbot.helpers.earningsBonus
 import nl.pindab0ter.eggbot.helpers.multipartRespond
+import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.EARNINGS_BONUS
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -41,14 +44,17 @@ class LeaderBoardCommand : Extension() {
             name = "leader-board"
             description = "View leader boards. Defaults to the Earnings Bonus leader board."
 
-            lateinit var farmers: List<Farmer>
-
             check {
-                farmers = transaction { Farmer.all().toList().sortedByDescending { it.earningsBonus } }
-                failIf("There are no registered farmers.") { farmers.isEmpty() }
+                failIf("There are no registered farmers.") { transaction { Farmer.count() == 0 } }
             }
 
             action {
+                val farmers: List<Backup> = transaction {
+                    Farmer.all()
+                        .mapNotNull { farmer -> AuxBrain.getFarmerBackup(farmer.eggIncId) }
+                        .sortedByDescending { backup -> backup.game?.earningsBonus }
+                }
+
                 multipartRespond(
                     leaderboardResponse(
                         farmers = farmers,
