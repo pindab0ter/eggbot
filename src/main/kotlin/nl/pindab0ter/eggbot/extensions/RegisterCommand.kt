@@ -45,9 +45,8 @@ class RegisterCommand : Extension() {
                     throwIfFailed()
 
                     transaction {
-                        Farmer.findById(eggIncId)?.discordUser?.let { databaseDiscordUser ->
-                            val referenceToUser = runBlocking { context.getMember()?.mention } ?: "`${databaseDiscordUser.tag}`"
-                            fail("This player is already registered to $referenceToUser")
+                        if (Farmer.findById(eggIncId)?.discordUser != null) {
+                            fail("This player is already registered to ${runBlocking { context.getMember()?.mention }}")
                         }
                     }
                 }
@@ -80,9 +79,7 @@ class RegisterCommand : Extension() {
                     return@action
                 }
 
-                val referenceToUser = runBlocking { getMember()?.mention } ?: "`${discordUser.tag}`"
-
-                respond { content = "Farmer `${farmer.inGameName}` has been registered to ${referenceToUser}." }
+                respond { content = "Farmer `${farmer.inGameName}` has been registered to ${runBlocking { getMember()?.mention }}." }
             }
         }
     }
