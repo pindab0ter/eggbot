@@ -17,7 +17,7 @@ class UpdateFarmers : Job {
 
         val timeTakenMillis = measureTimeMillis {
             farmers.asyncMap { farmer ->
-                AuxBrain.getFarmerBackup(farmer.inGameId)?.let {
+                AuxBrain.getFarmerBackup(farmer.eggIncId)?.let {
                     transaction { farmer.update(it) }
                 }
             }

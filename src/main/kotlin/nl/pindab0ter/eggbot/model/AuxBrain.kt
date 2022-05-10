@@ -83,9 +83,9 @@ object AuxBrain {
 
     private val cachedFarmerBackups: MutableMap<String, FarmerBackupCache> = mutableMapOf()
 
-    private fun firstContactRequest(userId: String): Request {
+    private fun firstContactRequest(eggIncId: String): Request {
         val data = FirstContactRequest {
-            eiUserId = userId
+            eiUserId = eggIncId
             deviceId = Config.deviceId
             clientVersion = Config.clientVersion
         }.serialize().encodeBase64ToString()
@@ -95,7 +95,7 @@ object AuxBrain {
             .body("data=$data")
     }
 
-    fun getFarmerBackup(userId: String): Backup? = cachedFarmerBackups[userId]
+    fun getFarmerBackup(eggIncId: String): Backup? = cachedFarmerBackups[eggIncId]
         ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
         ?.let { cachedFarmerBackup ->
             logger.trace { "Farmer backup cache hit" }
@@ -104,14 +104,14 @@ object AuxBrain {
 
         logger.trace { "Farmer backup cache miss" }
 
-        val retrievedFarmerBackup = firstContactRequest(userId)
+        val retrievedFarmerBackup = firstContactRequest(eggIncId)
             .responseObject(BackupDeserializer)
             .third
             .component1()
 
-        if (retrievedFarmerBackup == null) logger.warn { "Could not get backup for ID `$userId` from AuxBrain" }
+        if (retrievedFarmerBackup == null) logger.warn { "Could not get backup for ID `$eggIncId` from AuxBrain" }
         else {
-            cachedFarmerBackups[userId] = FarmerBackupCache(
+            cachedFarmerBackups[eggIncId] = FarmerBackupCache(
                 validUntil = Instant.now().plus(minutes(5).toStandardDuration()),
                 farmerBackup = retrievedFarmerBackup,
             )
