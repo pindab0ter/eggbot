@@ -8,6 +8,7 @@ import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.result.getOrNull
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
+import nl.pindab0ter.eggbot.model.database.Farmer
 import org.joda.time.Instant
 import org.joda.time.Period.minutes
 
@@ -53,8 +54,6 @@ object AuxBrain {
     private fun periodicalsRequest(): Request {
         val data = PeriodicalsRequest {
             clientVersion = Config.clientVersion
-            // TODO: Dynamically update the clientVersion
-            // clientVersion = EggBot.clientVersion
             userId = Config.userId
         }.serialize().encodeBase64ToString()
 
@@ -111,10 +110,17 @@ object AuxBrain {
             .component1()
 
         if (retrievedFarmerBackup == null) logger.warn { "Could not get backup for ID `$userId` from AuxBrain" }
-        else cachedFarmerBackups[userId] = FarmerBackupCache(
-            validUntil = Instant.now().plus(minutes(5).toStandardDuration()),
-            farmerBackup = retrievedFarmerBackup,
-        )
+        else {
+            cachedFarmerBackups[userId] = FarmerBackupCache(
+                validUntil = Instant.now().plus(minutes(5).toStandardDuration()),
+                farmerBackup = retrievedFarmerBackup,
+            )
+
+            if (retrievedFarmerBackup.clientVersion > Config.clientVersion) {
+                Farmer.logger.info { "Updated to client version ${retrievedFarmerBackup.clientVersion}." }
+                Config.clientVersion = retrievedFarmerBackup.clientVersion
+            }
+        }
 
         retrievedFarmerBackup
     }
