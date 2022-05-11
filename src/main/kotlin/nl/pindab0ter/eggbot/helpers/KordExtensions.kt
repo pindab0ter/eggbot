@@ -4,7 +4,7 @@ import com.auxbrain.ei.Contract
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceEnum
-import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.optionalEnumChoice
+import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.defaultingEnumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.types.respond
@@ -21,16 +21,17 @@ suspend fun <A : Arguments> PublicSlashCommandContext<A>.multipartRespond(messag
 }
 
 enum class DisplayMode : ChoiceEnum {
-    COMPACT, EXTENDED;
+    COMPACT, REGULAR, EXTENDED;
 
     override val readableName: String
         get() = name.lowercase()
 }
 
-fun Arguments.displayModeChoice() = optionalEnumChoice<DisplayMode> {
+fun Arguments.displayModeChoice() = defaultingEnumChoice<DisplayMode> {
     name = "display-mode"
     description = "Use compact to better fit mobile devices or extended to show numbers in non-scientific notation."
     typeName = DisplayMode::name.name
+    defaultValue = DisplayMode.REGULAR
 }
 
 fun Arguments.compact() = defaultingBoolean {

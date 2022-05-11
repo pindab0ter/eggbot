@@ -37,7 +37,7 @@ class LeaderBoardCommand : Extension() {
                 defaultValue = EARNINGS_BONUS
                 typeName = LeaderBoard::name.name
             }
-            val displayMode: DisplayMode? by displayModeChoice()
+            val displayMode: DisplayMode by displayModeChoice()
         }
 
         publicSlashCommand(::LeaderBoardArguments) {
@@ -61,7 +61,6 @@ class LeaderBoardCommand : Extension() {
                         leaderBoard = arguments.leaderBoard,
                         top = arguments.top?.takeIf { it > 0 },
                         displayMode = arguments.displayMode,
-                        context = this,
                     )
                 )
             }

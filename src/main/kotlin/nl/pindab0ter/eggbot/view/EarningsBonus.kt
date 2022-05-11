@@ -11,7 +11,7 @@ import nl.pindab0ter.eggbot.model.Table
 
 fun earningsBonusResponse(
     farmer: Backup,
-    displayMode: DisplayMode?,
+    displayMode: DisplayMode,
 ): List<String> = farmer.game.run {
     if (this == null) throw IllegalStateException("Backup is not in a valid state")
 

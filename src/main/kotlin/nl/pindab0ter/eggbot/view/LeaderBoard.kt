@@ -1,24 +1,19 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Backup
-import com.kotlindiscord.kord.extensions.commands.CommandContext
-import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
-import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
+import nl.pindab0ter.eggbot.helpers.DisplayMode.*
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Table
 
-@KordPreview
 suspend fun leaderboardResponse(
     farmers: List<Backup>,
     leaderBoard: LeaderBoard,
-    top: Int?,
-    displayMode: DisplayMode?,
-    context: CommandContext,
+    top: Int? = null,
+    displayMode: DisplayMode = REGULAR,
 ): List<String> = table {
     val compact = displayMode == COMPACT
 
@@ -40,8 +35,8 @@ suspend fun leaderboardResponse(
 
     val boardTitle = when (leaderBoard) {
         EARNINGS_BONUS -> "💵 Earnings Bonus"
-        SOUL_EGGS -> "${context.emoteMention(Config.emoteSoulEgg) ?: "🥚"} Soul Eggs"
-        PROPHECY_EGGS -> "${context.emoteMention(Config.emoteProphecyEgg) ?: "🥚"} Prophecy Eggs"
+        SOUL_EGGS -> "${emoteMention(Config.emoteSoulEgg) ?: "🥚"} Soul Eggs"
+        PROPHECY_EGGS -> "${emoteMention(Config.emoteProphecyEgg) ?: "🥚"} Prophecy Eggs"
         PRESTIGES -> "🥨 Prestiges"
         DRONE_TAKEDOWNS -> "✈🚫 Drone Takedowns"
         ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"

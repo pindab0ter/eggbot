@@ -21,7 +21,7 @@ class EarningsBonusCommand : Extension() {
     override suspend fun setup() {
 
         class EarningsBonusArguments : Arguments() {
-            val displayMode: DisplayMode? by displayModeChoice()
+            val displayMode: DisplayMode by displayModeChoice()
         }
 
         publicSlashCommand(::EarningsBonusArguments) {
