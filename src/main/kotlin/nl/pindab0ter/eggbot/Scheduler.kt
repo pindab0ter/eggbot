@@ -2,12 +2,9 @@ package nl.pindab0ter.eggbot
 
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.jobs.JobLogger
-import nl.pindab0ter.eggbot.jobs.UpdateFarmers
 import nl.pindab0ter.eggbot.jobs.UpdateLeaderBoardsJob
-import nl.pindab0ter.eggbot.model.Config
 import org.quartz.CronScheduleBuilder.weeklyOnDayAndHourAndMinute
 import org.quartz.JobBuilder.newJob
-import org.quartz.SimpleScheduleBuilder.simpleSchedule
 import org.quartz.TriggerBuilder.newTrigger
 import org.quartz.impl.StdSchedulerFactory
 import java.time.ZoneId
@@ -19,15 +16,6 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
     // Use Europe/London because it moves with Daylight Saving Time
     val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
 
-    if (!Config.devMode) scheduleJob(
-        newJob(UpdateFarmers::class.java)
-            .withIdentity("update_farmers")
-            .build(),
-        newTrigger()
-            .withIdentity("quarter_daily_farmer_update")
-            .withSchedule(simpleSchedule().withIntervalInHours(6).repeatForever())
-            .build()
-    )
     scheduleJob(
         newJob(UpdateLeaderBoardsJob::class.java)
             .withIdentity("update_leader_board")
@@ -41,6 +29,7 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
     )
 
     listenerManager.addJobListener(JobLogger)
+
     start()
 
     logger.info { "Scheduler started" }

@@ -6,9 +6,13 @@ import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.result.getOrNull
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
 import nl.pindab0ter.eggbot.model.database.Farmer
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.Instant
 import org.joda.time.Period.minutes
 
@@ -95,34 +99,48 @@ object AuxBrain {
             .body("data=$data")
     }
 
-    fun getFarmerBackup(eggIncId: String): Backup? = cachedFarmerBackups[eggIncId]
-        ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
-        ?.let { cachedFarmerBackup ->
+    fun getFarmerBackup(eggIncId: String): Backup? {
+        val cachedFarmerBackup = cachedFarmerBackups[eggIncId]
+            ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
+
+        return if (cachedFarmerBackup != null) {
             logger.trace { "Farmer backup cache hit" }
-            return cachedFarmerBackup.farmerBackup
-        } ?: run {
+            cachedFarmerBackup.farmerBackup
+        } else runBlocking {
+            logger.trace { "Farmer backup cache miss" }
 
-        logger.trace { "Farmer backup cache miss" }
+            // Get farmer backup from AuxBrain
+            val retrievedFarmerBackup = firstContactRequest(eggIncId)
+                .responseObject(BackupDeserializer)
+                .third
+                .component1()
 
-        val retrievedFarmerBackup = firstContactRequest(eggIncId)
-            .responseObject(BackupDeserializer)
-            .third
-            .component1()
+            if (retrievedFarmerBackup == null) {
+                logger.warn { "Could not get backup for ID `$eggIncId` from AuxBrain" }
+                return@runBlocking null
+            }
 
-        if (retrievedFarmerBackup == null) logger.warn { "Could not get backup for ID `$eggIncId` from AuxBrain" }
-        else {
+            // Cache farmer backup
             cachedFarmerBackups[eggIncId] = FarmerBackupCache(
                 validUntil = Instant.now().plus(minutes(5).toStandardDuration()),
                 farmerBackup = retrievedFarmerBackup,
             )
 
+            // Update farmer in database
+            launch(Dispatchers.IO) {
+                transaction {
+                    Farmer.findById(eggIncId)?.update(retrievedFarmerBackup)
+                }
+            }
+
+            // Check if the client version is up-to-date
             if (retrievedFarmerBackup.clientVersion > Config.clientVersion) {
-                Farmer.logger.info { "Updated to client version ${retrievedFarmerBackup.clientVersion}." }
+                logger.info { "Updated to client version ${retrievedFarmerBackup.clientVersion}." }
                 Config.clientVersion = retrievedFarmerBackup.clientVersion
             }
-        }
 
-        retrievedFarmerBackup
+            retrievedFarmerBackup
+        }
     }
 
     private object BackupDeserializer : ResponseDeserializable<Backup> {
