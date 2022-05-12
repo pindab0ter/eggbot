@@ -55,7 +55,7 @@ class RegisterCommand : Extension() {
 
         ephemeralSlashCommand(::RegisterArguments) {
             name = "register"
-            description = "Register your Egg, Inc. account."
+            description = "Register an Egg, Inc. account."
             guild(Config.guild)
 
             action {

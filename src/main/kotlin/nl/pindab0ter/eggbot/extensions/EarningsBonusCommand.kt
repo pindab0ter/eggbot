@@ -26,7 +26,7 @@ class EarningsBonusCommand : Extension() {
 
         publicSlashCommand(::EarningsBonusArguments) {
             name = "earnings-bonus"
-            description = "Shows your Farmer Role, EB and how much SE or PE till your next rank."
+            description = "See your Farmer Role, EB and how much SE or PE till your next rank."
 
             lateinit var discordUser: DiscordUser
             lateinit var farmers: List<Farmer>
