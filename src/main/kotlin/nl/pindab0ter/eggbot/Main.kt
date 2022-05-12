@@ -19,6 +19,7 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
         add(::CommandLogger)
 
         // add(::AdminCommands)
+        add(::ActivityCommand)
         add(::ContractsCommand)
         add(::CoopCommand)
         add(::CoopInfoCommand)
@@ -26,7 +27,7 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
         add(::LeaderBoardCommand)
         add(::PostCommands)
         add(::RegisterCommand)
-        add(::ActivityCommand)
+        add(::WhoIsCommand)
 
         if (Config.sentryDsn != null) sentry {
             enable = true
