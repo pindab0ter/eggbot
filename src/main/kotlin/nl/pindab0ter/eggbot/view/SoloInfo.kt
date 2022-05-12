@@ -38,9 +38,7 @@ private fun StringBuilder.drawGoals(
     state: SoloContractState,
     compact: Boolean,
 ): StringBuilder = appendTable {
-    title = "__**Goals** (${state.goalsReached}/${state.goals.count()})__"
-    // TODO:
-    // title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
+    title = "__${state.egg.asEmoteMention} **Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 

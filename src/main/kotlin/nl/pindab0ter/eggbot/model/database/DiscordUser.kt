@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.model.database
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.UserBehavior
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.helpers.configuredGuild
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
@@ -18,6 +19,11 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     var updatedAt by DiscordUsers.updated_at
 
     val farmers by Farmer referrersOn Farmers.discordId
+
+    val mention: String?
+        get() = runBlocking {
+            configuredGuild?.getMemberOrNull(this@DiscordUser.snowflake)?.mention
+        }
 
     companion object : EntityClass<String, DiscordUser>(DiscordUsers) {
         fun findBySnowflake(snowflake: Snowflake): DiscordUser? = DiscordUser.find { DiscordUsers.id eq snowflake.toString() }.firstOrNull()

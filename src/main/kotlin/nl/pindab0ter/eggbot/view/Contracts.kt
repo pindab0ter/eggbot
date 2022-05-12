@@ -2,21 +2,18 @@ package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.helpers.configuredGuild
+import nl.pindab0ter.eggbot.helpers.asEmoteMention
 import nl.pindab0ter.eggbot.helpers.displayName
 import nl.pindab0ter.eggbot.helpers.formatDayHourAndMinutes
 import nl.pindab0ter.eggbot.helpers.toDateTime
-import nl.pindab0ter.eggbot.model.Config
 
 
 fun contractsResponse(soloContracts: List<Contract>, coopContracts: List<Contract>): String = buildString {
-    suspend fun List<Contract>.printContracts(): String = buildString {
+    fun List<Contract>.printContracts(): String = buildString {
         this@printContracts.forEach { contract ->
 
-            Config.eggsToEmotes[contract.egg]?.let { emojiSnowflake ->
-                configuredGuild?.getEmojiOrNull(emojiSnowflake)
-            }?.let { eggEmoji ->
-                append(eggEmoji.mention)
+            contract.egg.asEmoteMention?.let { eggEmoji ->
+                append(eggEmoji)
             }
             append("_${contract.name}_")
             append(" (")
