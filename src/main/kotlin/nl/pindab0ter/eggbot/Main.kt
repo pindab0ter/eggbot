@@ -18,14 +18,12 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
     extensions {
         add(::CommandLogger)
 
-        // add(::AdminCommands)
         add(::ActivityCommand)
         add(::ContractsCommand)
         add(::CoopCommand)
         add(::CoopInfoCommand)
         add(::EarningsBonusCommand)
         add(::LeaderBoardCommand)
-        add(::PostCommands)
         add(::RegisterCommand)
         add(::WhoIsCommand)
 
