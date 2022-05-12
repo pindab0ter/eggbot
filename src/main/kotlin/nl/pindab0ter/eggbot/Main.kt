@@ -25,6 +25,7 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
         add(::EarningsBonusCommand)
         add(::LeaderBoardCommand)
         add(::RegisterCommand)
+        add(::UnregisterCommand)
         add(::WhoIsCommand)
 
         if (Config.sentryDsn != null) sentry {

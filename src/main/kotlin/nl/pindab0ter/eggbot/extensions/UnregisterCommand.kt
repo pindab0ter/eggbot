@@ -7,24 +7,27 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
-import dev.kord.core.entity.User
+import mu.KotlinLogging
 import nl.pindab0ter.eggbot.converters.optionalFarmer
-import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.helpers.toListing
+import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
-import org.jetbrains.exposed.sql.SortOrder.DESC
+import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
-class WhoIsCommand : Extension() {
+class UnregisterCommand : Extension() {
+    val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
     override suspend fun setup() {
-        class WhoIsThisArguments : Arguments() {
-            val discordUser: User? by optionalUser {
+
+        class UnregisterArguments : Arguments() {
+            val discordUser by optionalUser {
                 name = "member"
-                description = "Find out which farmers this member has registered."
+                description = "The member to unregister."
             }
             val farmer: Farmer? by optionalFarmer {
                 name = "farmer"
@@ -36,7 +39,7 @@ class WhoIsCommand : Extension() {
                     val farmers = transaction {
                         Farmer
                             .find { Farmers.inGameName like "%$farmerInput%" }
-                            .orderBy(Farmers.inGameName to DESC)
+                            .orderBy(Farmers.inGameName to SortOrder.DESC)
                             .limit(25)
                             .associate { farmer -> farmer.inGameName to farmer.inGameName }
                     }
@@ -46,9 +49,10 @@ class WhoIsCommand : Extension() {
             }
         }
 
-        publicSlashCommand(::WhoIsThisArguments) {
-            name = "whoisthis"
-            description = "Find out who is who."
+        publicSlashCommand(::UnregisterArguments) {
+            name = "unregister"
+            description = "Unregister a member, removing their farmers from our database. This does not affect their game."
+            guild(Config.guild)
 
             action {
                 when {
@@ -57,24 +61,34 @@ class WhoIsCommand : Extension() {
                     }
 
                     arguments.discordUser != null -> {
-                        val farmers = transaction {
-                            Farmer.find { Farmers.discordId eq arguments.discordUser?.id.toString() }
+                        val databaseDiscordUser = transaction {
+                            arguments.discordUser?.id?.let { DiscordUser.findBySnowflake(it) }
+                        }
+
+                        if (databaseDiscordUser == null) {
+                            respond { content = "${arguments.discordUser?.mention} is not registered." }
+                            return@action
+                        }
+
+                        val farmersListing = transaction {
+                            databaseDiscordUser.farmers.toListing()
+                        }
+
+                        transaction {
+                            databaseDiscordUser.delete()
                         }
 
                         respond {
-                            content =
-                                if (!farmers.empty()) "${arguments.discordUser?.mention} has: ${farmers.toListing()}"
-                                else "${arguments.discordUser?.mention} has not registered any farmers."
+                            content = "Unregistered ${arguments.discordUser?.mention}, removing their farmers: ${farmersListing}."
                         }
                     }
 
                     arguments.farmer != null -> {
-                        val discordUser = arguments.farmer?.discordId?.let { configuredGuild?.getMember(it) }
+                        // TODO: Find farmer and unregister them
+                        // TODO: Check for remaining farmers
 
                         respond {
-                            content =
-                                if (discordUser != null) "${arguments.farmer?.inGameName} is registered by ${discordUser.mention}"
-                                else "**Error:** Failed to find member for ${arguments.farmer?.inGameName}."
+                            content = ""
                         }
                     }
                 }

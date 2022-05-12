@@ -59,8 +59,8 @@ class RegisterCommand : Extension() {
             guild(Config.guild)
 
             action {
-
                 val farmerBackup = AuxBrain.getFarmerBackup(arguments.eggIncId)
+
                 if (farmerBackup == null) {
                     respond { content = "Could not find a farmer with the ID `${arguments.eggIncId}`" }
                     return@action

@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.helpers
 
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.TWO_DECIMALS
+import nl.pindab0ter.eggbot.model.database.Farmer
 import java.math.BigDecimal
 import java.math.BigDecimal.*
 import java.text.DecimalFormat
@@ -158,3 +159,12 @@ fun <T : Any> StringBuilder.appendPaddingCharacters(
     character: String = " ",
 ): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
 
+fun Iterable<Farmer>.toListing(): String = buildString {
+    this@toListing.forEach { farmer ->
+        when (farmer) {
+            this@toListing.first() -> append("`${farmer.inGameName}`")
+            this@toListing.last() -> append(" and `${farmer.inGameName}`")
+            else -> append(", `${farmer.inGameName}`")
+        }
+    }
+}
