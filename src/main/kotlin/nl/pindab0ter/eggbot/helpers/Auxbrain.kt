@@ -1,10 +1,8 @@
 package nl.pindab0ter.eggbot.helpers
 
 import ch.obermuhlner.math.big.BigDecimalMath
-import com.auxbrain.ei.Backup
-import com.auxbrain.ei.Contract
-import com.auxbrain.ei.CoopStatus
-import com.auxbrain.ei.LocalContract
+import com.auxbrain.ei.*
+import com.kotlindiscord.kord.extensions.utils.capitalizeWords
 import nl.pindab0ter.eggbot.BASE_PROPHECY_EGG_RESEARCH_BONUS
 import nl.pindab0ter.eggbot.BASE_SOUL_EGG_RESEARCH_BONUS
 import nl.pindab0ter.eggbot.PROPHECY_EGG_RESEARCH_BONUS_PER_LEVEL
@@ -24,6 +22,7 @@ val Backup.timeSinceBackup: Duration
 fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm ->
     farm.contractId == contractId
 }
+
 val Backup.Farm.timeSinceLastStep: Duration
     get() = Duration(lastStepTime.toDateTime(), DateTime.now())
 
@@ -65,3 +64,7 @@ val CoopStatus.eggsLaid: BigDecimal
     get() = BigDecimal(totalAmount)
 val CoopStatus.timeRemaining: Duration
     get() = secondsRemaining.toDuration()
+
+// Eggs
+val Egg.displayName: String
+    get() = name.replace("_", " ").lowercase().capitalizeWords()
