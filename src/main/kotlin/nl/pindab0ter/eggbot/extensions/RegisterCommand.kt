@@ -23,7 +23,7 @@ class RegisterCommand : Extension() {
 
         class RegisterArguments : Arguments() {
             val eggIncId by string {
-                name = "id"
+                name = "egg-inc-id"
                 description = "Find your Egg, Inc. ID in Menu → Settings → More, at the bottom of that screen."
 
                 mutate { it.uppercase() }
