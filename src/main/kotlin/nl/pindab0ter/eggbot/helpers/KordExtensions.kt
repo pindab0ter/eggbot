@@ -8,15 +8,13 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.i
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.types.respond
+import dev.kord.core.behavior.channel.createMessage
 import nl.pindab0ter.eggbot.converters.contract
 
 suspend fun <A : Arguments> PublicSlashCommandContext<A>.multipartRespond(messages: List<String>) {
-    respond {
-        content = messages.first()
-    }
-
+    respond { content = messages.first() }
     messages.tail().forEach { message ->
-        channel.createMessage(message)
+        channel.createMessage { content = message }
     }
 }
 
