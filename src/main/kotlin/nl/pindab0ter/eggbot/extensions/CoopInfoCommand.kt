@@ -12,7 +12,6 @@ import dev.kord.common.entity.optional.firstOrNull
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.compact
 import nl.pindab0ter.eggbot.helpers.contract
-import nl.pindab0ter.eggbot.helpers.discard
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -87,7 +86,7 @@ class CoopInfoCommand : Extension() {
                 if (coopStatus == null) {
                     respond {
                         content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
-                    }.discard()
+                    }
                     return@action
                 }
 

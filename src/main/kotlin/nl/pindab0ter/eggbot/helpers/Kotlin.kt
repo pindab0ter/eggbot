@@ -28,8 +28,6 @@ suspend fun <T, R> Iterable<T>.asyncMap(
     map { async(coroutineContext) { transform(it) } }.awaitAll()
 }
 
-fun Any?.discard(): Unit = Unit
-
 object Typography {
     /** The character &zwsp; – zero-width space */
     const val zwsp = '\u200B'

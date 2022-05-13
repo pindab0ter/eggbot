@@ -18,7 +18,10 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.CHANNEL
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.ROLE
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.contract
+import nl.pindab0ter.eggbot.helpers.createChannel
+import nl.pindab0ter.eggbot.helpers.createRole
+import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -79,12 +82,6 @@ class RollCallExtension : Extension() {
                 )
 
                 action {
-                    // Check if roles or channels can be created if required
-                    if (guild == null && (arguments.createRoles || arguments.createChannels)) return@action respond {
-                        content = "${Config.emojiWarning} Could not get server info. " +
-                                "Please try without creating roles or channels or else please contact the bot maintainer."
-                    }.discard()
-
                     val coops = transaction {
                         createRollCall(arguments.basename, arguments.contract.maxCoopSize)
                             // First create all co-ops
@@ -139,9 +136,10 @@ class RollCallExtension : Extension() {
                         Coop.find { Coops.contractId eq arguments.contract.id }.toList()
                     }
 
-                    if (coops.isEmpty()) return@action respond {
-                        content = "No co-ops found for _${arguments.contract.name}_."
-                    }.discard()
+                    if (coops.isEmpty()) {
+                        respond { content = "No co-ops found for _${arguments.contract.name}_." }
+                        return@action
+                    }
 
 
                     val statuses = coops
