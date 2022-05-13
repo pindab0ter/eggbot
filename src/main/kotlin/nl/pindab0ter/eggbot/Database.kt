@@ -1,16 +1,15 @@
 package nl.pindab0ter.eggbot
 
+import com.kotlindiscord.kord.extensions.utils.env
 import mu.KotlinLogging
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.exception.FlywayValidateException
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.TransactionManager
-import java.sql.Connection
 
 internal fun connectToDatabase() {
     val logger = KotlinLogging.logger {}
     Flyway.configure()
-        .dataSource("jdbc:sqlite:./EggBot.sqlite", null, null)
+        .dataSource(env("DATABASE_URL"), env("DATABASE_USER"), env("DATABASE_PASSWORD"))
         .load().apply {
             try {
                 migrate()
@@ -21,11 +20,11 @@ internal fun connectToDatabase() {
         }
 
     Database.connect(
-        url = "jdbc:sqlite:./EggBot.sqlite",
-        driver = "org.sqlite.JDBC",
-        setupConnection = { connection ->
-            connection.createStatement().execute("PRAGMA foreign_keys = ON")
-        })
-    TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
+        url = env("DATABASE_URL"),
+        driver = "org.postgresql.Driver",
+        user = env("DATABASE_USER"),
+        password = env("DATABASE_PASSWORD")
+    )
+
     logger.info { "Connected to database" }
 }

@@ -5,6 +5,7 @@ import org.joda.time.DateTime
 
 
 object Coops : IntIdTable() {
+    override val tableName = "coops"
     val name = text("name")
     val contractId = text("contract_id")
     val roleId = text("role_id").nullable()

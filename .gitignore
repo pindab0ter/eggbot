@@ -151,3 +151,6 @@ gradle-app.setting
 /eggbot.properties
 
 .idea/misc.xml
+
+### Environment variables ###
+.env

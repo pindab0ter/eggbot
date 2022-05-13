@@ -40,7 +40,7 @@ dependencies {
 
     // Database
     implementation("org.jetbrains.exposed", "exposed", "0.17.14")
-    runtimeOnly("org.xerial", "sqlite-jdbc", "3.36.0.3")
+    runtimeOnly("org.postgresql", "postgresql", "42.2.2")
     implementation("org.flywaydb", "flyway-core", "8.5.10")
 
     // Networking

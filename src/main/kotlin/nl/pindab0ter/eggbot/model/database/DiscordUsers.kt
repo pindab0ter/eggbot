@@ -4,6 +4,7 @@ import org.jetbrains.exposed.dao.IdTable
 import org.joda.time.DateTime
 
 object DiscordUsers : IdTable<String>() {
+    override val tableName = "discord_users"
     override val id = text("id").entityId().primaryKey()
     val tag = text("tag")
     val inactiveUntil = datetime("inactive_until").nullable()
