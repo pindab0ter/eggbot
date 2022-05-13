@@ -11,7 +11,7 @@ import java.util.*
 import kotlin.math.roundToLong
 
 
-val ONE_YEAR: Duration get() = Duration(DateTime.now(), DateTime.now().plusYears(1))
+val ONE_YEAR: Duration get() = Duration(now(), now().plusYears(1))
 val ONE_MINUTE: Duration = Duration.standardMinutes(1L)
 
 fun Double.toDateTime(): DateTime = DateTime((this * 1000).roundToLong())

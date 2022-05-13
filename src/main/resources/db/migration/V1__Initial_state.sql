@@ -4,8 +4,8 @@ CREATE TABLE discord_users
         PRIMARY KEY,
     tag            TEXT      NOT NULL,
     inactive_until TIMESTAMP,
-    created_at     TIMESTAMP NOT NULL,
-    updated_at     TIMESTAMP NOT NULL
+    created_at     TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at     TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE farmers
@@ -24,8 +24,8 @@ CREATE TABLE farmers
     prestiges             BIGINT    NOT NULL,
     drone_takedowns       INTEGER   NOT NULL,
     elite_drone_takedowns INTEGER   NOT NULL,
-    created_at            TIMESTAMP NOT NULL,
-    updated_at            TIMESTAMP NOT NULL
+    created_at            TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE coops
@@ -36,8 +36,8 @@ CREATE TABLE coops
     contract_id TEXT      NOT NULL,
     role_id     TEXT,
     channel_id  TEXT,
-    created_at  TIMESTAMP NOT NULL,
-    updated_at  TIMESTAMP NOT NULL
+    created_at  TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at  TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE coop_farmers

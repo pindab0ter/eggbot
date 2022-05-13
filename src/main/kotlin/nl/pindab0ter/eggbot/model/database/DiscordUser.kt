@@ -8,7 +8,6 @@ import nl.pindab0ter.eggbot.helpers.kord
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.EntityID
-import org.joda.time.DateTime
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val snowflake: Snowflake = Snowflake(this.id.value)
@@ -32,7 +31,6 @@ class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
         fun findBySnowflake(snowflake: Snowflake): DiscordUser? = DiscordUser.find { DiscordUsers.id eq snowflake.toString() }.firstOrNull()
         fun findOrCreate(user: UserBehavior): DiscordUser = findBySnowflake(user.id) ?: new(user.id.toString()) {
             tag = runBlocking { user.asUser().tag }
-            createdAt = DateTime.now()
         }
     }
 }

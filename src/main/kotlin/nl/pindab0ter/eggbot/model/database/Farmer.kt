@@ -104,8 +104,6 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
                 prestiges = backup.stats.prestigeCount
                 droneTakedowns = backup.stats.droneTakedowns
                 eliteDroneTakedowns = backup.stats.droneTakedownsElite
-                createdAt = backup.approxTime.toDateTime()
-                updatedAt = backup.approxTime.toDateTime()
             }
         }
     }

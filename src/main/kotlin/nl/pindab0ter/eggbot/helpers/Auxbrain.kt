@@ -10,7 +10,7 @@ import nl.pindab0ter.eggbot.BASE_SOUL_EGG_RESEARCH_BONUS
 import nl.pindab0ter.eggbot.PROPHECY_EGG_RESEARCH_BONUS_PER_LEVEL
 import nl.pindab0ter.eggbot.SOUL_EGG_RESEARCH_BONUS_PER_LEVEL
 import nl.pindab0ter.eggbot.model.Config
-import org.joda.time.DateTime
+import org.joda.time.DateTime.now
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
@@ -19,7 +19,7 @@ import java.math.RoundingMode
 
 // Basic information
 val Backup.timeSinceBackup: Duration
-    get() = Duration(approxTime.toDateTime(), DateTime.now())
+    get() = Duration(approxTime.toDateTime(), now())
 
 // Farms
 fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm ->
@@ -27,7 +27,7 @@ fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm 
 }
 
 val Backup.Farm.timeSinceLastStep: Duration
-    get() = Duration(lastStepTime.toDateTime(), DateTime.now())
+    get() = Duration(lastStepTime.toDateTime(), now())
 
 // Earnings bonus
 val Backup.Game.soulEggResearchLevel: BigDecimal
@@ -62,7 +62,7 @@ val Contract.finalGoal: BigDecimal
 val LocalContract.finished: Boolean
     get() = lastAmountWhenRewardGiven.toBigDecimal() >= contract?.finalGoal
 val LocalContract.timeRemaining: Duration
-    get() = contract!!.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), DateTime.now()))
+    get() = contract!!.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), now()))
 val CoopStatus.eggsLaid: BigDecimal
     get() = BigDecimal(totalAmount)
 val CoopStatus.timeRemaining: Duration

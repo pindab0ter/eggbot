@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.model.database
 
 import org.jetbrains.exposed.dao.IdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
-import org.joda.time.DateTime
 
 object Farmers : IdTable<String>() {
     override val tableName = "farmers"
@@ -16,6 +15,6 @@ object Farmers : IdTable<String>() {
     val prestiges = long("prestiges")
     val droneTakedowns = long("drone_takedowns")
     val eliteDroneTakedowns = long("elite_drone_takedowns")
-    val createdAt = datetime("created_at").default(DateTime.now())
-    val updatedAt = datetime("updated_at").default(DateTime.now())
+    val createdAt = datetime("created_at")
+    val updatedAt = datetime("updated_at")
 }
