@@ -62,7 +62,12 @@ class RegisterCommand : Extension() {
                 val farmerBackup = AuxBrain.getFarmerBackup(arguments.eggIncId)
 
                 if (farmerBackup == null) {
-                    respond { content = "Could not find a farmer with the ID `${arguments.eggIncId}`" }
+                    respond { content = "Could not find a farmer with the ID `${arguments.eggIncId}`. Please make sure you didn't make any typing errors." }
+                    return@action
+                }
+
+                if (farmerBackup.userName.isBlank()) {
+                    respond { content = "**Error:** Could not get your in-game name.\nPlease try logging out and back in to your Game Service (Main Menu → Game Services → Log Out)." }
                     return@action
                 }
 
