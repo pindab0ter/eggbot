@@ -57,7 +57,7 @@ object AuxBrain {
 
     private fun periodicalsRequest(): Request {
         val data = PeriodicalsRequest {
-            clientVersion = Config.clientVersion
+            clientVersion = Int.MAX_VALUE
             userId = Config.userId
         }.serialize().encodeBase64ToString()
 

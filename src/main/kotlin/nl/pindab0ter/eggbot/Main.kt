@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.annotation.KordPreview
 import dev.kord.gateway.Intent.*
 import nl.pindab0ter.eggbot.extensions.*
@@ -30,10 +31,11 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
         add(::UnregisterCommand)
         add(::WhoIsCommand)
 
-        if (Config.sentryDsn != null) sentry {
-            enable = true
-            dsn = Config.sentryDsn
-            environment = if (Config.devMode) "development" else "production"
+        envOrNull("SENTRY_DSN")?.let { sentryDsn ->
+            sentry {
+                enable = true
+                dsn = sentryDsn
+            }
         }
     }
 
