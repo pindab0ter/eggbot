@@ -7,6 +7,7 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
+import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.converters.optionalFarmer
 import nl.pindab0ter.eggbot.helpers.toListing
@@ -14,6 +15,7 @@ import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
+import org.jetbrains.exposed.dao.load
 import org.jetbrains.exposed.sql.SortOrder
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -62,7 +64,7 @@ class UnregisterCommand : Extension() {
 
                     arguments.discordUser != null -> {
                         val databaseDiscordUser = transaction {
-                            arguments.discordUser?.id?.let { DiscordUser.findBySnowflake(it) }
+                            arguments.discordUser?.id?.let { DiscordUser.findBySnowflake(it)?.load(DiscordUser::farmers) }
                         }
 
                         if (databaseDiscordUser == null) {
@@ -83,12 +85,32 @@ class UnregisterCommand : Extension() {
                         }
                     }
 
-                    arguments.farmer != null -> {
-                        // TODO: Find farmer and unregister them
-                        // TODO: Check for remaining farmers
+                    arguments.farmer != null -> transaction {
+                        val discordUser = arguments.farmer?.discordUser?.load(DiscordUser::farmers)
 
-                        respond {
-                            content = ""
+                        if (discordUser?.farmers?.minus(arguments.farmer)?.isEmpty() == true) {
+                            val discordUserMention = discordUser.mention
+
+                            discordUser.delete()
+
+                            runBlocking {
+                                respond {
+                                    content = "Unregistered `${arguments.farmer?.inGameName}` and member $discordUserMention along with it."
+                                }
+                            }
+                        } else {
+                            arguments.farmer?.delete()
+
+                            runBlocking {
+                                respond {
+                                    content = buildString {
+                                        appendLine("Unregistered `${arguments.farmer?.inGameName}`.")
+                                        append("${discordUser?.farmers?.toListing()} ")
+                                        if ((discordUser?.farmers?.count() ?: 0) == 1) append("is") else append("are")
+                                        append(" still registered to ${discordUser?.mention}.")
+                                    }
+                                }
+                            }
                         }
                     }
                 }
