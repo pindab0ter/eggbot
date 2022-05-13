@@ -134,7 +134,7 @@ private fun StringBuilder.drawBottleNecks(
             val moment = state.farmer.runningState.habsStatus.moment
             when {
                 moment == Duration.ZERO -> appendLine("🏠 Full! ")
-                moment < state.timeRemaining && moment < state.timeTillFinalGoal ?: ONE_YEAR ->
+                moment < state.timeRemaining && moment < (state.timeTillFinalGoal ?: ONE_YEAR) ->
                     appendLine("🏠 ${state.farmer.runningState.habsStatus.moment.formatDaysHoursAndMinutes(compact)} ")
                 else -> Unit
             }
@@ -150,7 +150,7 @@ private fun StringBuilder.drawBottleNecks(
     when {
         transportBottleneckMoment == null -> Unit
         transportBottleneckMoment == Duration.ZERO -> appendLine("🚛 Full! ")
-        transportBottleneckMoment < state.timeRemaining && transportBottleneckMoment < state.timeTillFinalGoal ?: ONE_YEAR ->
+        transportBottleneckMoment < state.timeRemaining && transportBottleneckMoment < (state.timeTillFinalGoal ?: ONE_YEAR) ->
             appendLine("🚛 ${transportBottleneckMoment.formatDaysHoursAndMinutes(compact)} ")
         else -> Unit
     }
@@ -159,7 +159,7 @@ private fun StringBuilder.drawBottleNecks(
         state.farmer.awayTimeRemaining <= Duration.ZERO -> appendLine("⌛ Empty!")
         state.farmer.awayTimeRemaining < Duration.standardHours(12L)
                 && state.farmer.awayTimeRemaining < state.timeRemaining
-                && state.farmer.awayTimeRemaining < state.timeTillFinalGoal ?: ONE_YEAR ->
+                && state.farmer.awayTimeRemaining < (state.timeTillFinalGoal ?: ONE_YEAR) ->
             appendLine("⌛ ${state.farmer.awayTimeRemaining.formatDaysHoursAndMinutes(compact)}")
         else -> Unit
     }
