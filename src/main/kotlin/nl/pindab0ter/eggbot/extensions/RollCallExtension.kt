@@ -31,7 +31,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 
 class RollCallExtension : Extension() {
     val logger = KotlinLogging.logger { }
-    override val name: String = "AdminExtension"
+    override val name: String = javaClass.simpleName
 
     private data class DeletionStatus(
         val type: Type,
