@@ -22,6 +22,7 @@ suspend fun main() = ExtensibleBot(Config.botToken) {
         add(::ContractsCommand)
         add(::CoopCommand)
         add(::CoopInfoCommand)
+        add(::CoopsInfoCommand)
         add(::EarningsBonusCommand)
         add(::LeaderBoardCommand)
         add(::RegisterCommand)
