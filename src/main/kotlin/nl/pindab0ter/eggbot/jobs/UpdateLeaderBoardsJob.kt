@@ -5,7 +5,7 @@ import dev.kord.core.entity.channel.TextChannel
 import dev.kord.core.supplier.EntitySupplyStrategy.Companion.rest
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.configuredGuild
+import nl.pindab0ter.eggbot.helpers.guild
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.Config.dronesLeaderBoardChannel
 import nl.pindab0ter.eggbot.model.Config.earningsBonusLeaderBoardChannel
@@ -39,7 +39,7 @@ class UpdateLeaderBoardsJob : Job {
             dronesLeaderBoardChannel to DRONE_TAKEDOWNS,
             eliteDronesLeaderBoardChannel to ELITE_DRONE_TAKEDOWNS
         ).map { (channelSnowFlake, category) ->
-            configuredGuild?.getChannelOfOrNull<TextChannel>(channelSnowFlake) to category
+            guild?.getChannelOfOrNull<TextChannel>(channelSnowFlake) to category
         }.forEach { (textChannel, category) ->
             textChannel!!.withStrategy(rest).messages.collect { message ->
                 message.delete("Updating leader boards")

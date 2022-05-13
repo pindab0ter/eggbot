@@ -4,7 +4,7 @@ import com.auxbrain.ei.Contract
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.NumberFormatter
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
-import nl.pindab0ter.eggbot.helpers.configuredGuild
+import nl.pindab0ter.eggbot.helpers.guild
 import nl.pindab0ter.eggbot.helpers.formatIllions
 import nl.pindab0ter.eggbot.model.database.Coop
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -36,7 +36,7 @@ fun rollCallResponse(
     }
 
     val coopContent = coops.map { coop ->
-        val role = coop.roleId?.let { configuredGuild?.getRoleOrNull(it) }
+        val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
         buildString {
             // Header
             appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")

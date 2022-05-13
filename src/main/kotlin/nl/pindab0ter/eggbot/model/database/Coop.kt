@@ -4,7 +4,7 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.helpers.configuredGuild
+import nl.pindab0ter.eggbot.helpers.guild
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -23,7 +23,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
         }
     val role: Role?
         get() = this@Coop.roleId?.let {
-            runBlocking { configuredGuild?.getRoleOrNull(it) }
+            runBlocking { guild?.getRoleOrNull(it) }
         }
 
     private var _channelId by Coops.channelId
@@ -34,7 +34,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
         }
     val channel: Channel?
         get() = this@Coop.channelId?.let {
-            runBlocking { configuredGuild?.getChannelOrNull(it) }
+            runBlocking { guild?.getChannelOrNull(it) }
         }
 
     var farmers by Farmer via CoopFarmers

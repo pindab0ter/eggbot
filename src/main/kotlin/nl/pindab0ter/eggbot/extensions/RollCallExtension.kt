@@ -80,7 +80,7 @@ class RollCallExtension : Extension() {
 
                 action {
                     // Check if roles or channels can be created if required
-                    if (configuredGuild == null && (arguments.createRoles || arguments.createChannels)) return@action respond {
+                    if (guild == null && (arguments.createRoles || arguments.createChannels)) return@action respond {
                         content = "${Config.emojiWarning} Could not get server info. " +
                                 "Please try without creating roles or channels or else please contact the bot maintainer."
                     }.discard()
@@ -100,21 +100,21 @@ class RollCallExtension : Extension() {
 
                                 runBlocking {
                                     // Create and assign roles
-                                    if (arguments.createRoles) configuredGuild?.createRole {
+                                    if (arguments.createRoles) guild?.createRole {
                                         name = coop.name
                                         mentionable = true
                                         color = DEFAULT_ROLE_COLOR
                                     }?.let { role ->
                                         coop.roleId = role.id
                                         coop.farmers.map { farmer ->
-                                            configuredGuild
+                                            guild
                                                 ?.getMemberOrNull(farmer.discordUser.snowflake)
                                                 ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
                                         }
                                     }
 
                                     // Create and assign channel
-                                    if (arguments.createChannels) configuredGuild?.createTextChannel(coop.name) {
+                                    if (arguments.createChannels) guild?.createTextChannel(coop.name) {
                                         parentId = Config.coopsGroupChannel
                                         reason = "Roll call for ${arguments.contract.name}"
                                     }?.let { channel -> coop.channelId = channel.id }

@@ -13,7 +13,7 @@ import dev.kord.core.entity.interaction.Interaction
 import dev.kord.core.event.interaction.InteractionCreateEvent
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.configuredGuild
+import nl.pindab0ter.eggbot.helpers.guild
 import nl.pindab0ter.eggbot.model.Config
 
 @KordPreview
@@ -66,13 +66,13 @@ class CommandLogger : Extension() {
                 is MentionableArgument -> "${option.name}: ${option.value}"
                 is AutoCompleteArgument -> "${option.name}: ${option.value}"
                 is UserArgument -> runBlocking {
-                    "${option.name}: ${configuredGuild?.getMemberOrNull(option.value)?.displayName?.let { "@${it}" } ?: "(id = ${option.value})"}"
+                    "${option.name}: ${guild?.getMemberOrNull(option.value)?.displayName?.let { "@${it}" } ?: "(id = ${option.value})"}"
                 }
                 is ChannelArgument -> runBlocking {
-                    "${option.name}: ${configuredGuild?.getChannelOrNull(option.value)?.name?.let { "#${it}" } ?: "(id = ${option.value})"}"
+                    "${option.name}: ${guild?.getChannelOrNull(option.value)?.name?.let { "#${it}" } ?: "(id = ${option.value})"}"
                 }
                 is RoleArgument -> runBlocking {
-                    "${option.name}: ${configuredGuild?.getRoleOrNull(option.value)?.name?.let { "@${it}" } ?: "(id = ${option.value})"}"
+                    "${option.name}: ${guild?.getRoleOrNull(option.value)?.name?.let { "@${it}" } ?: "(id = ${option.value})"}"
                 }
             }
         }

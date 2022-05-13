@@ -74,6 +74,6 @@ val Egg.displayName: String
 val Egg.asEmoteMention: String?
     get() = runBlocking {
         Config.eggsToEmotes[this@asEmoteMention]?.let { emojiSnowflake: Snowflake ->
-            configuredGuild?.getEmojiOrNull(emojiSnowflake)
+            guild?.getEmojiOrNull(emojiSnowflake)
         }?.mention
     }

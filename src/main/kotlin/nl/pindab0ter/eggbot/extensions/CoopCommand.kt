@@ -18,7 +18,6 @@ import dev.kord.core.behavior.createTextChannel
 import dev.kord.rest.request.RestRequestException
 import kotlinx.coroutines.flow.firstOrNull
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.helpers.contract
 import nl.pindab0ter.eggbot.helpers.createChannel
 import nl.pindab0ter.eggbot.helpers.createRole
@@ -78,7 +77,7 @@ class CoopCommand : Extension() {
                 }
 
                 // Check if a role with the same name exists
-                if (arguments.createRole) configuredGuild?.roles?.firstOrNull { role -> role.name == coopId }?.let { role ->
+                if (arguments.createRole) guild?.roles?.firstOrNull { role -> role.name == coopId }?.let { role ->
                     respond { content = "**Error:** The role ${role.mention} already exists." }
                     return@action
                 }
@@ -148,7 +147,7 @@ class CoopCommand : Extension() {
                 coopStatus?.contributors?.map { contributor ->
                     val member = transaction {
                         Farmer.find { Farmers.id eq contributor.userId }.firstOrNull()
-                    }?.discordId?.let { configuredGuild?.getMemberOrNull(it) }
+                    }?.discordId?.let { guild?.getMemberOrNull(it) }
 
                     if (member != null && role != null) {
                         member.addRole(role.id)

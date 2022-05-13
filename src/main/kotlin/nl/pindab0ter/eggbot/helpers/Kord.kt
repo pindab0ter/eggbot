@@ -7,8 +7,9 @@ import dev.kord.core.entity.Guild
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.model.Config
 
-val configuredGuild: Guild? get() = runBlocking { getKoin().get<Kord>().getGuild(Config.guild) }
+val kord: Kord get() = runBlocking { getKoin().get() }
+val guild: Guild? get() = runBlocking { kord.getGuild(Config.guild) }
 
 suspend fun emoteMention(snowflake: Snowflake?): String? = snowflake?.let {
-    configuredGuild?.asGuildOrNull()?.getEmojiOrNull(snowflake)?.mention
+    guild?.asGuildOrNull()?.getEmojiOrNull(snowflake)?.mention
 }

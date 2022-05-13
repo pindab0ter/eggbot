@@ -9,7 +9,6 @@ import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.entity.User
 import nl.pindab0ter.eggbot.converters.optionalFarmer
-import nl.pindab0ter.eggbot.helpers.configuredGuild
 import nl.pindab0ter.eggbot.helpers.toListing
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
@@ -69,7 +68,7 @@ class WhoIsCommand : Extension() {
                     }
 
                     arguments.farmer != null -> {
-                        val discordUser = arguments.farmer?.discordId?.let { configuredGuild?.getMember(it) }
+                        val discordUser = arguments.farmer?.discordId?.let { guild?.getMember(it) }
 
                         respond {
                             content =
