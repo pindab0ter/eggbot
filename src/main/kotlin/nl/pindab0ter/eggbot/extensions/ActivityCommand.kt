@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.extensions
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.ephemeralSubCommand
+import com.kotlindiscord.kord.extensions.commands.application.slash.publicSubCommand
 import com.kotlindiscord.kord.extensions.commands.converters.impl.int
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
@@ -12,6 +13,9 @@ import nl.pindab0ter.eggbot.helpers.formatDaysAndHoursUntil
 import nl.pindab0ter.eggbot.helpers.formatMonthAndDay
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.DiscordUser
+import nl.pindab0ter.eggbot.model.database.DiscordUsers
+import nl.pindab0ter.eggbot.view.inactivesResponse
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime.now
 
@@ -103,6 +107,23 @@ class ActivityCommand : Extension() {
 
                     respond {
                         content = if (wasActive) "You are (no longer) inactive." else "You were already active."
+                    }
+                }
+            }
+
+            publicSubCommand {
+                name = "list"
+                description = "List all currently inactive users."
+
+                action {
+                    val inactiveUsers = transaction {
+                        DiscordUser.find {
+                            DiscordUsers.inactiveUntil.isNotNull() and (DiscordUsers.inactiveUntil greater now())
+                        }.toList()
+                    }
+
+                    respond {
+                        content = inactivesResponse(inactiveUsers)
                     }
                 }
             }
