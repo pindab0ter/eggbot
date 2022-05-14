@@ -3,13 +3,10 @@ package nl.pindab0ter.eggbot.helpers
 import ch.obermuhlner.math.big.BigDecimalMath
 import com.auxbrain.ei.*
 import com.kotlindiscord.kord.extensions.utils.capitalizeWords
-import dev.kord.common.entity.Snowflake
-import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.BASE_PROPHECY_EGG_RESEARCH_BONUS
 import nl.pindab0ter.eggbot.BASE_SOUL_EGG_RESEARCH_BONUS
 import nl.pindab0ter.eggbot.PROPHECY_EGG_RESEARCH_BONUS_PER_LEVEL
 import nl.pindab0ter.eggbot.SOUL_EGG_RESEARCH_BONUS_PER_LEVEL
-import nl.pindab0ter.eggbot.model.Config
 import org.joda.time.DateTime.now
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -71,9 +68,3 @@ val CoopStatus.timeRemaining: Duration
 // Eggs
 val Egg.displayName: String
     get() = name.replace("_", " ").lowercase().capitalizeWords()
-val Egg.asEmoteMention: String?
-    get() = runBlocking {
-        Config.eggsToEmotes[this@asEmoteMention]?.let { emojiSnowflake: Snowflake ->
-            guild?.getEmojiOrNull(emojiSnowflake)
-        }?.mention
-    }

@@ -11,7 +11,7 @@ import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.formatDaysAndHoursUntil
 import nl.pindab0ter.eggbot.helpers.formatMonthAndDay
-import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.view.inactivesResponse
@@ -25,11 +25,10 @@ class ActivityCommand : Extension() {
     override val name: String = javaClass.simpleName
 
     override suspend fun setup() {
-
-        ephemeralSlashCommand {
+        for (guild in guilds) ephemeralSlashCommand {
             name = "activity"
             description = "Manage your (in)activity."
-            guild(Config.guild)
+            guild(guild.id)
 
             ephemeralSubCommand {
                 name = "status"
@@ -38,8 +37,9 @@ class ActivityCommand : Extension() {
                 lateinit var discordUser: DiscordUser
 
                 check {
-                    discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
-                        ?: return@check fail("You have not registered yet. Please do so using `/register`.")
+                    discordUser = transaction {
+                        DiscordUser.find(event.interaction.user.id, guild)
+                    } ?: return@check fail("You have not registered yet. Please do so using `/register`.")
                 }
 
                 action {
@@ -56,6 +56,7 @@ class ActivityCommand : Extension() {
                 val days by int {
                     name = "days"
                     description = "How many days you want to say yourself inactive as."
+
                     validate {
                         failIf(value <= 0, "You must say yourself inactive for at least 1 day.")
                         failIf(value > 356, "You can't say yourself inactive for more than a year.")

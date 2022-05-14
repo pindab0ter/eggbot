@@ -10,8 +10,8 @@ import dev.kord.common.annotation.KordPreview
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.converters.optionalFarmer
+import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.helpers.toListing
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
@@ -25,7 +25,6 @@ class UnregisterCommand : Extension() {
     override val name: String = javaClass.simpleName
 
     override suspend fun setup() {
-
         class UnregisterArguments : Arguments() {
             val discordUser by optionalUser {
                 name = "member"
@@ -51,10 +50,10 @@ class UnregisterCommand : Extension() {
             }
         }
 
-        publicSlashCommand(::UnregisterArguments) {
+        for (guild in guilds) publicSlashCommand(::UnregisterArguments) {
             name = "unregister"
             description = "Unregister a member, removing their farmers from our database. This does not affect their game."
-            guild(Config.guild)
+            guild(guild.id)
 
             action {
                 when {
@@ -64,7 +63,7 @@ class UnregisterCommand : Extension() {
 
                     arguments.discordUser != null -> {
                         val databaseDiscordUser = transaction {
-                            arguments.discordUser?.id?.let { DiscordUser.findBySnowflake(it)?.load(DiscordUser::farmers) }
+                            arguments.discordUser?.id?.let { DiscordUser.find(it, guild)?.load(DiscordUser::farmers) }
                         }
 
                         if (databaseDiscordUser == null) {
@@ -105,9 +104,13 @@ class UnregisterCommand : Extension() {
                                 respond {
                                     content = buildString {
                                         appendLine("Unregistered `${arguments.farmer?.inGameName}`.")
-                                        append("${discordUser?.farmers?.toListing()} ")
-                                        if ((discordUser?.farmers?.count() ?: 0) == 1) append("is") else append("are")
-                                        append(" still registered to ${discordUser?.mention}.")
+
+                                        val count = discordUser?.farmers?.count() ?: 0
+                                        if (count > 0) {
+                                            append("${discordUser?.farmers?.toListing()} ")
+                                            if (count == 1) append("is") else append("are")
+                                            append(" still registered to ${discordUser?.mention}.")
+                                        }
                                     }
                                 }
                             }

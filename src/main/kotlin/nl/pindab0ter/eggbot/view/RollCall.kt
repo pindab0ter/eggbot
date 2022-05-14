@@ -1,15 +1,15 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
+import dev.kord.core.entity.Guild
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.NumberFormatter
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
-import nl.pindab0ter.eggbot.helpers.guild
 import nl.pindab0ter.eggbot.helpers.formatIllions
 import nl.pindab0ter.eggbot.model.database.Coop
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun rollCallResponse(
+fun Guild.rollCallResponse(
     contract: Contract,
     coops: List<Coop>,
 ): List<String> = runBlocking {
@@ -36,7 +36,7 @@ fun rollCallResponse(
     }
 
     val coopContent = coops.map { coop ->
-        val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
+        val role = coop.roleId?.let { getRoleOrNull(it) }
         buildString {
             // Header
             appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")

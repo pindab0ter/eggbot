@@ -32,7 +32,6 @@ object Config {
 
     // Discord IDs
     val botOwner: Snowflake
-    val guild: Snowflake
     val adminRole: Snowflake
 
     val botCommandsChannel: Snowflake
@@ -76,7 +75,6 @@ object Config {
             deviceId = getRequired("device_id")
 
             botOwner = getOptional("bot_owner_id", "0").let(::Snowflake)
-            guild = getRequired("guild_id").let(::Snowflake)
             adminRole = getRequired("role.admin_id").let(::Snowflake)
 
             botCommandsChannel = getRequired("channel.bot_commands").let(::Snowflake)

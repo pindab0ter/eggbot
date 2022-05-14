@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Backup
+import dev.kord.core.entity.Guild
+import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.*
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
@@ -9,7 +11,7 @@ import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Table
 
-suspend fun leaderboardResponse(
+fun Guild.leaderboardResponse(
     farmers: List<Backup>,
     leaderBoard: LeaderBoard,
     top: Int? = null,
@@ -33,10 +35,13 @@ suspend fun leaderboardResponse(
         }
     }
 
+    val soulEgg = runBlocking { emoteMention(Config.emoteSoulEgg) } ?: "🥚"
+    val prophecyEgg = runBlocking { emoteMention(Config.emoteProphecyEgg) } ?: "🥚"
+
     val boardTitle = when (leaderBoard) {
         EARNINGS_BONUS -> "💵 Earnings Bonus"
-        SOUL_EGGS -> "${emoteMention(Config.emoteSoulEgg) ?: "🥚"} Soul Eggs"
-        PROPHECY_EGGS -> "${emoteMention(Config.emoteProphecyEgg) ?: "🥚"} Prophecy Eggs"
+        SOUL_EGGS -> "$soulEgg Soul Eggs"
+        PROPHECY_EGGS -> "$prophecyEgg Prophecy Eggs"
         PRESTIGES -> "🥨 Prestiges"
         DRONE_TAKEDOWNS -> "✈🚫 Drone Takedowns"
         ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"

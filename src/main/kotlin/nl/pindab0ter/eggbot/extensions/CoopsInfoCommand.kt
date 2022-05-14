@@ -9,6 +9,7 @@ import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.compact
 import nl.pindab0ter.eggbot.helpers.contract
+import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -29,9 +30,10 @@ class CoopsInfoCommand : Extension() {
             val compact: Boolean by compact()
         }
 
-        publicSlashCommand(::CoopsInfoArguments) {
+        for (guild in guilds) publicSlashCommand(::CoopsInfoArguments) {
             name = "coops"
             description = "See how all the coops are doing."
+            guild(guild.id)
 
             action {
                 val contract = arguments.contract
@@ -55,7 +57,7 @@ class CoopsInfoCommand : Extension() {
                 }
 
                 multipartRespond(
-                    coopsInfoResponse(
+                    guild.coopsInfoResponse(
                         contract = contract,
                         statuses = contractCoopStatuses,
                         compact = compact

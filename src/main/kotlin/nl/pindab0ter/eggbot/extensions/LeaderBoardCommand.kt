@@ -8,10 +8,7 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.DisplayMode
-import nl.pindab0ter.eggbot.helpers.displayModeChoice
-import nl.pindab0ter.eggbot.helpers.earningsBonus
-import nl.pindab0ter.eggbot.helpers.multipartRespond
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.EARNINGS_BONUS
@@ -24,25 +21,25 @@ class LeaderBoardCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
+    class LeaderBoardArguments : Arguments() {
+        val top: Int? by optionalInt {
+            name = "top"
+            description = "How many players to show"
+        }
+        val leaderBoard: LeaderBoard by defaultingEnumChoice {
+            name = "board"
+            description = "Which board to show"
+            defaultValue = EARNINGS_BONUS
+            typeName = LeaderBoard::name.name
+        }
+        val displayMode: DisplayMode by displayModeChoice()
+    }
 
     override suspend fun setup() {
-        class LeaderBoardArguments : Arguments() {
-            val top: Int? by optionalInt {
-                name = "top"
-                description = "How many players to show"
-            }
-            val leaderBoard: LeaderBoard by defaultingEnumChoice {
-                name = "board"
-                description = "Which board to show"
-                defaultValue = EARNINGS_BONUS
-                typeName = LeaderBoard::name.name
-            }
-            val displayMode: DisplayMode by displayModeChoice()
-        }
-
-        publicSlashCommand(::LeaderBoardArguments) {
+        for (guild in guilds) publicSlashCommand(::LeaderBoardArguments) {
             name = "leader-board"
             description = "View leader boards. Defaults to the Earnings Bonus leader board."
+            guild(guild.id)
 
             check {
                 failIf("There are no registered farmers.") { transaction { Farmer.count() == 0 } }
@@ -56,7 +53,7 @@ class LeaderBoardCommand : Extension() {
                 }
 
                 multipartRespond(
-                    leaderboardResponse(
+                    guild.leaderboardResponse(
                         farmers = farmers,
                         leaderBoard = arguments.leaderBoard,
                         top = arguments.top?.takeIf { it > 0 },

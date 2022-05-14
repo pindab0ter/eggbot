@@ -1,6 +1,8 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
+import com.kotlindiscord.kord.extensions.commands.application.ApplicationCommandContext
+import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
@@ -11,13 +13,15 @@ import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import kotlin.random.Random
 
 
-fun solosInfoResponse(
+fun ApplicationCommandContext.solosInfoResponse(
     contract: Contract,
     states: List<SoloContractState>,
     compact: Boolean,
 ) = buildString {
+    val guildName = runBlocking { guild?.asGuildOrNull()?.name }
+
     appendLine("`` vs. _${contract.name}_:")
-    appendLine("`${guild?.name}` vs. _${contract.name}_:")
+    appendLine("`$guildName` vs. _${contract.name}_:")
     appendLine()
 
     if (!compact) {

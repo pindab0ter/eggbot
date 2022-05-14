@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.view
 
+import dev.kord.core.entity.Guild
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
@@ -8,13 +9,13 @@ import nl.pindab0ter.eggbot.model.simulation.SoloContractState
 import org.joda.time.Duration
 
 
-fun soloInfoResponse(
+fun Guild.soloInfoResponse(
     state: SoloContractState,
     compact: Boolean = false,
 ): String = buildString message@{
     appendLine("`${state.farmer.name}` vs. _${state.contractName}_:")
 
-    drawGoals(state, compact)
+    drawGoals(state, compact, this@soloInfoResponse)
 
     drawBasicInfo(state, compact)
 
@@ -22,14 +23,14 @@ fun soloInfoResponse(
         drawBottleNecks(state, compact)
 }
 
-fun soloFinishedIfBankedResponse(
+fun Guild.soloFinishedIfBankedResponse(
     state: SoloContractState,
     compact: Boolean,
 ): String = buildString {
     appendLine("`${state.farmer.name}` vs. _${state.contractName}_:")
     appendLine()
 
-    drawGoals(state, compact)
+    drawGoals(state, compact, this@soloFinishedIfBankedResponse)
 
     drawFinishedBasicInfo(state, compact)
 }
@@ -37,8 +38,11 @@ fun soloFinishedIfBankedResponse(
 private fun StringBuilder.drawGoals(
     state: SoloContractState,
     compact: Boolean,
+    discordGuild: Guild?
 ): StringBuilder = appendTable {
-    title = "__${state.egg.asEmoteMention} **Goals** (${state.goalsReached}/${state.goals.count()})__"
+    val eggEmoteMention = discordGuild?.emoteMention(state.egg)
+
+    title = "__${eggEmoteMention} **Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 

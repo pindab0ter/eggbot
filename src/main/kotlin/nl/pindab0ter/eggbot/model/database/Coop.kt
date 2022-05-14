@@ -4,7 +4,6 @@ import dev.kord.common.entity.Snowflake
 import dev.kord.core.entity.Role
 import dev.kord.core.entity.channel.Channel
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.helpers.guild
 import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
@@ -23,7 +22,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
         }
     val role: Role?
         get() = this@Coop.roleId?.let {
-            runBlocking { guild?.getRoleOrNull(it) }
+            runBlocking { discordGuild.asGuild()?.getRoleOrNull(it) }
         }
 
     private var _channelId by Coops.channelId
@@ -34,10 +33,12 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
         }
     val channel: Channel?
         get() = this@Coop.channelId?.let {
-            runBlocking { guild?.getChannelOrNull(it) }
+            runBlocking { discordGuild.asGuild()?.getChannelOrNull(it) }
         }
 
     var farmers by Farmer via CoopFarmers
+    val discordGuild by DiscordGuild referencedOn DiscordUsers.guildId
+
     val activeEarningsBonus: BigDecimal
         get() = farmers.sumOf { farmer ->
             if (farmer.isActive) farmer.earningsBonus
@@ -45,7 +46,7 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
         }
 
     var createdAt by Coops.createdAt
-    var updatedAt by Coops.updated_at
+    var updatedAt by Coops.updatedAt
 
     companion object : IntEntityClass<Coop>(Coops)
 }

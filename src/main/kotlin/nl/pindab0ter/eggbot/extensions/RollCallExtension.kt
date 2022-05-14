@@ -18,10 +18,7 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.CHANNEL
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.ROLE
-import nl.pindab0ter.eggbot.helpers.contract
-import nl.pindab0ter.eggbot.helpers.createChannel
-import nl.pindab0ter.eggbot.helpers.createRole
-import nl.pindab0ter.eggbot.helpers.multipartRespond
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -43,13 +40,11 @@ class RollCallExtension : Extension() {
     }
 
     override suspend fun setup() {
-        publicSlashCommand {
-
+        for (guild in guilds) publicSlashCommand {
             name = "roll-call"
             description = "Manage roll calls"
-
-            guild(Config.guild)
             locking = true
+            guild(guild.id)
 
             check {
                 hasRole(Config.adminRole)
@@ -97,29 +92,32 @@ class RollCallExtension : Extension() {
 
                                 runBlocking {
                                     // Create and assign roles
-                                    if (arguments.createRoles) guild?.createRole {
-                                        name = coop.name
-                                        mentionable = true
-                                        color = DEFAULT_ROLE_COLOR
-                                    }?.let { role ->
+                                    if (arguments.createRoles) {
+                                        val role = guild.createRole {
+                                            name = coop.name
+                                            mentionable = true
+                                            color = DEFAULT_ROLE_COLOR
+                                        }
+
                                         coop.roleId = role.id
                                         coop.farmers.map { farmer ->
-                                            guild
-                                                ?.getMemberOrNull(farmer.discordUser.snowflake)
-                                                ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                                            guild.getMemberOrNull(farmer.discordUser.snowflake)?.addRole(role.id, "Roll call for ${arguments.contract.name}")
                                         }
                                     }
 
                                     // Create and assign channel
-                                    if (arguments.createChannels) guild?.createTextChannel(coop.name) {
-                                        parentId = Config.coopsGroupChannel
-                                        reason = "Roll call for ${arguments.contract.name}"
-                                    }?.let { channel -> coop.channelId = channel.id }
+                                    if (arguments.createChannels) {
+                                        val channel = guild.createTextChannel(coop.name) {
+                                            parentId = Config.coopsGroupChannel
+                                            reason = "Roll call for ${arguments.contract.name}"
+                                        }
+                                        coop.channelId = channel.id
+                                    }
                                 }
                             }
                     }
 
-                    multipartRespond(rollCallResponse(arguments.contract, coops))
+                    multipartRespond(guild.rollCallResponse(arguments.contract, coops))
                 }
             }
 

@@ -1,20 +1,19 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
+import dev.kord.core.entity.Guild
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.helpers.asEmoteMention
 import nl.pindab0ter.eggbot.helpers.displayName
+import nl.pindab0ter.eggbot.helpers.emoteMention
 import nl.pindab0ter.eggbot.helpers.formatDayHourAndMinutes
 import nl.pindab0ter.eggbot.helpers.toDateTime
 
 
-fun contractsResponse(soloContracts: List<Contract>, coopContracts: List<Contract>): String = buildString {
+fun Guild.contractsResponse(soloContracts: List<Contract>, coopContracts: List<Contract>): String = buildString {
     fun List<Contract>.printContracts(): String = buildString {
         this@printContracts.forEach { contract ->
 
-            contract.egg.asEmoteMention?.let { eggEmoji ->
-                append(eggEmoji)
-            }
+            emoteMention(contract.egg)?.let { eggEmoji -> append(eggEmoji) }
             append("_${contract.name}_")
             append(" (")
             append(contract.egg.displayName)
