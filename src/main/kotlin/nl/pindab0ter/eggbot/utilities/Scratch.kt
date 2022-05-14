@@ -1,12 +1,14 @@
 package nl.pindab0ter.eggbot.utilities
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.utils.env
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.connectToDatabase
-import nl.pindab0ter.eggbot.model.Config
 import kotlin.system.exitProcess
 
-suspend fun main() = ExtensibleBot(Config.botToken) {
+suspend fun main() = ExtensibleBot(
+    token = env("BOT_TOKEN"),
+) {
     val logger = KotlinLogging.logger {}
 
     hooks {

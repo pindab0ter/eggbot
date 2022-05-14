@@ -6,6 +6,7 @@ import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.result.getOrNull
+import com.kotlindiscord.kord.extensions.utils.env
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -58,7 +59,7 @@ object AuxBrain {
     private fun periodicalsRequest(): Request {
         val data = PeriodicalsRequest {
             clientVersion = Int.MAX_VALUE
-            userId = Config.userId
+            userId = env("EGG_INC_ID")
         }.serialize().encodeBase64ToString()
 
         return PERIODICALS_URL.httpPost()
@@ -90,8 +91,8 @@ object AuxBrain {
     private fun firstContactRequest(eggIncId: String): Request {
         val data = FirstContactRequest {
             eiUserId = eggIncId
-            deviceId = Config.deviceId
-            clientVersion = Config.clientVersion
+            deviceId = env("DEVICE_ID")
+            clientVersion = Int.MAX_VALUE
         }.serialize().encodeBase64ToString()
 
         return FIRST_CONTACT_URL.httpPost()
@@ -131,12 +132,6 @@ object AuxBrain {
                 transaction {
                     Farmer.findById(eggIncId)?.update(retrievedFarmerBackup)
                 }
-            }
-
-            // Check if the client version is up-to-date
-            if (retrievedFarmerBackup.clientVersion > Config.clientVersion) {
-                logger.info { "Updated to client version ${retrievedFarmerBackup.clientVersion}." }
-                Config.clientVersion = retrievedFarmerBackup.clientVersion
             }
 
             retrievedFarmerBackup

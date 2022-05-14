@@ -8,7 +8,6 @@ import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
@@ -80,7 +79,7 @@ fun coopFinishedResponse(
         """
         `${status.coopId}` vs. __${contract.name}__:
 
-        This co-op has successfully finished their contract! ${Config.emojiSuccess}
+        This co-op has successfully finished their contract! 👍
 
         """.trimIndent()
     )

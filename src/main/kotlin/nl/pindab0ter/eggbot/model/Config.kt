@@ -13,25 +13,7 @@ object Config {
     private const val FILE_NAME = "eggbot.properties"
     private val logger = KotlinLogging.logger { }
 
-    val botToken: String
-    val prefix: String
-    val helpWord: String
-    val emojiSuccess: String
-    val emojiWarning: String
-    val emojiError: String
-
-    // val activity: Activity?
-    private val statusType: String
-    private val statusText: String?
-    var clientVersion: Int
-    val devMode: Boolean
-
-    // AuxBrain IDs
-    val userId: String
-    val deviceId: String
-
     // Discord IDs
-    val botOwner: Snowflake
     val adminRole: Snowflake
 
     val botCommandsChannel: Snowflake
@@ -48,9 +30,6 @@ object Config {
     val emoteSoulEgg: Snowflake?
     val emoteProphecyEgg: Snowflake?
 
-    // Sentry
-    val sentryDsn: String?
-
     init {
         Properties().apply {
             try {
@@ -60,21 +39,6 @@ object Config {
                 exitProcess(1)
             }
 
-            botToken = getRequired("bot_token")
-            prefix = getOptional("prefix", "!")
-            helpWord = getOptional("help_word", "help")
-            emojiSuccess = getOptional("emoji.success", "👍")
-            emojiWarning = getOptional("emoji.warning", "⚠️")
-            emojiError = getOptional("emoji.error", "🚫")
-            statusType = getOptional("status_type", "DEFAULT")
-            statusText = getOptional("status_text")
-            clientVersion = getOptional("client_version", "0").toInt()
-            devMode = getOptional("dev_mode", "false") == "true"
-
-            userId = getRequired("user_id")
-            deviceId = getRequired("device_id")
-
-            botOwner = getOptional("bot_owner_id", "0").let(::Snowflake)
             adminRole = getRequired("role.admin_id").let(::Snowflake)
 
             botCommandsChannel = getRequired("channel.bot_commands").let(::Snowflake)
@@ -120,8 +84,6 @@ object Config {
             emoteGoldenEgg = getOptional("emote.gold")?.let(::Snowflake)
             emoteSoulEgg = getOptional("emote.soul")?.let(::Snowflake)
             emoteProphecyEgg = getOptional("emote.prophecy")?.let(::Snowflake)
-
-            sentryDsn = getOptional("sentry.dsn")
 
             logger.info("Config loaded")
         }

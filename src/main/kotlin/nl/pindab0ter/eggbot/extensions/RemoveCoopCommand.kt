@@ -6,9 +6,11 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.entity.Permission.ManageChannels
 import dev.kord.common.entity.Permission.ManageRoles
+import dev.kord.common.entity.Snowflake
 import dev.kord.rest.request.RestRequestException
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.guilds
@@ -60,7 +62,9 @@ class RemoveCoopCommand : Extension() {
 
                 check {
                     hasRole(Config.adminRole)
-                    passIf(event.interaction.user.id == Config.botOwner)
+                    envOrNull("BOT_OWNER_ID")?.let { botOwnerId ->
+                        passIf(event.interaction.user.id == Snowflake(botOwnerId))
+                    }
                 }
 
                 action {

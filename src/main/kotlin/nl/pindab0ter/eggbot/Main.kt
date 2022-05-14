@@ -3,10 +3,10 @@
 package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.utils.env
 import dev.kord.common.annotation.KordPreview
 import dev.kord.gateway.Intent.*
 import nl.pindab0ter.eggbot.extensions.*
-import nl.pindab0ter.eggbot.model.Config
 
 lateinit var eggBot: ExtensibleBot
 
@@ -25,7 +25,9 @@ val guildSpecificCommands = listOf(
 )
 
 suspend fun main() {
-    eggBot = ExtensibleBot(Config.botToken) {
+    eggBot = ExtensibleBot(
+        token = env("BOT_TOKEN")
+    ) {
         intents {
             +DirectMessages
             +DirectMessageTyping
