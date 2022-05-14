@@ -1,17 +1,21 @@
 package nl.pindab0ter.eggbot.extensions
 
+import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalUser
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Snowflake
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.converters.optionalFarmer
 import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.helpers.toListing
+import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
@@ -54,6 +58,13 @@ class UnregisterCommand : Extension() {
             name = "unregister"
             description = "Unregister a member, removing their farmers from our database. This does not affect their game."
             guild(guild.id)
+
+            check {
+                hasRole(Config.adminRole)
+                envOrNull("BOT_OWNER_ID")?.let { botOwnerId ->
+                    passIf(event.interaction.user.id == Snowflake(botOwnerId))
+                }
+            }
 
             action {
                 when {
