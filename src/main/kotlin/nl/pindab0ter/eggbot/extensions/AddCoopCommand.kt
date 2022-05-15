@@ -122,8 +122,8 @@ class AddCoopCommand : Extension() {
                 } else null
 
                 transaction {
-                    if (role != null) coop.roleSnowflake = role.id
-                    if (channel != null) coop.channelSnowflake = channel.id
+                    if (role != null) coop.roleId = role.id
+                    if (channel != null) coop.channelId = channel.id
                 }
 
                 val responseBuilder = StringBuilder().apply {

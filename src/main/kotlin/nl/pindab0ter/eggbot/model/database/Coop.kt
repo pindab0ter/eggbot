@@ -11,18 +11,18 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
     var contractId by Coops.contractId
 
-    private var _roleSnowflake by Coops.roleSnowflake
-    var roleSnowflake: Snowflake?
-        get() = this._roleSnowflake?.let { Snowflake(it) }
+    private var _roleId by Coops.roleId
+    var roleId: Snowflake?
+        get() = this._roleId?.let { Snowflake(it) }
         set(snowflake) {
-            _roleSnowflake = snowflake?.toString()
+            _roleId = snowflake?.toString()
         }
 
-    private var _channelSnowflake by Coops.channelSnowflake
-    var channelSnowflake: Snowflake?
-        get() = this._channelSnowflake?.let { Snowflake(it) }
+    private var _channelId by Coops.channelId
+    var channelId: Snowflake?
+        get() = this._channelId?.let { Snowflake(it) }
         set(snowflake) {
-            _channelSnowflake = snowflake?.toString()
+            _channelId = snowflake?.toString()
         }
 
     var farmers by Farmer via CoopFarmers

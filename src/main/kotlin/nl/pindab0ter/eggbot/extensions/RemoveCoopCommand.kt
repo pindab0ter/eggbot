@@ -77,8 +77,8 @@ class RemoveCoopCommand : Extension() {
                         return@action
                     }
 
-                    val role = coop.roleSnowflake?.let { guild?.getRoleOrNull(it) }
-                    val channel = coop.channelSnowflake?.let { guild?.getChannelOrNull(it) }
+                    val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
+                    val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
 
                     try {
                         val roleName = role?.name
