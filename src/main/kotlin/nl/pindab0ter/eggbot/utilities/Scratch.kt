@@ -12,12 +12,17 @@ suspend fun main() = ExtensibleBot(
     val logger = KotlinLogging.logger {}
 
     hooks {
-        beforeStart {
-            connectToDatabase()
+        beforeExtensionsAdded {
+            try {
+                connectToDatabase()
 
-            logger.info { "Scratch here…" }
+                logger.debug { "Scratch here…" }
 
-            exitProcess(0)
+            } catch (e: Exception) {
+                logger.error { e.stackTraceToString() }
+            } finally {
+                exitProcess(0)
+            }
         }
     }
 }.start()
