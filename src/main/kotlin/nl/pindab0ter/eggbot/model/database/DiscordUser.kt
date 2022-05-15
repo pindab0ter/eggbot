@@ -7,7 +7,7 @@ import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.kord
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.sql.and
 
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {

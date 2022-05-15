@@ -42,7 +42,7 @@ class LeaderBoardCommand : Extension() {
             guild(guild.id)
 
             check {
-                failIf("There are no registered farmers.") { transaction { Farmer.count() == 0 } }
+                failIf("There are no registered farmers.") { transaction { Farmer.count() == 0L } }
             }
 
             action {

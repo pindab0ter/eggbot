@@ -1,12 +1,9 @@
 package nl.pindab0ter.eggbot.model.database
 
 import dev.kord.common.entity.Snowflake
-import dev.kord.core.entity.Role
-import dev.kord.core.entity.channel.Channel
-import kotlinx.coroutines.runBlocking
-import org.jetbrains.exposed.dao.EntityID
 import org.jetbrains.exposed.dao.IntEntity
 import org.jetbrains.exposed.dao.IntEntityClass
+import org.jetbrains.exposed.dao.id.EntityID
 import java.math.BigDecimal
 
 
@@ -14,30 +11,21 @@ class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
     var contractId by Coops.contractId
 
-    private var _roleId by Coops.roleId
-    var roleId: Snowflake?
-        get() = this._roleId?.let { Snowflake(it) }
+    private var _roleSnowflake by Coops.roleSnowflake
+    var roleSnowflake: Snowflake?
+        get() = this._roleSnowflake?.let { Snowflake(it) }
         set(snowflake) {
-            _roleId = snowflake?.toString()
-        }
-    val role: Role?
-        get() = this@Coop.roleId?.let {
-            runBlocking { discordGuild.asGuild()?.getRoleOrNull(it) }
+            _roleSnowflake = snowflake?.toString()
         }
 
-    private var _channelId by Coops.channelId
-    var channelId: Snowflake?
-        get() = this._channelId?.let { Snowflake(it) }
+    private var _channelSnowflake by Coops.channelSnowflake
+    var channelSnowflake: Snowflake?
+        get() = this._channelSnowflake?.let { Snowflake(it) }
         set(snowflake) {
-            _channelId = snowflake?.toString()
-        }
-    val channel: Channel?
-        get() = this@Coop.channelId?.let {
-            runBlocking { discordGuild.asGuild()?.getChannelOrNull(it) }
+            _channelSnowflake = snowflake?.toString()
         }
 
     var farmers by Farmer via CoopFarmers
-    val discordGuild by DiscordGuild referencedOn DiscordUsers.guildId
 
     val activeEarningsBonus: BigDecimal
         get() = farmers.sumOf { farmer ->

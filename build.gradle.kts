@@ -39,7 +39,10 @@ dependencies {
     implementation("ch.obermuhlner", "big-math", "2.3.0")
 
     // Database
-    implementation("org.jetbrains.exposed", "exposed", "0.17.14")
+    implementation("org.jetbrains.exposed", "exposed-core", "0.38.1")
+    implementation("org.jetbrains.exposed", "exposed-dao", "0.38.1")
+    implementation("org.jetbrains.exposed", "exposed-jdbc", "0.38.1")
+    implementation("org.jetbrains.exposed", "exposed-jodatime", "0.38.1")
     runtimeOnly("org.postgresql", "postgresql", "42.2.2")
     implementation("org.flywaydb", "flyway-core", "8.5.10")
 

@@ -1,12 +1,14 @@
 package nl.pindab0ter.eggbot.model.database
 
-import org.jetbrains.exposed.dao.IdTable
+import org.jetbrains.exposed.dao.id.IdTable
 import org.jetbrains.exposed.sql.ReferenceOption.CASCADE
+import org.jetbrains.exposed.sql.jodatime.datetime
 
 object Farmers : IdTable<String>() {
     override val tableName = "farmers"
-    override val id = text("egg_inc_id").entityId().primaryKey()
-    val discordId = reference("discord_id", DiscordUsers, CASCADE, CASCADE)
+    override val id = text("egg_inc_id").entityId()
+    override val primaryKey = PrimaryKey(id)
+    val discordId = reference("discord_user", DiscordUsers, CASCADE, CASCADE)
     val inGameName = text("in_game_name")
     val soulEggs = double("soul_eggs")
     val soulBonus = integer("soul_bonus")

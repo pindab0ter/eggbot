@@ -8,7 +8,7 @@ import nl.pindab0ter.eggbot.guildSpecificCommands
 import nl.pindab0ter.eggbot.helpers.kord
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 
 class DiscordGuild(id: EntityID<String>) : Entity<String>(id) {
     val snowflake: Snowflake get() = Snowflake(this.id.value)

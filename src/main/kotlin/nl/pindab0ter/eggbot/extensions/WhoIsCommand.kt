@@ -78,7 +78,7 @@ class WhoIsCommand : Extension() {
                         }
 
                         arguments.farmer != null -> {
-                            val discordUser = arguments.farmer?.discordId?.let { guild?.getMember(it) }
+                            val discordUser = arguments.farmer?.discordId?.let { guild.getMember(it) }
 
                             respond {
                                 content =

@@ -12,7 +12,7 @@ import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.toDateTime
 import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
-import org.jetbrains.exposed.dao.EntityID
+import org.jetbrains.exposed.dao.id.EntityID
 import java.math.BigDecimal
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {

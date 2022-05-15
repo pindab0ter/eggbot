@@ -119,7 +119,7 @@ class UnregisterCommand : Extension() {
                                         val count = discordUser?.farmers?.count() ?: 0
                                         if (count > 0) {
                                             append("${discordUser?.farmers?.toListing()} ")
-                                            if (count == 1) append("is") else append("are")
+                                            if (count == 1L) append("is") else append("are")
                                             append(" still registered to ${discordUser?.mention}.")
                                         }
                                     }

@@ -12,8 +12,8 @@ import nl.pindab0ter.eggbot.model.Config.eliteDronesLeaderBoardChannel
 import nl.pindab0ter.eggbot.model.Config.prestigesLeaderBoardChannel
 import nl.pindab0ter.eggbot.model.Config.soulEggsLeaderBoardChannel
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
-import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.DiscordGuild
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.leaderboardResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.quartz.Job

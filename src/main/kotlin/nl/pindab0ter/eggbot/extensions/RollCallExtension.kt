@@ -103,7 +103,7 @@ class RollCallExtension : Extension() {
                                             color = DEFAULT_ROLE_COLOR
                                         }
 
-                                        coop.roleId = role.id
+                                        coop.roleSnowflake = role.id
                                         coop.farmers.map { farmer ->
                                             guild.getMemberOrNull(farmer.discordUser.snowflake)?.addRole(role.id, "Roll call for ${arguments.contract.name}")
                                         }
@@ -115,7 +115,7 @@ class RollCallExtension : Extension() {
                                             parentId = Config.coopsGroupChannel
                                             reason = "Roll call for ${arguments.contract.name}"
                                         }
-                                        coop.channelId = channel.id
+                                        coop.channelSnowflake = channel.id
                                     }
                                 }
                             }
@@ -149,7 +149,7 @@ class RollCallExtension : Extension() {
                             val coopName = coop.name
 
                             try {
-                                coop.channel?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
+                                guild.getChannelOrNull(coop.channelSnowflake)?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
                                 statuses.add(DeletionStatus(CHANNEL, true))
                             } catch (exception: RestRequestException) {
                                 statuses.add(DeletionStatus(CHANNEL, false))
@@ -157,7 +157,7 @@ class RollCallExtension : Extension() {
                             }
 
                             try {
-                                coop.role?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
+                                guild.getRoleOrNull(coop.roleSnowflake)?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
                                 statuses.add(DeletionStatus(ROLE, true))
                             } catch (exception: RestRequestException) {
                                 statuses.add(DeletionStatus(ROLE, false))

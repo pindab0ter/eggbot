@@ -36,7 +36,7 @@ fun Guild.rollCallResponse(
     }
 
     val coopContent = coops.map { coop ->
-        val role = coop.roleId?.let { getRoleOrNull(it) }
+        val role = coop.roleSnowflake?.let { getRoleOrNull(it) }
         buildString {
             // Header
             appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")
