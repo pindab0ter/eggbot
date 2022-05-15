@@ -8,7 +8,12 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.helpers.DisplayMode
+import nl.pindab0ter.eggbot.helpers.displayModeChoice
+import nl.pindab0ter.eggbot.helpers.earningsBonus
+import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.EARNINGS_BONUS
@@ -35,31 +40,30 @@ class LeaderBoardCommand : Extension() {
         val displayMode: DisplayMode by displayModeChoice()
     }
 
-    override suspend fun setup() {
-        for (guild in guilds) publicSlashCommand(::LeaderBoardArguments) {
+    override suspend fun setup() = config.servers.forEach { server ->
+        publicSlashCommand(::LeaderBoardArguments) {
             name = "leader-board"
             description = "View leader boards. Defaults to the Earnings Bonus leader board."
-            guild(guild.id)
+            guild(server.snowflake)
 
             check {
-                failIf("There are no registered farmers.") { transaction { Farmer.count() == 0L } }
+                failIf("There are no registered farmers.") { transaction(databases[server.name]) { Farmer.count() == 0L } }
             }
 
             action {
-                val farmers: List<Backup> = transaction {
+                val farmers: List<Backup> = transaction(databases[server.name]) {
                     Farmer.all()
                         .mapNotNull { farmer -> AuxBrain.getFarmerBackup(farmer.eggIncId) }
                         .sortedByDescending { backup -> backup.game?.earningsBonus }
                 }
 
-                multipartRespond(
-                    guild.leaderboardResponse(
-                        farmers = farmers,
-                        leaderBoard = arguments.leaderBoard,
-                        top = arguments.top?.takeIf { it > 0 },
-                        displayMode = arguments.displayMode,
-                    )
-                )
+                guild?.leaderboardResponse(
+                    farmers = farmers,
+                    leaderBoard = arguments.leaderBoard,
+                    top = arguments.top?.takeIf { it > 0 },
+                    displayMode = arguments.displayMode,
+                    server = server,
+                )?.let { multipartRespond(it) }
             }
         }
     }

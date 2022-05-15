@@ -8,7 +8,7 @@ object Farmers : IdTable<String>() {
     override val tableName = "farmers"
     override val id = text("egg_inc_id").entityId()
     override val primaryKey = PrimaryKey(id)
-    val discordId = reference("discord_user", DiscordUsers, CASCADE, CASCADE)
+    val discordUserId = reference("discord_user_id", DiscordUsers, CASCADE, CASCADE)
     val inGameName = text("in_game_name")
     val soulEggs = double("soul_eggs")
     val soulBonus = integer("soul_bonus")

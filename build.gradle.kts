@@ -12,6 +12,7 @@ plugins {
     idea
     application
     kotlin("jvm") version "1.6.21"
+    kotlin("plugin.serialization") version "1.6.21"
     id("com.toasttab.protokt") version "0.8.1"
     id("com.github.ben-manes.versions") version "0.42.0"
 }
@@ -37,6 +38,9 @@ dependencies {
     implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.6.1")
     implementation("joda-time", "joda-time", "2.10.14")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
+
+    // Configuration
+    implementation("com.charleskorn.kaml", "kaml", "0.44.0")
 
     // Database
     implementation("org.jetbrains.exposed", "exposed-core", "0.38.1")

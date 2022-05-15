@@ -10,9 +10,10 @@ import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.optional.firstOrNull
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.compact
 import nl.pindab0ter.eggbot.helpers.contract
-import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -26,7 +27,6 @@ import nl.pindab0ter.eggbot.view.coopFinishedIfBankedResponse
 import nl.pindab0ter.eggbot.view.coopFinishedResponse
 import nl.pindab0ter.eggbot.view.coopInfoResponse
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import java.lang.Integer.min
 
@@ -35,7 +35,7 @@ class CoopInfoCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
-    override suspend fun setup() = guilds.forEach { guild ->
+    override suspend fun setup() = config.servers.forEach { server ->
         class CoopInfoArguments : Arguments() {
             val contract: Contract by contract()
             val coopId: String by string {
@@ -52,11 +52,11 @@ class CoopInfoCommand : Extension() {
                     }?.value?.value?.value as String?
 
                     if (contractInput !== null) {
-                        val coops = transaction {
+                        val coops = transaction(databases[server.name]) {
                             val contract = AuxBrain.getContracts().find { contract -> contract.name == contractInput }
                             if (contract != null) {
                                 Coop
-                                    .find { (Coops.contractId eq contract.id) and (Coops.guildId eq guild.id.toString()) }
+                                    .find { (Coops.contractId eq contract.id) }
                                     .orderBy(Coops.name to SortOrder.ASC)
                                     .filter { coop -> coopInput != null && coop.name.contains(coopInput, ignoreCase = true) }
                                     .run { subList(0, min(count(), 25)) } // Limit to 25 results
@@ -79,6 +79,7 @@ class CoopInfoCommand : Extension() {
         publicSlashCommand(::CoopInfoArguments) {
             name = "coop"
             description = "See the current status and player contribution of a specific co-op."
+            guild(server.snowflake)
 
             action {
                 val contract = arguments.contract

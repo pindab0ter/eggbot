@@ -6,16 +6,16 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalUser
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
-import dev.kord.common.entity.Snowflake
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.converters.optionalFarmer
-import nl.pindab0ter.eggbot.helpers.guilds
+import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.helpers.getMemberOrNull
+import nl.pindab0ter.eggbot.helpers.mentionUser
 import nl.pindab0ter.eggbot.helpers.toListing
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
@@ -28,7 +28,7 @@ class UnregisterCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
-    override suspend fun setup() {
+    override suspend fun setup() = config.servers.forEach { server ->
         class UnregisterArguments : Arguments() {
             val discordUser by optionalUser {
                 name = "member"
@@ -41,7 +41,7 @@ class UnregisterCommand : Extension() {
                 autoComplete {
                     val farmerInput: String = command.options["name"]?.value as String? ?: ""
 
-                    val farmers = transaction {
+                    val farmers = transaction(databases[server.name]) {
                         Farmer
                             .find { Farmers.inGameName like "%$farmerInput%" }
                             .orderBy(Farmers.inGameName to SortOrder.DESC)
@@ -54,16 +54,14 @@ class UnregisterCommand : Extension() {
             }
         }
 
-        for (guild in guilds) publicSlashCommand(::UnregisterArguments) {
+        publicSlashCommand(::UnregisterArguments) {
             name = "unregister"
             description = "Unregister a member, removing their farmers from our database. This does not affect their game."
-            guild(guild.id)
+            guild(server.snowflake)
 
             check {
-                hasRole(Config.adminRole)
-                envOrNull("BOT_OWNER_ID")?.let { botOwnerId ->
-                    passIf(event.interaction.user.id == Snowflake(botOwnerId))
-                }
+                hasRole(server.role.admin)
+                passIf(event.interaction.user.id == config.botOwner)
             }
 
             action {
@@ -73,8 +71,8 @@ class UnregisterCommand : Extension() {
                     }
 
                     arguments.discordUser != null -> {
-                        val databaseDiscordUser = transaction {
-                            arguments.discordUser?.id?.let { DiscordUser.find(it, guild)?.load(DiscordUser::farmers) }
+                        val databaseDiscordUser = transaction(databases[server.name]) {
+                            arguments.discordUser?.id?.let { DiscordUser.findBy(it)?.load(DiscordUser::farmers) }
                         }
 
                         if (databaseDiscordUser == null) {
@@ -82,11 +80,11 @@ class UnregisterCommand : Extension() {
                             return@action
                         }
 
-                        val farmersListing = transaction {
+                        val farmersListing = transaction(databases[server.name]) {
                             databaseDiscordUser.farmers.toListing()
                         }
 
-                        transaction {
+                        transaction(databases[server.name]) {
                             databaseDiscordUser.delete()
                         }
 
@@ -95,11 +93,12 @@ class UnregisterCommand : Extension() {
                         }
                     }
 
-                    arguments.farmer != null -> transaction {
+                    arguments.farmer != null -> transaction(databases[server.name]) {
                         val discordUser = arguments.farmer?.discordUser?.load(DiscordUser::farmers)
 
+                        // If this is the only farmer
                         if (discordUser?.farmers?.minus(arguments.farmer)?.isEmpty() == true) {
-                            val discordUserMention = discordUser.mention
+                            val discordUserMention = guild?.mentionUser(discordUser.snowflake)
 
                             discordUser.delete()
 
@@ -120,7 +119,7 @@ class UnregisterCommand : Extension() {
                                         if (count > 0) {
                                             append("${discordUser?.farmers?.toListing()} ")
                                             if (count == 1L) append("is") else append("are")
-                                            append(" still registered to ${discordUser?.mention}.")
+                                            append(" still registered to ${guild?.getMemberOrNull(discordUser?.snowflake)}.")
                                         }
                                     }
                                 }

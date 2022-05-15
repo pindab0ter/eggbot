@@ -7,9 +7,10 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.compact
 import nl.pindab0ter.eggbot.helpers.contract
-import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -24,22 +25,21 @@ class CoopsInfoCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
-    override suspend fun setup() {
-        class CoopsInfoArguments : Arguments() {
-            val contract: Contract by contract()
-            val compact: Boolean by compact()
-        }
-
-        for (guild in guilds) publicSlashCommand(::CoopsInfoArguments) {
+    class CoopsInfoArguments : Arguments() {
+        val contract: Contract by contract()
+        val compact: Boolean by compact()
+    }
+    override suspend fun setup() = config.servers.forEach { server ->
+        publicSlashCommand(::CoopsInfoArguments) {
             name = "coops"
             description = "See how all the coops are doing."
-            guild(guild.id)
+            guild(server.snowflake)
 
             action {
                 val contract = arguments.contract
                 val compact = arguments.compact
 
-                val coops = transaction {
+                val coops = transaction(databases[server.name]) {
                     Coop.find { Coops.contractId eq contract.id }.orderBy(Coops.name to ASC)
                 }
 
@@ -56,13 +56,11 @@ class CoopsInfoCommand : Extension() {
                     CoopContractStatus(contract, coopStatus, coopName)
                 }
 
-                multipartRespond(
-                    guild.coopsInfoResponse(
-                        contract = contract,
-                        statuses = contractCoopStatuses,
-                        compact = compact
-                    )
-                )
+                guild?.coopsInfoResponse(
+                    contract = contract,
+                    statuses = contractCoopStatuses,
+                    compact = compact
+                )?.let { multipartRespond(it) }
             }
         }
     }

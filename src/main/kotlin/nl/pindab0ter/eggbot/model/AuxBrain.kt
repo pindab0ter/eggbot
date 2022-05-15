@@ -6,11 +6,11 @@ import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.result.getOrNull
-import com.kotlindiscord.kord.extensions.utils.env
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -59,7 +59,7 @@ object AuxBrain {
     private fun periodicalsRequest(): Request {
         val data = PeriodicalsRequest {
             clientVersion = Int.MAX_VALUE
-            userId = env("EGG_INC_ID")
+            userId = config.eggIncId
         }.serialize().encodeBase64ToString()
 
         return PERIODICALS_URL.httpPost()
@@ -91,7 +91,7 @@ object AuxBrain {
     private fun firstContactRequest(eggIncId: String): Request {
         val data = FirstContactRequest {
             eiUserId = eggIncId
-            deviceId = env("DEVICE_ID")
+            deviceId = config.deviceId
             clientVersion = Int.MAX_VALUE
         }.serialize().encodeBase64ToString()
 

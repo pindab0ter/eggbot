@@ -148,7 +148,7 @@ gradle-app.setting
 *.sqlite
 
 ### Development resources ###
-/eggbot.properties
+/eggbot.yaml
 
 .idea/misc.xml
 

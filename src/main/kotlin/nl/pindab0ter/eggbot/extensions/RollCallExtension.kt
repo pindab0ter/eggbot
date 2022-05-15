@@ -8,7 +8,6 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.entity.Permission.ManageChannels
 import dev.kord.common.entity.Permission.ManageRoles
 import dev.kord.common.entity.Snowflake
@@ -18,10 +17,11 @@ import dev.kord.rest.request.RestRequestException
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.CHANNEL
 import nl.pindab0ter.eggbot.extensions.RollCallExtension.DeletionStatus.Type.ROLE
 import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
@@ -42,17 +42,15 @@ class RollCallExtension : Extension() {
     }
 
     override suspend fun setup() {
-        for (guild in guilds) publicSlashCommand {
+        for (server in config.servers) publicSlashCommand {
             name = "roll-call"
             description = "Manage roll calls"
             locking = true
-            guild(guild.id)
+            guild(server.snowflake)
 
             check {
-                hasRole(Config.adminRole)
-                envOrNull("BOT_OWNER_ID")?.let { botOwnerId ->
-                    passIf(event.interaction.user.id == Snowflake(botOwnerId))
-                }
+                hasRole(server.role.admin)
+                passIf(event.interaction.user.id == config.botOwner)
             }
 
             class CreateRollCallArguments : Arguments() {
@@ -81,7 +79,7 @@ class RollCallExtension : Extension() {
                 )
 
                 action {
-                    val coops = transaction {
+                    val coops = transaction(databases[server.name]) {
                         createRollCall(arguments.basename, arguments.contract.maxCoopSize)
                             // First create all co-ops
                             .map { (name, farmers) ->
@@ -97,31 +95,36 @@ class RollCallExtension : Extension() {
                                 runBlocking {
                                     // Create and assign roles
                                     if (arguments.createRoles) {
-                                        val role = guild.createRole {
+                                        val role = guild?.createRole {
                                             name = coop.name
                                             mentionable = true
                                             color = DEFAULT_ROLE_COLOR
                                         }
 
-                                        coop.roleId = role.id
-                                        coop.farmers.map { farmer ->
-                                            guild.getMemberOrNull(farmer.discordUser.snowflake)?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                                        if (role != null) {
+                                            coop.roleId = role.id
+                                            coop.farmers.forEach { farmer ->
+                                                guild?.getMemberOrNull(farmer.discordUser.snowflake)
+                                                    ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                                            }
+                                        } else {
+                                            this@publicSubCommand.logger.error { "Failed to create role for co-op ${coop.name}" }
                                         }
                                     }
 
                                     // Create and assign channel
                                     if (arguments.createChannels) {
-                                        val channel = guild.createTextChannel(coop.name) {
-                                            parentId = Config.coopsGroupChannel
+                                        val channel = guild?.createTextChannel(coop.name) {
+                                            parentId = server.channel.coopsGroup
                                             reason = "Roll call for ${arguments.contract.name}"
                                         }
-                                        coop.channelId = channel.id
+                                        coop.channelId = channel?.id
                                     }
                                 }
                             }
                     }
 
-                    multipartRespond(guild.rollCallResponse(arguments.contract, coops))
+                    guild?.rollCallResponse(arguments.contract, coops)?.let { multipartRespond(it) }
                 }
             }
 
@@ -134,7 +137,7 @@ class RollCallExtension : Extension() {
                 )
 
                 action {
-                    val coops = transaction {
+                    val coops = transaction(databases[server.name]) {
                         Coop.find { Coops.contractId eq arguments.contract.id }.toList()
                     }
 
@@ -149,7 +152,7 @@ class RollCallExtension : Extension() {
                             val coopName = coop.name
 
                             try {
-                                guild.getChannelOrNull(coop.channelId)?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
+                                guild?.getChannelOrNull(coop.channelId)?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
                                 statuses.add(DeletionStatus(CHANNEL, true))
                             } catch (exception: RestRequestException) {
                                 statuses.add(DeletionStatus(CHANNEL, false))
@@ -157,14 +160,14 @@ class RollCallExtension : Extension() {
                             }
 
                             try {
-                                guild.getRoleOrNull(coop.roleId)?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
+                                guild?.getRoleOrNull(coop.roleId)?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
                                 statuses.add(DeletionStatus(ROLE, true))
                             } catch (exception: RestRequestException) {
                                 statuses.add(DeletionStatus(ROLE, false))
                                 this@publicSubCommand.logger.warn { "Failed to delete role for co-op $coopName: ${exception.localizedMessage}" }
                             }
 
-                            transaction { coop.delete() }
+                            transaction(databases[server.name]) {coop.delete() }
 
                             coopName to statuses.toSet()
                         }

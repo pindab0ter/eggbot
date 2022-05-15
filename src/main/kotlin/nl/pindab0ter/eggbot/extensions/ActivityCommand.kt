@@ -9,9 +9,10 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.formatDaysAndHoursUntil
 import nl.pindab0ter.eggbot.helpers.formatMonthAndDay
-import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.view.inactivesResponse
@@ -24,11 +25,11 @@ class ActivityCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
-    override suspend fun setup() {
-        for (guild in guilds) ephemeralSlashCommand {
+    override suspend fun setup() = config.servers.forEach { server ->
+        ephemeralSlashCommand {
             name = "activity"
             description = "Manage your (in)activity."
-            guild(guild.id)
+            guild(server.snowflake)
 
             ephemeralSubCommand {
                 name = "status"
@@ -37,8 +38,8 @@ class ActivityCommand : Extension() {
                 lateinit var discordUser: DiscordUser
 
                 check {
-                    discordUser = transaction {
-                        DiscordUser.find(event.interaction.user.id, guild)
+                    discordUser = transaction(databases[server.name]) {
+                        DiscordUser.findBy(event.interaction.user.id)
                     } ?: return@check fail("You have not registered yet. Please do so using `/register`.")
                 }
 
@@ -71,14 +72,14 @@ class ActivityCommand : Extension() {
                 lateinit var discordUser: DiscordUser
 
                 check {
-                    discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
+                    discordUser = transaction(databases[server.name]) { DiscordUser.findById(event.interaction.user.id.toString()) }
                         ?: return@check fail("You have not registered yet. Please do so using `/register`.")
                 }
 
 
                 action {
 
-                    transaction {
+                    transaction(databases[server.name]) {
                         discordUser.inactiveUntil = now().plusDays(arguments.days)
                     }
 
@@ -95,12 +96,12 @@ class ActivityCommand : Extension() {
                 lateinit var discordUser: DiscordUser
 
                 check {
-                    discordUser = transaction { DiscordUser.findById(event.interaction.user.id.toString()) }
+                    discordUser = transaction(databases[server.name]) { DiscordUser.findById(event.interaction.user.id.toString()) }
                         ?: return@check fail("You have not registered yet. Please do so using `/register`.")
                 }
 
                 action {
-                    val wasActive = transaction {
+                    val wasActive = transaction(databases[server.name]) {
                         val oldValue = discordUser.isActive
                         discordUser.inactiveUntil = null
                         return@transaction oldValue
@@ -117,14 +118,14 @@ class ActivityCommand : Extension() {
                 description = "List all currently inactive users."
 
                 action {
-                    val inactiveUsers = transaction {
+                    val inactiveUsers = transaction(databases[server.name]) {
                         DiscordUser.find {
                             DiscordUsers.inactiveUntil.isNotNull() and (DiscordUsers.inactiveUntil greater now())
                         }.toList()
                     }
 
                     respond {
-                        content = inactivesResponse(inactiveUsers)
+                        content = guild.inactivesResponse(inactiveUsers)
                     }
                 }
             }

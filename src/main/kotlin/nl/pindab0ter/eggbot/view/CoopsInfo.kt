@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
-import dev.kord.core.entity.Guild
+import dev.kord.core.behavior.GuildBehavior
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
@@ -18,13 +18,13 @@ import java.math.BigDecimal.ZERO
 import kotlin.random.Random
 
 
-fun Guild.coopsInfoResponse(
+fun GuildBehavior.coopsInfoResponse(
     contract: Contract,
     statuses: List<CoopContractStatus>,
     compact: Boolean,
 ) = buildString {
 
-    appendLine("`${runBlocking { name }}` vs. _${contract.name}_:")
+    appendLine("`${runBlocking { asGuildOrNull()?.name }}` vs. _${contract.name}_:")
     appendLine()
 
     if (!compact) {

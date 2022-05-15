@@ -19,6 +19,8 @@ class CommandLogger : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = "CommandLoggerExtension"
 
+    // TODO: Log guild
+
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {

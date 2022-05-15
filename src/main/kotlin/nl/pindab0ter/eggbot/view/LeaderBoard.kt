@@ -1,21 +1,22 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Backup
-import dev.kord.core.entity.Guild
+import dev.kord.core.behavior.GuildBehavior
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.Server
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.*
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Table
 
-fun Guild.leaderboardResponse(
+fun GuildBehavior.leaderboardResponse(
     farmers: List<Backup>,
     leaderBoard: LeaderBoard,
     top: Int? = null,
     displayMode: DisplayMode = REGULAR,
+    server: Server,
 ): List<String> = table {
     val compact = displayMode == COMPACT
 
@@ -35,8 +36,8 @@ fun Guild.leaderboardResponse(
         }
     }
 
-    val soulEgg = runBlocking { emoteMention(Config.emoteSoulEgg) } ?: "🥚"
-    val prophecyEgg = runBlocking { emoteMention(Config.emoteProphecyEgg) } ?: "🥚"
+    val soulEgg = runBlocking { getEmojiOrNull(server.emote.soulEgg) } ?: "🥚"
+    val prophecyEgg = runBlocking { getEmojiOrNull(server.emote.prophecyEgg) } ?: "🥚"
 
     val boardTitle = when (leaderBoard) {
         EARNINGS_BONUS -> "💵 Earnings Bonus"
@@ -95,4 +96,3 @@ fun Guild.leaderboardResponse(
         cells = sortedFarmers.map { farmer -> farmer.game?.earningsBonus?.formatRank(shortened = compact) ?: "" }
     }
 }
-

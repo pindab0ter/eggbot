@@ -8,9 +8,12 @@ import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.Farmer
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
@@ -26,24 +29,28 @@ class RegisterCommand : Extension() {
             mutate { it.uppercase() }
 
             validate {
+                val server = config.servers.find { server -> server.snowflake == context.getGuild()?.id }
+
+
+                failIf("This server is not configured. Please contact the bot owner.") { server == null }
+                throwIfFailed()
+
                 val eggIncId = mutator?.invoke(value) ?: value
 
-                failIf(
-                    !eggIncId.startsWith(prefix = "EI") || eggIncId.length != 18,
-                    "Your _Egg, Inc. ID_ starts with `EI` and is followed by exactly 16 digits."
-                )
+                failIf("Your _Egg, Inc. ID_ starts with `EI` and is followed by exactly 16 digits.") {
+                    !eggIncId.startsWith(prefix = "EI") || eggIncId.length != 18
+                }
                 throwIfFailed()
 
                 val farmerBackup = AuxBrain.getFarmerBackup(eggIncId)
-                failIf(
-                    farmerBackup?.game == null || farmerBackup.stats == null,
-                    "Could not find a farmer with _Egg, Inc. ID_ `$eggIncId`"
-                )
+                failIf("Could not find a farmer with _Egg, Inc. ID_ `$eggIncId`") {
+                    farmerBackup?.game == null || farmerBackup.stats == null
+                }
                 throwIfFailed()
 
-                transaction {
-                    if (Farmer.findById(eggIncId)?.discordUser != null) {
-                        fail("This player is already registered to ${runBlocking { context.getMember()?.mention }}")
+                newSuspendedTransaction(null, databases[server?.name]) {
+                    failIf("This player is already registered to ${runBlocking { context.getMember()?.mention }}") {
+                        Farmer.findById(eggIncId)?.discordUser != null
                     }
                 }
             }
@@ -57,6 +64,7 @@ class RegisterCommand : Extension() {
 
             action {
                 val farmerBackup = AuxBrain.getFarmerBackup(arguments.eggIncId)
+                val server = config.servers.find { server -> server.snowflake == guild?.id }
 
                 if (farmerBackup == null) {
                     respond { content = "Could not find a farmer with the ID `${arguments.eggIncId}`. Please make sure you didn't make any typing errors." }
@@ -75,11 +83,11 @@ class RegisterCommand : Extension() {
                     return@action
                 }
 
-                val discordUser = transaction {
-                    DiscordUser.findOrCreate(event.interaction.user, guild)
+                val discordUser = transaction(databases[server?.name]) {
+                    DiscordUser.findOrCreate(event.interaction.user)
                 }
 
-                val farmer = transaction {
+                val farmer = transaction(databases[server?.name]) {
                     Farmer.new(discordUser, farmerBackup)
                 }
 

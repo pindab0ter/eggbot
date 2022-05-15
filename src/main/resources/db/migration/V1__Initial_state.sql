@@ -10,7 +10,7 @@ CREATE TABLE discord_users
 CREATE TABLE farmers
 (
     egg_inc_id            TEXT      NOT NULL PRIMARY KEY,
-    discord_user          TEXT      NOT NULL
+    discord_user_id       TEXT      NOT NULL
         REFERENCES discord_users
             ON UPDATE CASCADE
             ON DELETE CASCADE,
@@ -49,10 +49,10 @@ CREATE TABLE coop_farmers
             ON DELETE CASCADE
 );
 
-CREATE VIEW names AS
+CREATE VIEW discord_users_to_egg_inc_users AS
     SELECT discord_users.tag    AS discord_tag
          , farmers.egg_inc_id   AS egg_inc_id
          , farmers.in_game_name AS in_game_name
     FROM discord_users
-             JOIN farmers ON discord_users.id = farmers.discord_user
+             JOIN farmers ON discord_users.id = farmers.discord_user_id
     ORDER BY tag;

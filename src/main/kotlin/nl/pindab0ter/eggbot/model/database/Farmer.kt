@@ -17,8 +17,8 @@ import java.math.BigDecimal
 
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val eggIncId: String get() = this.id.value
-    var discordUser by DiscordUser referencedOn Farmers.discordId
-    private var _discordId by Farmers.discordId
+    var discordUser by DiscordUser referencedOn Farmers.discordUserId
+    private var _discordId by Farmers.discordUserId
     var discordId: Snowflake
         get() = Snowflake(_discordId.value)
         set(snowflake) {

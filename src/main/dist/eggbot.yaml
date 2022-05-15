@@ -1,0 +1,64 @@
+# Discord
+## https://discordapp.com/developers/applications/ -> Your app -> Settings -> Bot -> Token
+botToken:
+botOwnerId:
+
+# Auxbrain
+## Egg, Inc. User ID and Device ID with which to make requests to the AuxBrain API
+eggIncId:
+deviceId:
+
+# Database
+databaseUrl:
+databaseUser:
+databasePassword:
+
+# Sentry
+sentryDsn:
+
+# Discord servers
+servers:
+  - name:
+    id:
+    databaseName:
+
+    role:
+      adminId:
+
+    channel:
+      coopsGroupId:
+      earningsBonusLeaderBoardId:
+      soulEggsLeaderBoardId:
+      prestigesLeaderBoardId:
+      droneTakedownsLeaderBoardId:
+      eliteDroneTakedownsLeaderBoardId:
+
+    emote:
+      defaultEggId:
+      edibleEggId:
+      superfoodEggId:
+      medicalEggId:
+      rocketFuelEggId:
+      superMaterialEggId:
+      fusionEggId:
+      quantumEggId:
+      immortalityEggId:
+      tachyonEggId:
+      gravitonEggId:
+      dilithiumEggId:
+      prodigyEggId:
+      terraformEggId:
+      antimatterEggId:
+      darkMatterEggId:
+      aiEggId:
+      nebulaEggId:
+      universeEggId:
+      enlightenmentEggId:
+      chocolateEggId:
+      easterEggId:
+      waterBalloonEggId:
+      fireworkEggId:
+      pumpkinEggId:
+      goldEggId:
+      soulEggId:
+      prophecyEggId:

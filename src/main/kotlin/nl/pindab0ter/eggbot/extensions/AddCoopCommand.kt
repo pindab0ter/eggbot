@@ -15,12 +15,12 @@ import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import kotlinx.coroutines.flow.firstOrNull
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.contract
 import nl.pindab0ter.eggbot.helpers.createChannel
 import nl.pindab0ter.eggbot.helpers.createRole
-import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.Config
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -51,22 +51,22 @@ class AddCoopCommand : Extension() {
         }
     }
 
-    override suspend fun setup() {
-        for (guild in guilds) ephemeralSlashCommand(::AddCoopArguments) {
+    override suspend fun setup() = config.servers.forEach { server ->
+        ephemeralSlashCommand(::AddCoopArguments) {
             name = "add-coop"
             description = "Register a co-op so it shows up in the co-ops info listing."
             requiredPerms += listOf(
                 ManageRoles,
                 ManageChannels,
             )
-            guild(guild.id)
+            guild(server.snowflake)
 
             action {
                 val contract = arguments.contract
                 val coopId = arguments.coopId.lowercase()
 
                 // Check if co-op is already registered
-                transaction {
+                transaction(databases[server.name]) {
                     Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contract.id) }.firstOrNull()
                 }?.let { coop ->
                     respond { content = "Co-op `${coop.name}` is already registered for _${contract.name}_." }
@@ -89,7 +89,7 @@ class AddCoopCommand : Extension() {
                 }
 
                 // Create the co-op
-                val coop = transaction {
+                val coop = transaction(databases[server.name]) {
                     Coop.new {
                         name = coopId
                         contractId = contract.id
@@ -116,12 +116,12 @@ class AddCoopCommand : Extension() {
                 }
 
                 val channel = if (arguments.createChannel) this@action.guild?.createTextChannel(coop.name) {
-                    parentId = Config.coopsGroupChannel
+                    parentId = server.channel.coopsGroup
                     name = coopId
                     topic = "_${coop.name}_ vs. _${contract.name}_"
                 } else null
 
-                transaction {
+                transaction(databases[server.name]) {
                     if (role != null) coop.roleId = role.id
                     if (channel != null) coop.channelId = channel.id
                 }
@@ -142,7 +142,7 @@ class AddCoopCommand : Extension() {
 
                 // Assign the role to each member
                 coopStatus?.contributors?.map { contributor ->
-                    val member = transaction {
+                    val member = transaction(databases[server.name]) {
                         Farmer.find { Farmers.id eq contributor.userId }.firstOrNull()
                     }?.discordId?.let { this@action.guild?.getMemberOrNull(it) }
 

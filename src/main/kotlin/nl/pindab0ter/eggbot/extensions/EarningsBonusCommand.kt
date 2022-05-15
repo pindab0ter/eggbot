@@ -5,9 +5,10 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.displayModeChoice
-import nl.pindab0ter.eggbot.helpers.guilds
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.DiscordUser
@@ -23,20 +24,20 @@ class EarningsBonusCommand : Extension() {
         val displayMode: DisplayMode by displayModeChoice()
     }
 
-    override suspend fun setup() {
-        for (guild in guilds) publicSlashCommand(::EarningsBonusArguments) {
+    override suspend fun setup() = config.servers.forEach { server ->
+        publicSlashCommand(::EarningsBonusArguments) {
             name = "earnings-bonus"
             description = "See your Farmer Role, EB and how much SE or PE till your next rank."
-            guild(guild.id)
+            guild(server.snowflake)
 
             lateinit var discordUser: DiscordUser
             lateinit var farmers: List<Farmer>
 
             check {
-                discordUser = transaction { DiscordUser.find(event.interaction.user.id, guild) }
+                discordUser = transaction(databases[server.name]) {DiscordUser.findBy(event.interaction.user.id) }
                     ?: return@check fail("You have not registered yet. Please do so using `/register`.")
 
-                farmers = transaction { discordUser.farmers.toList().sortedBy(Farmer::inGameName) }
+                farmers = transaction(databases[server.name]) {discordUser.farmers.toList().sortedBy(Farmer::inGameName) }
                 failIf("You have no Egg, Inc. accounts associated with your Discord account. Please register one using `/register`.") {
                     farmers.isEmpty()
                 }

@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
-import dev.kord.core.entity.Guild
+import dev.kord.core.behavior.GuildBehavior
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.NumberFormatter
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
@@ -9,7 +9,7 @@ import nl.pindab0ter.eggbot.helpers.formatIllions
 import nl.pindab0ter.eggbot.model.database.Coop
 import org.jetbrains.exposed.sql.transactions.transaction
 
-fun Guild.rollCallResponse(
+fun GuildBehavior.rollCallResponse(
     contract: Contract,
     coops: List<Coop>,
 ): List<String> = runBlocking {
@@ -46,7 +46,7 @@ fun Guild.rollCallResponse(
                 .sortedBy { farmer -> farmer.inGameName }
                 .forEach { farmer ->
                     if (farmer.isActive.not()) append("_")
-                    append(farmer.discordUser.mention)
+                    append(getMemberOrNull(farmer.discordUser.snowflake))
                     if (farmer.inGameName.isNotEmpty()) append(" (`${farmer.inGameName}`)")
                     if (farmer.isActive.not()) append(" (Inactive)_")
                     appendLine()

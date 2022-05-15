@@ -6,19 +6,16 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.envOrNull
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.entity.Permission.ManageChannels
 import dev.kord.common.entity.Permission.ManageRoles
-import dev.kord.common.entity.Snowflake
 import dev.kord.rest.request.RestRequestException
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.guilds
-import nl.pindab0ter.eggbot.model.Config
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
 import org.jetbrains.exposed.sql.SortOrder
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class RemoveCoopCommand : Extension() {
@@ -26,7 +23,7 @@ class RemoveCoopCommand : Extension() {
     override val name: String = javaClass.simpleName
 
     override suspend fun setup() {
-        for (databaseGuild in guilds) {
+        for (server in config.servers) {
             class RemoveCoopArguments : Arguments() {
                 val coopId: String by string {
                     name = "name"
@@ -39,9 +36,9 @@ class RemoveCoopCommand : Extension() {
                     autoComplete {
                         val coopInput: String = command.options["name"]?.value as String? ?: ""
 
-                        val coops = transaction {
+                        val coops = transaction(databases[server.name]) {
                             Coop
-                                .find { (Coops.name like "$coopInput%") and (Coops.guildId eq databaseGuild.id.toString()) }
+                                .find { Coops.name like "$coopInput%" }
                                 .limit(25)
                                 .orderBy(Coops.name to SortOrder.ASC)
                                 .associate { coop -> Pair(coop.name, coop.name) }
@@ -58,17 +55,15 @@ class RemoveCoopCommand : Extension() {
                     ManageRoles,
                     ManageChannels,
                 )
-                guild(databaseGuild.id)
+                guild(server.snowflake)
 
                 check {
-                    hasRole(Config.adminRole)
-                    envOrNull("BOT_OWNER_ID")?.let { botOwnerId ->
-                        passIf(event.interaction.user.id == Snowflake(botOwnerId))
-                    }
+                    hasRole(server.role.admin)
+                    passIf(event.interaction.user.id == config.botOwner)
                 }
 
                 action {
-                    val coop: Coop? = transaction {
+                    val coop: Coop? = transaction(databases[server.name]) {
                         Coop.find { Coops.name eq arguments.coopId }.firstOrNull()
                     }
 
@@ -85,7 +80,7 @@ class RemoveCoopCommand : Extension() {
                         val channelName = channel?.name
                         role?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
                         channel?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
-                        transaction { coop.delete() }
+                        transaction(databases[server.name]) {coop.delete() }
                         respond {
                             content = buildString {
                                 append("Successfully deleted co-op")
