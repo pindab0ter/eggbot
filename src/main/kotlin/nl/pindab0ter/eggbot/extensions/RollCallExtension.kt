@@ -59,9 +59,9 @@ class RollCallExtension : Extension() {
                 val contract: Contract by contract()
                 val basename: String by string {
                     name = "name"
-                    description = "The base for the team names"
+                    description = "The base for the co-op names"
                     validate {
-                        if (value.contains(' ')) fail("Team names cannot contain spaces")
+                        failIf("Co-op names cannot contain spaces") { value.contains(' ') }
                     }
                 }
                 val createRoles: Boolean by createRole()
@@ -74,7 +74,7 @@ class RollCallExtension : Extension() {
 
             publicSubCommand(::CreateRollCallArguments) {
                 name = "create"
-                description = "Create teams for a contract"
+                description = "Create co-ops for a contract"
                 requiredPerms += listOf(
                     ManageRoles,
                     ManageChannels,
@@ -127,7 +127,7 @@ class RollCallExtension : Extension() {
 
             publicSubCommand(::ClearRollCallArguments) {
                 name = "clear"
-                description = "Remove all teams for a contract"
+                description = "Remove all co-ops for a contract"
                 requiredPerms += listOf(
                     ManageRoles,
                     ManageChannels,
@@ -142,7 +142,6 @@ class RollCallExtension : Extension() {
                         respond { content = "No co-ops found for _${arguments.contract.name}_." }
                         return@action
                     }
-
 
                     val statuses = coops
                         .map<Coop, Pair<Coop, MutableSet<DeletionStatus>>> { coop: Coop -> coop to mutableSetOf() }
