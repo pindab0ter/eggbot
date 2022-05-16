@@ -77,5 +77,6 @@ tasks {
 
     withType<JavaCompile>().configureEach {
         enabled = false
+        targetCompatibility = "1.8"
     }
 }
