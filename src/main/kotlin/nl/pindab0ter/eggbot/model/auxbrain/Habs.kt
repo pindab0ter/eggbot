@@ -61,6 +61,5 @@ val HabLevel.capacity: BigDecimal get() = when(this) {
     MONOLITH ->          BigDecimal(50_000_000)
     PLANET_PORTAL ->    BigDecimal(100_000_000)
     CHICKEN_UNIVERSE -> BigDecimal(600_000_000)
-    else ->                                ZERO
 }
 // @formatter:on

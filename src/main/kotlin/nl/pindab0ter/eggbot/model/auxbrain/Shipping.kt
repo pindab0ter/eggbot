@@ -73,6 +73,5 @@ private val VehicleType.capacity: BigDecimal get() = when (this) {
     VehicleType.HOVER_SEMI ->          BigDecimal(30_000_000)
     VehicleType.QUANTUM_TRANSPORTER -> BigDecimal(50_000_000)
     VehicleType.HYPERLOOP_TRAIN ->     BigDecimal(50_000_000)
-    else ->                                              ZERO
 }
 // @formatter:on
