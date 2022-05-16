@@ -10,15 +10,13 @@ import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
-import nl.pindab0ter.eggbot.helpers.DisplayMode
-import nl.pindab0ter.eggbot.helpers.displayModeChoice
-import nl.pindab0ter.eggbot.helpers.earningsBonus
-import nl.pindab0ter.eggbot.helpers.multipartRespond
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.EARNINGS_BONUS
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.leaderboardResponse
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
@@ -51,9 +49,10 @@ class LeaderBoardCommand : Extension() {
             }
 
             action {
-                val farmers: List<Backup> = transaction(databases[server.name]) {
+                val farmers: List<Backup> = newSuspendedTransaction(null, databases[server.name]) {
                     Farmer.all()
-                        .mapNotNull { farmer -> AuxBrain.getFarmerBackup(farmer.eggIncId) }
+                        .asyncMap { farmer -> AuxBrain.getFarmerBackup(farmer.eggIncId) }
+                        .filterNotNull()
                         .sortedByDescending { backup -> backup.game?.earningsBonus }
                 }
 
