@@ -3,9 +3,9 @@ option java_package = "com.auxbrain.ei";
 option java_outer_classname = "EggInc";
 
 message Backup {
-  string user_id = 1;
-  string user_name = 2;
-  double approx_time = 3;
+  string userId = 1;
+  string userName = 2;
+  double approxTime = 3;
   Settings settings = 4;
   Tutorial tutorial = 5;
   Stats stats = 6;
@@ -14,76 +14,76 @@ message Backup {
   Misc misc = 10;
   repeated Farm farms = 12;
   MyContracts contracts = 13;
-  ArtifactsStatus artifacts_status = 14;
-  ArtifactsDatabase artifacts_database = 15;
-  string game_services_id = 16;
-  string device_id = 17;
-  string ei_user_id = 18;
-  bool force_offer_backup = 20;
-  uint32 client_version = 21;
-  bool force_backup = 22;
+  ArtifactsStatus artifactsStatus = 14;
+  ArtifactsDatabase artifactsDatabase = 15;
+  string gameServicesId = 16;
+  string deviceId = 17;
+  string eiUserId = 18;
+  bool forceOfferBackup = 20;
+  uint32 clientVersion = 21;
+  bool forceBackup = 22;
   uint64 checksum = 100;
   string signature = 101;
 
   message Settings {
     bool sfx = 1;
     bool music = 2;
-    bool low_battery_mode = 3;
-    bool low_performance_mode = 4;
-    bool notifications_queried = 5;
-    bool notifications_enabled = 6;
-    bool coppa_queried = 7;
-    bool coppa_restricted = 8;
-    bool force_touch_chicken_btn = 9;
-    bool low_performance = 10;
-    bool notify_daily_gift = 11;
-    bool gdpr_consent_queried = 12;
-    bool gdpr_consent_given = 13;
-    bool user_ads_enabled = 14;
-    bool user_cloud_enabled = 15;
-    bool gdpr_age_restricted = 16;
-    uint32 last_day_age_queried = 17;
-    bool age_queried = 18;
-    bool age_restricted = 19;
-    bool data_collection_consent_queried = 20;
-    bool data_collection_consent_given = 21;
-    bool user_analytics_enabled = 22;
-    bool user_personalized_ads_enabled = 23;
-    double last_backup_time = 24;
+    bool lowBatteryMode = 3;
+    bool lowPerformanceMode = 4;
+    bool notificationsQueried = 5;
+    bool notificationsEnabled = 6;
+    bool coppaQueried = 7;
+    bool coppaRestricted = 8;
+    bool forceTouchChickenBtn = 9;
+    bool lowPerformance = 10;
+    bool notifyDailyGift = 11;
+    bool gdprConsentQueried = 12;
+    bool gdprConsentGiven = 13;
+    bool userAdsEnabled = 14;
+    bool userCloudEnabled = 15;
+    bool gdprAgeRestricted = 16;
+    uint32 lastDayAgeQueried = 17;
+    bool ageQueried = 18;
+    bool ageRestricted = 19;
+    bool dataCollectionConsentQueried = 20;
+    bool dataCollectionConsentGiven = 21;
+    bool userAnalyticsEnabled = 22;
+    bool userPersonalizedAdsEnabled = 23;
+    double lastBackupTime = 24;
   }
 
   message Tutorial {
-    bool intro_shown = 1;
-    bool click_tutorial_shown = 2;
-    bool buy_hab_shown = 3;
-    bool hire_vehicle_shown = 4;
-    bool q_num_shown = 5;
-    bool s_num_shown = 6;
-    bool contracts_tab_shown = 7;
-    bool contract_info_shown = 8;
-    bool join_coop_shown = 9;
-    bool switch_farm_shown = 10;
-    repeated bool tutorials_shown = 11;
+    bool introShown = 1;
+    bool clickTutorialShown = 2;
+    bool buyHabShown = 3;
+    bool hireVehicleShown = 4;
+    bool qNumShown = 5;
+    bool sNumShown = 6;
+    bool contractsTabShown = 7;
+    bool contractInfoShown = 8;
+    bool joinCoopShown = 9;
+    bool switchFarmShown = 10;
+    repeated bool tutorialsShown = 11;
   }
 
   message Stats {
-    uint64 refill_uses = 2;
-    uint64 video_doubler_uses = 3;
-    uint64 warp_1_uses = 4;
-    uint64 warp_8_uses = 5;
-    uint64 drone_takedowns = 6;
-    uint64 unlimited_chickens_uses = 7;
-    repeated double egg_totals = 8;
-    uint64 prestige_count = 9;
-    uint64 drone_takedowns_elite = 10;
-    uint64 piggy_break_count = 11;
-    uint64 iap_packs_purchased = 12;
-    uint64 boosts_used = 13;
-    bool piggy_full = 14;
-    bool piggy_found_full = 15;
-    double time_piggy_filled_realtime = 16;
-    double time_piggy_full_gametime = 17;
-    uint64 lost_piggy_increments = 18;
+    uint64 refillUses = 2;
+    uint64 videoDoublerUses = 3;
+    uint64 warp_1Uses = 4;
+    uint64 warp_8Uses = 5;
+    uint64 droneTakedowns = 6;
+    uint64 unlimitedChickensUses = 7;
+    repeated double eggTotals = 8;
+    uint64 prestigeCount = 9;
+    uint64 droneTakedownsElite = 10;
+    uint64 piggyBreakCount = 11;
+    uint64 iapPacksPurchased = 12;
+    uint64 boostsUsed = 13;
+    bool piggyFull = 14;
+    bool piggyFoundFull = 15;
+    double timePiggyFilledRealtime = 16;
+    double timePiggyFullGametime = 17;
+    uint64 lostPiggyIncrements = 18;
   }
 
   message ResearchItem {
@@ -103,8 +103,8 @@ message Backup {
 
   message ActiveBoost {
     string id = 1;
-    double time_remaining = 2;
-    double reference_value = 3;
+    double timeRemaining = 2;
+    double referenceValue = 3;
   }
 
   message OwnedBoost {
@@ -113,151 +113,151 @@ message Backup {
   }
 
   message Game {
-    Egg max_egg_reached = 1;
-    uint64 golden_eggs_earned = 2;
-    uint64 golden_eggs_spent = 3;
-    double prestige_cash_earned = 5;
-    double lifetime_cash_earned = 6;
-    uint64 piggy_bank = 7;
-    uint32 permit_level = 8;
-    repeated ResearchItem epic_research = 9;
-    double next_daily_gift_time = 10;
+    Egg maxEggReached = 1;
+    uint64 goldenEggsEarned = 2;
+    uint64 goldenEggsSpent = 3;
+    double prestigeCashEarned = 5;
+    double lifetimeCashEarned = 6;
+    uint64 piggyBank = 7;
+    uint32 permitLevel = 8;
+    repeated ResearchItem epicResearch = 9;
+    double nextDailyGiftTime = 10;
     repeated NewsHeadline news = 11;
-    double last_news_time = 12;
-    double current_multiplier = 13;
-    double current_multiplier_expiration = 14;
+    double lastNewsTime = 12;
+    double currentMultiplier = 13;
+    double currentMultiplierExpiration = 14;
     repeated AchievementInfo achievements = 15;
-    uint64 unclaimed_golden_eggs = 16;
-    repeated uint64 max_farm_size_reached = 18;
-    repeated TrophyLevel egg_medal_levels = 19;
-    uint32 last_daily_gift_collected_day = 20;
-    uint32 current_farm = 22;
-    uint64 prophecy_eggs = 23;
-    uint32 unclaimed_prophecy_eggs = 24;
-    bool long_idle_notification_set = 25;
-    double long_idle_notification_threshold = 26;
-    double long_idle_reward = 27;
-    uint32 daily_gift_index = 28;
-    bool hyperloop_station = 29;
+    uint64 unclaimedGoldenEggs = 16;
+    repeated uint64 maxFarmSizeReached = 18;
+    repeated TrophyLevel eggMedalLevels = 19;
+    uint32 lastDailyGiftCollectedDay = 20;
+    uint32 currentFarm = 22;
+    uint64 prophecyEggs = 23;
+    uint32 unclaimedProphecyEggs = 24;
+    bool longIdleNotificationSet = 25;
+    double longIdleNotificationThreshold = 26;
+    double longIdleReward = 27;
+    uint32 dailyGiftIndex = 28;
+    bool hyperloopStation = 29;
     repeated OwnedBoost boosts = 30;
-    bool piggy_full_alert_shown = 31;
-    uint32 total_time_cheats_detected = 32;
-    double prestige_soul_boost_cash = 33;
-    double soul_eggs = 34;
-    double unclaimed_soul_eggs = 35;
-    bool force_elite_contracts = 36;
-    double new_player_event_end_time = 37;
+    bool piggyFullAlertShown = 31;
+    uint32 totalTimeCheatsDetected = 32;
+    double prestigeSoulBoostCash = 33;
+    double soulEggs = 34;
+    double unclaimedSoulEggs = 35;
+    bool forceEliteContracts = 36;
+    double newPlayerEventEndTime = 37;
   }
 
   message ArtifactsStatus {
     bool infusing = 1;
-    ArtifactInventoryItem item_being_infused = 2;
-    Egg egg_type_infusing = 3;
-    double infusing_eggs_required = 4;
-    double eggs_infused = 5;
-    double flow_percentage_artifacts = 6;
-    bool fueling_enabled = 7;
-    bool infusing_enabled = 8;
-    .Mission.Spaceship last_fueled_ship = 9;
-    double inventory_score = 10;
+    ArtifactInventoryItem itemBeingInfused = 2;
+    Egg eggTypeInfusing = 3;
+    double infusingEggsRequired = 4;
+    double eggsInfused = 5;
+    double flowPercentageArtifacts = 6;
+    bool fuelingEnabled = 7;
+    bool infusingEnabled = 8;
+    .Mission.Spaceship lastFueledShip = 9;
+    double inventoryScore = 10;
     bool enabled = 11;
-    bool intro_shown = 12;
-    Artifact artifact_being_infused = 13;
+    bool introShown = 12;
+    Artifact artifactBeingInfused = 13;
   }
 
   message Farm {
     Egg egg = 1;
-    double cash_earned = 2;
-    double cash_spent = 3;
-    double unclaimed_cash = 4;
-    double last_step_time = 5;
-    uint64 num_chickens = 6;
-    uint64 num_chickens_unsettled = 7;
-    uint64 num_chickens_running = 8;
-    double eggs_laid = 9;
-    double eggs_paid_for = 10;
-    uint32 silos_owned = 11;
+    double cashEarned = 2;
+    double cashSpent = 3;
+    double unclaimedCash = 4;
+    double lastStepTime = 5;
+    uint64 numChickens = 6;
+    uint64 numChickensUnsettled = 7;
+    uint64 numChickensRunning = 8;
+    double eggsLaid = 9;
+    double eggsPaidFor = 10;
+    uint32 silosOwned = 11;
     repeated HabLevel habs = 12;
-    repeated uint64 hab_populations = 13;
-    repeated uint64 hab_population_inbounds = 14;
-    repeated double hab_incubator_populations = 15;
-    double hatchery_population = 16;
+    repeated uint64 habPopulations = 13;
+    repeated uint64 habPopulationInbounds = 14;
+    repeated double habIncubatorPopulations = 15;
+    double hatcheryPopulation = 16;
     repeated VehicleType vehicles = 17;
-    repeated ResearchItem common_research = 18;
-    FarmType farm_type = 19;
-    string contract_id = 20;
-    repeated uint32 hyperloop_cars = 21;
-    repeated ActiveBoost active_boosts = 22;
-    uint32 time_cheats_detected = 23;
-    double time_cheat_debt = 24;
-    uint32 boost_tokens_received = 25;
-    uint32 boost_tokens_spent = 26;
-    uint32 unclaimed_boost_tokens = 27;
-    uint32 boost_tokens_given = 28;
-    double gametime_until_next_boost_token = 29;
-    double eggs_shipped = 30;
+    repeated ResearchItem commonResearch = 18;
+    FarmType farmType = 19;
+    string contractId = 20;
+    repeated uint32 hyperloopCars = 21;
+    repeated ActiveBoost activeBoosts = 22;
+    uint32 timeCheatsDetected = 23;
+    double timeCheatDebt = 24;
+    uint32 boostTokensReceived = 25;
+    uint32 boostTokensSpent = 26;
+    uint32 unclaimedBoostTokens = 27;
+    uint32 boostTokensGiven = 28;
+    double gametimeUntilNextBoostToken = 29;
+    double eggsShipped = 30;
   }
 
   message Mission {
     string id = 1;
     bool completed = 2;
-    double reference_value = 3;
+    double referenceValue = 3;
   }
 
   message Missions {
-    string current_mission_name = 1;
-    double reference_value = 2;
+    string currentMissionName = 1;
+    double referenceValue = 2;
     repeated Mission missions = 3;
-    repeated string current_missions = 4;
+    repeated string currentMissions = 4;
   }
 
   message Misc {
-    bool chicken_btn_pref_big = 1;
-    bool free_hatchery_refill_given = 2;
-    double last_share_farm_value = 3;
-    double last_share_swarm_farm_value = 4;
-    double last_share_swarm_size = 5;
-    uint64 friend_rank = 6;
-    uint64 friend_rank_pop = 7;
-    uint64 global_rank = 8;
-    uint64 global_rank_pop = 9;
-    uint64 last_prestige_alert_soul_eggs = 10;
-    bool trophy_alert = 11;
-    bool ar_alert = 12;
-    bool contracts_alert = 13;
-    bool coop_alert = 14;
-    bool switch_alert = 15;
-    bool egg_of_prophecy_alert = 16;
-    bool boost_token_alert = 17;
-    bool soul_egg_alert = 18;
-    bool backup_reminder_alert = 19;
+    bool chickenBtnPrefBig = 1;
+    bool freeHatcheryRefillGiven = 2;
+    double lastShareFarmValue = 3;
+    double lastShareSwarmFarmValue = 4;
+    double lastShareSwarmSize = 5;
+    uint64 friendRank = 6;
+    uint64 friendRankPop = 7;
+    uint64 globalRank = 8;
+    uint64 globalRankPop = 9;
+    uint64 lastPrestigeAlertSoulEggs = 10;
+    bool trophyAlert = 11;
+    bool arAlert = 12;
+    bool contractsAlert = 13;
+    bool coopAlert = 14;
+    bool switchAlert = 15;
+    bool eggOfProphecyAlert = 16;
+    bool boostTokenAlert = 17;
+    bool soulEggAlert = 18;
+    bool backupReminderAlert = 19;
   }
 }
 
-/* http://www.auxbrain.com/ei/first_contact */
+/* http://www.auxbrain.com/ei/firstContact */
 
 message FirstContactRequest {
-  string user_id = 1;
-  uint32 client_version = 2;
+  string userId = 1;
+  uint32 clientVersion = 2;
   uint32 platform = 3;
-  string ei_user_id = 4;
-  string device_id = 5;
+  string eiUserId = 4;
+  string deviceId = 5;
   string username = 6;
-  string game_services_id = 7;
-  BasicRequestInfo request_info = 8;
+  string gameServicesId = 7;
+  BasicRequestInfo requestInfo = 8;
 }
 
 message FirstContactResponse {
-  FirstContact first_contact = 1;
+  FirstContact firstContact = 1;
   string checksum = 2;
 }
 
 message FirstContact {
   Backup backup = 1;
-  string ei_user_id = 2;
-  repeated string ids_transferred = 3;
-  ErrorCode error_code = 4;
-  string error_message = 5;
+  string eiUserId = 2;
+  repeated string idsTransferred = 3;
+  ErrorCode errorCode = 4;
+  string errorMessage = 5;
 }
 
 enum ErrorCode {
@@ -268,35 +268,35 @@ enum ErrorCode {
 }
 
 message Reward {
-  RewardType reward_type = 1;
-  string reward_sub_type = 2;
-  double reward_amount = 3;
+  RewardType rewardType = 1;
+  string rewardSubType = 2;
+  double rewardAmount = 3;
 }
 
 message Contract {
   string id = 1;
   Egg egg = 2;
   repeated Goal goals = 3;
-  bool coop_allowed = 4;
-  uint32 max_coop_size = 5;
-  double expiration_time = 6;
-  double length_seconds = 7;
+  bool coopAllowed = 4;
+  uint32 maxCoopSize = 5;
+  double expirationTime = 6;
+  double lengthSeconds = 7;
   string name = 9;
   string description = 10;
   bool debug = 11;
-  uint32 max_boosts = 12;
-  double max_soul_eggs = 13;
-  uint32 min_client_version = 14;
-  double minutes_per_token = 15;
-  repeated GoalSet goal_sets = 16;
+  uint32 maxBoosts = 12;
+  double maxSoulEggs = 13;
+  uint32 minClientVersion = 14;
+  double minutesPerToken = 15;
+  repeated GoalSet goalSets = 16;
 
   message Goal {
     GoalType type = 1;
-    double target_amount = 2;
-    RewardType reward_type = 3;
-    string reward_sub_type = 4;
-    double reward_amount = 5;
-    double target_soul_eggs = 6;
+    double targetAmount = 2;
+    RewardType rewardType = 3;
+    string rewardSubType = 4;
+    double rewardAmount = 5;
+    double targetSoulEggs = 6;
   }
 
   message GoalSet {
@@ -305,8 +305,8 @@ message Contract {
 }
 
 message BasicRequestInfo {
-  string ei_user_id = 1;
-  uint32 client_version = 2;
+  string eiUserId = 1;
+  uint32 clientVersion = 2;
   string version = 3;
   string build = 4;
   string platform = 5;
@@ -314,19 +314,19 @@ message BasicRequestInfo {
 
 message ContractsResponse {
   repeated Contract contracts = 1;
-  double server_time = 2;
-  uint32 max_eop = 3; // Unknown
-  string warning_message = 4;
+  double serverTime = 2;
+  uint32 maxEop = 3; // Unknown
+  string warningMessage = 4;
 }
 
-/* http://www.auxbrain.com/ei/coop_status */
+/* http://www.auxbrain.com/ei/coopStatus */
 
 message CoopStatusRequest {
-  string contract_id = 1;
-  string coop_id = 2;
-  string user_id = 3;
-  uint32 client_version = 4;
-  BasicRequestInfo request_info = 5;
+  string contractId = 1;
+  string coopId = 2;
+  string userId = 3;
+  uint32 clientVersion = 4;
+  BasicRequestInfo requestInfo = 5;
 }
 
 message CoopStatusResponse {
@@ -335,71 +335,71 @@ message CoopStatusResponse {
 }
 
 message CoopStatus {
-  string contract_id = 1;
-  double total_amount = 2;
-  string coop_id = 3;
+  string contractId = 1;
+  double totalAmount = 2;
+  string coopId = 3;
   repeated ContributionInfo contributors = 4;
-  double seconds_remaining = 5;
-  bool all_members_reporting = 6;
-  double grace_period_seconds_remaining = 7; // After 48 hours contract becomes inactive (172800 seconds) more than time_left.
-  bool auto_generated = 8;
-  string creator_id = 9;
+  double secondsRemaining = 5;
+  bool allMembersReporting = 6;
+  double gracePeriodSecondsRemaining = 7; // After 48 hours contract becomes inactive (172800 seconds) more than timeLeft.
+  bool autoGenerated = 8;
+  string creatorId = 9;
   bool public = 10;
   repeated CoopGift gifts = 11;
-  double local_timestamp = 12;
+  double localTimestamp = 12;
 
   message CoopGift {
-    string user_id = 1;
+    string userId = 1;
     uint32 amount = 2;
-    string user_name = 3;
+    string userName = 3;
   }
 
   message ContributionInfo {
-    string user_id = 1;
-    string user_name = 2;
-    double contribution_amount = 3;
+    string userId = 1;
+    string userName = 2;
+    double contributionAmount = 3;
     bool active = 4;
     uint32 platform = 5;
-    double contribution_rate = 6;
-    bool time_cheat_detected = 7;
-    int32 rank_change = 8;
-    string push_id = 9;
-    uint32 ban_votes = 10;
-    double soul_power = 11;
-    uint32 boost_tokens = 12;
-    repeated CoopBuffState buff_history = 13;
+    double contributionRate = 6;
+    bool timeCheatDetected = 7;
+    int32 rankChange = 8;
+    string pushId = 9;
+    uint32 banVotes = 10;
+    double soulPower = 11;
+    uint32 boostTokens = 12;
+    repeated CoopBuffState buffHistory = 13;
   }
 }
 
 message LocalContract {
   Contract contract = 1;
-  string coop_id = 2;
-  double time_accepted = 3;
+  string coopId = 2;
+  double timeAccepted = 3;
   bool cancelled = 4;
-  double coop_shared_end_time = 5;
-  double last_amount_when_reward_given = 6;
+  double coopSharedEndTime = 5;
+  double lastAmountWhenRewardGiven = 6;
   bool accepted = 7;
   bool new = 8;
-  double coop_grace_period_end_time = 9;
-  bool coop_contribution_finalized = 10;
-  double coop_last_uploaded_contribution = 11;
-  uint32 boosts_used = 12;
-  string coop_user_id = 13;
-  uint32 num_goals_achieved = 14;
+  double coopGracePeriodEndTime = 9;
+  bool coopContributionFinalized = 10;
+  double coopLastUploadedContribution = 11;
+  uint32 boostsUsed = 12;
+  string coopUserId = 13;
+  uint32 numGoalsAchieved = 14;
   uint32 league = 15;
 }
 
 message MyContracts {
   repeated LocalContract contracts = 1;
   repeated LocalContract archived = 2;
-  repeated string contract_ids_seen = 3;
-  repeated CoopStatus coop_statuses = 4;
+  repeated string contractIdsSeen = 3;
+  repeated CoopStatus coopStatuses = 4;
 }
 
 message CoopBuffState {
-  double egg_laying_rate = 1;
+  double eggLayingRate = 1;
   double earnings = 2;
-  double server_timestamp = 3;
+  double serverTimestamp = 3;
 }
 
 message CoopBuffHistory {
@@ -407,25 +407,220 @@ message CoopBuffHistory {
 }
 
 message ServerGift {
-  string user_id = 1;
-  RewardType reward_type = 3;
-  string reward_sub_type = 4;
-  double reward_amount = 5;
+  string userId = 1;
+  RewardType rewardType = 3;
+  string rewardSubType = 4;
+  double rewardAmount = 5;
 }
 
-/* http://www.auxbrain.com/ei/get_periodicals */
+/* http://www.auxbrain.com/ei/getPeriodicals */
 
 message PeriodicalsRequest {
-  string user_id = 1;
-  bool piggy_full = 2;
-  bool piggy_found_full = 3;
-  double seconds_full_realtime = 4;
-  double seconds_full_gametime = 5;
-  uint32 lost_increments = 7;
-  double soul_eggs = 8;
-  uint32 client_version = 10;
+  string userId = 1;
+  bool piggyFull = 2;
+  bool piggyFoundFull = 3;
+  double secondsFullRealtime = 4;
+  double secondsFullGametime = 5;
+  uint32 lostIncrements = 7;
+  double soulEggs = 8;
+  uint32 clientVersion = 10;
   bool debug = 11;
-  BasicRequestInfo request_info = 12;
+  BasicRequestInfo requestInfo = 12;
+}
+
+message LiveConfig {
+  string configId = 1;
+
+  BoostsConfig boostsConfig = 2;
+  message BoostsConfig {
+    repeated ItemConfig itemConfigs = 1;
+    message ItemConfig {
+      string boostId = 1;
+      uint32 price = 2;
+      uint32 tokenPrice = 3;
+      double seRequired = 4;
+    }
+
+    double cashBoostCooloffTime = 2;
+  }
+
+  GiftConfig giftConfig = 3;
+  message GiftConfig {
+    repeated GiftValueConfig giftConfigs = 9;
+    message GiftValueConfig {
+      string giftId = 1;
+      double amount = 4;
+      double randMin = 2;
+      double randMax = 3;
+      double videoMin = 5;
+      double videoMax = 6;
+    }
+
+    double giftMuMinSpent = 10;
+    double giftMuMaxSpent = 11;
+    double giftMuOverallMult = 12;
+    double packageInterval = 1;
+    double videoOfferInterval = 2;
+    double videoOfferIntervalContract = 3;
+    double videoOfferIntervalPiggyFull = 4;
+    double videoOfferIntervalPiggyExtraFull = 5;
+    bool videoResetOnIdle = 14;
+    double packageIntervalContract = 6;
+    double packageIntervalPiggyFull = 7;
+    double packageIntervalPiggyExtraFull = 8;
+    bool packageResetOnIdle = 13;
+  }
+
+  MiscConfig miscConfig = 4;
+  message MiscConfig {
+    bool askToTrack = 1;
+    double askToTrackMinSoulEggs = 2;
+    string askToTrackMessage = 3;
+    bool askToTrackShowPreDialog = 4;
+    bool askToTrackAfterPrivacy = 5;
+  }
+}
+
+enum Platform {
+  IOS = 0;
+  DROID = 1;
+}
+
+enum DeviceFormFactor {
+  PHONE = 0;
+  TABLET = 1;
+}
+
+enum AdNetwork {
+  VUNGLE = 0;
+  CHARTBOOST = 1;
+  AD_COLONY = 2;
+  HYPER_MX = 3;
+  UNITY = 4;
+  FACEBOOK = 5;
+  APPLOVIN = 6;
+}
+
+message EggIncAdConfig {
+  repeated AdNetwork networkPriority = 1;
+}
+
+message DailyGiftInfo {
+  uint32 currentDay = 1;
+  double secondsToNextDay = 2;
+}
+
+message SalesInfoRequest {
+  string userId = 1;
+  bool piggyFull = 2;
+  bool piggyFoundFull = 3;
+  double secondsFullRealtime = 4;
+  double secondsFullGametime = 5;
+  uint32 lostIncrements = 7;
+  uint32 currentClientVersion = 10;
+}
+
+message IAPSaleEntry {
+  string productId = 1;
+  double secondsRemaining = 2;
+  string discountString = 3;
+  string saleId = 4;
+}
+
+message SalesInfo {
+  repeated IAPSaleEntry sales = 1;
+}
+
+message EggIncEvent {
+  string identifier = 1;
+  double secondsRemaining = 2;
+  string type = 3;
+  double multiplier = 4;
+  string subtitle = 5;
+  double startTime = 6;
+  double duration = 7;
+}
+
+message EggIncCurrentEvents {
+  repeated EggIncEvent events = 1;
+}
+
+message DeviceInfo {
+  string deviceId = 1;
+  string advertisingId = 13;
+  string platform = 2;
+  string formFactor = 3;
+  string deviceName = 4;
+  string platformVersion = 5;
+  string localeCountry = 6;
+  string localeLanguage = 7;
+  string gpuVendor = 8;
+  string gpuModel = 9;
+  string deviceBucket = 10;
+  uint32 screenWidth = 11;
+  uint32 screenHeight = 12;
+}
+
+message AppInfo {
+  string versionStr = 1;
+  uint32 sessions = 2;
+  uint32 numPrestiges = 3;
+  uint64 soulEggs = 4;
+  uint32 currentEgg = 5;
+  uint64 goldEarned = 6;
+  uint64 goldSpent = 7;
+  uint32 currentMission = 8;
+  uint32 piggySize = 9;
+  uint64 numPiggyBreaks = 10;
+  uint64 verifiedPiggyBreaks = 29;
+  uint64 iapPacksPurchased = 11;
+  uint32 permitLevel = 12;
+  uint64 videoDoublerUses = 15;
+  uint64 droneTakedowns = 18;
+  uint64 droneTakedownsElite = 19;
+  bool trophiesUnlocked = 20;
+  float eggLevel = 21;
+  float struggleFactor = 22;
+  bool piggyFull = 23;
+  bool piggyFoundFull = 24;
+  double timePiggyFullRealtime = 25;
+  double timePiggyFullGametime = 26;
+  uint64 lostPiggyIncrements = 27;
+  string saleId = 28;
+  uint64 unlimitedChickensUses = 13;
+  uint64 refillUses = 14;
+  uint64 shortWarpUses = 16;
+  uint64 longWarpUses = 17;
+}
+
+message ActionKeyValuePair {
+  string key = 1;
+  string value = 2;
+}
+
+message GenericAction {
+  string userId = 1;
+  string advertisingId = 7;
+  float approxTime_DEP = 2;
+  double approxTime = 8;
+  string actionName = 3;
+  repeated ActionKeyValuePair data = 4;
+  AppInfo app = 5;
+  DeviceInfo device = 6;
+}
+
+message VerifyPurchaseRequest {
+  BasicRequestInfo rinfo = 6;
+  string sku = 1;
+  string transactionId = 2;
+  string receipt = 3;
+  string platform = 4;
+  GenericAction log = 5;
+}
+
+message VerifyPurchaseResponse {
+  bool verified = 1;
+  string message = 2;
 }
 
 message PeriodicalsResponse {
@@ -433,24 +628,132 @@ message PeriodicalsResponse {
   string checksum = 2;
 }
 
+message InGameMail {
+  string id = 1;
+  string title = 2;
+  string date = 8;
+  string message = 3;
+  string action = 4;
+  string url = 5;
+  uint32 platform = 7;
+  repeated string builds = 9;
+  uint32 minClientVersion = 10;
+  uint32 maxClientVersion = 12;
+  double minSoulEggs = 11;
+  double minMysticalBonus = 13;
+  double goldTip = 6;
+}
+
+message MailDB {
+  repeated InGameMail mail = 1;
+}
+
 message Periodicals {
-  uint32 sales = 1; // SalesInfo
-  uint32 events = 2; // CurrentEventsInfo
+  SalesInfo sales = 1;
+  EggIncCurrentEvents events = 2;
   ContractsResponse contracts = 3;
   repeated ServerGift gifts = 4;
+  LiveConfig liveConfig = 5;
+  MailDB mailBag = 6;
+}
+
+message GetPeriodicalsRequest {
+  BasicRequestInfo rinfo = 12;
+  string userId = 1;
+  bool piggyFull = 2;
+  bool piggyFoundFull = 3;
+  double secondsFullRealtime = 4;
+  double secondsFullGametime = 5;
+  uint32 lostIncrements = 7;
+  double soulEggs = 8;
+  double mysticalEarningsMult = 13;
+  uint32 eop = 14;
+  bool contractsUnlocked = 15;
+  bool artifactsUnlocked = 16;
+  uint32 currentClientVersion = 10;
+  bool debug = 11;
+}
+
+message ConfigRequest {
+  BasicRequestInfo rinfo = 1;
+  double soulEggs = 2;
+  bool artifactsEnabled = 3;
+  bool fuelTankUnlocked = 4;
+}
+
+message ConfigResponse {
+  LiveConfig liveConfig = 1;
+  MailDB mailBag = 2;
+  DLCCatalog dlcCatalog = 3;
+}
+
+message ReturnEDTPayload {
+  string eiUserId = 1;
+}
+
+message DLCItem {
+  string name = 1;
+  string directory = 2;
+  string ext = 3;
+  string url = 4;
+  string checksum = 5;
+}
+
+message DLCCatalog {
+  repeated DLCItem items = 1;
+}
+
+message AdAttributionRawData {
+  string deviceAdId = 1;
+  string userId = 4;
+  string adNetwork = 2;
+  string jsonData = 3;
+}
+
+message AdAttributionRow {
+  string userId = 1;
+  string adId = 2;
+  string adNetwork = 3;
+  string campaign = 4;
+  string keyword = 5;
+  string extra = 6;
+  float clickDate = 7;
+  float downloadDate = 8;
+  float approxTime = 9;
+}
+
+message AdAttributionInfo {
+  string deviceAdId = 1;
+  string networkName = 2;
+  bool attribution = 3;
+  string orgName = 4;
+  string orgId = 5;
+  string campaignName = 6;
+  string campaignId = 7;
+  string clickDate = 8;
+  string conversionDate = 9;
+  string conversionType = 10;
+  string geo = 11;
+  string adgroupName = 12;
+  string adgroupId = 13;
+  string keyword = 14;
+  string keywordId = 15;
+  string keywordExtra = 16;
+  string creativesetName = 17;
+  string creativesetId = 18;
 }
 
 message Mission {
   Spaceship ship = 1;
   Status status = 2;
-  DurationType duration_type = 3;
+  DurationType durationType = 3;
   repeated Fuel fuels = 4;
-  double duration_seconds = 5;
-  double seconds_remaining = 6;
+  double durationSeconds = 5;
+  double secondsRemaining = 6;
   string identifier = 7;
-  double start_time_derived = 8;
+  double startTimeDerived = 8;
   uint32 capacity = 9;
-  string mission_log = 10;
+  string missionLog = 10;
 
   message Fuel {
     Egg egg = 1;
@@ -582,79 +885,79 @@ enum Type {
 }
 
 message CompleteArtifact {
-  Artifact artifact_base = 1;
+  Artifact artifactBase = 1;
   repeated Artifact stones = 2;
 }
 
 message ArtifactInventoryItem {
-  uint64 item_id = 1;
+  uint64 itemId = 1;
   CompleteArtifact artifact = 2;
   double quantity = 3;
-  string server_id = 4;
+  string serverId = 4;
 }
 
 message InventorySlot {
   bool occupied = 1;
-  uint32 item_id = 2;
+  uint32 itemId = 2;
 }
 
-/* http://auxbrain.com/ei_afx/config */
+/* http://auxbrain.com/eiAfx/config */
 
 message ArtifactsConfigurationRequest {
-  uint32 client_version = 1;
-  BasicRequestInfo request_info = 2;
+  uint32 clientVersion = 1;
+  BasicRequestInfo requestInfo = 2;
 }
 
 message ArtifactsConfigurationResponse {
-  ArtifactsConfiguration artifacts_configuration = 1;
+  ArtifactsConfiguration artifactsConfiguration = 1;
   string checksum = 2;
 }
 
 message ArtifactsConfiguration {
-  repeated MissionParameters mission_parameters = 1;
-  repeated ArtifactParameters artifact_parameters = 2;
+  repeated MissionParameters missionParameters = 1;
+  repeated ArtifactParameters artifactParameters = 2;
 
   message MissionParameters {
     Mission.Spaceship ship = 1;
     repeated Duration durations = 3;
 
     message Duration {
-      Mission.DurationType duration_type = 1;
+      Mission.DurationType durationType = 1;
       double seconds = 2;
       float quality = 3;
-      float min_quality = 4;
-      float max_quality = 5;
+      float minQuality = 4;
+      float maxQuality = 5;
       uint32 capacity = 6;
     }
   }
 
   message ArtifactParameters {
     Artifact artifact = 1;
-    double base_quality = 2;
+    double baseQuality = 2;
     double value = 3;
-    double odds_multiplier = 4;
-    double crafting_price = 5;
-    double crafting_price_low = 6;
-    uint32 crafting_price_domain = 7;
-    double crafting_price_curve = 8;
+    double oddsMultiplier = 4;
+    double craftingPrice = 5;
+    double craftingPriceLow = 6;
+    uint32 craftingPriceDomain = 7;
+    double craftingPriceCurve = 8;
   }
 }
 
 message ArtifactsDatabase {
-  repeated ArtifactInventoryItem inventory_items = 1;
-  uint64 item_sequence = 2;
-  repeated InventorySlot inventory_slots = 3;
+  repeated ArtifactInventoryItem inventoryItems = 1;
+  uint64 itemSequence = 2;
+  repeated InventorySlot inventorySlots = 3;
   repeated Mission missions = 4;
-  repeated Mission archived_missions = 5;
-  repeated ActiveArtifactSlot active_artifacts = 7;
-  repeated Artifact discovered_artifacts = 8;
-  repeated CraftableArtifact craftable_artifacts = 9;
-  repeated CraftableArtifact crafting_counts = 10;
-  repeated ActiveArtifactSet active_artifact_sets = 11;
+  repeated Mission archivedMissions = 5;
+  repeated ActiveArtifactSlot activeArtifacts = 7;
+  repeated Artifact discoveredArtifacts = 8;
+  repeated CraftableArtifact craftableArtifacts = 9;
+  repeated CraftableArtifact craftingCounts = 10;
+  repeated ActiveArtifactSet activeArtifactSets = 11;
 
   message ActiveArtifactSlot {
     bool occupied = 1;
-    uint64 item_id = 2;
+    uint64 itemId = 2;
   }
 
   message ActiveArtifactSet {
@@ -669,7 +972,7 @@ message ArtifactsDatabase {
 
 message ActiveArtifactSlot {
   bool occupied = 1;
-  uint64 item_id = 2;
+  uint64 itemId = 2;
 }
 
 message ActiveArtifactSet {

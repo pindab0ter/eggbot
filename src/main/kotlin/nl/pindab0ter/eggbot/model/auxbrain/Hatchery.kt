@@ -14,11 +14,11 @@ import nl.pindab0ter.eggbot.model.auxbrain.EpicResearch.INTERNAL_HATCH_SHARING
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 
-fun Backup.hatcheryRateFromResearchFor(farm: Farm) = farm
+fun Backup.hatcheryRateFromResearchFor(farm: Farm): BigDecimal = farm
     .hatcheryRateFlatIncreases.sum()
     .multiply(hatcheryRateMultiplier)
 
-fun Backup.hatcheryRateArtifactsMultiplierFor(farm: Farm) =
+fun Backup.hatcheryRateArtifactsMultiplierFor(farm: Farm): BigDecimal =
     artifactsFor(farm).hatcheryRateMultiplier
 
 fun Backup.hatcheryRateFor(farm: Farm): BigDecimal = hatcheryRateFromResearchFor(farm)

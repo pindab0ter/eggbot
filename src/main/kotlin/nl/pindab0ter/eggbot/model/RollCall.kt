@@ -37,7 +37,7 @@ fun createRollCall(
             .filter { (_, farmers) -> farmers.count() <= preferredCoopSize }
             // Filter out co-ops that have the current highest amount of farmers
             .filter { (_, farmers) ->
-                farmers.count() == coops.map { (_, coopFarmers) -> coopFarmers.count() }.minOrNull()
+                farmers.count() == coops.minOfOrNull { (_, coopFarmers) -> coopFarmers.count() }
             }
             // Select the coop with the current lowest total earnings bonus
             .minByOrNull { (_, farmers) -> farmers.sumOf { it.earningsBonus } }

@@ -76,7 +76,7 @@ data class CoopContractState(
         coopId = coopStatus.coopId,
         egg = contract.egg,
         maxCoopSize = contract.maxCoopSize,
-        public = coopStatus.public,
+        public = coopStatus.public_,
         goals = Goal.fromContract(contract, farmers.sumOf { farmer: Farmer -> farmer.reportedState.eggsLaid }),
         timeRemaining = coopStatus.secondsRemaining.toDuration(),
         farmers = farmers

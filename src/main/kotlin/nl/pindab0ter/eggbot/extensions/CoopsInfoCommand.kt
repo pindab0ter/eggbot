@@ -29,6 +29,7 @@ class CoopsInfoCommand : Extension() {
         val contract: Contract by contract()
         val compact: Boolean by compact()
     }
+
     override suspend fun setup() = config.servers.forEach { server ->
         publicSlashCommand(::CoopsInfoArguments) {
             name = "coops"
@@ -43,8 +44,10 @@ class CoopsInfoCommand : Extension() {
                     Coop.find { Coops.contractId eq contract.id }.orderBy(Coops.name to ASC)
                 }
 
-                val coopStatuses = coops.associate { coop ->
-                    coop.name to AuxBrain.getCoopStatus(contract.id, coop.name)
+                val coopStatuses = transaction(databases[server.name]) {
+                    coops.associate { coop ->
+                        coop.name to AuxBrain.getCoopStatus(contract.id, coop.name)
+                    }
                 }
 
                 if (coopStatuses.isEmpty()) {

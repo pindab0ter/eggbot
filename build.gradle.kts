@@ -13,8 +13,12 @@ plugins {
     application
     kotlin("jvm") version "1.6.21"
     kotlin("plugin.serialization") version "1.6.21"
-    id("com.toasttab.protokt") version "0.8.1"
+    id("com.squareup.wire") version "4.3.0"
     id("com.github.ben-manes.versions") version "0.42.0"
+}
+
+wire {
+    kotlin {}
 }
 
 repositories {
@@ -39,20 +43,23 @@ dependencies {
     implementation("joda-time", "joda-time", "2.10.14")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
 
+
     // Configuration
     implementation("com.charleskorn.kaml", "kaml", "0.44.0")
 
     // Database
-    implementation("org.jetbrains.exposed", "exposed-core", "0.38.1")
-    implementation("org.jetbrains.exposed", "exposed-dao", "0.38.1")
-    implementation("org.jetbrains.exposed", "exposed-jdbc", "0.38.1")
-    implementation("org.jetbrains.exposed", "exposed-jodatime", "0.38.1")
-    runtimeOnly("org.postgresql", "postgresql", "42.2.2")
-    implementation("org.flywaydb", "flyway-core", "8.5.10")
+    implementation("org.jetbrains.exposed", "exposed-core", "0.38.2")
+    implementation("org.jetbrains.exposed", "exposed-dao", "0.38.2")
+    implementation("org.jetbrains.exposed", "exposed-jdbc", "0.38.2")
+    implementation("org.jetbrains.exposed", "exposed-jodatime", "0.38.2")
+    runtimeOnly("org.postgresql", "postgresql", "42.3.5")
+    implementation("org.flywaydb", "flyway-core", "8.5.11")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
-    runtimeOnly("com.google.protobuf", "protobuf-java", "4.0.0-rc-2")
+    // runtimeOnly("com.google.protobuf", "protobuf-kotlin", "3.20.1")
+    implementation("com.squareup.wire", "wire-gradle-plugin", "4.3.0")
+
 
     // Discord
     implementation("dev.kord", "kord-core", "0.8.0-M9")

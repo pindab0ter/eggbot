@@ -96,7 +96,7 @@ fun coopFinishedResponse(
             cells = buildList list@{
                 add("Time remaining:")
                 add("Banked eggs:")
-                if (status.public) add("Access:")
+                if (status.public_) add("Access:")
             }
         }
 
@@ -113,7 +113,7 @@ fun coopFinishedResponse(
             cells = buildList {
                 add(status.timeRemaining.formatDaysHoursAndMinutes(compact, compact))
                 add(eggsLaid.formatIllions() + if (!compact) " (${eggsLaidRate.formatIllions()}/hr)" else "")
-                if (status.public) add("This co-op is PUBLIC")
+                if (status.public_) add("This co-op is PUBLIC")
             }
         }
     }

@@ -57,10 +57,10 @@ object AuxBrain {
         }
 
     private fun periodicalsRequest(): Request {
-        val data = PeriodicalsRequest {
-            clientVersion = Int.MAX_VALUE
-            userId = config.eggIncId
-        }.serialize().encodeBase64ToString()
+        val data = PeriodicalsRequest (
+            clientVersion = Int.MAX_VALUE,
+            userId = config.eggIncId,
+        ).encode().encodeBase64ToString()
 
         return PERIODICALS_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
@@ -73,7 +73,7 @@ object AuxBrain {
 
     private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
         override fun deserialize(content: String): List<Contract>? {
-            return content.decodeBase64()?.let { PeriodicalsResponse.deserialize(it).periodicals?.contracts?.contracts }
+            return content.decodeBase64()?.let { PeriodicalsResponse.ADAPTER.decode(it).periodicals?.contracts?.contracts }
         }
     }
 
@@ -89,11 +89,11 @@ object AuxBrain {
     private val cachedFarmerBackups: MutableMap<String, FarmerBackupCache> = mutableMapOf()
 
     private fun firstContactRequest(eggIncId: String): Request {
-        val data = FirstContactRequest {
-            eiUserId = eggIncId
-            deviceId = config.deviceId
-            clientVersion = Int.MAX_VALUE
-        }.serialize().encodeBase64ToString()
+        val data = FirstContactRequest(
+            eiUserId = eggIncId,
+            deviceId = config.deviceId,
+            clientVersion = Int.MAX_VALUE,
+        ).encode().encodeBase64ToString()
 
         return FIRST_CONTACT_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
@@ -140,7 +140,7 @@ object AuxBrain {
 
     private object BackupDeserializer : ResponseDeserializable<Backup> {
         override fun deserialize(content: String): Backup? {
-            return content.decodeBase64()?.let { FirstContactResponse.deserialize(it).firstContact?.backup }
+            return content.decodeBase64()?.let { FirstContactResponse.ADAPTER.decode(it).firstContact?.backup }
         }
     }
 
@@ -149,10 +149,10 @@ object AuxBrain {
     ////////////
 
     private fun coopStatusRequest(contractId: String, coopId: String): Request {
-        val data = CoopStatusRequest {
-            this.contractId = contractId
-            this.coopId = coopId
-        }.serialize().encodeBase64ToString()
+        val data = CoopStatusRequest(
+            contractId = contractId,
+            coopId = coopId,
+        ).encode().encodeBase64ToString()
 
         return COOP_STATUS_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
@@ -169,7 +169,7 @@ object AuxBrain {
 
     private object CoopStatusDeserializer : ResponseDeserializable<CoopStatus> {
         override fun deserialize(content: String): CoopStatus? {
-            return content.decodeBase64()?.let { CoopStatusResponse.deserialize(it).coopStatus }
+            return content.decodeBase64()?.let { CoopStatusResponse.ADAPTER.decode(it) }?.coopStatus
         }
     }
 }

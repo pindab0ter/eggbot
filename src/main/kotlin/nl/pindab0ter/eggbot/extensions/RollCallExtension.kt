@@ -10,7 +10,6 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.entity.Permission.ManageChannels
 import dev.kord.common.entity.Permission.ManageRoles
-import dev.kord.common.entity.Snowflake
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import dev.kord.rest.request.RestRequestException

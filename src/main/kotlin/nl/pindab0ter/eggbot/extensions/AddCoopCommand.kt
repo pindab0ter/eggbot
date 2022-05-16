@@ -80,7 +80,7 @@ class AddCoopCommand : Extension() {
                 }
 
                 // Fetch the co-op status to see if it exists
-                val coopStatus: CoopStatus? = AuxBrain.getCoopStatus(arguments.contract.id, coopId)
+                val coopStatus: CoopStatus? = arguments.contract.id.let { AuxBrain.getCoopStatus(it, coopId) }
 
                 // Finish if the co-op status couldn't be found, and it isn't being created pre-emptively
                 if (coopStatus == null && !arguments.preEmptive) {
