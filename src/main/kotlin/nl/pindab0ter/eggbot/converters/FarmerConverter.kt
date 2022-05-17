@@ -26,10 +26,10 @@ import org.jetbrains.exposed.sql.transactions.transaction
 class FarmerConverter(
     override var validator: Validator<Farmer> = null,
 ) : ChoiceConverter<Farmer>(choices = transaction {
-    Farmer.all()
+    Farmer.find { Farmers.inGameName.isNotNull() }
         .limit(25)
         .orderBy(Farmers.updatedAt to DESC)
-        .associateBy { farmer -> farmer.inGameName }
+        .associateBy { farmer -> farmer.inGameName!! }
 }) {
     override val signatureTypeString: String = "Egg, Inc. Farmer"
 
@@ -43,7 +43,7 @@ class FarmerConverter(
     }
 
     override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
-        parsed = choices.values.firstOrNull { farmer -> farmer.inGameName.trim() == option.value }
+        parsed = choices.values.firstOrNull { farmer -> farmer.inGameName?.trim() == option.value }
             ?: throw Exception("Could not get farmer information")
 
         return true
@@ -54,7 +54,7 @@ class FarmerConverter(
         description = arg.description
     ).apply {
         required = true
-        this@FarmerConverter.choices.forEach { choice(it.key, it.value.inGameName) }
+        this@FarmerConverter.choices.forEach { choice(it.key, it.value.inGameName!!) }
     }
 }
 

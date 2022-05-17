@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
@@ -190,7 +191,7 @@ fun coopFinishedResponse(
 }.splitMessage(separator = zwsp)
 
 private fun List<Farmer>.shortenedNames(): List<String> = map { farmer ->
-    farmer.name.let { name ->
+    (farmer.name ?: NO_ALIAS).let { name ->
         if (name.length <= 10) name
         else "${name.substring(0 until 9)}…"
     }
@@ -434,7 +435,7 @@ private fun StringBuilder.drawBottleNecks(
     column {
         header = "Name"
         rightPadding = 2
-        cells = bottleneckedFarmers.map { (farmer, _) -> farmer.name }
+        cells = bottleneckedFarmers.map { (farmer, _) -> farmer.name ?: NO_ALIAS }
     }
 
     column {
@@ -641,7 +642,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(
     column {
         header = "Name"
         cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
-            farmer.name
+            farmer.name ?: NO_ALIAS
         }
     }
 

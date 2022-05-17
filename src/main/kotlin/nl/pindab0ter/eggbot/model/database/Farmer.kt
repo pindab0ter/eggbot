@@ -64,12 +64,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             return
         }
 
-        if (!backup.userName.matches(Regex("""\[(android-)?unknown]"""))) {
-            inGameName = backup.userName
-        } else {
-            logger.info { "Found an invalid in-game name: `${backup.userName}` for {${backup.userId}" }
-        }
-
+        inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
         _soulEggs = backup.game.soulEggs
         _prophecyEggs = backup.game.prophecyEggs
         _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()
@@ -89,14 +84,9 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
                 return null
             }
 
-            if (backup.userName.matches(Regex("""\[(android-)?unknown]"""))) {
-                logger.warn { "Found an invalid in-game name: `${backup.userName}` for {${backup.userId}" }
-                return null
-            }
-
             return Farmer.new(backup.eiUserId.ifBlank { backup.userId }) {
                 this.discordUser = discordUser
-                if (backup.userName.isNotBlank()) inGameName = backup.userName
+                inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
                 _soulEggs = backup.game.soulEggs
                 _prophecyEggs = backup.game.prophecyEggs
                 _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()

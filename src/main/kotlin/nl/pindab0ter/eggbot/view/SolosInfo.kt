@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.view
 import com.auxbrain.ei.Contract
 import com.kotlindiscord.kord.extensions.commands.application.ApplicationCommandContext
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
@@ -81,6 +82,7 @@ private fun StringBuilder.drawCompactBasicInfo(contract: Contract): StringBuilde
     }
 }
 
+
 private fun StringBuilder.drawFarmers(
     states: List<SoloContractState>,
 ): StringBuilder = appendTable {
@@ -98,7 +100,7 @@ private fun StringBuilder.drawFarmers(
         rightPadding = 1
 
         cells = states.map { state ->
-            state.farmer.name
+            state.farmer.name ?: NO_ALIAS
         }
     }
 
@@ -191,7 +193,7 @@ private fun StringBuilder.drawCompactFarmers(
         rightPadding = 1
 
         cells = states.map { state ->
-            state.farmer.name.let { name ->
+            (state.farmer.name ?: NO_ALIAS).let { name ->
                 if (name.length <= 10) name
                 else "${name.substring(0 until 9)}…"
             }

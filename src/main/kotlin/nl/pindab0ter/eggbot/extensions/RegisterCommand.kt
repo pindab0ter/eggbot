@@ -71,11 +71,6 @@ class RegisterCommand : Extension() {
                     return@action
                 }
 
-                if (farmerBackup.userName.isBlank()) {
-                    respond { content = "**Error:** Could not get your in-game name.\nPlease try logging out and back in to your Game Service (Main Menu → Game Services → Log Out)." }
-                    return@action
-                }
-
                 val guild = guild?.asGuild()
 
                 if (guild == null) {

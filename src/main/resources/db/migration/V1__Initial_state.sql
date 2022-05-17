@@ -14,7 +14,7 @@ CREATE TABLE farmers
         REFERENCES discord_users
             ON UPDATE CASCADE
             ON DELETE CASCADE,
-    in_game_name          TEXT      NOT NULL,
+    in_game_name          TEXT,
     soul_eggs             REAL      NOT NULL,
     soul_bonus            INTEGER   NOT NULL,
     prophecy_eggs         BIGINT    NOT NULL,

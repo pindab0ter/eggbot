@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.view
 import com.auxbrain.ei.Contract
 import dev.kord.core.behavior.GuildBehavior
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.NumberFormatter
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
 import nl.pindab0ter.eggbot.helpers.formatIllions
@@ -43,11 +44,11 @@ fun GuildBehavior.rollCallResponse(
 
             // Body
             coop.farmers
-                .sortedBy { farmer -> farmer.inGameName }
+                .sortedBy { farmer -> (farmer.inGameName ?: "") }
                 .forEach { farmer ->
                     if (farmer.isActive.not()) append("_")
                     append(getMemberOrNull(farmer.discordUser.snowflake))
-                    if (farmer.inGameName.isNotEmpty()) append(" (`${farmer.inGameName}`)")
+                    append(" (`${farmer.inGameName ?: NO_ALIAS}`)")
                     if (farmer.isActive.not()) append(" (Inactive)_")
                     appendLine()
                 }

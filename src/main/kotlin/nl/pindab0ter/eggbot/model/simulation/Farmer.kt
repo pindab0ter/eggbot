@@ -8,7 +8,7 @@ import org.joda.time.Duration
 import java.math.BigDecimal
 
 data class Farmer(
-    val name: String,
+    val name: String?,
     val reportedState: FarmState,
     val currentState: FarmState?,
     val runningState: FarmState,
@@ -18,7 +18,7 @@ data class Farmer(
     val timeSinceBackup: Duration,
 ) {
     constructor(
-        name: String,
+        name: String?,
         reportedState: FarmState,
         currentState: FarmState? = null,
         constants: Constants,

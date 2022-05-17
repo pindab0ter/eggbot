@@ -4,7 +4,7 @@ option java_outer_classname = "EggInc";
 
 message Backup {
   string userId = 1;
-  string userName = 2;
+  optional string userName = 2;
   double approxTime = 3;
   Settings settings = 4;
   Tutorial tutorial = 5;

@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.view
 import com.auxbrain.ei.Backup
 import dev.kord.core.behavior.GuildBehavior
 import kotlinx.coroutines.runBlocking
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.Server
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.*
@@ -30,10 +31,10 @@ fun GuildBehavior.leaderboardResponse(
     }.let { sortedFarmers -> if (top != null) sortedFarmers.take(top) else sortedFarmers }
 
     val shortenedNames = sortedFarmers.map { farmer ->
-        farmer.userName.let { name ->
+        farmer.userName?.let { name ->
             if (name.length <= 10) name
             else "${name.substring(0 until 9)}…"
-        }
+        } ?: NO_ALIAS
     }
 
     val soulEgg = runBlocking { getEmojiOrNull(server.emote.soulEgg) } ?: "🥚"
@@ -55,7 +56,7 @@ fun GuildBehavior.leaderboardResponse(
         header = "Name"
         leftPadding = 1
         rightPadding = if (compact) 1 else 2
-        cells = if (compact) shortenedNames else sortedFarmers.map { farmer -> farmer.userName }
+        cells = if (compact) shortenedNames else sortedFarmers.map { farmer -> farmer.userName ?: NO_ALIAS }
     }
 
     column {

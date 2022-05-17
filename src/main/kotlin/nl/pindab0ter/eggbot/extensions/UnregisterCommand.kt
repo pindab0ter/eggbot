@@ -21,6 +21,7 @@ import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
 import org.jetbrains.exposed.dao.load
 import org.jetbrains.exposed.sql.SortOrder
+import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
@@ -43,10 +44,10 @@ class UnregisterCommand : Extension() {
 
                     val farmers = transaction(databases[server.name]) {
                         Farmer
-                            .find { Farmers.inGameName like "%$farmerInput%" }
+                            .find { Farmers.inGameName.isNotNull() and (Farmers.inGameName like "%$farmerInput%") }
                             .orderBy(Farmers.inGameName to SortOrder.DESC)
                             .limit(25)
-                            .associate { farmer -> farmer.inGameName to farmer.inGameName }
+                            .associate { farmer -> farmer.inGameName!! to farmer.inGameName!! }
                     }
 
                     suggestStringMap(farmers)
