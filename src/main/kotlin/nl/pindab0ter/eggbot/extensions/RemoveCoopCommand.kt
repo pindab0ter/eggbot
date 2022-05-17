@@ -22,81 +22,79 @@ class RemoveCoopCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
-    override suspend fun setup() {
-        for (server in config.servers) {
-            class RemoveCoopArguments : Arguments() {
-                val coopId: String by string {
-                    name = "name"
-                    description = "The co-op ID. Can be found in #roll-call or in-game."
+    override suspend fun setup() = config.servers.forEach { server ->
+        class RemoveCoopArguments : Arguments() {
+            val coopId: String by string {
+                name = "name"
+                description = "The co-op ID. Can be found in #roll-call or in-game."
 
-                    validate {
-                        failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
+                validate {
+                    failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
+                }
+
+                autoComplete {
+                    val coopInput: String = command.options["name"]?.value as String? ?: ""
+
+                    val coops = transaction(databases[server.name]) {
+                        Coop
+                            .find { Coops.name like "$coopInput%" }
+                            .limit(25)
+                            .orderBy(Coops.name to SortOrder.ASC)
+                            .associate { coop -> Pair(coop.name, coop.name) }
                     }
-
-                    autoComplete {
-                        val coopInput: String = command.options["name"]?.value as String? ?: ""
-
-                        val coops = transaction(databases[server.name]) {
-                            Coop
-                                .find { Coops.name like "$coopInput%" }
-                                .limit(25)
-                                .orderBy(Coops.name to SortOrder.ASC)
-                                .associate { coop -> Pair(coop.name, coop.name) }
-                        }
-                        suggestStringMap(coops)
-                    }
+                    suggestStringMap(coops)
                 }
             }
+        }
 
-            ephemeralSlashCommand(::RemoveCoopArguments) {
-                name = "remove-coop"
-                description = "Remove a coop and it's corresponding role and/or channel (does not affect the co-op in-game)"
-                requiredPerms += listOf(
-                    ManageRoles,
-                    ManageChannels,
-                )
-                guild(server.snowflake)
+        ephemeralSlashCommand(::RemoveCoopArguments) {
+            name = "remove-coop"
+            description = "Remove a coop and it's corresponding role and/or channel (does not affect the co-op in-game)"
+            requiredPerms += listOf(
+                ManageRoles,
+                ManageChannels,
+            )
+            guild(server.snowflake)
 
-                check {
-                    hasRole(server.role.admin)
-                    passIf(event.interaction.user.id == config.botOwner)
+            check {
+                hasRole(server.role.admin)
+                passIf(event.interaction.user.id == config.botOwner)
+            }
+
+            action {
+                val coop: Coop? = transaction(databases[server.name]) {
+                    Coop.find { Coops.name eq arguments.coopId }.firstOrNull()
                 }
 
-                action {
-                    val coop: Coop? = transaction(databases[server.name]) {
-                        Coop.find { Coops.name eq arguments.coopId }.firstOrNull()
-                    }
+                if (coop == null) {
+                    respond { content = "Could not find that co-op" }
+                    return@action
+                }
 
-                    if (coop == null) {
-                        respond { content = "Could not find that co-op" }
-                        return@action
-                    }
+                val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
+                val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
 
-                    val role = coop.roleId?.let { guild?.getRoleOrNull(it) }
-                    val channel = coop.channelId?.let { guild?.getChannelOrNull(it) }
-
-                    try {
-                        val roleName = role?.name
-                        val channelName = channel?.name
-                        role?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
-                        channel?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
-                        transaction(databases[server.name]) {coop.delete() }
-                        respond {
-                            content = buildString {
-                                append("Successfully deleted co-op")
-                                if (roleName != null || channelName != null) {
-                                    append(" as well as")
-                                    if (roleName != null) {
-                                        append(" role `@$roleName`")
-                                        if (channelName != null) append(" and")
-                                    }
-                                    if (channelName != null) append(" channel $channelName")
+                try {
+                    val roleName = role?.name
+                    val channelName = channel?.name
+                    role?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
+                    channel?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
+                    transaction(databases[server.name]) {coop.delete() }
+                    respond {
+                        content = buildString {
+                            append("Successfully deleted co-op")
+                            if (roleName != null || channelName != null) {
+                                append(" as well as")
+                                if (roleName != null) {
+                                    append(" role `@$roleName`")
+                                    if (channelName != null) append(" and")
                                 }
+                                if (channelName != null) append(" channel $channelName")
                             }
                         }
-                    } catch (_: RestRequestException) {
-                        respond { content = "Could not remove the co-op" }
                     }
+                } catch (_: RestRequestException) {
+                    respond { content = "Could not remove the co-op" }
                 }
             }
         }

@@ -40,8 +40,8 @@ class RollCallExtension : Extension() {
         }
     }
 
-    override suspend fun setup() {
-        for (server in config.servers) publicSlashCommand {
+    override suspend fun setup() = config.servers.forEach { server ->
+        publicSlashCommand {
             name = "roll-call"
             description = "Manage roll calls"
             locking = true
