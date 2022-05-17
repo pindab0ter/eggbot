@@ -2,20 +2,17 @@ package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
 import dev.kord.core.behavior.GuildBehavior
-import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.NumberFormatter
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
 import nl.pindab0ter.eggbot.helpers.formatIllions
 import nl.pindab0ter.eggbot.model.database.Coop
-import org.jetbrains.exposed.sql.transactions.transaction
 
-fun GuildBehavior.rollCallResponse(
+suspend fun GuildBehavior.rollCallResponse(
     contract: Contract,
     coops: List<Coop>,
-): List<String> = runBlocking {
-    val header = transaction {
-        listOf(buildString {
+): List<String> {
+    val header = listOf(buildString {
             appendLine("Co-ops generated for __${contract.name}__:")
 
             append("```")
@@ -34,7 +31,6 @@ fun GuildBehavior.rollCallResponse(
             }
             appendLine("```")
         })
-    }
 
     val coopContent = coops.map { coop ->
         val role = coop.roleId?.let { getRoleOrNull(it) }
@@ -56,5 +52,5 @@ fun GuildBehavior.rollCallResponse(
         }
     }
 
-    return@runBlocking header + coopContent
+    return header + coopContent
 }

@@ -18,7 +18,8 @@ val guildSpecificCommands = listOf(
     ::EarningsBonusCommand,
     ::LeaderBoardCommand,
     ::RemoveCoopCommand,
-    ::RollCallExtension,
+    ::RemoveCoopsCommand,
+    ::RollCallCommand,
     ::UnregisterCommand,
     ::WhoIsCommand,
 )
