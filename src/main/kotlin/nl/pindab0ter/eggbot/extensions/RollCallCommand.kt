@@ -6,11 +6,11 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
+import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.entity.Permission.ManageChannels
 import dev.kord.common.entity.Permission.ManageRoles
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
 import nl.pindab0ter.eggbot.config
@@ -22,7 +22,7 @@ import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.view.rollCallResponse
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 class RollCallCommand : Extension() {
     val logger = KotlinLogging.logger { }
@@ -59,53 +59,39 @@ class RollCallCommand : Extension() {
             }
 
             action {
-                transaction(databases[server.name]) {
+                newSuspendedTransaction(null, databases[server.name]) {
                     val coops = createRollCall(arguments.basename, arguments.contract.maxCoopSize)
-                        // First create all co-ops
                         .map { (name, farmers) ->
                             Coop.new {
                                 this.contractId = arguments.contract.id
                                 this.name = name
                             }.also { it.farmers = farmers }
                         }
-                        // Then create roles and channels for all the successfully created co-ops
-                        .onEach { coop ->
-                            // TODO: Progress bar?
 
-                            runBlocking {
-                                // Create and assign roles
-                                if (arguments.createRoles) {
-                                    val role = guild?.createRole {
-                                        name = coop.name
-                                        mentionable = true
-                                        color = DEFAULT_ROLE_COLOR
-                                    }
-
-                                    if (role != null) {
-                                        coop.roleId = role.id
-                                        coop.farmers.forEach { farmer ->
-                                            guild?.getMemberOrNull(farmer.discordUser.snowflake)
-                                                ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
-                                        }
-                                    } else {
-                                        this@RollCallCommand.logger.error { "Failed to create role for co-op ${coop.name}" }
-                                    }
-                                }
-
-                                // Create and assign channel
-                                if (arguments.createChannels) {
-                                    val channel = guild?.createTextChannel(coop.name) {
-                                        parentId = server.channel.coopsGroup
-                                        reason = "Roll call for ${arguments.contract.name}"
-                                    }
-                                    coop.channelId = channel?.id
-                                }
-                            }
+                    if (arguments.createChannels) coops.forEach createChannels@{ coop ->
+                        val channel = guild?.createTextChannel(coop.name) {
+                            parentId = server.channel.coopsGroup
+                            reason = "Roll call for ${arguments.contract.name}"
                         }
-
-                    runBlocking {
-                        guild?.rollCallResponse(arguments.contract, coops)?.let { multipartRespond(it) }
+                        coop.channelId = channel?.id
                     }
+
+                    if (arguments.createRoles) coops.forEach createRoles@{ coop ->
+                        val role = guild?.createRole {
+                            name = coop.name
+                            mentionable = true
+                            color = DEFAULT_ROLE_COLOR
+                        } ?: return@createRoles
+
+                        coop.roleId = role.id
+                        coop.farmers.forEach { farmer ->
+                            guild?.getMemberOrNull(farmer.discordUser.snowflake)
+                                ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                        }
+                    }
+
+                    guild?.let { multipartRespond(it.rollCallResponse(arguments.contract, coops)) }
+                        ?: respond { content = "**Error:** Could not get guild." }
                 }
             }
         }
