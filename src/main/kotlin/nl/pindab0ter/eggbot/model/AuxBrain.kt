@@ -6,18 +6,19 @@ import com.github.kittinunf.fuel.core.ResponseDeserializable
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.result.getOrNull
+import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
-import nl.pindab0ter.eggbot.helpers.encodeBase64ToString
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.Instant
 import org.joda.time.Period.minutes
 
 
+@OptIn(InternalAPI::class)
 object AuxBrain {
     private val logger = KotlinLogging.logger {}
 
@@ -60,7 +61,7 @@ object AuxBrain {
         val data = PeriodicalsRequest (
             clientVersion = Int.MAX_VALUE,
             userId = config.eggIncId,
-        ).encode().encodeBase64ToString()
+        ).encode().encodeBase64()
 
         return PERIODICALS_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
@@ -68,8 +69,6 @@ object AuxBrain {
     }
 
     fun getContracts(): List<Contract> = contracts.values.toList()
-
-    fun getContract(contractId: String): Contract? = contracts[contractId]
 
     private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
         override fun deserialize(content: String): List<Contract>? {
@@ -93,7 +92,7 @@ object AuxBrain {
             eiUserId = eggIncId,
             deviceId = config.deviceId,
             clientVersion = Int.MAX_VALUE,
-        ).encode().encodeBase64ToString()
+        ).encode().encodeBase64()
 
         return FIRST_CONTACT_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
@@ -152,7 +151,7 @@ object AuxBrain {
         val data = CoopStatusRequest(
             contractId = contractId,
             coopId = coopId,
-        ).encode().encodeBase64ToString()
+        ).encode().encodeBase64()
 
         return COOP_STATUS_URL.httpPost()
             .header("Content-Type", "application/x-www-form-urlencoded")
