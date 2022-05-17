@@ -5,7 +5,7 @@ import dev.kord.core.supplier.EntitySupplyStrategy.Companion.rest
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
-import nl.pindab0ter.eggbot.helpers.asyncMap
+import nl.pindab0ter.eggbot.helpers.mapAsync
 import nl.pindab0ter.eggbot.helpers.getChannelOfOrNull
 import nl.pindab0ter.eggbot.helpers.kord
 import nl.pindab0ter.eggbot.model.AuxBrain
@@ -20,7 +20,7 @@ class UpdateLeaderBoardsJob : Job {
     override fun execute(context: JobExecutionContext?) = config.servers.forEach { server ->
         val farmers = transaction {
             runBlocking {
-                Farmer.all().asyncMap { farmer ->
+                Farmer.all().mapAsync { farmer ->
                     AuxBrain.getFarmerBackup(farmer.eggIncId)
                 }.filterNotNull()
             }

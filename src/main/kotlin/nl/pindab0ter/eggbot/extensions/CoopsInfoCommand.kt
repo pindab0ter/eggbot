@@ -9,6 +9,7 @@ import dev.kord.common.annotation.KordPreview
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.helpers.associateAsync
 import nl.pindab0ter.eggbot.helpers.compact
 import nl.pindab0ter.eggbot.helpers.contract
 import nl.pindab0ter.eggbot.helpers.multipartRespond
@@ -18,7 +19,7 @@ import nl.pindab0ter.eggbot.model.database.Coops
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus
 import nl.pindab0ter.eggbot.view.coopsInfoResponse
 import org.jetbrains.exposed.sql.SortOrder.ASC
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 
 @KordPreview
 class CoopsInfoCommand : Extension() {
@@ -40,12 +41,10 @@ class CoopsInfoCommand : Extension() {
                 val contract = arguments.contract
                 val compact = arguments.compact
 
-                val coops = transaction(databases[server.name]) {
-                    Coop.find { Coops.contractId eq contract.id }.orderBy(Coops.name to ASC)
-                }
+                val coopStatuses = newSuspendedTransaction(null, databases[server.name]) {
+                    val coops = Coop.find { Coops.contractId eq contract.id }.orderBy(Coops.name to ASC)
 
-                val coopStatuses = transaction(databases[server.name]) {
-                    coops.associate { coop ->
+                    coops.associateAsync { coop ->
                         coop.name to AuxBrain.getCoopStatus(contract.id, coop.name)
                     }
                 }

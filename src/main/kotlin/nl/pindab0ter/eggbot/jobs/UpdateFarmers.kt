@@ -2,7 +2,7 @@ package nl.pindab0ter.eggbot.jobs
 
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.helpers.asyncMap
+import nl.pindab0ter.eggbot.helpers.mapAsync
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -16,7 +16,7 @@ class UpdateFarmers : Job {
         val farmers = transaction { Farmer.all().toList() }
 
         val timeTakenMillis = measureTimeMillis {
-            farmers.asyncMap { farmer ->
+            farmers.mapAsync { farmer ->
                 AuxBrain.getFarmerBackup(farmer.eggIncId)?.let {
                     transaction { farmer.update(it) }
                 }

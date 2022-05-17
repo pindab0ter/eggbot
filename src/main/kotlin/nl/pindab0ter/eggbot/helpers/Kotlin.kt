@@ -21,11 +21,18 @@ inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
 fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
     zip(other).flatMap(Pair<T, T>::toList) + if (size > other.size) drop(other.size) else other.drop(size)
 
-suspend fun <T, R> Iterable<T>.asyncMap(
+suspend fun <T, R> Iterable<T>.mapAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
     transform: suspend (T) -> R,
 ): List<R> = coroutineScope {
     map { async(coroutineContext) { transform(it) } }.awaitAll()
+}
+
+suspend fun <T, K, V> Iterable<T>.associateAsync(
+    coroutineContext: CoroutineContext = Dispatchers.Default,
+    transform: suspend (T) -> Pair<K, V>,
+): Map<K, V> = coroutineScope {
+    mapAsync { transform(it) }.toMap()
 }
 
 object Typography {
