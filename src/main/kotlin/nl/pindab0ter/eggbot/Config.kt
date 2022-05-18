@@ -7,10 +7,12 @@ import com.github.kittinunf.fuel.core.extensions.authentication
 import com.github.kittinunf.result.Result.Failure
 import com.github.kittinunf.result.Result.Success
 import com.kotlindiscord.kord.extensions.utils.env
+import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import mu.KotlinLogging
+import java.io.File
 
 val logger = KotlinLogging.logger {}
 
@@ -160,22 +162,28 @@ data class Emote(
     val prophecyEgg get() = this.prophecyEggId?.let(::Snowflake)
 }
 
-val config = Yaml.default.decodeFromString(
-    deserializer = Config.serializer(),
-    string = run {
-        val (_, _, result) = Fuel.get(env("CONFIG_URL"))
-            .authentication()
-            .basic(env("CONFIG_USERNAME"), env("CONFIG_PASSWORD"))
-            .responseString()
+val config = when (envOrNull("ENVIRONMENT")) {
+    "production" -> Yaml.default.decodeFromString(
+        deserializer = Config.serializer(),
+        string = run {
+            val (_, _, result) = Fuel.get(env("CONFIG_URL"))
+                .authentication()
+                .basic(env("CONFIG_USERNAME"), env("CONFIG_PASSWORD"))
+                .responseString()
 
-        when (result) {
-            is Failure -> {
-                logger.error { result.getException() }
-                throw Exception("Failed to fetch configuration")
-            }
-            is Success -> {
-                result.get()
+            when (result) {
+                is Failure -> {
+                    logger.error { result.getException() }
+                    throw Exception("Failed to fetch configuration")
+                }
+                is Success -> {
+                    result.get()
+                }
             }
         }
-    }
-)
+    )
+    else -> Yaml.default.decodeFromStream(
+        deserializer = Config.serializer(),
+        File("eggbot.yaml").inputStream()
+    )
+}
