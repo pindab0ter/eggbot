@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot
 
+import com.kotlindiscord.kord.extensions.utils.env
 import mu.KotlinLogging
 import org.flywaydb.core.Flyway
 import org.flywaydb.core.api.exception.FlywayValidateException
@@ -11,26 +12,27 @@ internal fun connectToDatabase() {
     val logger = KotlinLogging.logger {}
 
     config.servers.forEach { server ->
+        // postgres://<username>:<password>@<host>:<port>/<database>
+        val postgresConnectionUrl = env(server.databaseEnv)
+
+        val url = "jdbc:postgresql://${postgresConnectionUrl.substringAfter("@")}"
+        val username: String = postgresConnectionUrl.substringAfter("//").substringBefore(":")
+        val password: String = postgresConnectionUrl.substringAfter(":").substringAfter(":").substringBefore("@")
+
         Flyway.configure()
-            .dataSource(
-                config.databaseUrl + server.databaseName,
-                config.databaseUser,
-                config.databasePassword
-            )
-            .load().apply {
+            .dataSource(url, username, password)
+            .load().also { flyway ->
                 try {
-                    migrate()
+                    flyway.migrate()
                 } catch (exception: FlywayValidateException) {
-                    repair()
-                    migrate()
+                    flyway.repair()
+                    flyway.migrate()
                 }
             }
 
         databases[server.name] = Database.connect(
-            url = config.databaseUrl + server.databaseName,
-            driver = "org.postgresql.Driver",
-            user = config.databaseUser,
-            password = config.databasePassword,
+            url = postgresConnectionUrl.replace("postgres://", "jdbc:postgresql://"),
+            driver = "org.postgresql.Driver"
         )
     }
 

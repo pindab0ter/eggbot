@@ -2,10 +2,17 @@ package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.Egg.*
 import com.charleskorn.kaml.Yaml
+import com.github.kittinunf.fuel.Fuel
+import com.github.kittinunf.fuel.core.extensions.authentication
+import com.github.kittinunf.result.Result.Failure
+import com.github.kittinunf.result.Result.Success
+import com.kotlindiscord.kord.extensions.utils.env
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import java.io.File
+import mu.KotlinLogging
+
+val logger = KotlinLogging.logger {}
 
 @Serializable
 data class Config(
@@ -13,10 +20,6 @@ data class Config(
     private val botOwnerId: String,
     val eggIncId: String,
     val deviceId: String,
-
-    val databaseUrl: String,
-    val databaseUser: String,
-    val databasePassword: String,
 
     val sentryDsn: String?,
 
@@ -30,7 +33,7 @@ data class Config(
 class Server(
     val name: String,
     private val id: String,
-    val databaseName: String,
+    val databaseEnv: String,
     val role: Role,
     val channel: Channel,
     val emote: Emote,
@@ -157,7 +160,22 @@ data class Emote(
     val prophecyEgg get() = this.prophecyEggId?.let(::Snowflake)
 }
 
-val config = Yaml.default.decodeFromStream(
+val config = Yaml.default.decodeFromString(
     deserializer = Config.serializer(),
-    source = File("eggbot.yaml").inputStream()
+    string = run {
+        val (_, _, result) = Fuel.get(env("CONFIG_URL"))
+            .authentication()
+            .basic(env("CONFIG_USERNAME"), env("CONFIG_PASSWORD"))
+            .responseString()
+
+        when (result) {
+            is Failure -> {
+                logger.error { result.getException() }
+                throw Exception("Failed to fetch configuration")
+            }
+            is Success -> {
+                result.get()
+            }
+        }
+    }
 )

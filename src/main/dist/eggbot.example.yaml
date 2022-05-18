@@ -8,11 +8,6 @@ botOwnerId:
 eggIncId:
 deviceId:
 
-# Database
-databaseUrl:
-databaseUser:
-databasePassword:
-
 # Sentry
 sentryDsn:
 
@@ -20,7 +15,9 @@ sentryDsn:
 servers:
   - name:
     id:
-    databaseName:
+
+    # The key to the PostgreSQL connection string defined in .env
+    databaseEnv:
 
     role:
       adminId:
