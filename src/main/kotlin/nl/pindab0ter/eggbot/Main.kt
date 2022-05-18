@@ -9,21 +9,6 @@ import nl.pindab0ter.eggbot.extensions.*
 
 lateinit var eggBot: ExtensibleBot
 
-val guildSpecificCommands = listOf(
-    ::ActivityCommand,
-    ::AddCoopCommand,
-    ::ContractsCommand,
-    ::CoopInfoCommand,
-    ::CoopsInfoCommand,
-    ::EarningsBonusCommand,
-    ::LeaderBoardCommand,
-    ::RemoveCoopCommand,
-    ::RemoveCoopsCommand,
-    ::RollCallCommand,
-    ::UnregisterCommand,
-    ::WhoIsCommand,
-)
-
 suspend fun main() {
     eggBot = ExtensibleBot(
         token = config.botToken
@@ -43,7 +28,18 @@ suspend fun main() {
 
             // Commands
             add(::RegisterCommand)
-            guildSpecificCommands.forEach(::add)
+            add(::ActivityCommand)
+            add(::AddCoopCommand)
+            add(::ContractsCommand)
+            add(::CoopInfoCommand)
+            add(::CoopsInfoCommand)
+            add(::EarningsBonusCommand)
+            add(::LeaderBoardCommand)
+            add(::RemoveCoopCommand)
+            add(::RemoveCoopsCommand)
+            add(::RollCallCommand)
+            add(::UnregisterCommand)
+            add(::WhoIsCommand)
         }
 
         hooks {
