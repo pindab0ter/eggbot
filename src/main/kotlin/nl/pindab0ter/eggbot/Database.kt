@@ -12,15 +12,12 @@ internal fun connectToDatabase() {
     val logger = KotlinLogging.logger {}
 
     config.servers.forEach { server ->
-        // postgres://<username>:<password>@<host>:<port>/<database>
-        val postgresConnectionUrl = env(server.databaseEnv)
-
-        val url = "jdbc:postgresql://${postgresConnectionUrl.substringAfter("@")}"
-        val username: String = postgresConnectionUrl.substringAfter("//").substringBefore(":")
-        val password: String = postgresConnectionUrl.substringAfter(":").substringAfter(":").substringBefore("@")
+        val urlString = env(server.databaseJdbcUrlEnv)
+        val user = urlString.substringAfter("user=", "").substringBefore("&")
+        val password = urlString.substringAfter("password=", "").substringBefore("&")
 
         Flyway.configure()
-            .dataSource(url, username, password)
+            .dataSource(urlString, user, password)
             .load().also { flyway ->
                 try {
                     flyway.migrate()
@@ -31,7 +28,7 @@ internal fun connectToDatabase() {
             }
 
         databases[server.name] = Database.connect(
-            url = postgresConnectionUrl.replace("postgres://", "jdbc:postgresql://"),
+            url = urlString,
             driver = "org.postgresql.Driver"
         )
     }

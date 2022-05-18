@@ -35,7 +35,7 @@ data class Config(
 class Server(
     val name: String,
     private val id: String,
-    val databaseEnv: String,
+    val databaseJdbcUrlEnv: String,
     val role: Role,
     val channel: Channel,
     val emote: Emote,

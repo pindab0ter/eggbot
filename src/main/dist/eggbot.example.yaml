@@ -16,8 +16,8 @@ servers:
   - name:
     id:
 
-    # The key to the PostgreSQL connection string defined in .env
-    databaseEnv:
+    # The key pointing to the environment variable containing the PostgreSQL JDBC connection url
+    databaseJdbcUrlEnv:
 
     role:
       adminId:
