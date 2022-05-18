@@ -91,7 +91,12 @@ class RegisterCommand : Extension() {
                     return@action
                 }
 
-                respond { content = "Farmer `${farmer.inGameName}` has been registered to ${runBlocking { getMember()?.mention }}." }
+                respond {
+                    content = when (farmer.inGameName) {
+                        null -> "A farmer without a name has been registered to ${runBlocking { getMember()?.mention }}"
+                        else -> "Farmer `${farmer.inGameName}` has been registered to ${runBlocking { getMember()?.mention }}."
+                    }
+                }
             }
         }
     }
