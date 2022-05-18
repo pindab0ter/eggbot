@@ -163,27 +163,33 @@ data class Emote(
 }
 
 val config = when (envOrNull("ENVIRONMENT")) {
-    "production" -> Yaml.default.decodeFromString(
-        deserializer = Config.serializer(),
-        string = run {
-            val (_, _, result) = Fuel.get(env("CONFIG_URL"))
-                .authentication()
-                .basic(env("CONFIG_USERNAME"), env("CONFIG_PASSWORD"))
-                .responseString()
+    "production" -> {
+        logger.info { "Production environment: Loading remote config from ${env("CONFIG_URL")}" }
+        Yaml.default.decodeFromString(
+            deserializer = Config.serializer(),
+            string = run {
+                val (_, _, result) = Fuel.get(env("CONFIG_URL"))
+                    .authentication()
+                    .basic(env("CONFIG_USERNAME"), env("CONFIG_PASSWORD"))
+                    .responseString()
 
-            when (result) {
-                is Failure -> {
-                    logger.error { result.getException() }
-                    throw Exception("Failed to fetch configuration")
-                }
-                is Success -> {
-                    result.get()
+                when (result) {
+                    is Failure -> {
+                        logger.error { result.getException() }
+                        throw Exception("Failed to fetch configuration")
+                    }
+                    is Success -> {
+                        result.get()
+                    }
                 }
             }
-        }
-    )
-    else -> Yaml.default.decodeFromStream(
-        deserializer = Config.serializer(),
-        File("eggbot.yaml").inputStream()
-    )
+        )
+    }
+    else -> {
+        logger.info { "Non-production environment: Loading local config" }
+        Yaml.default.decodeFromStream(
+            deserializer = Config.serializer(),
+            File("eggbot.yaml").inputStream()
+        )
+    }
 }
