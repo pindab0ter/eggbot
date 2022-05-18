@@ -59,7 +59,7 @@ class RollCallCommand : Extension() {
             }
 
             action {
-                newSuspendedTransaction(null, databases[server.name]) {
+                val coops = newSuspendedTransaction(null, databases[server.name]) {
                     val coops = createRollCall(arguments.basename, arguments.contract.maxCoopSize)
                         .map { (name, farmers) ->
                             Coop.new {
@@ -90,9 +90,11 @@ class RollCallCommand : Extension() {
                         }
                     }
 
-                    guild?.let { multipartRespond(it.rollCallResponse(arguments.contract, coops)) }
-                        ?: respond { content = "**Error:** Could not get guild." }
+                    coops
                 }
+
+                guild?.let { multipartRespond(it.rollCallResponse(arguments.contract, coops)) }
+                    ?: respond { content = "**Error:** Could not get guild." }
             }
         }
     }
