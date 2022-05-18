@@ -17,6 +17,7 @@ import dev.kord.rest.builder.interaction.OptionsBuilder
 import dev.kord.rest.builder.interaction.StringChoiceBuilder
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SortOrder.DESC
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -25,7 +26,8 @@ import org.jetbrains.exposed.sql.transactions.transaction
  */
 class FarmerConverter(
     override var validator: Validator<Farmer> = null,
-) : ChoiceConverter<Farmer>(choices = transaction {
+    val database: Database?
+) : ChoiceConverter<Farmer>(choices = transaction(database) {
     Farmer.find { Farmers.inGameName.isNotNull() }
         .limit(25)
         .orderBy(Farmers.updatedAt to DESC)
@@ -59,6 +61,8 @@ class FarmerConverter(
 }
 
 class FarmerConverterBuilder : ConverterBuilder<Farmer>() {
+    var database: Database? = null
+
     override fun build(arguments: Arguments): SingleConverter<Farmer> {
         return arguments.arg(
             displayName = name,
@@ -66,12 +70,15 @@ class FarmerConverterBuilder : ConverterBuilder<Farmer>() {
 
             converter = FarmerConverter(
                 validator = validator,
+                database = database,
             ).withBuilder(this)
         )
     }
 }
 
 class OptionalFarmerConverterBuilder : OptionalConverterBuilder<Farmer>() {
+    var database: Database? = null
+
     @OptIn(ConverterToOptional::class)
     override fun build(arguments: Arguments): OptionalConverter<Farmer> {
         return arguments.arg(
@@ -80,6 +87,7 @@ class OptionalFarmerConverterBuilder : OptionalConverterBuilder<Farmer>() {
 
             converter = FarmerConverter(
                 validator = validator,
+                database = database,
             ).toOptional(
                 outputError = !ignoreErrors,
                 nestedValidator = validator,

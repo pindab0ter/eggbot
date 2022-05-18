@@ -60,7 +60,7 @@ class RollCallCommand : Extension() {
 
             action {
                 val coops = newSuspendedTransaction(null, databases[server.name]) {
-                    val coops = createRollCall(arguments.basename, arguments.contract.maxCoopSize)
+                    val coops = createRollCall(arguments.basename, arguments.contract.maxCoopSize, databases[server.name])
                         .map { (name, farmers) ->
                             Coop.new {
                                 this.contractId = arguments.contract.id

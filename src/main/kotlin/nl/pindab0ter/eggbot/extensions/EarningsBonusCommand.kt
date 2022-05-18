@@ -46,7 +46,7 @@ class EarningsBonusCommand : Extension() {
             action {
                 farmers.forEach { farmer ->
                     try {
-                        val backup = AuxBrain.getFarmerBackup(farmer.eggIncId)
+                        val backup = AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])
                         multipartRespond(earningsBonusResponse(backup!!, arguments.displayMode))
                     } catch (e: IllegalStateException) {
                         respond { content = "Could not get information on EggBot user with in-game ID: `${farmer.inGameName}`" }

@@ -93,7 +93,7 @@ class CoopInfoCommand : Extension() {
                     return@action
                 }
 
-                when (val coopContractStatus = CoopContractStatus(contract, coopStatus, arguments.coopId)) {
+                when (val coopContractStatus = CoopContractStatus(contract, coopStatus, arguments.coopId, databases[server.name])) {
                     is NotFound -> respond {
                         content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
                     }

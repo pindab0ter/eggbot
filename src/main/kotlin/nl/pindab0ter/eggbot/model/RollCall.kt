@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.model
 import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.dao.with
+import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.ceil
@@ -17,7 +18,8 @@ private const val FILL_PERCENTAGE = 0.8
 fun createRollCall(
     baseName: String,
     maxCoopSize: Int,
-): List<Pair<String, SizedCollection<Farmer>>> = transaction {
+    database: Database?
+): List<Pair<String, SizedCollection<Farmer>>> = transaction(database) {
     val farmers = Farmer.all().with(Farmer::discordUser).toList()
     val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
     val inactiveFarmers = farmers.filter { !it.isActive }.sortedBy { it.earningsBonus }

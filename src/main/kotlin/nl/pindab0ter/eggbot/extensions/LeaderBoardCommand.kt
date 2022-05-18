@@ -51,7 +51,7 @@ class LeaderBoardCommand : Extension() {
             action {
                 val farmers: List<Backup> = newSuspendedTransaction(null, databases[server.name]) {
                     Farmer.all()
-                        .mapAsync { farmer -> AuxBrain.getFarmerBackup(farmer.eggIncId) }
+                        .mapAsync { farmer -> AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name]) }
                         .filterNotNull()
                         .sortedByDescending { backup -> backup.game?.earningsBonus }
                 }

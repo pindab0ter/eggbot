@@ -42,7 +42,7 @@ class RegisterCommand : Extension() {
                 }
                 throwIfFailed()
 
-                val farmerBackup = AuxBrain.getFarmerBackup(eggIncId)
+                val farmerBackup = AuxBrain.getFarmerBackup(eggIncId, databases[server?.name])
                 failIf("Could not find a farmer with _Egg, Inc. ID_ `$eggIncId`") {
                     farmerBackup?.game == null || farmerBackup.stats == null
                 }
@@ -63,8 +63,8 @@ class RegisterCommand : Extension() {
             description = "Register an Egg, Inc. account."
 
             action {
-                val farmerBackup = AuxBrain.getFarmerBackup(arguments.eggIncId)
                 val server = config.servers.find { server -> server.snowflake == guild?.id }
+                val farmerBackup = AuxBrain.getFarmerBackup(arguments.eggIncId, databases[server?.name])
 
                 if (farmerBackup == null) {
                     respond { content = "Could not find a farmer with the ID `${arguments.eggIncId}`. Please make sure you didn't make any typing errors." }

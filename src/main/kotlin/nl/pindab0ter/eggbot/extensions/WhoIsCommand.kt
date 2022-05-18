@@ -34,6 +34,7 @@ class WhoIsCommand : Extension() {
             val farmer: Farmer? by optionalFarmer {
                 name = "farmer"
                 description = "Find out which member has registered this farmer."
+                database = databases[server.name]
 
                 autoComplete {
                     val farmerInput: String = command.options["name"]?.value as String? ?: ""

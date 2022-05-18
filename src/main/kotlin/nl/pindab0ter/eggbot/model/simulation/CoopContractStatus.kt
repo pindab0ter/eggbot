@@ -4,14 +4,15 @@ import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.helpers.mapAsync
 import nl.pindab0ter.eggbot.helpers.eggsLaid
 import nl.pindab0ter.eggbot.helpers.farmFor
 import nl.pindab0ter.eggbot.helpers.finalGoal
+import nl.pindab0ter.eggbot.helpers.mapAsync
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.auxbrain.coopArtifactsFor
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
+import org.jetbrains.exposed.sql.Database
 import org.joda.time.Duration
 
 sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopContractStatus> {
@@ -40,6 +41,7 @@ sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopCont
             contract: Contract,
             coopStatus: CoopStatus?,
             coopId: String,
+            database: Database?,
             progressCallback: () -> Unit = { },
         ): CoopContractStatus = when {
             coopStatus == null ->
@@ -52,7 +54,7 @@ sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopCont
                 Failed(coopStatus)
             else -> runBlocking(Dispatchers.Default) {
                 val backups = coopStatus.contributors.mapAsync(coroutineContext) { contributionInfo ->
-                    AuxBrain.getFarmerBackup(contributionInfo.userId).also { progressCallback() }
+                    AuxBrain.getFarmerBackup(contributionInfo.userId, database).also { progressCallback() }
                 }.filterNotNull()
                 val activeCoopArtifacts = backups.flatMap { backup ->
                     backup.coopArtifactsFor(backup.farmFor(contract.id))

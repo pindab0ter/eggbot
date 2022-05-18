@@ -8,12 +8,12 @@ import com.github.kittinunf.fuel.util.decodeBase64
 import com.github.kittinunf.result.getOrNull
 import io.ktor.util.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.model.database.Farmer
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.joda.time.Instant
 import org.joda.time.Period.minutes
 
@@ -58,7 +58,7 @@ object AuxBrain {
         }
 
     private fun periodicalsRequest(): Request {
-        val data = PeriodicalsRequest (
+        val data = PeriodicalsRequest(
             clientVersion = Int.MAX_VALUE,
             userId = config.eggIncId,
         ).encode().encodeBase64()
@@ -99,7 +99,7 @@ object AuxBrain {
             .body("data=$data")
     }
 
-    fun getFarmerBackup(eggIncId: String): Backup? {
+    fun getFarmerBackup(eggIncId: String, database: Database?): Backup? {
         val cachedFarmerBackup = cachedFarmerBackups[eggIncId]
             ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
 
@@ -127,10 +127,8 @@ object AuxBrain {
             )
 
             // Update farmer in database
-            launch(Dispatchers.IO) {
-                transaction {
-                    Farmer.findById(eggIncId)?.update(retrievedFarmerBackup)
-                }
+            newSuspendedTransaction(Dispatchers.IO, database) {
+                Farmer.findById(eggIncId)?.update(retrievedFarmerBackup)
             }
 
             retrievedFarmerBackup

@@ -55,7 +55,7 @@ class CoopsInfoCommand : Extension() {
                 }
 
                 val contractCoopStatuses = coopStatuses.map { (coopName, coopStatus) ->
-                    CoopContractStatus(contract, coopStatus, coopName)
+                    CoopContractStatus(contract, coopStatus, coopName, databases[server.name])
                 }
 
                 guild?.coopsInfoResponse(
