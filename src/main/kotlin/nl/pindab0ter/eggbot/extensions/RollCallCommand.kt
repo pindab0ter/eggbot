@@ -22,8 +22,10 @@ import nl.pindab0ter.eggbot.helpers.createRole
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.rollCallResponse
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.transaction
 
 class RollCallCommand : Extension() {
     val logger = KotlinLogging.logger { }
@@ -55,6 +57,11 @@ class RollCallCommand : Extension() {
             }
 
             action {
+                if (transaction { Farmer.count() == 0L }) {
+                    respond { content = "No farmers registered." }
+                    return@action
+                }
+
                 if (arguments.createRoles && guild?.botHasPermissions(ManageRoles)?.not() == true) {
                     respond { content = "**Error:** No permission to create roles" }
                     return@action
