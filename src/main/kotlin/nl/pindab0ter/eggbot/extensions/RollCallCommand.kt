@@ -7,6 +7,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import dev.kord.common.entity.Permission.ManageChannels
 import dev.kord.common.entity.Permission.ManageRoles
 import dev.kord.core.behavior.createRole
@@ -48,17 +49,22 @@ class RollCallCommand : Extension() {
             locking = true
             guild(server.snowflake)
 
-            requiredPerms += listOf(
-                ManageRoles,
-                ManageChannels,
-            )
-
             check {
                 hasRole(server.role.admin)
                 passIf(event.interaction.user.id == config.botOwner)
             }
 
             action {
+                if (arguments.createRoles && guild?.botHasPermissions(ManageRoles)?.not() == true) {
+                    respond { content = "**Error:** No permission to create roles" }
+                    return@action
+                }
+
+                if (arguments.createChannels && guild?.botHasPermissions(ManageChannels)?.not() == true) {
+                    respond { content = "**Error:** No permission to create channels" }
+                    return@action
+                }
+
                 val coops = newSuspendedTransaction(null, databases[server.name]) {
                     val coops = createRollCall(arguments.basename, arguments.contract.maxCoopSize, databases[server.name])
                         .map { (name, farmers) ->
