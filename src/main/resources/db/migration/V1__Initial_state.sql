@@ -34,7 +34,8 @@ CREATE TABLE coops
     role_id           TEXT,
     channel_id        TEXT,
     created_at        TIMESTAMP NOT NULL DEFAULT NOW(),
-    updated_at        TIMESTAMP NOT NULL DEFAULT NOW()
+    updated_at        TIMESTAMP NOT NULL DEFAULT NOW(),
+    UNIQUE (name, contract_id)
 );
 
 CREATE TABLE coop_farmers
