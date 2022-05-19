@@ -3,6 +3,7 @@
 package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
+import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.annotation.KordPreview
 import dev.kord.gateway.Intent.*
 import nl.pindab0ter.eggbot.extensions.*
@@ -40,6 +41,11 @@ suspend fun main() {
             add(::RollCallCommand)
             add(::UnregisterCommand)
             add(::WhoIsCommand)
+
+            // Test command
+            if (envOrNull("ENVIRONMENT") != "production") {
+                add(::TestCommand)
+            }
         }
 
         hooks {
