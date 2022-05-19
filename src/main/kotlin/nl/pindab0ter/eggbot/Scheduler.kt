@@ -24,9 +24,10 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
     val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
 
     runBlocking {
+        logger.info { "Checking permissions before starting update_leader_board schedule…" }
         config.servers.forEachAsync { server ->
             val guild = kord.getGuild(server.snowflake)
-            server.channel.allConfigured.forEach { (channelName, channelId) ->
+            server.channel.configuredLeaderBoards.forEach { (channelName, channelId) ->
                 val channel = guild?.getChannelOrNull(channelId)
 
                 if (channel == null) {
@@ -34,23 +35,11 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
                     exitProcess(1)
                 }
 
-                if (!channel.botHasPermissions(ViewChannel)) {
-                    logger.error { "Bot does not have permission to view the \"$channelName\" channel with ID $channelId on server ${server.name}" }
-                    exitProcess(1)
-                }
-
-                if (!channel.botHasPermissions(SendMessages)) {
-                    logger.error { "Bot does not have permission to send messages in the \"$channelName\" channel with ID $channelId on server ${server.name}" }
-                    exitProcess(1)
-                }
-
-                if (!channel.botHasPermissions(ReadMessageHistory)) {
-                    logger.error { "Bot does not have permission to read message history in the \"$channelName\" channel with ID $channelId on server ${server.name}" }
-                    exitProcess(1)
-                }
-
-                if (!channel.botHasPermissions(ManageMessages)) {
-                    logger.error { "Bot does not have permission to manage messages in the \"$channelName\" channel with ID $channelId on server ${server.name}" }
+                if (!channel.botHasPermissions(ViewChannel, SendMessages, ManageMessages, ReadMessageHistory)) {
+                    logger.error {
+                        "Bot does not have the required permissions for the \"$channelName\" channel with ID $channelId on server ${server.name}.\n" +
+                                "The required permissions are: \"View Channel\", \", Send Messages\"\", Manage Messages\"\" and Read Message History\""
+                    }
                     exitProcess(1)
                 }
             }
