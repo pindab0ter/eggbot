@@ -18,13 +18,14 @@ import nl.pindab0ter.eggbot.helpers.getChannelOrNull
 import nl.pindab0ter.eggbot.helpers.getRoleOrNull
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
+import nl.pindab0ter.eggbot.view.removeCoopsResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
 class RemoveCoopsCommand : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = javaClass.simpleName
 
-    private data class DeletionStatus(
+    data class DeletionStatus(
         val type: Type,
         val deleted: Boolean,
     ) {
@@ -91,42 +92,7 @@ class RemoveCoopsCommand : Extension() {
                     }
 
                 respond {
-                    // TODO: Move to RemoveCoops view
-                    content = buildString {
-                        val successfullyDeletedChannels = statuses.count { (_, statuses: Set<DeletionStatus>) ->
-                            statuses.any { deletionStatus: DeletionStatus ->
-                                deletionStatus.type == CHANNEL && deletionStatus.deleted
-                            }
-                        }
-                        val successfullyDeletedRoles = statuses.count { (_, statuses: Set<DeletionStatus>) ->
-                            statuses.any { deletionStatus: DeletionStatus ->
-                                deletionStatus.type == ROLE && deletionStatus.deleted
-                            }
-                        }
-
-                        appendLine("Cleared the roll-call for __${arguments.contract.name}__:")
-                        appendLine("Successfully deleted $successfullyDeletedChannels channels and $successfullyDeletedRoles roles.")
-
-                        statuses
-                            .map { (coopName, statuses) ->
-                                coopName to statuses
-                                    .filterNot(DeletionStatus::deleted)
-                                    .map { deletionStatus -> deletionStatus.type }
-                                    .sorted()
-                            }
-                            .filter { (_, statuses) -> statuses.isNotEmpty() }
-                            .sortedWith(compareBy { it.first })
-                            .let { failedToDelete ->
-                                if (failedToDelete.isNotEmpty()) appendLine("Failed to delete:")
-                                failedToDelete.forEach { (coopName, types) ->
-                                    append("For `$coopName`: ")
-                                    when (types.size) {
-                                        1 -> append(types.first().name.lowercase())
-                                        else -> types.joinToString(" and ") { type -> type.name.lowercase() }
-                                    }
-                                }
-                            }
-                    }
+                    content = removeCoopsResponse(arguments.contract, statuses)
                 }
             }
         }
