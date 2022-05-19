@@ -1,15 +1,18 @@
 package nl.pindab0ter.eggbot.extensions
 
 import com.auxbrain.ei.Contract
+import com.kotlindiscord.kord.extensions.checks.guildFor
 import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
+import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
 import nl.pindab0ter.eggbot.config
@@ -60,6 +63,22 @@ class RollCallCommand : Extension() {
             check {
                 hasRole(server.role.admin)
                 passIf(event.interaction.user.id == config.botOwner)
+                throwIfFailedWithMessage()
+
+                val channel = guildFor(event)?.getChannelOrNull(server.channel.coopsGroup)
+                failIf("Cannot create channels because the configured channel is not a \"Category\". Please contact the bot maintainer") {
+                    channel !is Category
+                }
+                throwIfFailedWithMessage()
+
+                failIfNot("Missing required permissions to set up channels. Please contact the bot maintainer.") {
+                    channel?.botHasPermissions(
+                        ViewChannel,
+                        ManageChannels,
+                        SendMessages,
+                        MentionEveryone,
+                    ) == true
+                }
             }
 
             action {
