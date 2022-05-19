@@ -24,6 +24,7 @@ import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.rollCallResponse
+import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -72,42 +73,53 @@ class RollCallCommand : Extension() {
                     return@action
                 }
 
-                val coops = newSuspendedTransaction(null, databases[server.name]) {
-                    val coops = createRollCall(arguments.basename, arguments.contract.maxCoopSize, databases[server.name])
-                        .map { (name, farmers) ->
-                            Coop.new {
-                                this.contractId = arguments.contract.id
-                                this.name = name
-                            }.also { it.farmers = farmers }
-                        }
-
-                    if (arguments.createChannels) coops.forEach createChannels@{ coop ->
-                        val channel = guild?.createTextChannel(coop.name) {
-                            parentId = server.channel.coopsGroup
-                            reason = "Roll call for ${arguments.contract.name}"
-                        }
-                        coop.channelId = channel?.id
-                    }
-
-                    if (arguments.createRoles) coops.forEach createRoles@{ coop ->
-                        val role = guild?.createRole {
-                            name = coop.name
-                            mentionable = true
-                            color = DEFAULT_ROLE_COLOR
-                        } ?: return@createRoles
-
-                        coop.roleId = role.id
-                        coop.farmers.forEach { farmer ->
-                            guild?.getMemberOrNull(farmer.discordUser.snowflake)
-                                ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                newSuspendedTransaction(null, databases[server.name]) {
+                    val coops = createRollCall(
+                        baseName = arguments.basename,
+                        maxCoopSize = arguments.contract.maxCoopSize,
+                        database = databases[server.name]
+                    ).map { (name, farmers) ->
+                        Coop.new {
+                            this.contractId = arguments.contract.id
+                            this.name = name
+                        }.also { coop ->
+                            coop.farmers = SizedCollection(farmers)
                         }
                     }
 
-                    coops
+                    commit()
+
+                    if (arguments.createChannels) {
+                        coops.forEach createChannels@{ coop ->
+                            val channel = guild?.createTextChannel(coop.name) {
+                                parentId = server.channel.coopsGroup
+                                reason = "Roll call for ${arguments.contract.name}"
+                            }
+                            coop.channelId = channel?.id
+                        }
+                        commit()
+                    }
+
+                    if (arguments.createRoles) {
+                        coops.forEach createRoles@{ coop ->
+                            val role = guild?.createRole {
+                                name = coop.name
+                                mentionable = true
+                                color = DEFAULT_ROLE_COLOR
+                            } ?: return@createRoles
+
+                            coop.roleId = role.id
+                            coop.farmers.forEach { farmer ->
+                                guild?.getMemberOrNull(farmer.discordUser.snowflake)
+                                    ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                            }
+                        }
+                        commit()
+                    }
+
+                    guild?.let { multipartRespond(it.rollCallResponse(arguments.contract, coops)) }
+                        ?: respond { content = "**Error:** Could not get guild." }
                 }
-
-                guild?.let { multipartRespond(it.rollCallResponse(arguments.contract, coops)) }
-                    ?: respond { content = "**Error:** Could not get guild." }
             }
         }
     }

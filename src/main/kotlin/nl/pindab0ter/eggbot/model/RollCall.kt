@@ -4,7 +4,6 @@ import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.dao.with
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.ceil
 import kotlin.math.floor
@@ -19,7 +18,7 @@ fun createRollCall(
     baseName: String,
     maxCoopSize: Int,
     database: Database?
-): List<Pair<String, SizedCollection<Farmer>>> = transaction(database) {
+): List<Pair<String, List<Farmer>>> = transaction(database) {
     val farmers = Farmer.all().with(Farmer::discordUser).toList()
     val activeFarmers = farmers.filter { it.isActive }.sortedByDescending { it.earningsBonus }
     val inactiveFarmers = farmers.filter { !it.isActive }.sortedBy { it.earningsBonus }
@@ -57,7 +56,7 @@ fun createRollCall(
             ?.let { (_, farmers) -> farmers.add(inactiveFarmer) }
     }
 
-    coops.map { (name, farmers) -> name to SizedCollection(farmers) }
+    coops.map { (name, farmers) -> name to farmers }
 }
 
 private fun coopNames(amount: Int, baseName: String): List<String> = when {
