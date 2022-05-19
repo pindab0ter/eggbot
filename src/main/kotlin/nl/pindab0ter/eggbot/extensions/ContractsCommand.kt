@@ -14,7 +14,7 @@ class ContractsCommand : Extension() {
 
     override suspend fun setup() = config.servers.forEach { server ->
         publicSlashCommand {
-            name = "Contracts"
+            name = "contracts"
             description = "List all currently available contracts."
             guild(server.snowflake)
 

@@ -54,7 +54,7 @@ dependencies {
     implementation("com.squareup.wire", "wire-gradle-plugin", "4.3.0")
 
     // Discord
-    implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.5.2-RC1")
+    implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.5.3-SNAPSHOT")
 
     // Task scheduling
     implementation("org.quartz-scheduler", "quartz", "2.3.2")
@@ -68,13 +68,12 @@ dependencies {
 tasks {
     withType<KotlinCompile>().configureEach {
         kotlinOptions {
-            jvmTarget = "1.8"
+            jvmTarget = "11"
             freeCompilerArgs = listOf("-Xopt-in=kotlin.RequiresOptIn")
         }
     }
 
     withType<JavaCompile>().configureEach {
         enabled = false
-        targetCompatibility = "1.8"
     }
 }

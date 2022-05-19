@@ -61,6 +61,7 @@ class CommandLogger : Extension() {
                     is RoleArgument -> runBlocking {
                         "${option.name}: ${guild?.getRoleOrNull(option.value)?.name?.let { "@${it}" } ?: "(id = ${option.value})"}"
                     }
+                    is AttachmentArgument -> "${option.name}: ${option.value}"
                 }
             }
 
