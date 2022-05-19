@@ -19,8 +19,6 @@ class CommandLogger : Extension() {
     val logger = KotlinLogging.logger { }
     override val name: String = "CommandLoggerExtension"
 
-    // TODO: Log guild
-
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {
@@ -29,7 +27,7 @@ class CommandLogger : Extension() {
                 val userName = event.interaction.user.asMemberOrNull(guild.id)?.displayName
                     ?: event.interaction.user.asUser().username
 
-                logger.trace { "$userName: ${event.interaction.userInput()}" }
+                logger.trace { "$userName (${guild.name}): ${event.interaction.userInput()}" }
             }
         }
     }
