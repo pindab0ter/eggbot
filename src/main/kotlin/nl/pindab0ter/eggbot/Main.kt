@@ -5,7 +5,6 @@ package nl.pindab0ter.eggbot
 import com.kotlindiscord.kord.extensions.ExtensibleBot
 import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.annotation.KordPreview
-import dev.kord.gateway.Intent.*
 import nl.pindab0ter.eggbot.extensions.*
 
 lateinit var eggBot: ExtensibleBot
@@ -14,13 +13,6 @@ suspend fun main() {
     eggBot = ExtensibleBot(
         token = config.botToken
     ) {
-        intents {
-            +DirectMessages
-            +DirectMessageTyping
-            +GuildMessages
-            +GuildMessageTyping
-        }
-
         extensions {
             configureSentry()
 
