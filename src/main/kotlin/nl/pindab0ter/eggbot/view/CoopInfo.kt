@@ -2,6 +2,8 @@ package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
+import dev.kord.core.behavior.GuildBehavior
+import dev.kord.core.entity.Guild
 import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
@@ -18,7 +20,7 @@ import org.joda.time.Duration
 import kotlin.random.Random
 
 
-fun coopInfoResponse(
+suspend fun GuildBehavior.coopInfoResponse(
     state: CoopContractState,
     compact: Boolean = false,
 ): List<String> = buildString {
@@ -28,7 +30,7 @@ fun coopInfoResponse(
 
     appendLine("`${state.coopId}` vs. _${state.contractName}_:")
 
-    drawGoals(state, compact)
+    drawGoals(state, compact, asGuildOrNull())
     appendBreakpoint()
     drawBasicInfo(state, compact)
     appendBreakpoint()
@@ -50,12 +52,12 @@ fun coopInfoResponse(
     }
 }.splitMessage(separator = zwsp)
 
-fun coopFinishedIfBankedResponse(
+suspend fun GuildBehavior.coopFinishedIfBankedResponse(
     state: CoopContractState,
     compact: Boolean,
 ): List<String> = buildString {
     appendLine("`${state.coopId}` vs. _${state.contractName}_:")
-    drawGoals(state, compact)
+    drawGoals(state, compact, asGuildOrNull())
     appendBreakpoint()
     drawBasicInfo(state, compact)
     appendBreakpoint()
@@ -71,7 +73,7 @@ fun coopFinishedIfBankedResponse(
     }
 }.splitMessage(separator = zwsp)
 
-fun coopFinishedResponse(
+suspend fun GuildBehavior.coopFinishedResponse(
     status: CoopStatus,
     contract: Contract,
     compact: Boolean,
@@ -121,8 +123,7 @@ fun coopFinishedResponse(
 
     appendTable {
         title = "__**Goals** (${contract.goals.count()}/${contract.goals.count()})__"
-        // TODO:
-        // title = "__${contract.egg.toEmote()} **Goals** (${contract.goals.count()}/${contract.goals.count()})__"
+        title = "__${asGuildOrNull()?.emoteMention(contract.egg)} **Goals** (${contract.goals.count()}/${contract.goals.count()})__"
         displayHeaders = false
         topPadding = 1
 
@@ -200,10 +201,10 @@ private fun List<Farmer>.shortenedNames(): List<String> = map { farmer ->
 private fun StringBuilder.drawGoals(
     state: CoopContractState,
     compact: Boolean,
+    guild: Guild?,
 ): StringBuilder = appendTable {
     title = "__**Goals** (${state.goalsReached}/${state.goals.count()})__"
-    // TODO:
-    // title = "__${state.egg.toEmote()} **Goals** (${state.goalsReached}/${state.goals.count()})__"
+    title = "__${guild?.emoteMention(state.egg)} **Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 

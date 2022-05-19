@@ -117,19 +117,17 @@ class CoopInfoCommand : Extension() {
                                 This co-op has not reached their final goal.""".trimIndent()
                     }
 
-                    is Finished -> multipartRespond(coopFinishedResponse(coopStatus, contract, compact))
+                    is Finished -> guild?.coopFinishedResponse(coopStatus, contract, compact)?.let { multipartRespond(it) }
 
                     is InProgress -> {
                         val sortedState = coopContractStatus.state.copy(
                             farmers = coopContractStatus.state.farmers.sortedByDescending(Farmer::currentEggsLaid)
                         )
 
-                        multipartRespond(
-                            when (coopContractStatus) {
-                                is InProgress.FinishedIfBanked -> coopFinishedIfBankedResponse(sortedState, compact)
-                                else -> coopInfoResponse(sortedState, compact)
-                            }
-                        )
+                        when (coopContractStatus) {
+                            is InProgress.FinishedIfBanked -> guild?.coopFinishedIfBankedResponse(sortedState, compact)
+                            else -> guild?.coopInfoResponse(sortedState, compact)
+                        }?.let { multipartRespond(it) }
                     }
                 }
             }
