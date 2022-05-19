@@ -16,6 +16,8 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
     // Use Europe/London because it moves with Daylight Saving Time
     val london = TimeZone.getTimeZone(ZoneId.of("Europe/London"))
 
+    // TODO: Check if the bot has permissions to view and post in each configured channel
+
     scheduleJob(
         newJob(UpdateLeaderBoardsJob::class.java)
             .withIdentity("update_leader_board")
