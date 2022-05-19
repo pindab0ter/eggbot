@@ -25,15 +25,9 @@ repositories {
     mavenCentral()
 
     maven {
-        // Required for Kord
+        // Required for Kord and Kord Extensions
         name = "Kotlin Discord"
         url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
-    }
-
-    maven {
-        // Required for Kord Extensions
-        name = "Sonatype"
-        url = uri("https://oss.sonatype.org/content/repositories/snapshots/")
     }
 }
 
@@ -57,12 +51,9 @@ dependencies {
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
-    // runtimeOnly("com.google.protobuf", "protobuf-kotlin", "3.20.1")
     implementation("com.squareup.wire", "wire-gradle-plugin", "4.3.0")
 
-
     // Discord
-    implementation("dev.kord", "kord-core", "0.8.0-M9")
     implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.5.2-RC1")
 
     // Task scheduling
