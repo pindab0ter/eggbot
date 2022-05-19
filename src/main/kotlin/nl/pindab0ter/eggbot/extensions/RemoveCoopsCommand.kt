@@ -6,8 +6,7 @@ import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.botHasPermissions
-import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permission.*
 import dev.kord.rest.request.RestRequestException
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
@@ -44,6 +43,11 @@ class RemoveCoopsCommand : Extension() {
             description = "Remove all co-ops for a contract"
             locking = true
             guild(server.snowflake)
+            requireBotPermissions(
+                ManageChannels,
+                ManageRoles,
+                MentionEveryone
+            )
 
             check {
                 hasRole(server.role.admin)
@@ -64,16 +68,6 @@ class RemoveCoopsCommand : Extension() {
                     .map<Coop, Pair<Coop, MutableSet<DeletionStatus>>> { coop: Coop -> coop to mutableSetOf() }
                     .map { (coop: Coop, statuses: MutableSet<DeletionStatus>) ->
                         val coopName = coop.name
-
-                        if (coop.roleId != null && guild?.botHasPermissions(Permission.ManageRoles)?.not() == true) {
-                            respond { content = "No permission to remove channels. Please remove the channels manually." }
-                            return@action
-                        }
-
-                        if (coop.channelId != null && guild?.botHasPermissions(Permission.ManageChannels)?.not() == true) {
-                            respond { content = "No permission to remove roles. Please remove the roles manually." }
-                            return@action
-                        }
 
                         try {
                             guild?.getChannelOrNull(coop.channelId)?.delete("Roll Call for ${arguments.contract.name} cleared by ${user.asUser().username}")
@@ -97,6 +91,7 @@ class RemoveCoopsCommand : Extension() {
                     }
 
                 respond {
+                    // TODO: Move to RemoveCoops view
                     content = buildString {
                         val successfullyDeletedChannels = statuses.count { (_, statuses: Set<DeletionStatus>) ->
                             statuses.any { deletionStatus: DeletionStatus ->

@@ -6,10 +6,8 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
-import dev.kord.common.entity.Permission.ManageChannels
-import dev.kord.common.entity.Permission.ManageRoles
+import dev.kord.common.entity.Permission.*
 import dev.kord.rest.request.RestRequestException
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
@@ -57,6 +55,11 @@ class RemoveCoopCommand : Extension() {
                 hasRole(server.role.admin)
                 passIf(event.interaction.user.id == config.botOwner)
             }
+            requireBotPermissions(
+                ManageChannels,
+                ManageRoles,
+                MentionEveryone
+            )
 
             action {
                 val coop: Coop? = transaction(databases[server.name]) {
@@ -65,16 +68,6 @@ class RemoveCoopCommand : Extension() {
 
                 if (coop == null) {
                     respond { content = "Could not find that co-op" }
-                    return@action
-                }
-
-                if (coop.roleId != null && guild?.botHasPermissions(ManageRoles)?.not() == true) {
-                    respond { content = "No permission to remove channels. Please remove the channel manually." }
-                    return@action
-                }
-
-                if (coop.channelId != null && guild?.botHasPermissions(ManageChannels)?.not() == true) {
-                    respond { content = "No permission to remove roles. Please remove the role manually." }
                     return@action
                 }
 

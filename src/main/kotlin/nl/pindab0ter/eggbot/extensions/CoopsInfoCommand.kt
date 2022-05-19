@@ -6,6 +6,8 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Permission.SendMessages
+import dev.kord.common.entity.Permission.ViewChannel
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
@@ -36,6 +38,10 @@ class CoopsInfoCommand : Extension() {
             name = "coops"
             description = "See how all the coops are doing."
             guild(server.snowflake)
+            requireBotPermissions(
+                ViewChannel,
+                SendMessages,
+            )
 
             action {
                 val contract = arguments.contract

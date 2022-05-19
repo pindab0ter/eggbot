@@ -8,10 +8,8 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import dev.kord.common.Color
-import dev.kord.common.entity.Permission.ManageChannels
-import dev.kord.common.entity.Permission.ManageRoles
+import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import kotlinx.coroutines.flow.firstOrNull
@@ -57,18 +55,13 @@ class AddCoopCommand : Extension() {
             name = "add-coop"
             description = "Register a co-op so it shows up in the co-ops info listing."
             guild(server.snowflake)
+            requireBotPermissions(
+                ManageChannels,
+                ManageRoles,
+                MentionEveryone,
+            )
 
             action {
-                if (arguments.createRole && guild?.botHasPermissions(ManageRoles)?.not() == true) {
-                    respond { content = "**Error:** No permission to create channels" }
-                    return@action
-                }
-
-                if (arguments.createChannel && guild?.botHasPermissions(ManageChannels)?.not() == true) {
-                    respond { content = "**Error:** No permission to create channels" }
-                    return@action
-                }
-
                 val contract = arguments.contract
                 val coopId = arguments.coopId.lowercase()
 

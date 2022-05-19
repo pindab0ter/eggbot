@@ -7,9 +7,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
-import com.kotlindiscord.kord.extensions.utils.botHasPermissions
-import dev.kord.common.entity.Permission.ManageChannels
-import dev.kord.common.entity.Permission.ManageRoles
+import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.createTextChannel
 import mu.KotlinLogging
@@ -51,6 +49,13 @@ class RollCallCommand : Extension() {
             description = "Create co-ops for a contract"
             locking = true
             guild(server.snowflake)
+            requireBotPermissions(
+                ViewChannel,
+                SendMessages,
+                ManageChannels,
+                ManageRoles,
+                MentionEveryone,
+            )
 
             check {
                 hasRole(server.role.admin)
@@ -60,16 +65,6 @@ class RollCallCommand : Extension() {
             action {
                 if (transaction { Farmer.count() == 0L }) {
                     respond { content = "No farmers registered." }
-                    return@action
-                }
-
-                if (arguments.createRoles && guild?.botHasPermissions(ManageRoles)?.not() == true) {
-                    respond { content = "**Error:** No permission to create roles" }
-                    return@action
-                }
-
-                if (arguments.createChannels && guild?.botHasPermissions(ManageChannels)?.not() == true) {
-                    respond { content = "**Error:** No permission to create channels" }
                     return@action
                 }
 

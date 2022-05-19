@@ -7,6 +7,8 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalInt
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import dev.kord.common.annotation.KordPreview
+import dev.kord.common.entity.Permission.SendMessages
+import dev.kord.common.entity.Permission.ViewChannel
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
@@ -43,6 +45,10 @@ class LeaderBoardCommand : Extension() {
             name = "leader-board"
             description = "View leader boards. Defaults to the Earnings Bonus leader board."
             guild(server.snowflake)
+            requireBotPermissions(
+                ViewChannel,
+                SendMessages,
+            )
 
             check {
                 failIf("There are no registered farmers.") { transaction(databases[server.name]) { Farmer.count() == 0L } }
