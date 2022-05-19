@@ -1,9 +1,6 @@
 package nl.pindab0ter.eggbot.helpers
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.*
 import kotlin.coroutines.CoroutineContext
 
 fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
@@ -32,7 +29,14 @@ suspend fun <T, K, V> Iterable<T>.associateAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
     transform: suspend (T) -> Pair<K, V>,
 ): Map<K, V> = coroutineScope {
-    mapAsync { transform(it) }.toMap()
+    map { async(coroutineContext) { transform(it) } }.awaitAll()
+}.toMap()
+
+suspend fun <T> Iterable<T>.forEachAsync(
+    coroutineContext: CoroutineContext = Dispatchers.Default,
+    transform: suspend (T) -> Unit,
+): Unit = coroutineScope {
+    forEach { launch(coroutineContext) { transform(it) } }
 }
 
 object Typography {

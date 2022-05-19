@@ -45,12 +45,12 @@ class UpdateLeaderBoardsJob : Job {
             ).map { (channelSnowFlake, category) ->
                 guild?.getChannelOfOrNull<TextChannel>(channelSnowFlake) to category
             }.forEach { (textChannel, category) ->
-                textChannel!!.withStrategy(rest).messages.collect { message ->
+                textChannel?.withStrategy(rest)?.messages?.collect { message ->
                     message.delete("Updating leader boards")
                 }
 
                 guild?.leaderboardResponse(farmers, category, server = server)?.forEach { content ->
-                    textChannel.createMessage(content)
+                    textChannel?.createMessage(content)
                 }
             }
         }

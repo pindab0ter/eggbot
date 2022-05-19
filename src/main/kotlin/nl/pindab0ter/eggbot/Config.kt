@@ -98,6 +98,15 @@ class Channel(
     val prestigesLeaderBoard get() = prestigesLeaderBoardId?.let { Snowflake(it) }
     val droneTakedownsLeaderBoard get() = droneTakedownsLeaderBoardId?.let { Snowflake(it) }
     val eliteDroneTakedownsLeaderBoard get() = eliteDroneTakedownsLeaderBoardId?.let { Snowflake(it) }
+    val allConfigured: Map<String, Snowflake?>
+        get() = mapOf(
+            "coopsGroup" to coopsGroup,
+            "earningsBonusLeaderBoard" to earningsBonusLeaderBoard,
+            "soulEggsLeaderBoard" to soulEggsLeaderBoard,
+            "prestigesLeaderBoard" to prestigesLeaderBoard,
+            "droneTakedownsLeaderBoard" to droneTakedownsLeaderBoard,
+            "eliteDroneTakedownsLeaderBoard" to eliteDroneTakedownsLeaderBoard,
+        ).filter { (_, value) -> value != null }
 }
 
 @SerialName("emote")
