@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.utils.botHasPermissions
-import dev.kord.common.entity.Permission
+import dev.kord.common.entity.Permission.*
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.forEachAsync
@@ -34,13 +34,23 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
                     exitProcess(1)
                 }
 
-                if (!channel.botHasPermissions(Permission.ViewChannel)) {
+                if (!channel.botHasPermissions(ViewChannel)) {
                     logger.error { "Bot does not have permission to view the \"$channelName\" channel with ID $channelId on server ${server.name}" }
                     exitProcess(1)
                 }
 
-                if (!channel.botHasPermissions(Permission.SendMessages)) {
+                if (!channel.botHasPermissions(SendMessages)) {
                     logger.error { "Bot does not have permission to send messages in the \"$channelName\" channel with ID $channelId on server ${server.name}" }
+                    exitProcess(1)
+                }
+
+                if (!channel.botHasPermissions(ReadMessageHistory)) {
+                    logger.error { "Bot does not have permission to read message history in the \"$channelName\" channel with ID $channelId on server ${server.name}" }
+                    exitProcess(1)
+                }
+
+                if (!channel.botHasPermissions(ManageMessages)) {
+                    logger.error { "Bot does not have permission to manage messages in the \"$channelName\" channel with ID $channelId on server ${server.name}" }
                     exitProcess(1)
                 }
             }
