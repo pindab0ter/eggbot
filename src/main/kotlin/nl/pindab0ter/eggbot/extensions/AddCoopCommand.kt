@@ -10,15 +10,18 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.Color
 import dev.kord.common.entity.Permission.*
+import dev.kord.core.behavior.channel.createTextChannel
 import dev.kord.core.behavior.createRole
-import dev.kord.core.behavior.createTextChannel
+import dev.kord.core.behavior.getChannelOfOrNull
+import dev.kord.core.entity.channel.Category
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.toList
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.helpers.Plurality.SINGULAR
 import nl.pindab0ter.eggbot.helpers.contract
-import nl.pindab0ter.eggbot.helpers.createChannel
-import nl.pindab0ter.eggbot.helpers.createRole
+import nl.pindab0ter.eggbot.helpers.createRolesAndChannels
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
@@ -41,8 +44,7 @@ class AddCoopCommand : Extension() {
                 failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
             }
         }
-        val createRole: Boolean by createRole()
-        val createChannel: Boolean by createChannel()
+        val createRolesAndChannels: Boolean by createRolesAndChannels(SINGULAR)
         val preEmptive: Boolean by defaultingBoolean {
             name = "pre-emptive"
             description = "Add the co-op even if it doesn't exist (yet)."
@@ -73,10 +75,27 @@ class AddCoopCommand : Extension() {
                     return@action
                 }
 
-                // Check if a role with the same name exists
-                if (arguments.createRole) this@action.guild?.roles?.firstOrNull { role -> role.name == coopId }?.let { role ->
-                    respond { content = "**Error:** The role ${role.mention} already exists." }
-                    return@action
+                val coopCategoryChannel = guild?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
+
+                // Check if a role or channel with the same name already exists
+                if (arguments.createRolesAndChannels) {
+                    val role = guild?.roles?.firstOrNull { role -> role.name == coopId }
+                    val coopChannel = coopCategoryChannel?.channels?.toList()?.firstOrNull { channel -> channel.name == coopId }
+
+                    when {
+                        role != null && coopChannel != null -> {
+                            respond { content = "Role ${role.mention} and channel `${arguments.coopId}` already exist." }
+                            return@action
+                        }
+                        role != null -> {
+                            respond { content = "Role `${role.mention}` already exists." }
+                            return@action
+                        }
+                        coopChannel != null -> {
+                            respond { content = "Channel `${arguments.coopId}` already exists." }
+                            return@action
+                        }
+                    }
                 }
 
                 // Fetch the co-op status to see if it exists
@@ -96,8 +115,8 @@ class AddCoopCommand : Extension() {
                     }
                 }
 
-                // Finish if no role needs to be created
-                if (!arguments.createRole) {
+                // Finish if no role or channel needs to be created
+                if (!arguments.createRolesAndChannels) {
                     respond {
                         content = buildString {
                             append("Registered co-op `${coop.name}` for contract _${contract.name}_")
@@ -108,33 +127,21 @@ class AddCoopCommand : Extension() {
                     return@action
                 }
 
-                // Create the role
-                val role = this@action.guild?.createRole {
+                val role = guild?.createRole {
                     name = coopId
                     color = Color(15, 212, 57)
                     mentionable = true
+                    reason = "Added by ${user.asUser().username} through ${this@ephemeralSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                 }
 
-                val channel = if (arguments.createChannel) this@action.guild?.createTextChannel(coop.name) {
-                    parentId = server.channel.coopsGroup
-                    name = coopId
+                val channel = coopCategoryChannel?.createTextChannel(coop.name) {
+                    reason = "Added by ${user.asUser().username} through ${this@ephemeralSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                     topic = "_${coop.name}_ vs. _${contract.name}_"
-                } else null
+                }
 
                 transaction(databases[server.name]) {
-                    if (role != null) coop.roleId = role.id
-                    if (channel != null) coop.channelId = channel.id
-                }
-
-                val responseBuilder = StringBuilder().apply {
-                    append("Registered co-op `${coop.name}` for contract _${contract.name}_")
-                    if (role != null) append(", with the role ${role.mention}")
-                    if (channel != null) {
-                        if (role != null) append(" and ") else append(", ")
-                        append("the channel ${channel.mention}")
-                    }
-                    if (coopStatus == null && arguments.preEmptive) append(", even though the co-op was not found")
-                    append(".")
+                    coop.roleId = role?.id
+                    coop.channelId = channel?.id
                 }
 
                 val successes = mutableListOf<String>()
@@ -152,7 +159,16 @@ class AddCoopCommand : Extension() {
                     } else failures.add(contributor.userName)
                 }
 
-                responseBuilder.apply {
+                val responseBuilder = StringBuilder().apply {
+                    append("Registered co-op `${coop.name}` for contract _${contract.name}_")
+                    if (role != null) append(", with the role ${role.mention}")
+                    if (channel != null) {
+                        if (role != null) append(" and ") else append(", ")
+                        append("the channel ${channel.mention}")
+                    }
+                    if (coopStatus == null && arguments.preEmptive) append(", even though the co-op was not found")
+                    append(".")
+
                     if (successes.isNotEmpty()) {
                         appendLine()
                         appendLine("The following players have been assigned the role ${role?.mention}:")

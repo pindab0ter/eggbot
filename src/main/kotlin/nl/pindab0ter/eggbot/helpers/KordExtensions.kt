@@ -10,6 +10,8 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBool
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.channel.createMessage
 import nl.pindab0ter.eggbot.converters.contract
+import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
+import nl.pindab0ter.eggbot.helpers.Plurality.SINGULAR
 
 suspend fun <A : Arguments> PublicSlashCommandContext<A>.multipartRespond(messages: List<String>) {
     respond { content = messages.first() }
@@ -43,14 +45,14 @@ fun Arguments.contract(): SingleConverter<Contract> = contract {
     description = "Select an Egg, Inc. contract."
 }
 
-fun Arguments.createRole() = defaultingBoolean {
-    name = "create-role"
-    description = "Whether to create a role for this co-op. Defaults to ‘False’."
-    defaultValue = false
-}
-
-fun Arguments.createChannel() = defaultingBoolean {
-    name = "create-channel"
-    description = "Whether to create a channel for this co-op. Defaults to ‘False’."
-    defaultValue = false
+fun Arguments.createRolesAndChannels(plurality: Plurality) = defaultingBoolean {
+    name = when (plurality) {
+        SINGULAR -> "create-role-and-channel"
+        PLURAL -> "create-roles-and-channels"
+    }
+    description = when (plurality) {
+        SINGULAR -> "Create a role and a channel for the contract. This is the default."
+        PLURAL -> "Create roles and channels for the contracts. This is the default."
+    }
+    defaultValue = true
 }

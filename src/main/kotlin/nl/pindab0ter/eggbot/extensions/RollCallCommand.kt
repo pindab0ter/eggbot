@@ -10,16 +10,18 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import dev.kord.common.entity.Permission.*
+import dev.kord.core.behavior.channel.createTextChannel
 import dev.kord.core.behavior.createRole
-import dev.kord.core.behavior.createTextChannel
+import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.helpers.contract
-import nl.pindab0ter.eggbot.helpers.createChannel
-import nl.pindab0ter.eggbot.helpers.createRole
+import nl.pindab0ter.eggbot.helpers.createRolesAndChannels
+import nl.pindab0ter.eggbot.helpers.forEachAsync
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -42,8 +44,7 @@ class RollCallCommand : Extension() {
                 failIf("Co-op names cannot contain spaces") { value.contains(' ') }
             }
         }
-        val createRoles: Boolean by createRole()
-        val createChannels: Boolean by createChannel()
+        val createRolesAndChannels: Boolean by createRolesAndChannels(PLURAL)
     }
 
     override suspend fun setup() = config.servers.forEach { server ->
@@ -65,14 +66,14 @@ class RollCallCommand : Extension() {
                 passIf(event.interaction.user.id == config.botOwner)
                 throwIfFailedWithMessage()
 
-                val channel = guildFor(event)?.getChannelOrNull(server.channel.coopsGroup)
+                val coopsCategoryChannel = guildFor(event)?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
                 failIf("Cannot create channels because the configured channel is not a \"Category\". Please contact the bot maintainer") {
-                    channel !is Category
+                    coopsCategoryChannel !is Category
                 }
                 throwIfFailedWithMessage()
 
                 failIfNot("Missing required permissions to set up channels. Please contact the bot maintainer.") {
-                    channel?.botHasPermissions(
+                    coopsCategoryChannel?.botHasPermissions(
                         ViewChannel,
                         ManageChannels,
                         SendMessages,
@@ -103,30 +104,35 @@ class RollCallCommand : Extension() {
 
                     commit()
 
-                    if (arguments.createChannels) {
-                        coops.forEach createChannels@{ coop ->
-                            val channel = guild?.createTextChannel(coop.name) {
-                                parentId = server.channel.coopsGroup
-                                reason = "Roll call for ${arguments.contract.name}"
-                            }
-                            coop.channelId = channel?.id
-                        }
-                        commit()
-                    }
+                    if (arguments.createRolesAndChannels) {
+                        val coopsCategoryChannel = guildFor(event)?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
 
-                    if (arguments.createRoles) {
-                        coops.forEach createRoles@{ coop ->
+                        // Create and assign roles
+                        coops.forEachAsync createRoles@{ coop ->
                             val role = guild?.createRole {
                                 name = coop.name
                                 mentionable = true
                                 color = DEFAULT_ROLE_COLOR
-                            } ?: return@createRoles
-
-                            coop.roleId = role.id
-                            coop.farmers.forEach { farmer ->
-                                guild?.getMemberOrNull(farmer.discordUser.snowflake)
-                                    ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                                reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                             }
+                            if (role != null) {
+                                coop.roleId = role.id
+                                coop.farmers.forEachAsync { farmer ->
+                                    guild
+                                        ?.getMemberOrNull(farmer.discordUser.snowflake)
+                                        ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
+                                }
+                            }
+                        }
+                        commit()
+
+                        // Create channels
+                        coops.forEachAsync createChannels@{ coop ->
+                            val channel = coopsCategoryChannel?.createTextChannel(coop.name) {
+                                topic = "_${coop.name}_ vs. _${arguments.contract.name}_"
+                                reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
+                            }
+                            coop.channelId = channel?.id
                         }
                         commit()
                     }

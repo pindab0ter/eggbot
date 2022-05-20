@@ -9,6 +9,10 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale.ENGLISH
 
+enum class Plurality {
+    SINGULAR,
+    PLURAL
+}
 
 enum class NumberFormatter {
     /** Format as integer */
