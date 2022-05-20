@@ -16,13 +16,11 @@ import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
-import nl.pindab0ter.eggbot.helpers.contract
-import nl.pindab0ter.eggbot.helpers.createRolesAndChannels
-import nl.pindab0ter.eggbot.helpers.forEachAsync
-import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -107,14 +105,15 @@ class RollCallCommand : Extension() {
                     if (arguments.createRolesAndChannels) {
                         val coopsCategoryChannel = guildFor(event)?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
 
-                        // Create and assign roles
-                        coops.forEachAsync createRoles@{ coop ->
+                        // Create and assign roles and channels
+                        coops.forEachAsync createRolesAndChannels@{ coop ->
                             val role = guild?.createRole {
                                 name = coop.name
                                 mentionable = true
                                 color = DEFAULT_ROLE_COLOR
                                 reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                             }
+
                             if (role != null) {
                                 coop.roleId = role.id
                                 coop.farmers.forEachAsync { farmer ->
@@ -123,16 +122,29 @@ class RollCallCommand : Extension() {
                                         ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
                                 }
                             }
-                        }
-                        commit()
 
-                        // Create channels
-                        coops.forEachAsync createChannels@{ coop ->
                             val channel = coopsCategoryChannel?.createTextChannel(coop.name) {
                                 topic = "_${coop.name}_ vs. _${arguments.contract.name}_"
                                 reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                             }
                             coop.channelId = channel?.id
+
+                            channel?.createMessage(buildString {
+                                // Header
+                                appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")
+
+                                // Body
+                                coop.farmers
+                                    .sortedBy { farmer -> (farmer.inGameName ?: "") }
+                                    .forEach { farmer ->
+                                        if (farmer.isActive.not()) append("_")
+                                        append(guild?.mentionUser(farmer.discordUser.snowflake))
+                                        append(" (`${farmer.inGameName ?: NO_ALIAS}`)")
+                                        if (farmer.isActive.not()) append(" (Inactive)_")
+                                        appendLine()
+                                    }
+                                appendLine()
+                            })
                         }
                         commit()
                     }
