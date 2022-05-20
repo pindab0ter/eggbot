@@ -6,7 +6,7 @@ import kotlin.coroutines.CoroutineContext
 fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.tail(): Iterable<T> = filterIndexed { index, _ -> index > 0 }
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
-fun <T> Iterable<T>.replace(newValue: T, predicate: (T) -> Boolean): Iterable<T> = map { element ->
+fun <T> Iterable<T>.replace(newValue: T, predicate: (T) -> Boolean): List<T> = map { element ->
     if (predicate(element)) newValue else element
 }
 
@@ -25,6 +25,14 @@ suspend fun <T, R> Iterable<T>.mapAsync(
     map { async(coroutineContext) { transform(it) } }.awaitAll()
 }
 
+suspend fun <T> Iterable<T>.onEachAsync(
+    coroutineContext: CoroutineContext = Dispatchers.Default,
+    action: suspend (T) -> Unit,
+): Iterable<T> = coroutineScope {
+    onEach { launch(coroutineContext) { action(it) } }
+}
+
+
 suspend fun <T, K, V> Iterable<T>.associateAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
     transform: suspend (T) -> Pair<K, V>,
@@ -34,9 +42,9 @@ suspend fun <T, K, V> Iterable<T>.associateAsync(
 
 suspend fun <T> Iterable<T>.forEachAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
-    transform: suspend (T) -> Unit,
+    action: suspend (T) -> Unit,
 ): Unit = coroutineScope {
-    forEach { launch(coroutineContext) { transform(it) } }
+    forEach { launch(coroutineContext) { action(it) } }
 }
 
 object Typography {

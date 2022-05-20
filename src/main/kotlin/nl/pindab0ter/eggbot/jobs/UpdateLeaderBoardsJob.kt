@@ -8,7 +8,7 @@ import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.getChannelOfOrNull
 import nl.pindab0ter.eggbot.helpers.kord
-import nl.pindab0ter.eggbot.helpers.mapAsync
+import nl.pindab0ter.eggbot.helpers.onEachAsync
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -21,9 +21,9 @@ class UpdateLeaderBoardsJob : Job {
     override fun execute(context: JobExecutionContext?) = config.servers.forEach { server ->
         val farmers = transaction(databases[server.name]) {
             runBlocking {
-                Farmer.all().mapAsync { farmer ->
+                Farmer.all().onEachAsync { farmer ->
                     AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])
-                }.filterNotNull()
+                }.toList()
             }
         }
 
