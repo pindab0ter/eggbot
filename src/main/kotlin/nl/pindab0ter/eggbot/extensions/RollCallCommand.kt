@@ -23,9 +23,14 @@ import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.model.database.Farmer
+import nl.pindab0ter.eggbot.model.database.Farmers
 import nl.pindab0ter.eggbot.view.rollCallResponse
 import org.jetbrains.exposed.sql.SizedCollection
+import org.jetbrains.exposed.sql.jodatime.CurrentDateTime
+import org.jetbrains.exposed.sql.or
+import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -81,8 +86,14 @@ class RollCallCommand : Extension() {
             }
 
             action {
-                if (transaction { Farmer.count() == 0L }) {
-                    respond { content = "No farmers registered." }
+                val farmers = transaction {
+                    val activeFarmersQuery = Farmers.innerJoin(DiscordUsers)
+                        .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) }
+                    Farmer.wrapRows(activeFarmersQuery).toList()
+                }
+
+                if (farmers.isEmpty()) {
+                    respond { content = "**Error:** Could not create a roll call because there are no active farmers." }
                     return@action
                 }
 
@@ -90,7 +101,7 @@ class RollCallCommand : Extension() {
                     val coops = createRollCall(
                         baseName = arguments.basename,
                         maxCoopSize = arguments.contract.maxCoopSize,
-                        database = databases[server.name]
+                        farmers = farmers,
                     ).map { (name, farmers) ->
                         Coop.new {
                             this.contractId = arguments.contract.id

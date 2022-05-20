@@ -1,13 +1,7 @@
 package nl.pindab0ter.eggbot.model
 
 import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
-import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.model.database.Farmer
-import nl.pindab0ter.eggbot.model.database.Farmers
-import org.jetbrains.exposed.dao.with
-import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.select
-import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.ceil
 import kotlin.math.floor
 import kotlin.math.roundToInt
@@ -20,13 +14,8 @@ private const val FILL_PERCENTAGE = 0.8
 fun createRollCall(
     baseName: String,
     maxCoopSize: Int,
-    database: Database?
-): List<Pair<String, List<Farmer>>> = transaction(database) {
-    val farmers = Farmer.wrapRows(Farmers.innerJoin(DiscordUsers)
-        .select { DiscordUsers.inactiveUntil.isNull() })
-        .with(Farmer::discordUser)
-        .toList()
-
+    farmers: List<Farmer>
+): List<Pair<String, List<Farmer>>> {
     val preferredCoopSize: Int =
         if (maxCoopSize <= 10) maxCoopSize
         else (maxCoopSize * FILL_PERCENTAGE).roundToInt()
@@ -51,7 +40,7 @@ fun createRollCall(
             ?.let { (_, farmers) -> farmers.add(activeFarmer) }
     }
 
-    coops.map { (name, farmers) -> name to farmers }
+    return coops.map { (name, farmers) -> name to farmers }
 }
 
 private fun coopNames(amount: Int, baseName: String): List<String> = when {
