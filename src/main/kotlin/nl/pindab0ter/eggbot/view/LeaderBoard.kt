@@ -10,7 +10,7 @@ import nl.pindab0ter.eggbot.helpers.DisplayMode.*
 import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
-import nl.pindab0ter.eggbot.model.Table
+import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 
 fun GuildBehavior.leaderboardResponse(
     farmers: List<Backup>,
@@ -37,8 +37,8 @@ fun GuildBehavior.leaderboardResponse(
         } ?: NO_ALIAS
     }
 
-    val soulEgg = runBlocking { getEmojiOrNull(server.emote.soulEgg) } ?: "🥚"
-    val prophecyEgg = runBlocking { getEmojiOrNull(server.emote.prophecyEgg) } ?: "🥚"
+    val soulEgg = runBlocking { getEmojiOrNull(server.emote.soulEgg)?.mention } ?: "🥚"
+    val prophecyEgg = runBlocking { getEmojiOrNull(server.emote.prophecyEgg)?.mention } ?: "🥚"
 
     val boardTitle = when (leaderBoard) {
         EARNINGS_BONUS -> "💵 Earnings Bonus"
@@ -69,7 +69,7 @@ fun GuildBehavior.leaderboardResponse(
             ELITE_DRONE_TAKEDOWNS -> "Elite Drone Takedowns"
         }
 
-        alignment = Table.AlignedColumn.Alignment.RIGHT
+        alignment = RIGHT
 
         cells = when (leaderBoard) {
             EARNINGS_BONUS -> sortedFarmers.map { farmer ->
