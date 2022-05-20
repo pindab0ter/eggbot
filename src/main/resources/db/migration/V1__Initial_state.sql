@@ -50,10 +50,15 @@ CREATE TABLE coop_farmers
             ON DELETE CASCADE
 );
 
-CREATE VIEW discord_users_to_egg_inc_users AS
-    SELECT discord_users.tag    AS discord_tag
-         , farmers.egg_inc_id   AS egg_inc_id
-         , farmers.in_game_name AS in_game_name
-    FROM discord_users
-             JOIN farmers ON discord_users.id = farmers.discord_user_id
-    ORDER BY tag;
+CREATE VIEW farmers_to_discord_users AS
+    SELECT discord_users.tag AS discord_tag
+         , farmers.egg_inc_id
+         , farmers.in_game_name
+         , CASE
+               WHEN discord_users.inactive_until < now() OR discord_users.inactive_until IS NULL
+                   THEN TRUE
+                   ELSE FALSE
+           END               AS active
+    FROM farmers
+             JOIN discord_users ON discord_users.id = farmers.discord_user_id
+    ORDER BY discord_users.tag;
