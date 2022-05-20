@@ -38,7 +38,7 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
                 if (!channel.botHasPermissions(ViewChannel, SendMessages, ManageMessages, ReadMessageHistory)) {
                     logger.error {
                         "Bot does not have the required permissions for the \"$channelName\" channel with ID $channelId on server ${server.name}.\n" +
-                                "The required permissions are: \"View Channel\", \", Send Messages\"\", Manage Messages\"\" and Read Message History\""
+                                "The required permissions are: \"View Channel\", \", Send Messages\"\", Manage Messages\" and \"Read Message History\""
                     }
                     exitProcess(1)
                 }
