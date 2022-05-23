@@ -47,7 +47,7 @@ class RollCallCommand : Extension() {
             }
         }
         val maxCoopSize: Int? by optionalInt {
-            name = "coop-size"
+            name = "max-coop-size"
             description = "How many farmers should be in each co-op"
         }
         val createRolesAndChannels: Boolean by createRolesAndChannels(PLURAL)
@@ -94,41 +94,46 @@ class RollCallCommand : Extension() {
                     return@action
                 }
 
+                val startGetFarmers = System.currentTimeMillis()
                 val farmers = transaction {
                     val activeFarmersQuery = Farmers.innerJoin(DiscordUsers)
                         .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) }
                     Farmer.wrapRows(activeFarmersQuery).toList()
                 }
+                logger.debug { "Get farmers: ${System.currentTimeMillis() - startGetFarmers}ms" }
 
                 if (farmers.isEmpty()) {
                     respond { content = "**Error:** Could not create a roll call because there are no active farmers." }
                     return@action
                 }
 
-                val preferredCoopSize: Int = arguments.maxCoopSize
+                val maxCoopSize: Int = arguments.maxCoopSize
                     ?: if (arguments.contract.maxCoopSize <= 10) arguments.contract.maxCoopSize
                     else (arguments.contract.maxCoopSize * COOP_FILL_PERCENTAGE).roundToInt()
 
                 newSuspendedTransaction(null, databases[server.name]) {
-                    val coops = createRollCall(
-                        baseName = arguments.basename,
-                        preferredCoopSize = preferredCoopSize,
-                        farmers = farmers,
-                    ).map { (name, farmers) ->
-                        Coop.new {
-                            this.contractId = arguments.contract.id
-                            this.name = name
-                        }.also { coop ->
-                            coop.farmers = SizedCollection(farmers)
+                    val startCreateCoops = System.currentTimeMillis()
+                    val coops = createRollCall(arguments.basename, maxCoopSize, farmers)
+                        .map { (name, farmers) ->
+                            Coop.new {
+                                this.contractId = arguments.contract.id
+                                this.name = name
+                            }.also { coop -> coop.farmers = SizedCollection(farmers) }
                         }
-                    }
+                        .sortedBy(Coop::name)
 
+                    logger.debug { "Create co-ops: ${System.currentTimeMillis() - startCreateCoops}ms" }
                     commit()
 
                     if (arguments.createRolesAndChannels) {
                         val coopsCategoryChannel = guildFor(event)?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
 
-                        coops.forEachAsync createRolesAndChannels@{ coop ->
+                        val startRolesAndChannels = System.currentTimeMillis()
+
+                        // No need for async since we'll be rate-limited by Discord
+                        coops.forEach createRolesAndChannels@{ coop ->
+                            val startRoleAndChannel = System.currentTimeMillis()
+                            // TODO: "Creating and assigning roles and channel to users for ${coop.name}..."
                             // Create and assign roles
                             val role = guild?.createRole {
                                 name = coop.name
@@ -170,12 +175,14 @@ class RollCallCommand : Extension() {
                                     }
                                 appendLine()
                             })
+                            logger.debug { "${coop.name} done in ${System.currentTimeMillis() - startRoleAndChannel}ms" }
+                            commit()
                         }
-                        commit()
+
+                        logger.debug { "Roles and channels: ${System.currentTimeMillis() - startRolesAndChannels}ms" }
                     }
 
-                    guild?.let { multipartRespond(it.rollCallResponse(arguments.contract, coops)) }
-                        ?: respond { content = "**Error:** Could not get guild." }
+                    multipartRespond(guild?.rollCallResponse(arguments.contract, coops) ?: emptyList())
                 }
             }
         }
