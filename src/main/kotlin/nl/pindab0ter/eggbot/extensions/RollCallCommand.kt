@@ -4,6 +4,7 @@ import com.auxbrain.ei.Contract
 import com.kotlindiscord.kord.extensions.checks.guildFor
 import com.kotlindiscord.kord.extensions.checks.hasRole
 import com.kotlindiscord.kord.extensions.commands.Arguments
+import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalInt
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
@@ -15,10 +16,7 @@ import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
-import nl.pindab0ter.eggbot.NO_ALIAS
-import nl.pindab0ter.eggbot.config
-import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.model.createRollCall
@@ -33,6 +31,7 @@ import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
 import org.jetbrains.exposed.sql.transactions.transaction
+import kotlin.math.roundToInt
 
 class RollCallCommand : Extension() {
     val logger = KotlinLogging.logger { }
@@ -46,6 +45,10 @@ class RollCallCommand : Extension() {
             validate {
                 failIf("Co-op names cannot contain spaces") { value.contains(' ') }
             }
+        }
+        val maxCoopSize: Int? by optionalInt {
+            name = "coop-size"
+            description = "How many farmers should be in each co-op"
         }
         val createRolesAndChannels: Boolean by createRolesAndChannels(PLURAL)
     }
@@ -86,6 +89,11 @@ class RollCallCommand : Extension() {
             }
 
             action {
+                if (arguments.maxCoopSize != null && arguments.maxCoopSize!! > arguments.contract.maxCoopSize) {
+                    respond { content = "The contract has a maximum co-op size of ${arguments.contract.maxCoopSize}" }
+                    return@action
+                }
+
                 val farmers = transaction {
                     val activeFarmersQuery = Farmers.innerJoin(DiscordUsers)
                         .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) }
@@ -97,10 +105,14 @@ class RollCallCommand : Extension() {
                     return@action
                 }
 
+                val preferredCoopSize: Int = arguments.maxCoopSize
+                    ?: if (arguments.contract.maxCoopSize <= 10) arguments.contract.maxCoopSize
+                    else (arguments.contract.maxCoopSize * COOP_FILL_PERCENTAGE).roundToInt()
+
                 newSuspendedTransaction(null, databases[server.name]) {
                     val coops = createRollCall(
                         baseName = arguments.basename,
-                        maxCoopSize = arguments.contract.maxCoopSize,
+                        preferredCoopSize = preferredCoopSize,
                         farmers = farmers,
                     ).map { (name, farmers) ->
                         Coop.new {
@@ -116,8 +128,8 @@ class RollCallCommand : Extension() {
                     if (arguments.createRolesAndChannels) {
                         val coopsCategoryChannel = guildFor(event)?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
 
-                        // Create and assign roles and channels
                         coops.forEachAsync createRolesAndChannels@{ coop ->
+                            // Create and assign roles
                             val role = guild?.createRole {
                                 name = coop.name
                                 mentionable = true
@@ -134,12 +146,14 @@ class RollCallCommand : Extension() {
                                 }
                             }
 
+                            // Create channel
                             val channel = coopsCategoryChannel?.createTextChannel(coop.name) {
                                 topic = "_${coop.name}_ vs. _${arguments.contract.name}_"
                                 reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                             }
                             coop.channelId = channel?.id
 
+                            // Send message in co-op channel
                             channel?.createMessage(buildString {
                                 // Header
                                 appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")

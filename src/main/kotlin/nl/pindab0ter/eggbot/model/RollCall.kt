@@ -4,24 +4,18 @@ import nl.pindab0ter.eggbot.helpers.mapCartesianProducts
 import nl.pindab0ter.eggbot.model.database.Farmer
 import kotlin.math.ceil
 import kotlin.math.floor
-import kotlin.math.roundToInt
 
-private const val FILL_PERCENTAGE = 0.8
 
 /**
  * Create a list of co-op names to lists of farmers
  */
 fun createRollCall(
     baseName: String,
-    maxCoopSize: Int,
-    farmers: List<Farmer>
+    preferredCoopSize: Int,
+    farmers: List<Farmer>,
 ): List<Pair<String, List<Farmer>>> {
-    val preferredCoopSize: Int =
-        if (maxCoopSize <= 10) maxCoopSize
-        else (maxCoopSize * FILL_PERCENTAGE).roundToInt()
-
     // Fill each co-op with the strongest available player so that all co-ops have one
-    val coops = coopNames((farmers.size / preferredCoopSize) + 1, baseName).mapIndexed { i, coopName ->
+    val coops = coopNames(farmers.size / preferredCoopSize, baseName).mapIndexed { i, coopName ->
         coopName to mutableListOf(farmers[i])
     }
 
@@ -31,9 +25,7 @@ fun createRollCall(
             // Filter out co-ops that have enough farmers
             .filter { (_, farmers) -> farmers.count() <= preferredCoopSize }
             // Filter out co-ops that have the current highest amount of farmers
-            .filter { (_, farmers) ->
-                farmers.count() == coops.minOfOrNull { (_, coopFarmers) -> coopFarmers.count() }
-            }
+            .filter { (_, farmers) -> farmers.count() == coops.minOfOrNull { (_, coopFarmers) -> coopFarmers.count() } }
             // Select the coop with the current lowest total earnings bonus
             .minByOrNull { (_, farmers) -> farmers.sumOf { it.earningsBonus } }
             // Add the farmer to the co-op

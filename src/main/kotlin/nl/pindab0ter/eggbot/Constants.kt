@@ -4,6 +4,7 @@ import dev.kord.common.Color
 import java.math.BigDecimal
 
 const val NO_ALIAS = "[no alias]"
+const val COOP_FILL_PERCENTAGE = 0.8
 
 val DEFAULT_ROLE_COLOR = Color(15, 212, 57) // #0FD439
 
