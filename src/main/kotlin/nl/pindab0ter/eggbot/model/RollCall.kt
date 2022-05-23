@@ -43,7 +43,7 @@ private fun coopNames(amount: Int, baseName: String): List<String> = when {
         val remainder = amount - chunks * chunkSize
         ('a' until 'a' + chunkSize).mapCartesianProducts(1..chunks) { char: Char, digit: Int ->
             "$char$digit$baseName"
-        }.plus(('a' until 'a' + remainder).map { c -> "${c + chunkSize}$baseName" })
+        }.plus(('a' until 'a' + remainder).map { c -> "${c + chunkSize}-$baseName" })
     }
 }
 
