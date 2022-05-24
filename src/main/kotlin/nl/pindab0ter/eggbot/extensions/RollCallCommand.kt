@@ -18,6 +18,7 @@ import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -165,12 +166,11 @@ class RollCallCommand : Extension() {
 
                                 // Body
                                 coop.farmers
-                                    .sortedBy { farmer -> (farmer.inGameName ?: "") }
+                                    .sortedBy(Farmer::earningsBonus)
                                     .forEach { farmer ->
-                                        if (farmer.isActive.not()) append("_")
+                                        append("`${farmer.inGameName ?: NO_ALIAS}` ")
                                         append(guild?.mentionUser(farmer.discordUser.snowflake))
-                                        append(" (`${farmer.inGameName ?: NO_ALIAS}`)")
-                                        if (farmer.isActive.not()) append(" (Inactive)_")
+                                        append(" (${farmer.earningsBonus.formatIllions(INTEGER)} %)")
                                         appendLine()
                                     }
                                 appendLine()
