@@ -25,7 +25,6 @@ import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.helpers.contract
 import nl.pindab0ter.eggbot.helpers.createRolesAndChannels
-import nl.pindab0ter.eggbot.helpers.forEachAsync
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -159,7 +158,7 @@ class RollCallCommand : Extension() {
 
                             if (role != null) {
                                 coop.roleId = role.id
-                                coop.farmers.forEachAsync { farmer ->
+                                coop.farmers.forEach { farmer ->
                                     guild
                                         ?.getMemberOrNull(farmer.discordUser.snowflake)
                                         ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
