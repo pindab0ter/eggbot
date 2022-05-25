@@ -13,6 +13,7 @@ import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.channel.createTextChannel
 import dev.kord.core.behavior.createRole
+import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
@@ -25,6 +26,7 @@ import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
+import nl.pindab0ter.eggbot.model.withProgressBar
 import nl.pindab0ter.eggbot.view.rollCallResponse
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.jodatime.CurrentDateTime
@@ -95,16 +97,16 @@ class RollCallCommand : Extension() {
                     return@action
                 }
 
-                val startGetFarmers = System.currentTimeMillis()
+                val message = respond { content = "Roll call for __${arguments.contract.name}__…" }.message
+
                 val farmers = transaction {
                     val activeFarmersQuery = Farmers.innerJoin(DiscordUsers)
                         .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) }
                     Farmer.wrapRows(activeFarmersQuery).toList()
                 }
-                logger.debug { "Get farmers: ${System.currentTimeMillis() - startGetFarmers}ms" }
 
                 if (farmers.isEmpty()) {
-                    respond { content = "**Error:** Could not create a roll call because there are no active farmers." }
+                    message.edit { content = "**Error:** Could not create a roll call because there are no active farmers." }
                     return@action
                 }
 
@@ -113,29 +115,34 @@ class RollCallCommand : Extension() {
                     else (arguments.contract.maxCoopSize * COOP_FILL_PERCENTAGE).roundToInt()
 
                 newSuspendedTransaction(null, databases[server.name]) {
-                    val startCreateCoops = System.currentTimeMillis()
-                    val coops = createRollCall(arguments.basename, maxCoopSize, farmers)
-                        .map { (name, farmers) ->
+                    val rollCall = createRollCall(arguments.basename, maxCoopSize, farmers)
+                    val coops = withProgressBar(rollCall.size, "Roll call for __${arguments.contract.name}__…", "co-ops", message) {
+                        rollCall.map { (name, farmers) ->
                             Coop.new {
                                 this.contractId = arguments.contract.id
                                 this.name = name
-                            }.also { coop -> coop.farmers = SizedCollection(farmers) }
-                        }
-                        .sortedBy(Coop::name)
+                            }.also { coop ->
+                                coop.farmers = SizedCollection(farmers)
+                                increment()
+                            }
+                        }.sortedBy(Coop::name)
+                    }
 
-                    logger.debug { "Create co-ops: ${System.currentTimeMillis() - startCreateCoops}ms" }
                     commit()
 
-                    if (arguments.createRolesAndChannels) {
+                    if (arguments.createRolesAndChannels) withProgressBar(
+                        goal = coops.size,
+                        statusText = "Roll call for __${arguments.contract.name}__:\nCreating roles and channels…",
+                        unit = "co-ops",
+                        message = message
+                    ) {
                         val coopsCategoryChannel = guildFor(event)?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
-
-                        val startRolesAndChannels = System.currentTimeMillis()
 
                         // No need for async since we'll be rate-limited by Discord
                         coops.forEach createRolesAndChannels@{ coop ->
-                            val startRoleAndChannel = System.currentTimeMillis()
-                            // TODO: "Creating and assigning roles and channel to users for ${coop.name}..."
+
                             // Create and assign roles
+                            setStatusText("Roll call for __${arguments.contract.name}__:\nCreating and assigning roles for `${coop.name}`…")
                             val role = guild?.createRole {
                                 name = coop.name
                                 mentionable = true
@@ -153,8 +160,9 @@ class RollCallCommand : Extension() {
                             }
 
                             // Create channel
+                            setStatusText("Roll call for __${arguments.contract.name}__:\nCreating channel and message for `${coop.name}`…")
                             val channel = coopsCategoryChannel?.createTextChannel(coop.name) {
-                                topic = "_${coop.name}_ vs. _${arguments.contract.name}_"
+                                topic = "**${coop.name}** vs. __${arguments.contract.name}__"
                                 reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                             }
                             coop.channelId = channel?.id
@@ -168,19 +176,21 @@ class RollCallCommand : Extension() {
                                 coop.farmers
                                     .sortedBy(Farmer::earningsBonus)
                                     .forEach { farmer ->
-                                        append("`${farmer.inGameName ?: NO_ALIAS}` ")
                                         append(guild?.mentionUser(farmer.discordUser.snowflake))
-                                        append(" (${farmer.earningsBonus.formatIllions(INTEGER)} %)")
+                                        append(" (`${farmer.inGameName ?: NO_ALIAS}`, ")
+                                        append("${farmer.earningsBonus.formatIllions(INTEGER)} %)")
                                         appendLine()
                                     }
                                 appendLine()
                             })
-                            logger.debug { "${coop.name} done in ${System.currentTimeMillis() - startRoleAndChannel}ms" }
-                            commit()
-                        }
 
-                        logger.debug { "Roles and channels: ${System.currentTimeMillis() - startRolesAndChannels}ms" }
+                            commit()
+                            increment()
+                        }
                     }
+
+                    // TODO: Make overview table separate and use message.edit to display it so that is the target of the 'reply'
+                    message.edit { content = "Roll call for __${arguments.contract.name}__" }
 
                     multipartRespond(guild?.rollCallResponse(arguments.contract, coops) ?: emptyList())
                 }
