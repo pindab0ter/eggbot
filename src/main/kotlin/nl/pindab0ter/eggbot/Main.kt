@@ -46,7 +46,9 @@ suspend fun main() {
             }
 
             beforeStart {
-                startScheduler()
+                if (envOrNull("ENVIRONMENT") == "production") {
+                    startScheduler()
+                }
             }
         }
     }
