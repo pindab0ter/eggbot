@@ -79,7 +79,7 @@ class RemoveCoopCommand : Extension() {
                     val channelName = channel?.name
                     role?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
                     channel?.delete("Removed by ${user.asUser().username} using `/co-op remove`")
-                    transaction(databases[server.name]) {coop.delete() }
+                    transaction(databases[server.name]) { coop.delete() }
                     respond {
                         content = buildString {
                             append("Successfully deleted co-op")
@@ -89,7 +89,7 @@ class RemoveCoopCommand : Extension() {
                                     append(" role `@$roleName`")
                                     if (channelName != null) append(" and")
                                 }
-                                if (channelName != null) append(" channel $channelName")
+                                if (channelName != null) append(" channel `#$channelName`")
                             }
                         }
                     }

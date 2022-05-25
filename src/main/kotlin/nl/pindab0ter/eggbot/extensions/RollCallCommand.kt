@@ -162,7 +162,7 @@ class RollCallCommand : Extension() {
                                     guild
                                         ?.getMemberOrNull(farmer.discordUser.snowflake)
                                         ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
-                                }
+                               }
                             }
 
                             // Create channel

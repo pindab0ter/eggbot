@@ -86,15 +86,15 @@ class AddCoopCommand : Extension() {
 
                     when {
                         role != null && coopChannel != null -> {
-                            respond { content = "Role ${role.mention} and channel `${arguments.coopId}` already exist." }
+                            respond { content = "Role ${role.mention} and channel ${coopChannel.mention} already exist." }
                             return@action
                         }
                         role != null -> {
-                            respond { content = "Role `${role.mention}` already exists." }
+                            respond { content = "Role ${role.mention} already exists." }
                             return@action
                         }
                         coopChannel != null -> {
-                            respond { content = "Channel `${arguments.coopId}` already exists." }
+                            respond { content = "Channel ${coopChannel.mention} already exists." }
                             return@action
                         }
                     }
