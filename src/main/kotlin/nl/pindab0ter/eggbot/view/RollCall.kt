@@ -2,12 +2,14 @@ package nl.pindab0ter.eggbot.view
 
 import com.auxbrain.ei.Contract
 import dev.kord.core.behavior.GuildBehavior
+import dev.kord.core.entity.Role
 import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
 import nl.pindab0ter.eggbot.helpers.formatIllions
 import nl.pindab0ter.eggbot.helpers.mentionUser
 import nl.pindab0ter.eggbot.model.database.Coop
+import nl.pindab0ter.eggbot.model.database.Farmer
 
 suspend fun GuildBehavior.rollCallResponse(
     contract: Contract,
@@ -54,4 +56,23 @@ suspend fun GuildBehavior.rollCallResponse(
     }
 
     return header + coopContent
+}
+
+suspend fun GuildBehavior.coopChannelMessage(
+    coop: Coop,
+    role: Role?,
+): String = buildString {
+    // Header
+    appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")
+
+    // Body
+    coop.farmers
+        .sortedBy(Farmer::earningsBonus)
+        .forEach { farmer ->
+            append(asGuildOrNull()?.mentionUser(farmer.discordUser.snowflake))
+            append(" (`${farmer.inGameName ?: NO_ALIAS}`, ")
+            append("${farmer.earningsBonus.formatIllions(INTEGER)} %)")
+            appendLine()
+        }
+    appendLine()
 }

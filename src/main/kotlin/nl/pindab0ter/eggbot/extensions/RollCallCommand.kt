@@ -11,22 +11,29 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import dev.kord.common.entity.Permission.*
+import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.createTextChannel
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.*
-import nl.pindab0ter.eggbot.helpers.*
-import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
+import nl.pindab0ter.eggbot.COOP_FILL_PERCENTAGE
+import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
+import nl.pindab0ter.eggbot.config
+import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
+import nl.pindab0ter.eggbot.helpers.contract
+import nl.pindab0ter.eggbot.helpers.createRolesAndChannels
+import nl.pindab0ter.eggbot.helpers.forEachAsync
+import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
 import nl.pindab0ter.eggbot.model.withProgressBar
+import nl.pindab0ter.eggbot.view.coopChannelMessage
 import nl.pindab0ter.eggbot.view.rollCallResponse
 import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.jodatime.CurrentDateTime
@@ -168,21 +175,7 @@ class RollCallCommand : Extension() {
                             coop.channelId = channel?.id
 
                             // Send message in co-op channel
-                            channel?.createMessage(buildString {
-                                // Header
-                                appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")
-
-                                // Body
-                                coop.farmers
-                                    .sortedBy(Farmer::earningsBonus)
-                                    .forEach { farmer ->
-                                        append(guild?.mentionUser(farmer.discordUser.snowflake))
-                                        append(" (`${farmer.inGameName ?: NO_ALIAS}`, ")
-                                        append("${farmer.earningsBonus.formatIllions(INTEGER)} %)")
-                                        appendLine()
-                                    }
-                                appendLine()
-                            })
+                            channel?.createMessage { content = guild?.coopChannelMessage(coop, role) }
 
                             commit()
                             increment()

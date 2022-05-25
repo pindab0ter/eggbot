@@ -10,6 +10,7 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.Color
 import dev.kord.common.entity.Permission.*
+import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.createTextChannel
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.getChannelOfOrNull
@@ -27,6 +28,7 @@ import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
+import nl.pindab0ter.eggbot.view.coopChannelMessage
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -137,6 +139,8 @@ class AddCoopCommand : Extension() {
                 val channel = coopCategoryChannel?.createTextChannel(coop.name) {
                     reason = "Added by ${user.asUser().username} through ${this@ephemeralSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                     topic = "**${coop.name}** vs. __${contract.name}__"
+                }?.also { channel ->
+                    channel.createMessage { content = guild?.coopChannelMessage(coop, role) }
                 }
 
                 transaction(databases[server.name]) {
