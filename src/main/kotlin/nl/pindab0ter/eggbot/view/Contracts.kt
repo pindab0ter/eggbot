@@ -17,7 +17,7 @@ fun GuildBehavior.contractsResponse(
         this@printContracts.forEach { contract ->
 
             emoteMention(contract.egg)?.let { eggEmoji -> append(eggEmoji) }
-            append("_${contract.name}_")
+            append("__${contract.name}__")
             append(" (")
             append(contract.egg.displayName)
             if (contract.coopAllowed) append(", max ${contract.maxCoopSize} farmers")

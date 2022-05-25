@@ -21,8 +21,7 @@ fun ApplicationCommandContext.solosInfoResponse(
 ) = buildString {
     val guildName = runBlocking { guild?.asGuildOrNull()?.name }
 
-    appendLine("`` vs. _${contract.name}_:")
-    appendLine("`$guildName` vs. _${contract.name}_:")
+    appendLine("`$guildName` vs. __${contract.name}__:")
     appendLine()
 
     if (!compact) {

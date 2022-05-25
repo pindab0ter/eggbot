@@ -61,7 +61,7 @@ class RemoveCoopsCommand : Extension() {
                 }
 
                 if (coops.isEmpty()) {
-                    respond { content = "No co-ops found for _${arguments.contract.name}_." }
+                    respond { content = "No co-ops found for __${arguments.contract.name}__." }
                     return@action
                 }
 

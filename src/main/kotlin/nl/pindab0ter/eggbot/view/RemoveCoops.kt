@@ -13,7 +13,7 @@ fun removeCoopsResponse(contract: Contract, statuses: Map<String, CleanupStatus>
         else -> append("${statuses.count()} co-ops")
     }
 
-    appendLine(" for _${contract.name}_")
+    appendLine(" for __${contract.name}__")
 
     if (statuses.all { (_, status) -> status.role == NO_ACTION && status.channel == NO_ACTION })
         appendLine("- No roles or channels to delete")

@@ -15,7 +15,6 @@ import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
 import java.math.BigDecimal
 import java.math.BigDecimal.ZERO
-import kotlin.random.Random
 
 
 fun GuildBehavior.coopsInfoResponse(
@@ -24,7 +23,7 @@ fun GuildBehavior.coopsInfoResponse(
     compact: Boolean,
 ) = buildString {
 
-    appendLine("`${runBlocking { asGuildOrNull()?.name }}` vs. _${contract.name}_:")
+    appendLine("`${runBlocking { asGuildOrNull()?.name }}` vs. __${contract.name}__:")
     appendLine()
 
     if (!compact) {

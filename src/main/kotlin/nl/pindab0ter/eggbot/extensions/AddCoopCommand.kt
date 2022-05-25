@@ -71,7 +71,7 @@ class AddCoopCommand : Extension() {
                 transaction(databases[server.name]) {
                     Coop.find { (Coops.name eq coopId) and (Coops.contractId eq contract.id) }.firstOrNull()
                 }?.let { coop ->
-                    respond { content = "Co-op `${coop.name}` is already registered for _${contract.name}_." }
+                    respond { content = "Co-op `${coop.name}` is already registered for __${contract.name}__." }
                     return@action
                 }
 
@@ -103,7 +103,7 @@ class AddCoopCommand : Extension() {
 
                 // Finish if the co-op status couldn't be found, and it isn't being created pre-emptively
                 if (coopStatus == null && !arguments.preEmptive) {
-                    respond { content = "No co-op found for contract _${contract.name}_ with ID `${coopId}`" }
+                    respond { content = "No co-op found for contract __${contract.name}__ with ID `${coopId}`" }
                     return@action
                 }
 
@@ -119,7 +119,7 @@ class AddCoopCommand : Extension() {
                 if (!arguments.createRolesAndChannels) {
                     respond {
                         content = buildString {
-                            append("Registered co-op `${coop.name}` for contract _${contract.name}_")
+                            append("Registered co-op `${coop.name}` for contract __${contract.name}__")
                             if (arguments.preEmptive && coopStatus == null) append(", even though the co-op was not found")
                             append(".")
                         }
@@ -136,7 +136,7 @@ class AddCoopCommand : Extension() {
 
                 val channel = coopCategoryChannel?.createTextChannel(coop.name) {
                     reason = "Added by ${user.asUser().username} through ${this@ephemeralSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
-                    topic = "_${coop.name}_ vs. _${contract.name}_"
+                    topic = "**${coop.name}** vs. __${contract.name}__"
                 }
 
                 transaction(databases[server.name]) {
@@ -160,7 +160,7 @@ class AddCoopCommand : Extension() {
                 }
 
                 val responseBuilder = StringBuilder().apply {
-                    append("Registered co-op `${coop.name}` for contract _${contract.name}_")
+                    append("Registered co-op `${coop.name}` for contract __${contract.name}__")
                     if (role != null) append(", with the role ${role.mention}")
                     if (channel != null) {
                         if (role != null) append(" and ") else append(", ")

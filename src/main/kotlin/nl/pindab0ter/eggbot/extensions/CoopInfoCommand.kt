@@ -94,25 +94,25 @@ class CoopInfoCommand : Extension() {
 
                 if (coopStatus == null) {
                     respond {
-                        content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
+                        content = "No co-op found for contract __${contract.name}__ with ID `${arguments.coopId}`"
                     }
                     return@action
                 }
 
                 when (val coopContractStatus = CoopContractStatus(contract, coopStatus, arguments.coopId, databases[server.name])) {
                     is NotFound -> respond {
-                        content = "No co-op found for contract _${contract.name}_ with ID `${arguments.coopId}`"
+                        content = "No co-op found for contract __${contract.name}__ with ID `${arguments.coopId}`"
                     }
                     is Abandoned -> respond {
                         content = """
-                                `${coopContractStatus.coopStatus.coopId}` vs. _${contract.name}_:
+                                `${coopContractStatus.coopStatus.coopId}` vs. __${contract.name}__:
                                     
                                 This co-op has no members.""".trimIndent()
                     }
 
                     is Failed -> respond {
                         content = """
-                                `${coopContractStatus.coopStatus.coopId}` vs. _${contract.name}_:
+                                `${coopContractStatus.coopStatus.coopId}` vs. __${contract.name}__:
                                     
                                 This co-op has not reached their final goal.""".trimIndent()
                     }
