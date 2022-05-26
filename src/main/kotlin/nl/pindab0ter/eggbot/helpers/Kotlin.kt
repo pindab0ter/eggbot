@@ -32,7 +32,6 @@ suspend fun <T> Iterable<T>.onEachAsync(
     onEach { launch(coroutineContext) { action(it) } }
 }
 
-
 suspend fun <T, K, V> Iterable<T>.associateAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
     transform: suspend (T) -> Pair<K, V>,
