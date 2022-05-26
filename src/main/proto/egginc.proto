@@ -74,9 +74,9 @@ message Backup {
     uint64 droneTakedowns = 6;
     uint64 unlimitedChickensUses = 7;
     repeated double eggTotals = 8;
-    uint64 prestigeCount = 9;
+    uint64 prestiges = 9;
     uint64 droneTakedownsElite = 10;
-    uint64 piggyBreakCount = 11;
+    uint64 piggyBreaks = 11;
     uint64 iapPacksPurchased = 12;
     uint64 boostsUsed = 13;
     bool piggyFull = 14;
@@ -171,9 +171,9 @@ message Backup {
     double cashSpent = 3;
     double unclaimedCash = 4;
     double lastStepTime = 5;
-    uint64 numChickens = 6;
-    uint64 numChickensUnsettled = 7;
-    uint64 numChickensRunning = 8;
+    uint64 chickens = 6;
+    uint64 unsettledChicken = 7;
+    uint64 runningChicken = 8;
     double eggsLaid = 9;
     double eggsPaidFor = 10;
     uint32 silosOwned = 11;
@@ -385,7 +385,7 @@ message LocalContract {
   double coopLastUploadedContribution = 11;
   uint32 boostsUsed = 12;
   string coopUserId = 13;
-  uint32 numGoalsAchieved = 14;
+  uint32 goalsAchieved = 14;
   uint32 league = 15;
 }
 
@@ -564,14 +564,14 @@ message DeviceInfo {
 message AppInfo {
   string versionStr = 1;
   uint32 sessions = 2;
-  uint32 numPrestiges = 3;
+  uint32 prestiges = 3;
   uint64 soulEggs = 4;
   uint32 currentEgg = 5;
   uint64 goldEarned = 6;
   uint64 goldSpent = 7;
   uint32 currentMission = 8;
   uint32 piggySize = 9;
-  uint64 numPiggyBreaks = 10;
+  uint64 piggyBreaks = 10;
   uint64 verifiedPiggyBreaks = 29;
   uint64 iapPacksPurchased = 11;
   uint32 permitLevel = 12;
@@ -1032,7 +1032,7 @@ enum RewardType {
   CASH = 1;
   GOLDEN_EGGS = 2;
   SOUL_EGGS = 3;
-  EGGS_OF_PROPHECY = 4;
+  PROPHECY_EGGS = 4;
   EPIC_RESEARCH_ITEM = 5;
   PIGGY_FILL = 6;
   PIGGY_MULTIPLIER = 7;

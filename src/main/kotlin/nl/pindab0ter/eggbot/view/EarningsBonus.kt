@@ -42,7 +42,7 @@ fun earningsBonusResponse(
             addRow("Soul Bonus:", soulEggResearchLevel.formatInteger(), "/140")
         if (prophecyEggResearchLevel < MAX_PROPHECY_EGG_RESEARCH_LEVEL)
             addRow("Prophecy Bonus:", prophecyEggResearchLevel.formatInteger(), "/5")
-        addRow("Prestiges:", farmer.stats?.prestigeCount?.formatInteger() ?: "?")
+        addRow("Prestiges:", farmer.stats?.prestiges?.formatInteger() ?: "?")
         addRow(
             "SE to next rank:", "+ ${
                 when (displayMode) {

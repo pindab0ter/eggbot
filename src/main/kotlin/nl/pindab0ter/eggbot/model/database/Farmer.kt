@@ -69,7 +69,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         _prophecyEggs = backup.game.prophecyEggs
         _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()
         _prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel.toInt()
-        prestiges = backup.stats.prestigeCount
+        prestiges = backup.stats.prestiges
         droneTakedowns = backup.stats.droneTakedowns
         eliteDroneTakedowns = backup.stats.droneTakedownsElite
         updatedAt = backup.approxTime.toDateTime()
@@ -91,7 +91,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
                 _prophecyEggs = backup.game.prophecyEggs
                 _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()
                 _prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel.toInt()
-                prestiges = backup.stats.prestigeCount
+                prestiges = backup.stats.prestiges
                 droneTakedowns = backup.stats.droneTakedowns
                 eliteDroneTakedowns = backup.stats.droneTakedownsElite
             }
