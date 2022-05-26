@@ -23,6 +23,7 @@ suspend fun main() {
             add(::RegisterCommand)
             add(::ActivityCommand)
             add(::AddCoopCommand)
+            add(::ContractAttemptsCommand)
             add(::ContractsCommand)
             add(::CoopInfoCommand)
             add(::CoopsInfoCommand)

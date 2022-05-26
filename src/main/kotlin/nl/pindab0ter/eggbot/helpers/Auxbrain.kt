@@ -54,10 +54,32 @@ val Backup.Game.prophecyEggsForNextRank: BigDecimal
     get() = prophecyEggsToNextRank + prophecyEggs.toBigDecimal()
 
 // Contracts
+val Backup.localContracts: List<LocalContract>
+    get() = (contracts?.contracts ?: emptyList()) + (contracts?.archived ?: emptyList())
+
+enum class AttemptStatus { NEVER_ATTEMPTED, FAILED_TO_GET_PROPHECY_EGG, FAILED_TO_COMPLETE_ALL_GOALS, COMPLETED }
+
+fun Backup.attemptStatusFor(contractId: String): AttemptStatus {
+    val localContract = localContracts.firstOrNull { it.contract?.id == contractId }
+
+    return when {
+        localContract == null ->
+            AttemptStatus.NEVER_ATTEMPTED
+        localContract.contract?.indexOfPeGoal != null && localContract.goalsAchieved < (localContract.contract.indexOfPeGoal!! + 1) ->
+            AttemptStatus.FAILED_TO_GET_PROPHECY_EGG
+        localContract.goalsAchieved < (localContract.contract?.goals?.size ?: 0) ->
+            AttemptStatus.FAILED_TO_COMPLETE_ALL_GOALS
+        else ->
+            AttemptStatus.COMPLETED
+    }
+}
+
 val Contract.finalGoal: BigDecimal
     get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
+val Contract.indexOfPeGoal: Int?
+    get() = goals.indexOfFirst { it.rewardType == RewardType.PROPHECY_EGGS }.takeIf { it != -1 }
 val LocalContract.finished: Boolean
-    get() = lastAmountWhenRewardGiven.toBigDecimal() >= contract?.finalGoal
+    get() = goalsAchieved == contract?.goals?.size
 val LocalContract.timeRemaining: Duration
     get() = contract!!.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), now()))
 val CoopStatus.eggsLaid: BigDecimal
