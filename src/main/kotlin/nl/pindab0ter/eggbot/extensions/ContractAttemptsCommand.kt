@@ -55,13 +55,13 @@ class ContractAttemptsCommand : Extension() {
                 edit { content = "Finished checking all farmers." }
 
                 if (farmers.isEmpty()) respond {
-                    content = "All farmers have completed this contract."
+                    content = "All farmers have completed __${arguments.contract.name}__."
                 } else respond {
                     content = buildString {
                         val failedToGetProphecyEggFarmers = farmers.filter { (_, attemptStatus) -> attemptStatus == FAILED_TO_GET_PROPHECY_EGG }
                         val failedToCompleteAllGoalsFarmers = farmers.filter { (_, attemptStatus) -> attemptStatus == FAILED_TO_COMPLETE_ALL_GOALS }
                         val neverAttemptedFarmers = farmers.filter { (_, attemptStatus) -> attemptStatus == NEVER_ATTEMPTED }
-                        appendLine("The following farmers have not completed this contract:")
+                        appendLine("The following farmers have not completed __${arguments.contract.name}__:")
                         if (failedToGetProphecyEggFarmers.isNotEmpty()) {
                             appendLine("- ${failedToGetProphecyEggFarmers.size} farmers have not earned the Prophecy Egg:")
                             append("  ")
