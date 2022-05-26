@@ -122,8 +122,10 @@ suspend fun GuildBehavior.coopFinishedResponse(
     }
 
     appendTable {
-        title = "__**Goals** (${contract.goals.count()}/${contract.goals.count()})__"
-        title = "__${asGuildOrNull()?.emoteMention(contract.egg)} **Goals** (${contract.goals.count()}/${contract.goals.count()})__"
+        title = if (asGuildOrNull()?.emoteMention(contract.egg) != null)
+            "__${asGuildOrNull()?.emoteMention(contract.egg)} **Goals** (${contract.goals.count()}/${contract.goals.count()})__"
+        else
+            "__**Goals** (${contract.goals.count()}/${contract.goals.count()})__"
         displayHeaders = false
         topPadding = 1
 
@@ -203,8 +205,10 @@ private fun StringBuilder.drawGoals(
     compact: Boolean,
     guild: Guild?,
 ): StringBuilder = appendTable {
-    title = "__**Goals** (${state.goalsReached}/${state.goals.count()})__"
-    title = "__${guild?.emoteMention(state.egg)} **Goals** (${state.goalsReached}/${state.goals.count()})__"
+    title = if (guild?.emoteMention(state.egg) != null)
+        "__${guild.emoteMention(state.egg)} **Goals** (${state.goalsReached}/${state.goals.count()})__"
+    else
+        "__**Goals** (${state.goalsReached}/${state.goals.count()})__"
     displayHeaders = false
     topPadding = 1
 
