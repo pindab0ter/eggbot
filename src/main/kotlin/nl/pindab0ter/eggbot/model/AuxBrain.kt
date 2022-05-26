@@ -104,10 +104,10 @@ object AuxBrain {
             ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
 
         return if (cachedFarmerBackup != null) {
-            logger.trace { "Farmer backup cache hit" }
+            logger.trace { "Farmer backup cache hit for $eggIncId" }
             cachedFarmerBackup.farmerBackup
         } else runBlocking {
-            logger.trace { "Farmer backup cache miss" }
+            logger.trace { "Farmer backup cache miss for $eggIncId" }
 
             // Get farmer backup from AuxBrain
             val retrievedFarmerBackup = firstContactRequest(eggIncId)
