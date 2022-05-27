@@ -72,7 +72,7 @@ class ProgressBar(
     private fun loop(coroutineContext: CoroutineContext): Job = kord.launch(coroutineContext) {
         if (goal.get() == 0) running.set(false)
         var i = 0
-        while (running.get()) when {
+        do when {
             dirty.getAndSet(false) -> {
                 message.edit {
                     content = drawProgressBar(
@@ -89,7 +89,7 @@ class ProgressBar(
                 else if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.type()
                 delay(250)
             }
-        }
+        } while (running.get())
     }
 
     fun increment() {
