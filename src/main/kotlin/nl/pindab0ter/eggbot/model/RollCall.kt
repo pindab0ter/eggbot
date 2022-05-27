@@ -38,14 +38,16 @@ fun createRollCall(
 }
 
 private fun coopNames(amount: Int, baseName: String): List<String> = when {
+    amount == 0 -> emptyList()
     amount <= 26 -> ('a' until 'a' + amount).map { char -> "$char-$baseName" }
     else -> {
         val chunks = ceil(amount / 26.0).toInt()
         val chunkSize = floor(amount.toDouble() / chunks).toInt()
         val remainder = amount - chunks * chunkSize
-        ('a' until 'a' + chunkSize).mapCartesianProducts(1..chunks) { char: Char, digit: Int ->
-            "$char$digit$baseName"
-        }.plus(('a' until 'a' + remainder).map { c -> "${c + chunkSize}-$baseName" })
+        ('a' until 'a' + chunkSize)
+            .mapCartesianProducts(1..chunks) { char: Char, digit: Int -> "$char$digit-$baseName" }
+            .plus(('a' until 'a' + remainder)
+                .map { c -> "${c + chunkSize}-$baseName" })
     }
 }
 
