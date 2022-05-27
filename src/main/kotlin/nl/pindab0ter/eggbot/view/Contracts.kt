@@ -29,11 +29,11 @@ fun GuildBehavior.contractsResponse(
 
     runBlocking {
         if (soloContracts.isNotEmpty()) {
-            append("\n__Solo contracts__:\n")
+            append("\n**Solo contracts**:\n")
             append(soloContracts.printContracts())
         }
         if (coopContracts.isNotEmpty()) {
-            append("\n__Co-op contracts__:\n")
+            append("\n**Co-op contracts**:\n")
             append(coopContracts.printContracts())
         }
     }
