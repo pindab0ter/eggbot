@@ -39,7 +39,12 @@ suspend fun GuildBehavior.rollCallResponse(
         val role = coop.roleId?.let { getRoleOrNull(it) }
         buildString {
             // Header
-            appendLine("**__Co-op ${role?.mention ?: coop.name} (`${coop.name}`)__**")
+            append("**__Co-op ")
+            when (val roleMention = role?.mention) {
+                null -> "`${coop.name}`"
+                else -> "$roleMention (`${coop.name}`)"
+            }
+            appendLine("__**")
 
             // Body
             coop.farmers
