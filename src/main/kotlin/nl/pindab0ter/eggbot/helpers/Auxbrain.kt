@@ -59,8 +59,8 @@ val Backup.localContracts: List<LocalContract>
 
 enum class AttemptStatus { NEVER_ATTEMPTED, FAILED_TO_GET_PROPHECY_EGG, FAILED_TO_COMPLETE_ALL_GOALS, COMPLETED }
 
-fun Backup.attemptStatusFor(contractId: String): AttemptStatus {
-    val localContract = localContracts.firstOrNull { it.contract?.id == contractId }
+fun Backup?.attemptStatusFor(contractId: String): AttemptStatus {
+    val localContract = this?.localContracts?.firstOrNull { it.contract?.id == contractId }
 
     return when {
         localContract == null ->

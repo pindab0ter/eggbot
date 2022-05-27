@@ -22,10 +22,10 @@ import nl.pindab0ter.eggbot.COOP_FILL_PERCENTAGE
 import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
+import nl.pindab0ter.eggbot.helpers.*
+import nl.pindab0ter.eggbot.helpers.AttemptStatus.COMPLETED
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
-import nl.pindab0ter.eggbot.helpers.coopContract
-import nl.pindab0ter.eggbot.helpers.createRolesAndChannels
-import nl.pindab0ter.eggbot.helpers.multipartRespond
+import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.createRollCall
 import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
@@ -39,7 +39,6 @@ import org.jetbrains.exposed.sql.jodatime.CurrentDateTime
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
-import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.math.roundToInt
 
 class RollCallCommand : Extension() {
@@ -103,26 +102,38 @@ class RollCallCommand : Extension() {
                     return@action
                 }
 
-                respond { content = "Roll call for __${arguments.contract.name}__…" }.message
-
-                val farmers = transaction {
-                    val activeFarmersQuery = Farmers.innerJoin(DiscordUsers)
-                        .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) }
-                    Farmer.wrapRows(activeFarmersQuery).toList()
-                }
-
-                if (farmers.isEmpty()) {
-                    edit { content = "**Error:** Could not create a roll call because there are no active farmers." }
-                    return@action
-                }
-
-                val maxCoopSize: Int = arguments.maxCoopSize
-                    ?: if (arguments.contract.maxCoopSize <= 10) arguments.contract.maxCoopSize
-                    else (arguments.contract.maxCoopSize * COOP_FILL_PERCENTAGE).roundToInt()
-
                 newSuspendedTransaction(null, databases[server.name]) {
+                    val farmers = withProgressBar(
+                        goal = Farmers.innerJoin(DiscordUsers)
+                            .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) }
+                            .count().toInt(),
+                        statusText = "Roll call for __${arguments.contract.name}__:\nChecking who has attempted this contract in the past…",
+                        unit = "farmers",
+                    ) {
+                        Farmer.wrapRows(Farmers.innerJoin(DiscordUsers)
+                            .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) })
+                            .associateWithAsync { AuxBrain.getFarmerBackup(it.eggIncId, databases[server.name]).also { increment() } }
+                            .filterValues { backup -> backup.attemptStatusFor(arguments.contract.id) != COMPLETED }
+                            .keys
+                            .toList()
+                    }
+
+                    if (farmers.isEmpty()) {
+                        edit { content = "**Error:** Could not create a roll call because there are no active farmers that haven’t completed this contract." }
+                        return@newSuspendedTransaction
+                    }
+
+                    val maxCoopSize: Int = arguments.maxCoopSize
+                        ?: if (arguments.contract.maxCoopSize <= 10) arguments.contract.maxCoopSize
+                        else (arguments.contract.maxCoopSize * COOP_FILL_PERCENTAGE).roundToInt()
+
                     val rollCall = createRollCall(arguments.basename, maxCoopSize, farmers)
-                    val coops = withProgressBar(rollCall.size, "Roll call for __${arguments.contract.name}__…", "co-ops") {
+
+                    val coops = withProgressBar(
+                        goal = rollCall.size,
+                        statusText = "Roll call for __${arguments.contract.name}__…",
+                        unit = "co-ops"
+                    ) {
                         rollCall.map { (name, farmers) ->
                             Coop.new {
                                 this.contractId = arguments.contract.id
