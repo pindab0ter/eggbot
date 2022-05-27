@@ -20,13 +20,8 @@ import nl.pindab0ter.eggbot.model.AuxBrain
  */
 class ContractChoiceConverter(
     override var validator: Validator<Contract> = null,
-) : ChoiceConverter<Contract>(
-    choices = AuxBrain
-        .getContracts()
-        .sortedByDescending { contract -> contract.expirationTime }
-        .toTypedArray()
-        .associateBy { contract -> contract.name }
-) {
+    val suppliedChoices: Map<String, Contract>,
+) : ChoiceConverter<Contract>(choices = suppliedChoices) {
     override val signatureTypeString: String = Contract::name.name
 
     override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
@@ -62,15 +57,51 @@ class ContractConverterBuilder : ConverterBuilder<Contract>() {
 
             converter = ContractChoiceConverter(
                 validator = validator,
+                suppliedChoices = AuxBrain
+                    .getContracts()
+                    .sortedByDescending { contract -> contract.expirationTime }
+                    .toTypedArray()
+                    .associateBy { contract -> contract.name }
+            ).withBuilder(this)
+        )
+    }
+}
+
+class CoopContractConverterBuilder : ConverterBuilder<Contract>() {
+    override fun build(arguments: Arguments): SingleConverter<Contract> {
+        return arguments.arg(
+            displayName = name,
+            description = description,
+
+            converter = ContractChoiceConverter(
+                validator = validator,
+                suppliedChoices = AuxBrain
+                    .getContracts()
+                    .filter { contract -> contract.coopAllowed }
+                    .sortedByDescending { contract -> contract.expirationTime }
+                    .toTypedArray()
+                    .associateBy { contract -> contract.name }
             ).withBuilder(this)
         )
     }
 }
 
 fun Arguments.contract(
-    body: ContractConverterBuilder.() -> Unit
+    body: ContractConverterBuilder.() -> Unit,
 ): SingleConverter<Contract> {
     val builder = ContractConverterBuilder()
+
+    body(builder)
+
+    builder.validateArgument()
+
+    return builder.build(this)
+}
+
+fun Arguments.coopContract(
+    body: CoopContractConverterBuilder.() -> Unit,
+): SingleConverter<Contract> {
+    val builder = CoopContractConverterBuilder()
 
     body(builder)
 

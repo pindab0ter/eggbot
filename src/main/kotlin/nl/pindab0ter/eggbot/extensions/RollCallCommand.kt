@@ -23,7 +23,7 @@ import nl.pindab0ter.eggbot.DEFAULT_ROLE_COLOR
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
-import nl.pindab0ter.eggbot.helpers.contract
+import nl.pindab0ter.eggbot.helpers.coopContract
 import nl.pindab0ter.eggbot.helpers.createRolesAndChannels
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.createRollCall
@@ -47,7 +47,7 @@ class RollCallCommand : Extension() {
     override val name: String = javaClass.simpleName
 
     class RollCallArguments : Arguments() {
-        val contract: Contract by contract()
+        val contract: Contract by coopContract()
         val basename: String by string {
             name = "name"
             description = "The base for the co-op names"

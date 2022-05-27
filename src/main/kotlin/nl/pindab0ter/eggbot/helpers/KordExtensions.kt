@@ -10,6 +10,7 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBool
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.core.behavior.channel.createMessage
 import nl.pindab0ter.eggbot.converters.contract
+import nl.pindab0ter.eggbot.converters.coopContract
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.helpers.Plurality.SINGULAR
 
@@ -43,6 +44,11 @@ fun Arguments.compact() = defaultingBoolean {
 fun Arguments.contract(): SingleConverter<Contract> = contract {
     name = "contract"
     description = "Select an Egg, Inc. contract."
+}
+
+fun Arguments.coopContract(): SingleConverter<Contract> = coopContract {
+    name = "contract"
+    description = "Select an Egg, Inc. co-op contract."
 }
 
 fun Arguments.createRolesAndChannels(plurality: Plurality) = defaultingBoolean {
