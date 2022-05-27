@@ -20,23 +20,30 @@ fun <T> Collection<T>.interleave(other: Collection<T>): Collection<T> =
 
 suspend fun <T, R> Iterable<T>.mapAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
-    transform: suspend (T) -> R,
+    transform: (T) -> R,
 ): List<R> = coroutineScope {
     map { async(coroutineContext) { transform(it) } }.awaitAll()
 }
 
 suspend fun <T> Iterable<T>.onEachAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
-    action: suspend (T) -> Unit,
+    action: (T) -> Unit,
 ): Iterable<T> = coroutineScope {
     onEach { launch(coroutineContext) { action(it) } }
 }
 
 suspend fun <T, K, V> Iterable<T>.associateAsync(
     coroutineContext: CoroutineContext = Dispatchers.Default,
-    transform: suspend (T) -> Pair<K, V>,
+    transform: (T) -> Pair<K, V>,
 ): Map<K, V> = coroutineScope {
     map { async(coroutineContext) { transform(it) } }.awaitAll()
+}.toMap()
+
+suspend fun <K, V> Iterable<K>.associateWithAsync(
+    coroutineContext: CoroutineContext = Dispatchers.Default,
+    valueSelector: (K) -> V,
+): Map<K, V> = coroutineScope {
+    map { async(coroutineContext) { it to valueSelector(it) } }.awaitAll()
 }.toMap()
 
 suspend fun <T> Iterable<T>.forEachAsync(
