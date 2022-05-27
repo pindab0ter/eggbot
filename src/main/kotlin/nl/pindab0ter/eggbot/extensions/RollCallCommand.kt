@@ -8,13 +8,13 @@ import com.kotlindiscord.kord.extensions.commands.converters.impl.optionalInt
 import com.kotlindiscord.kord.extensions.commands.converters.impl.string
 import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
+import com.kotlindiscord.kord.extensions.types.edit
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.botHasPermissions
 import dev.kord.common.entity.Permission.*
 import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.createTextChannel
 import dev.kord.core.behavior.createRole
-import dev.kord.core.behavior.edit
 import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.channel.Category
 import mu.KotlinLogging
@@ -103,7 +103,7 @@ class RollCallCommand : Extension() {
                     return@action
                 }
 
-                val message = respond { content = "Roll call for __${arguments.contract.name}__…" }.message
+                respond { content = "Roll call for __${arguments.contract.name}__…" }.message
 
                 val farmers = transaction {
                     val activeFarmersQuery = Farmers.innerJoin(DiscordUsers)
@@ -112,7 +112,7 @@ class RollCallCommand : Extension() {
                 }
 
                 if (farmers.isEmpty()) {
-                    message.edit { content = "**Error:** Could not create a roll call because there are no active farmers." }
+                    edit { content = "**Error:** Could not create a roll call because there are no active farmers." }
                     return@action
                 }
 
@@ -122,7 +122,7 @@ class RollCallCommand : Extension() {
 
                 newSuspendedTransaction(null, databases[server.name]) {
                     val rollCall = createRollCall(arguments.basename, maxCoopSize, farmers)
-                    val coops = withProgressBar(rollCall.size, "Roll call for __${arguments.contract.name}__…", "co-ops", message) {
+                    val coops = withProgressBar(rollCall.size, "Roll call for __${arguments.contract.name}__…", "co-ops") {
                         rollCall.map { (name, farmers) ->
                             Coop.new {
                                 this.contractId = arguments.contract.id
@@ -140,7 +140,6 @@ class RollCallCommand : Extension() {
                         goal = coops.size,
                         statusText = "Roll call for __${arguments.contract.name}__:\nCreating roles and channels…",
                         unit = "co-ops",
-                        message = message
                     ) {
                         val coopsCategoryChannel = guildFor(event)?.getChannelOfOrNull<Category>(server.channel.coopsGroup)
 
@@ -162,7 +161,7 @@ class RollCallCommand : Extension() {
                                     guild
                                         ?.getMemberOrNull(farmer.discordUser.snowflake)
                                         ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
-                               }
+                                }
                             }
 
                             // Create channel
@@ -181,8 +180,7 @@ class RollCallCommand : Extension() {
                         }
                     }
 
-                    // TODO: Make overview table separate and use message.edit to display it so that is the target of the 'reply'
-                    message.edit { content = "Roll call for __${arguments.contract.name}__" }
+                    edit { content = "Roll call for __${arguments.contract.name}__" }
 
                     multipartRespond(guild?.rollCallResponse(arguments.contract, coops) ?: emptyList())
                 }

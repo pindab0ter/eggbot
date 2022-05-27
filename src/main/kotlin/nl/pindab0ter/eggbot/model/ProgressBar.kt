@@ -2,11 +2,10 @@ package nl.pindab0ter.eggbot.model
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
-import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.types.edit
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Message
 import kotlinx.coroutines.*
-import mu.KotlinLogging
 import nl.pindab0ter.eggbot.helpers.kord
 import nl.pindab0ter.eggbot.helpers.paddingCharacters
 import nl.pindab0ter.eggbot.model.ProgressBar.Companion.drawProgressBar
@@ -26,7 +25,6 @@ inline fun <T, A : Arguments> PublicSlashCommandContext<A>.withProgressBar(
     goal: Int,
     statusText: String? = null,
     unit: String = "",
-    message: Message? = null,
     coroutineContext: CoroutineContext = Dispatchers.Default,
     block: ProgressBar.() -> T,
 ): T {
@@ -34,8 +32,8 @@ inline fun <T, A : Arguments> PublicSlashCommandContext<A>.withProgressBar(
         callsInPlace(block, InvocationKind.EXACTLY_ONCE)
     }
 
-    val progressBarMessage = message ?: runBlocking {
-        respond { content = drawProgressBar(0, goal, statusText, unit) }
+    val progressBarMessage = runBlocking {
+        edit { content = drawProgressBar(0, goal, statusText, unit) }
     }.message
 
     val progressBar = ProgressBar(goal, statusText, unit, progressBarMessage, coroutineContext)
@@ -49,6 +47,7 @@ inline fun <T, A : Arguments> PublicSlashCommandContext<A>.withProgressBar(
     return value
 }
 
+@Suppress("unused")
 class ProgressBar(
     goal: Int,
     statusText: String? = null,
@@ -63,7 +62,6 @@ class ProgressBar(
     private val running: AtomicBoolean = AtomicBoolean(true)
     private val dirty: AtomicBoolean = AtomicBoolean(true)
     private val job: Job
-    private val logger = KotlinLogging.logger { }
 
     init {
         job = loop(coroutineContext)
@@ -94,14 +92,6 @@ class ProgressBar(
 
     fun increment() {
         value.incrementAndGet()
-        dirty.set(true)
-    }
-
-    fun reset(value: Int = 0, goal: Int, statusText: String? = null, unit: String = "") {
-        this.value.set(value)
-        this.goal.set(goal)
-        this.statusText.set(statusText)
-        this.unit.set(unit)
         dirty.set(true)
     }
 
