@@ -82,7 +82,7 @@ object AuxBrain {
 
     data class FarmerBackupCache(
         val validUntil: Instant,
-        val farmerBackup: Backup
+        val farmerBackup: Backup,
     )
 
     private val cachedFarmerBackups: MutableMap<String, FarmerBackupCache> = mutableMapOf()
@@ -110,13 +110,13 @@ object AuxBrain {
             logger.trace { "Farmer backup cache miss for $eggIncId" }
 
             // Get farmer backup from AuxBrain
-            val retrievedFarmerBackup = firstContactRequest(eggIncId)
+            val (retrievedFarmerBackup, error) = firstContactRequest(eggIncId)
                 .responseObject(BackupDeserializer)
                 .third
-                .component1()
 
             if (retrievedFarmerBackup == null) {
-                logger.warn { "Could not get backup for ID `$eggIncId` from AuxBrain" }
+                logger.warn { "Could not get backup for ID $eggIncId from AuxBrain." }
+                if (error != null) logger.error { "Error: ${error.message}" }
                 return@runBlocking null
             }
 
