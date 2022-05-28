@@ -8,6 +8,12 @@ import java.math.BigDecimal.*
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale.ENGLISH
+import kotlin.random.Random
+
+val farmerEmoji = when (Random.nextBoolean()) {
+    true -> "👨‍🌾"
+    false -> "👩‍🌾"
+}
 
 enum class Plurality {
     SINGULAR,

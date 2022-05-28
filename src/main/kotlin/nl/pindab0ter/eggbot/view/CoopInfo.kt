@@ -145,11 +145,7 @@ suspend fun GuildBehavior.coopFinishedResponse(
     }
 
     appendTable {
-        val memberEmoji = when (Random.nextBoolean()) {
-            true -> "👨‍🌾"
-            false -> "👩‍🌾"
-        }
-        title = "__**${memberEmoji} Members** (${status.contributors.count()}/${contract.maxCoopSize})__"
+        title = "__**${farmerEmoji} Members** (${status.contributors.count()}/${contract.maxCoopSize})__"
         topPadding = 1
 
         incrementColumn { suffix = "." }
@@ -294,11 +290,7 @@ private fun StringBuilder.drawBasicInfo(
 private fun StringBuilder.drawMembers(
     state: CoopContractState,
 ): StringBuilder = appendTable {
-    val memberEmoji = when (Random.nextBoolean()) {
-        true -> "👨‍🌾"
-        false -> "👩‍🌾"
-    }
-    title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize})__"
+    title = "__**${farmerEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize})__"
     topPadding = 1
 
     incrementColumn { suffix = "." }
@@ -374,11 +366,7 @@ private fun StringBuilder.drawMembers(
 private fun StringBuilder.drawCompactMembers(
     state: CoopContractState,
 ): StringBuilder = appendTable {
-    val memberEmoji = when (Random.nextBoolean()) {
-        true -> "👨‍🌾"
-        false -> "👩‍🌾"
-    }
-    title = "__**${memberEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize})__"
+    title = "__**${farmerEmoji} Members** (${state.farmers.count()}/${state.maxCoopSize})__"
     topPadding = 1
 
     column {
