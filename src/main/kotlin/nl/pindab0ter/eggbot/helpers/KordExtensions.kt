@@ -8,11 +8,12 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.i
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
 import com.kotlindiscord.kord.extensions.types.respond
+import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.core.behavior.channel.createMessage
 import nl.pindab0ter.eggbot.converters.contract
-import nl.pindab0ter.eggbot.converters.coopContract
 import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.helpers.Plurality.SINGULAR
+import nl.pindab0ter.eggbot.model.AuxBrain
 
 suspend fun <A : Arguments> PublicSlashCommandContext<A>.multipartRespond(messages: List<String>) {
     respond { content = messages.first() }
@@ -44,11 +45,22 @@ fun Arguments.compact() = defaultingBoolean {
 fun Arguments.contract(): SingleConverter<Contract> = contract {
     name = "contract"
     description = "Select an Egg, Inc. contract."
+    autoComplete {
+        val suggestions = AuxBrain.getContracts()
+            .associate { contract -> contract.name to contract.name }
+        suggestStringMap(suggestions)
+    }
 }
 
-fun Arguments.coopContract(): SingleConverter<Contract> = coopContract {
+fun Arguments.coopContract(): SingleConverter<Contract> = contract {
     name = "contract"
     description = "Select an Egg, Inc. co-op contract."
+    autoComplete {
+        val suggestions = AuxBrain.getContracts()
+            .filter { contract -> contract.coopAllowed }
+            .associate { contract -> contract.name to contract.name }
+        suggestStringMap(suggestions)
+    }
 }
 
 fun Arguments.createRolesAndChannels(plurality: Plurality) = defaultingBoolean {

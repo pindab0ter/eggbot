@@ -2,10 +2,10 @@ package nl.pindab0ter.eggbot.converters
 
 
 import com.auxbrain.ei.Contract
+import com.kotlindiscord.kord.extensions.DiscordRelayedException
 import com.kotlindiscord.kord.extensions.commands.Argument
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.CommandContext
-import com.kotlindiscord.kord.extensions.commands.application.slash.converters.ChoiceConverter
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.Validator
 import com.kotlindiscord.kord.extensions.commands.converters.builders.ConverterBuilder
@@ -18,34 +18,32 @@ import nl.pindab0ter.eggbot.model.AuxBrain
 /**
  * Choice converter for AuxBrain contracts.
  */
-class ContractChoiceConverter(
-    override var validator: Validator<Contract> = null,
-    val suppliedChoices: Map<String, Contract>,
-) : ChoiceConverter<Contract>(choices = suppliedChoices) {
+class ContractChoiceConverter(override var validator: Validator<Contract> = null) : SingleConverter<Contract>() {
     override val signatureTypeString: String = Contract::name.name
 
     override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
-        val arg: String = named ?: parser?.parseNext()?.data ?: return false
+        val contractName: String = named ?: parser?.parseNext()?.data ?: return false
 
-        parsed = choices.values.firstOrNull { contract -> contract.name == arg }
-            ?: throw Exception("Could not get contract information")
+        val contracts = AuxBrain.getContracts()
+
+        parsed = contracts.firstOrNull { contract -> contract.name.trim() == contractName.trim() }
+            ?: throw DiscordRelayedException("Could not find contract “$contractName”.")
 
         return true
     }
 
     override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
-        parsed = choices.values.firstOrNull { contract -> contract.name.trim() == option.value }
-            ?: throw Exception("Could not get contract information")
+        parsed = AuxBrain.getContracts().firstOrNull { contract -> contract.name.trim() == option.value }
+            ?: throw DiscordRelayedException("Could not find contract “${option.value}”.")
 
         return true
     }
 
     override suspend fun toSlashOption(arg: Argument<*>): OptionsBuilder = StringChoiceBuilder(
         name = arg.displayName,
-        description = arg.description
+        description = arg.description,
     ).apply {
         required = true
-        this@ContractChoiceConverter.choices.forEach { choice(it.key, it.value.name) }
     }
 }
 
@@ -54,34 +52,7 @@ class ContractConverterBuilder : ConverterBuilder<Contract>() {
         return arguments.arg(
             displayName = name,
             description = description,
-
-            converter = ContractChoiceConverter(
-                validator = validator,
-                suppliedChoices = AuxBrain
-                    .getContracts()
-                    .sortedByDescending { contract -> contract.expirationTime }
-                    .toTypedArray()
-                    .associateBy { contract -> contract.name }
-            ).withBuilder(this)
-        )
-    }
-}
-
-class CoopContractConverterBuilder : ConverterBuilder<Contract>() {
-    override fun build(arguments: Arguments): SingleConverter<Contract> {
-        return arguments.arg(
-            displayName = name,
-            description = description,
-
-            converter = ContractChoiceConverter(
-                validator = validator,
-                suppliedChoices = AuxBrain
-                    .getContracts()
-                    .filter { contract -> contract.coopAllowed }
-                    .sortedByDescending { contract -> contract.expirationTime }
-                    .toTypedArray()
-                    .associateBy { contract -> contract.name }
-            ).withBuilder(this)
+            converter = ContractChoiceConverter(validator).withBuilder(this)
         )
     }
 }
@@ -90,18 +61,6 @@ fun Arguments.contract(
     body: ContractConverterBuilder.() -> Unit,
 ): SingleConverter<Contract> {
     val builder = ContractConverterBuilder()
-
-    body(builder)
-
-    builder.validateArgument()
-
-    return builder.build(this)
-}
-
-fun Arguments.coopContract(
-    body: CoopContractConverterBuilder.() -> Unit,
-): SingleConverter<Contract> {
-    val builder = CoopContractConverterBuilder()
 
     body(builder)
 
