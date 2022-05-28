@@ -3,6 +3,7 @@ package nl.pindab0ter.eggbot.view
 import com.auxbrain.ei.Backup
 import nl.pindab0ter.eggbot.MAX_PROPHECY_EGG_RESEARCH_LEVEL
 import nl.pindab0ter.eggbot.MAX_SOUL_EGG_RESEARCH_LEVEL
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.COMPACT
 import nl.pindab0ter.eggbot.helpers.DisplayMode.EXTENDED
@@ -12,10 +13,11 @@ import nl.pindab0ter.eggbot.model.Table
 fun earningsBonusResponse(
     farmer: Backup,
     displayMode: DisplayMode,
-): List<String> = farmer.game.run {
+): String = farmer.game.run {
     if (this == null) throw IllegalStateException("Backup is not in a valid state")
 
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
+
     fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") = add(Row(label, value, suffix))
     val compact = displayMode == COMPACT
 
@@ -55,7 +57,7 @@ fun earningsBonusResponse(
     }
 
     return table {
-        title = "Earnings bonus for **${farmer.userName}**"
+        title = "Earnings bonus for **${farmer.userName ?: NO_ALIAS}**"
         displayHeaders = false
         column {
             rightPadding = 2
@@ -68,5 +70,5 @@ fun earningsBonusResponse(
         column {
             cells = rows.map { row -> row.suffix }
         }
-    }
+    }.first()
 }

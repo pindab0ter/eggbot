@@ -5,14 +5,14 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.DisplayMode
 import nl.pindab0ter.eggbot.helpers.displayModeChoice
-import nl.pindab0ter.eggbot.helpers.multipartRespond
+import nl.pindab0ter.eggbot.helpers.forEachAsync
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.DiscordUser
-import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.earningsBonusResponse
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -30,26 +30,25 @@ class EarningsBonusCommand : Extension() {
             description = "See your Farmer Role, EB and how much SE or PE till your next rank."
             guild(server.snowflake)
 
-            lateinit var discordUser: DiscordUser
-            lateinit var farmers: List<Farmer>
-
-            check {
-                discordUser = transaction(databases[server.name]) {DiscordUser.findBy(event.interaction.user.id) }
-                    ?: return@check fail("You have not registered yet. Please do so using `/register`.")
-
-                farmers = transaction(databases[server.name]) {discordUser.farmers.toList().sortedBy(Farmer::inGameName) }
-                failIf("You have no Egg, Inc. accounts associated with your Discord account. Please register one using `/register`.") {
-                    farmers.isEmpty()
-                }
-            }
-
             action {
-                farmers.forEach { farmer ->
-                    try {
-                        val backup = AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])
-                        multipartRespond(earningsBonusResponse(backup!!, arguments.displayMode))
-                    } catch (e: IllegalStateException) {
-                        respond { content = "Could not get information on EggBot user with in-game ID: `${farmer.inGameName}`" }
+                val discordUser = transaction(databases[server.name]) { DiscordUser.findBy(event.interaction.user.id) }
+
+                if (discordUser == null) {
+                    respond { content = "You have not registered yet. Please do so using `/register`." }
+                    return@action
+                }
+
+                val farmers = transaction(databases[server.name]) { discordUser.farmers }
+
+                if (farmers.empty()) {
+                    respond { content = "You have no Egg, Inc. accounts registered yet. Please do so using `/register`." }
+                    return@action
+                }
+
+                farmers.forEachAsync { farmer ->
+                    when (val backup = AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])) {
+                        null -> respond { content = "Could not get information on EggBot user with in-game name: `${farmer.inGameName ?: NO_ALIAS}`" }
+                        else -> respond { content = earningsBonusResponse(backup, arguments.displayMode) }
                     }
                 }
             }

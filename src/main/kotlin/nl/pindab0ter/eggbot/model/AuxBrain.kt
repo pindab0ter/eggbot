@@ -3,22 +3,22 @@ package nl.pindab0ter.eggbot.model
 import com.auxbrain.ei.*
 import com.github.kittinunf.fuel.core.Request
 import com.github.kittinunf.fuel.core.ResponseDeserializable
+import com.github.kittinunf.fuel.core.awaitResult
 import com.github.kittinunf.fuel.httpPost
 import com.github.kittinunf.fuel.util.decodeBase64
+import com.github.kittinunf.result.Result
 import com.github.kittinunf.result.getOrNull
 import io.ktor.util.*
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.model.database.Farmer
 import org.jetbrains.exposed.sql.Database
-import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.jetbrains.exposed.sql.transactions.experimental.suspendedTransactionAsync
 import org.joda.time.Instant
 import org.joda.time.Period.minutes
 
 
-@OptIn(InternalAPI::class)
 object AuxBrain {
     private val logger = KotlinLogging.logger {}
 
@@ -26,36 +26,9 @@ object AuxBrain {
     private const val COOP_STATUS_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
     private const val FIRST_CONTACT_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
 
-    ///////////////
-    // Contracts //
-    ///////////////
-
-    private var contractsUpdateValidUntil: Instant = Instant.EPOCH
-    private val contracts: MutableMap<String, Contract> = mutableMapOf()
-        get() = if (contractsUpdateValidUntil.isBefore(Instant.now())) {
-            logger.trace { "Contracts cache miss" }
-
-            val contracts = periodicalsRequest()
-                .responseObject(ContractsDeserializer)
-                .third
-                .component1()
-                .orEmpty()
-
-            if (contracts.isEmpty()) {
-                logger.warn { "Could not get contracts from AuxBrain" }
-            }
-
-            contracts
-                .filter { contract -> contract.id != "first-contract" }
-                .forEach { contract ->
-                    field[contract.id] = contract
-                }
-            contractsUpdateValidUntil = Instant.now().plus(minutes(5).toStandardDuration())
-            field
-        } else {
-            logger.trace { "Contracts cache hit" }
-            field
-        }
+    //region Contracts
+    private var contractsCacheUpdateValidUntil: Instant = Instant.EPOCH
+    private var contractsCache: Set<Contract> = emptySet()
 
     private fun periodicalsRequest(): Request {
         val data = PeriodicalsRequest(
@@ -68,24 +41,33 @@ object AuxBrain {
             .body("data=$data")
     }
 
-    fun getContracts(): List<Contract> = contracts.values.toList()
+    private fun updateContractsCache() = when (val result = runBlocking { periodicalsRequest().awaitResult(ContractsDeserializer) }) {
+        is Result.Success -> {
+            contractsCache = result.value.filter { contract -> contract.id != "first-contract" }.toSet()
+            contractsCacheUpdateValidUntil = Instant.now().plus(minutes(5).toStandardDuration())
+        }
+        is Result.Failure -> {
+            logger.error { "Could not get contracts from AuxBrain." }
+            logger.error { result.error }
+        }
+    }
+
+    fun getContracts(): Set<Contract> {
+        if (contractsCacheUpdateValidUntil.isBeforeNow) updateContractsCache()
+        return contractsCache
+    }
 
     private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
         override fun deserialize(content: String): List<Contract>? {
             return content.decodeBase64()?.let { PeriodicalsResponse.ADAPTER.decode(it).periodicals?.contracts?.contracts }
         }
     }
+    //endregion
 
-    /////////////
-    // Backups //
-    /////////////
+    //region Farmer backups
+    data class FarmerBackupCache(val validUntil: Instant, val farmerBackup: Backup)
 
-    data class FarmerBackupCache(
-        val validUntil: Instant,
-        val farmerBackup: Backup,
-    )
-
-    private val cachedFarmerBackups: MutableMap<String, FarmerBackupCache> = mutableMapOf()
+    private val farmerBackupsCache: MutableMap<String, FarmerBackupCache> = mutableMapOf()
 
     private fun firstContactRequest(eggIncId: String): Request {
         val data = FirstContactRequest(
@@ -99,52 +81,36 @@ object AuxBrain {
             .body("data=$data")
     }
 
-    fun getFarmerBackup(eggIncId: String, database: Database?): Backup? {
-        val cachedFarmerBackup = cachedFarmerBackups[eggIncId]
-            ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }
-
-        return if (cachedFarmerBackup != null) {
-            logger.trace { "Farmer backup cache hit for $eggIncId" }
-            cachedFarmerBackup.farmerBackup
-        } else runBlocking {
-            logger.trace { "Farmer backup cache miss for $eggIncId" }
-
-            // Get farmer backup from AuxBrain
-            val (retrievedFarmerBackup, error) = firstContactRequest(eggIncId)
-                .responseObject(BackupDeserializer)
-                .third
-
-            if (retrievedFarmerBackup == null) {
-                logger.warn { "Could not get backup for ID $eggIncId from AuxBrain." }
-                if (error != null) logger.error { "Error: ${error.message}" }
-                return@runBlocking null
-            }
-
-            // Cache farmer backup
-            cachedFarmerBackups[eggIncId] = FarmerBackupCache(
+    private fun updateFarmerBackupsCache(eggIncId: String, database: Database?): Unit = when (
+        val result = runBlocking { firstContactRequest(eggIncId).awaitResult(BackupDeserializer) }
+    ) {
+        is Result.Success -> runBlocking {
+            suspendedTransactionAsync(null, database) {
+                Farmer.findById(eggIncId)?.update(result.value)
+            }.start()
+            farmerBackupsCache[eggIncId] = FarmerBackupCache(
                 validUntil = Instant.now().plus(minutes(5).toStandardDuration()),
-                farmerBackup = retrievedFarmerBackup,
+                farmerBackup = result.value
             )
-
-            // Update farmer in database
-            newSuspendedTransaction(Dispatchers.IO, database) {
-                Farmer.findById(eggIncId)?.update(retrievedFarmerBackup)
-            }
-
-            retrievedFarmerBackup
+        }
+        is Result.Failure -> {
+            logger.error { "Could not get backup for ID $eggIncId from AuxBrain." }
+            logger.error { result.error }
         }
     }
+
+    fun getFarmerBackup(eggIncId: String, database: Database?): Backup? = farmerBackupsCache[eggIncId]
+        ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }?.farmerBackup
+        ?: updateFarmerBackupsCache(eggIncId, database).run { farmerBackupsCache[eggIncId]?.farmerBackup }
 
     private object BackupDeserializer : ResponseDeserializable<Backup> {
         override fun deserialize(content: String): Backup? {
             return content.decodeBase64()?.let { FirstContactResponse.ADAPTER.decode(it).firstContact?.backup }
         }
     }
+    //endregion
 
-    ////////////
-    // Co-ops //
-    ////////////
-
+    //region Co-ops
     private fun coopStatusRequest(contractId: String, coopId: String): Request {
         val data = CoopStatusRequest(
             contractId = contractId,
@@ -169,4 +135,5 @@ object AuxBrain {
             return content.decodeBase64()?.let { CoopStatusResponse.ADAPTER.decode(it) }?.coopStatus
         }
     }
+    //endregion
 }
