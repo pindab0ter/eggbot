@@ -47,7 +47,12 @@ fun Arguments.contract(): SingleConverter<Contract> = contract {
     description = "Select an Egg, Inc. contract."
     autoComplete {
         val suggestions = AuxBrain.getContracts()
-            .associate { contract -> contract.name to contract.name }
+            .associate { contract ->
+                when (contract.coopAllowed) {
+                    true -> "${contract.name} (Max ${contract.maxCoopSize})"
+                    false -> "${contract.name} (Solo)"
+                } to contract.id
+            }
         suggestStringMap(suggestions)
     }
 }
@@ -58,7 +63,12 @@ fun Arguments.coopContract(): SingleConverter<Contract> = contract {
     autoComplete {
         val suggestions = AuxBrain.getContracts()
             .filter { contract -> contract.coopAllowed }
-            .associate { contract -> contract.name to contract.name }
+            .associate { contract ->
+                when (contract.coopAllowed) {
+                    true -> "${contract.name} (Max ${contract.maxCoopSize})"
+                    false -> "${contract.name} (Solo)"
+                } to contract.id
+            }
         suggestStringMap(suggestions)
     }
 }

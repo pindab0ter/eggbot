@@ -22,18 +22,18 @@ class ContractChoiceConverter(override var validator: Validator<Contract> = null
     override val signatureTypeString: String = Contract::name.name
 
     override suspend fun parse(parser: StringParser?, context: CommandContext, named: String?): Boolean {
-        val contractName: String = named ?: parser?.parseNext()?.data ?: return false
+        val contractId: String = named ?: parser?.parseNext()?.data ?: return false
 
         val contracts = AuxBrain.getContracts()
 
-        parsed = contracts.firstOrNull { contract -> contract.name.trim() == contractName.trim() }
-            ?: throw DiscordRelayedException("Could not find contract “$contractName”.")
+        parsed = contracts.firstOrNull { contract -> contract.id.trim() == contractId }
+            ?: throw DiscordRelayedException("Could not find contract “$contractId”.")
 
         return true
     }
 
     override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
-        parsed = AuxBrain.getContracts().firstOrNull { contract -> contract.name.trim() == option.value }
+        parsed = AuxBrain.getContracts().firstOrNull { contract -> contract.id.trim() == option.value }
             ?: throw DiscordRelayedException("Could not find contract “${option.value}”.")
 
         return true
