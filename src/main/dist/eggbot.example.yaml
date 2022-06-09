@@ -1,3 +1,13 @@
+# Environment
+## Adds the test command if not set to production
+environment: development
+
+# Database
+## Database URl without database name, these are defined on a per-server basis
+databaseUrl: jdbc:postgresql://<hostname>:<port>/
+databaseUser:
+databasePassword:
+
 # Discord
 ## https://discordapp.com/developers/applications/ -> Your app -> Settings -> Bot -> Token
 botToken:
@@ -16,8 +26,8 @@ servers:
   - name:
     id:
 
-    # The key pointing to the environment variable containing the PostgreSQL JDBC connection url
-    databaseJdbcUrlEnv:
+    # The name of the database to use for this Discord server. This needs to be set up in advance.
+    databaseName:
 
     role:
       adminId:

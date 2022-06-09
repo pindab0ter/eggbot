@@ -2,12 +2,6 @@ package nl.pindab0ter.eggbot
 
 import com.auxbrain.ei.Egg.*
 import com.charleskorn.kaml.Yaml
-import com.github.kittinunf.fuel.Fuel
-import com.github.kittinunf.fuel.core.extensions.authentication
-import com.github.kittinunf.result.Result.Failure
-import com.github.kittinunf.result.Result.Success
-import com.kotlindiscord.kord.extensions.utils.env
-import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
@@ -18,6 +12,10 @@ val logger = KotlinLogging.logger {}
 
 @Serializable
 data class Config(
+    val environment: String,
+    val databaseUrl: String,
+    val databaseUser: String,
+    val databasePassword: String,
     val botToken: String,
     private val botOwnerId: String,
     val eggIncId: String,
@@ -35,7 +33,7 @@ data class Config(
 class Server(
     val name: String,
     private val id: String,
-    val databaseJdbcUrlEnv: String,
+    val databaseName: String,
     val role: Role,
     val channel: Channel,
     val emote: Emote,
@@ -170,34 +168,7 @@ data class Emote(
     val prophecyEgg get() = this.prophecyEggId?.let(::Snowflake)
 }
 
-val config = when (envOrNull("ENVIRONMENT")) {
-    "production" -> {
-        logger.info { "Production environment: Loading remote config from ${env("CONFIG_URL")}" }
-        Yaml.default.decodeFromString(
-            deserializer = Config.serializer(),
-            string = run {
-                val (_, _, result) = Fuel.get(env("CONFIG_URL"))
-                    .authentication()
-                    .basic(env("CONFIG_USERNAME"), env("CONFIG_PASSWORD"))
-                    .responseString()
-
-                when (result) {
-                    is Failure -> {
-                        logger.error { result.getException() }
-                        throw Exception("Failed to fetch configuration")
-                    }
-                    is Success -> {
-                        result.get()
-                    }
-                }
-            }
-        )
-    }
-    else -> {
-        logger.info { "Non-production environment: Loading local config" }
-        Yaml.default.decodeFromStream(
-            deserializer = Config.serializer(),
-            File("eggbot.yaml").inputStream()
-        )
-    }
-}
+val config = Yaml.default.decodeFromStream(
+    deserializer = Config.serializer(),
+    File("eggbot.yaml").inputStream()
+)

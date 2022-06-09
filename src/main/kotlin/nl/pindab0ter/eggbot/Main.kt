@@ -3,7 +3,6 @@
 package nl.pindab0ter.eggbot
 
 import com.kotlindiscord.kord.extensions.ExtensibleBot
-import com.kotlindiscord.kord.extensions.utils.envOrNull
 import dev.kord.common.annotation.KordPreview
 import nl.pindab0ter.eggbot.extensions.*
 
@@ -36,7 +35,7 @@ suspend fun main() {
             add(::WhoIsCommand)
 
             // Test command
-            if (envOrNull("ENVIRONMENT") != "production") {
+            if (config.environment != "production") {
                 add(::TestCommand)
             }
         }
@@ -47,7 +46,7 @@ suspend fun main() {
             }
 
             beforeStart {
-                if (envOrNull("ENVIRONMENT") == "production") {
+                if (config.environment == "production") {
                     startScheduler()
                 }
             }
