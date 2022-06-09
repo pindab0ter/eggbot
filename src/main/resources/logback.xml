@@ -26,6 +26,7 @@
 
     <logger name="nl.pindab0ter.eggbot" level="TRACE"/>
     <logger name="org.quartz" level="WARN"/>
+    <logger name="Exposed" level="WARN"/>
     <logger name="com.kotlindiscord.kord" level="INFO"/>
     <logger name="com.kotlindiscord.kord.extensions.i18n" level="OFF"/>
     <logger name="org.flywaydb.core.internal" level="WARN"/>
