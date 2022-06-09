@@ -16,7 +16,9 @@ suspend fun main() = ExtensibleBot(
             try {
                 connectToDatabase()
 
-                logger.debug { "Scratch here…" }
+                config.servers.forEach { server ->
+                    logger.debug { "Scratch here…" }
+                }
 
             } catch (e: Exception) {
                 logger.error { e.stackTraceToString() }
