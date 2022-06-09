@@ -22,9 +22,9 @@ import org.joda.time.Period.minutes
 object AuxBrain {
     private val logger = KotlinLogging.logger {}
 
-    private const val PERIODICALS_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/get_periodicals"
-    private const val COOP_STATUS_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
-    private const val FIRST_CONTACT_URL = "http://afx-2-dot-auxbrainhome.appspot.com/ei/first_contact"
+    private const val PERIODICALS_URL = "https://afx-2-dot-auxbrainhome.appspot.com/ei/get_periodicals"
+    private const val COOP_STATUS_URL = "https://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
+    private const val FIRST_CONTACT_URL = "https://afx-2-dot-auxbrainhome.appspot.com/ei/bot_first_contact"
 
     //region Contracts
     private var contractsCacheUpdateValidUntil: Instant = Instant.EPOCH
@@ -73,7 +73,6 @@ object AuxBrain {
         val data = FirstContactRequest(
             eiUserId = eggIncId,
             deviceId = config.deviceId,
-            clientVersion = Int.MAX_VALUE,
         ).encode().encodeBase64()
 
         return FIRST_CONTACT_URL.httpPost()
@@ -105,7 +104,7 @@ object AuxBrain {
 
     private object BackupDeserializer : ResponseDeserializable<Backup> {
         override fun deserialize(content: String): Backup? {
-            return content.decodeBase64()?.let { FirstContactResponse.ADAPTER.decode(it).firstContact?.backup }
+            return content.decodeBase64()?.let { FirstContact.ADAPTER.decode(it).backup }
         }
     }
     //endregion

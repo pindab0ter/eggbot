@@ -234,7 +234,7 @@ message Backup {
   }
 }
 
-/* http://www.auxbrain.com/ei/firstContact */
+/* https://www.auxbrain.com/ei/first_contact */
 
 message FirstContactRequest {
   string userId = 1;
@@ -319,7 +319,7 @@ message ContractsResponse {
   string warningMessage = 4;
 }
 
-/* http://www.auxbrain.com/ei/coopStatus */
+/* https://www.auxbrain.com/ei/coop_status */
 
 message CoopStatusRequest {
   string contractId = 1;
@@ -413,7 +413,7 @@ message ServerGift {
   double rewardAmount = 5;
 }
 
-/* http://www.auxbrain.com/ei/getPeriodicals */
+/* https://www.auxbrain.com/ei/get_periodicals */
 
 message PeriodicalsRequest {
   string userId = 1;
@@ -901,7 +901,7 @@ message InventorySlot {
   uint32 itemId = 2;
 }
 
-/* http://auxbrain.com/eiAfx/config */
+/* https://auxbrain.com/ei_afx/config */
 
 message ArtifactsConfigurationRequest {
   uint32 clientVersion = 1;
