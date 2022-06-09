@@ -85,7 +85,7 @@ class ProgressBar(
             else -> {
                 if (i >= TIME_OUT) stop()
                 else if (i++ % SEND_TYPING_INTERVAL == 0) message.channel.type()
-                delay(250)
+                delay(500)
             }
         } while (running.get())
     }
