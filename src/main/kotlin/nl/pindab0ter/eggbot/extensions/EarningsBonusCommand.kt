@@ -38,9 +38,9 @@ class EarningsBonusCommand : Extension() {
                     return@action
                 }
 
-                val farmers = transaction(databases[server.name]) { discordUser.farmers }
+                val farmers = transaction(databases[server.name]) { discordUser.farmers.toList() }
 
-                if (farmers.empty()) {
+                if (farmers.isEmpty()) {
                     respond { content = "You have no Egg, Inc. accounts registered yet. Please do so using `/register`." }
                     return@action
                 }
