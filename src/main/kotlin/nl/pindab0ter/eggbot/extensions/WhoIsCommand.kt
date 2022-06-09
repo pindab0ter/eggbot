@@ -16,8 +16,8 @@ import nl.pindab0ter.eggbot.helpers.toListing
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
-import org.jetbrains.exposed.sql.SortOrder.DESC
 import org.jetbrains.exposed.sql.and
+import org.jetbrains.exposed.sql.SortOrder.ASC
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -43,7 +43,7 @@ class WhoIsCommand : Extension() {
                         val query = Farmers
                             .innerJoin(DiscordUsers)
                             .select { Farmers.inGameName.isNotNull() and (Farmers.inGameName like "%$farmerInput%") }
-                            .orderBy(Farmers.inGameName to DESC)
+                            .orderBy(Farmers.inGameName to ASC)
                             .limit(25)
 
                         Farmer.wrapRows(query).associate { farmer ->
