@@ -21,7 +21,6 @@ import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
 import org.jetbrains.exposed.dao.load
 import org.jetbrains.exposed.sql.SortOrder.ASC
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
 @KordPreview
@@ -40,11 +39,11 @@ class UnregisterCommand : Extension() {
                 description = "Find out which member has registered this farmer."
 
                 autoComplete {
-                    val farmerInput: String = command.options["name"]?.value as String? ?: ""
+                    val farmerInput: String = command.options["farmer"]?.value as String
 
                     val farmers = transaction(databases[server.name]) {
                         Farmer
-                            .find { Farmers.inGameName.isNotNull() and (Farmers.inGameName like "%$farmerInput%") }
+                            .find { Farmers.inGameName like "%$farmerInput%" }
                             .orderBy(Farmers.inGameName to ASC)
                             .limit(25)
                             .associate { farmer -> farmer.inGameName!! to farmer.inGameName!! }

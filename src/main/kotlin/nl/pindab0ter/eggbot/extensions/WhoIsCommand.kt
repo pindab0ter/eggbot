@@ -16,7 +16,6 @@ import nl.pindab0ter.eggbot.helpers.toListing
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
-import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.SortOrder.ASC
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -37,17 +36,17 @@ class WhoIsCommand : Extension() {
                 database = databases[server.name]
 
                 autoComplete {
-                    val farmerInput: String = command.options["name"]?.value as String? ?: ""
+                    val farmerInput: String = command.options["farmer"]?.value as String
 
                     val farmers = transaction(databases[server.name]) {
                         val query = Farmers
                             .innerJoin(DiscordUsers)
-                            .select { Farmers.inGameName.isNotNull() and (Farmers.inGameName like "%$farmerInput%") }
+                            .select { Farmers.inGameName like "%$farmerInput%" }
                             .orderBy(Farmers.inGameName to ASC)
                             .limit(25)
 
                         Farmer.wrapRows(query).associate { farmer ->
-                            farmer.inGameName!! to farmer.inGameName!!
+                            farmer.inGameName!! to farmer.eggIncId
                         }
                     }
 
@@ -87,6 +86,9 @@ class WhoIsCommand : Extension() {
                                 if (discordUser != null) "${arguments.farmer?.inGameName} is registered by ${discordUser.mention}"
                                 else "**Error:** Failed to find member for ${arguments.farmer?.inGameName}."
                         }
+                    }
+                    else -> {
+                        respond { content = "Please specify a member or a farmer." }
                     }
                 }
             }
