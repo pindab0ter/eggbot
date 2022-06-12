@@ -41,7 +41,6 @@ servers:
       eliteDroneTakedownsLeaderBoardId:
 
     emote:
-      defaultEggId:
       edibleEggId:
       superfoodEggId:
       medicalEggId:

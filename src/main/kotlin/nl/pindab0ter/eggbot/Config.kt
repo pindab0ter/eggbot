@@ -44,7 +44,6 @@ class Server(
 
 // @formatter:off
 val Server.eggsToEmotes get() = mapOf (
-    UNKNOWN_EGG    to emote.defaultEgg,
     EDIBLE         to emote.edibleEgg,
     SUPERFOOD      to emote.superfoodEgg,
     MEDICAL        to emote.medicalEgg,
@@ -109,7 +108,6 @@ class Channel(
 @SerialName("emote")
 @Serializable
 data class Emote(
-    private val defaultEggId: String?,
     private val edibleEggId: String?,
     private val superfoodEggId: String?,
     private val medicalEggId: String?,
@@ -138,7 +136,6 @@ data class Emote(
     private val soulEggId: String?,
     private val prophecyEggId: String?,
 ) {
-    val defaultEgg get() = this.defaultEggId?.let(::Snowflake)
     val edibleEgg get() = this.edibleEggId?.let(::Snowflake)
     val superfoodEgg get() = this.superfoodEggId?.let(::Snowflake)
     val medicalEgg get() = this.medicalEggId?.let(::Snowflake)
