@@ -54,3 +54,8 @@ fun GuildBehavior?.mentionUser(userId: Snowflake?): String? = when (userId) {
     null -> null
     else -> runBlocking { this@mentionUser?.getMemberOrNull(userId)?.mention ?: kord.getUser(userId)?.mention }
 }
+
+fun GuildBehavior?.displayNameForUser(userId: Snowflake?): String? = when (userId) {
+    null -> null
+    else -> runBlocking { this@displayNameForUser?.getMemberOrNull(userId)?.displayName ?: kord.getUser(userId)?.username }
+}
