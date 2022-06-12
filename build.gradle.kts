@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 group = "nl.pindab0ter"
-version = "2.0.0"
+version = "3.0.0"
 
 application {
     applicationName = "EggBot"
