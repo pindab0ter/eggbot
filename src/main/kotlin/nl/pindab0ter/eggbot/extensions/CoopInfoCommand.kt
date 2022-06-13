@@ -15,7 +15,7 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.compact
-import nl.pindab0ter.eggbot.helpers.contract
+import nl.pindab0ter.eggbot.helpers.coopContract
 import nl.pindab0ter.eggbot.helpers.multipartRespond
 import nl.pindab0ter.eggbot.model.AuxBrain
 import nl.pindab0ter.eggbot.model.database.Coop
@@ -39,7 +39,7 @@ class CoopInfoCommand : Extension() {
 
     override suspend fun setup() = config.servers.forEach { server ->
         class CoopInfoArguments : Arguments() {
-            val contract: Contract by contract()
+            val contract: Contract by coopContract()
             val coopId: String by string {
                 name = "coop"
                 description = "The co-op ID. Can be found in #roll-call or in-game."
