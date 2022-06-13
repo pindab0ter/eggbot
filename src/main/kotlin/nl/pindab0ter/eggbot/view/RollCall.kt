@@ -41,8 +41,8 @@ suspend fun GuildBehavior.rollCallResponse(
             // Header
             append("**__Co-op ")
             when (val roleMention = role?.mention) {
-                null -> "`${coop.name}`"
-                else -> "$roleMention (`${coop.name}`)"
+                null -> append("`${coop.name}`")
+                else -> append("$roleMention (`${coop.name}`)")
             }
             appendLine("__**")
 
