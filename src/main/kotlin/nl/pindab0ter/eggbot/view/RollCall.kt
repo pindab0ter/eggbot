@@ -48,7 +48,7 @@ suspend fun GuildBehavior.rollCallResponse(
 
             // Body
             coop.farmers
-                .sortedBy { farmer -> (farmer.inGameName ?: "") }
+                .sortedByDescending { farmer -> farmer.earningsBonus }
                 .forEach { farmer ->
                     if (farmer.isActive.not()) append("_")
                     append(mentionUser(farmer.discordUser.snowflake))
