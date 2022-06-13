@@ -55,17 +55,14 @@ class CoopInfoCommand : Extension() {
 
                     if (contractInput !== null) {
                         val coops = transaction(databases[server.name]) {
-                            if (contract != null) {
-                                Coop
-                                    .find { (Coops.contractId eq contract.id) }
-                                    .orderBy(Coops.name to SortOrder.ASC)
-                                    .filter { coop -> coopInput != null && coop.name.contains(coopInput, ignoreCase = true) }
-                                    .run { subList(0, min(count(), 25)) } // Limit to 25 results
-                                    .associate { coop -> Pair(coop.name, coop.name) }
-                            } else {
-                                emptyMap()
-                            }
                             val contract = AuxBrain.getContracts().find { contract -> contract.id == contractInput }
+                            if (contract != null) Coop
+                                .find { (Coops.contractId eq contract.id) }
+                                .orderBy(Coops.name to SortOrder.ASC)
+                                .filter { coop -> coopInput != null && coop.name.contains(coopInput, ignoreCase = true) }
+                                .run { subList(0, min(count(), 25)) } // Limit to 25 results
+                                .associate { coop -> Pair(coop.name, coop.name) }
+                            else emptyMap()
                         }
                         suggestStringMap(coops)
                     }
