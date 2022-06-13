@@ -55,7 +55,6 @@ class CoopInfoCommand : Extension() {
 
                     if (contractInput !== null) {
                         val coops = transaction(databases[server.name]) {
-                            val contract = AuxBrain.getContracts().find { contract -> contract.name == contractInput }
                             if (contract != null) {
                                 Coop
                                     .find { (Coops.contractId eq contract.id) }
@@ -66,6 +65,7 @@ class CoopInfoCommand : Extension() {
                             } else {
                                 emptyMap()
                             }
+                            val contract = AuxBrain.getContracts().find { contract -> contract.id == contractInput }
                         }
                         suggestStringMap(coops)
                     }
