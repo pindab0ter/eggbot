@@ -17,7 +17,6 @@ import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 import nl.pindab0ter.eggbot.model.simulation.CoopContractState
 import nl.pindab0ter.eggbot.model.simulation.Farmer
 import org.joda.time.Duration
-import kotlin.random.Random
 
 
 suspend fun GuildBehavior.coopInfoResponse(
@@ -398,22 +397,25 @@ private fun StringBuilder.drawCompactMembers(
     }
 }
 
-private fun Table.overtakersColumn(state: CoopContractState, init: Table.EmojiColumn.() -> Unit = {}) {
+private fun Table.overtakersColumn(state: CoopContractState, init: Table.Column.() -> Unit = {}) {
     val overtakers: List<String> = state.farmers.map { farmer ->
         when {
             state.farmers.any { other ->
                 farmer.currentEggsLaid < other.currentEggsLaid && farmer.timeUpEggsLaid > other.timeUpEggsLaid
-            } -> "⬆️"
+            } -> "↑"
             state.farmers.any { other ->
                 farmer.currentEggsLaid > other.currentEggsLaid && farmer.timeUpEggsLaid < other.timeUpEggsLaid
-            } -> "⬇️"
-            else -> "➖"
+            } -> "↓"
+            else -> " "
         }
     }
 
-    if (overtakers.any { it != "➖" }) emojiColumn {
-        header = if (Random.nextBoolean()) "🏃‍♂️" else "🏃‍♀️"
+    if (overtakers.any(String::isNotBlank)) column {
         cells = overtakers
+
+        leftPadding = 1
+        rightPadding = 1
+
         init()
     }
 }
