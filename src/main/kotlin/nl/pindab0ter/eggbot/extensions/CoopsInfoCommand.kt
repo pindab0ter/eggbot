@@ -56,7 +56,7 @@ class CoopsInfoCommand : Extension() {
                 }
 
                 if (coopStatuses.isEmpty()) {
-                    respond { content = "No coops found for contract ${contract.id}" }
+                    respond { content = "No coops found for contract __${contract.name}__" }
                     return@action
                 }
 
