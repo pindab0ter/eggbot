@@ -62,6 +62,9 @@ class CoopsInfoCommand : Extension() {
 
                 val contractCoopStatuses = coopStatuses.map { (coopName, coopStatus) ->
                     CoopContractStatus(contract, coopStatus, coopName, databases[server.name])
+                }.let { statuses ->
+                    if (!compact) statuses.sortedWith(CoopContractStatus.currentEggsComparator)
+                    else statuses.sortedWith(CoopContractStatus.timeTillFinalGoalComparator)
                 }
 
                 guild?.coopsInfoResponse(
