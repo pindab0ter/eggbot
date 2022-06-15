@@ -19,6 +19,8 @@ import org.joda.time.Instant
 import org.joda.time.Period.minutes
 
 
+private const val CACHE_TTL_MINUTES = 10
+
 object AuxBrain {
     private val logger = KotlinLogging.logger {}
 
@@ -44,7 +46,7 @@ object AuxBrain {
     private fun updateContractsCache() = when (val result = runBlocking { periodicalsRequest().awaitResult(ContractsDeserializer) }) {
         is Result.Success -> {
             contractsCache = result.value.filter { contract -> contract.id != "first-contract" }.toSet()
-            contractsCacheUpdateValidUntil = Instant.now().plus(minutes(5).toStandardDuration())
+            contractsCacheUpdateValidUntil = Instant.now().plus(minutes(CACHE_TTL_MINUTES).toStandardDuration())
         }
         is Result.Failure -> {
             logger.error { "Could not get contracts from AuxBrain." }
@@ -88,7 +90,7 @@ object AuxBrain {
                 Farmer.findById(eggIncId)?.update(result.value)
             }.start()
             farmerBackupsCache[eggIncId] = FarmerBackupCache(
-                validUntil = Instant.now().plus(minutes(5).toStandardDuration()),
+                validUntil = Instant.now().plus(minutes(CACHE_TTL_MINUTES).toStandardDuration()),
                 farmerBackup = result.value
             )
         }
