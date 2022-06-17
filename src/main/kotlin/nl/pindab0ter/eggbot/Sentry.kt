@@ -9,6 +9,7 @@ internal suspend fun ExtensibleBotBuilder.ExtensionsBuilder.configureSentry() {
     if (!config.sentryDsn.isNullOrBlank()) {
         sentry {
             enable = true
+            environment = config.environment
             dsn = config.sentryDsn
         }
         logger.info("Configured Sentry")
