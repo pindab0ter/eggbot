@@ -53,6 +53,7 @@ class RollCallCommand : Extension() {
             validate {
                 failIf("Co-op names cannot contain spaces") { value.contains(' ') }
             }
+            mutate(String::lowercase)
         }
         val maxCoopSize: Int? by optionalInt {
             name = "max-coop-size"
