@@ -68,12 +68,12 @@ class WhoIsCommand : Extension() {
 
                     arguments.discordUser != null -> {
                         val farmers = transaction(databases[server.name]) {
-                            Farmer.find { Farmers.discordUserId eq arguments.discordUser?.id.toString() }
+                            Farmer.find { Farmers.discordUserId eq arguments.discordUser?.id.toString() }.toList()
                         }
 
                         respond {
                             content =
-                                if (!farmers.empty()) "${arguments.discordUser?.mention} has: ${farmers.toListing()}"
+                                if (farmers.isNotEmpty()) "${arguments.discordUser?.mention} has: ${farmers.toListing()}"
                                 else "${arguments.discordUser?.mention} has not registered any farmers."
                         }
                     }
