@@ -74,7 +74,6 @@ suspend fun GuildBehavior.coopChannelMessage(
     coop.farmers
         .sortedBy(Farmer::earningsBonus)
         .forEach { farmer ->
-            append(asGuildOrNull()?.mentionUser(farmer.discordUser.snowflake))
             when (val userMention = asGuildOrNull()?.mentionUser(farmer.discordUser.snowflake)) {
                 null -> append("`${farmer.inGameName ?: NO_ALIAS}`")
                 else -> append("$userMention (`${farmer.inGameName ?: NO_ALIAS}`)")
