@@ -43,6 +43,8 @@ class RemoveCoopCommand : Extension() {
                     }
                     suggestStringMap(coops)
                 }
+
+                mutate(String::lowercase)
             }
         }
 

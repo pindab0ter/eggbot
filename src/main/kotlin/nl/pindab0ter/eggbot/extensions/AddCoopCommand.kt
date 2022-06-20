@@ -45,6 +45,8 @@ class AddCoopCommand : Extension() {
             validate {
                 failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
             }
+
+            mutate(String::lowercase)
         }
         val createRolesAndChannels: Boolean by createRolesAndChannels(SINGULAR)
         val preEmptive: Boolean by defaultingBoolean {

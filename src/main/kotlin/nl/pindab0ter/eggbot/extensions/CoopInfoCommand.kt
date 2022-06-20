@@ -71,6 +71,8 @@ class CoopInfoCommand : Extension() {
                 validate {
                     failIf(value.contains(" "), "Co-op ID cannot contain spaces.")
                 }
+
+                mutate(String::lowercase)
             }
             val compact: Boolean by compact()
         }
