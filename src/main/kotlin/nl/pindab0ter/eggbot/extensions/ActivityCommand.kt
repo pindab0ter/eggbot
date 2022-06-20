@@ -16,6 +16,7 @@ import nl.pindab0ter.eggbot.helpers.formatMonthAndDay
 import nl.pindab0ter.eggbot.model.database.DiscordUser
 import nl.pindab0ter.eggbot.model.database.DiscordUsers
 import nl.pindab0ter.eggbot.view.inactivesResponse
+import org.jetbrains.exposed.sql.SortOrder.ASC
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime.now
@@ -119,9 +120,10 @@ class ActivityCommand : Extension() {
 
                 action {
                     val inactiveUsers = transaction(databases[server.name]) {
-                        DiscordUser.find {
-                            DiscordUsers.inactiveUntil.isNotNull() and (DiscordUsers.inactiveUntil greater now())
-                        }.toList()
+                        DiscordUser
+                            .find { DiscordUsers.inactiveUntil.isNotNull() and (DiscordUsers.inactiveUntil greater now()) }
+                            .orderBy(DiscordUsers.inactiveUntil to ASC)
+                            .toList()
                     }
 
                     respond {
