@@ -5,6 +5,7 @@ import com.kotlindiscord.kord.extensions.utils.getKoin
 import dev.kord.common.entity.Snowflake
 import dev.kord.core.Kord
 import dev.kord.core.behavior.GuildBehavior
+import dev.kord.core.behavior.getChannelOfOrNull
 import dev.kord.core.entity.GuildEmoji
 import dev.kord.core.entity.Member
 import dev.kord.core.entity.Role
@@ -29,7 +30,7 @@ fun GuildBehavior?.getChannelOrNull(channelId: Snowflake?): GuildChannel? = when
     else -> runBlocking { this@getChannelOrNull?.asGuildOrNull()?.getChannelOrNull(channelId) }
 }
 
-fun <T> GuildBehavior?.getChannelOfOrNull(channelId: Snowflake?): T? = when (channelId) {
+inline fun <reified T : GuildChannel> GuildBehavior?.getChannelOfOrNull(channelId: Snowflake?): T? = when (channelId) {
     null -> null
     else -> runBlocking { this@getChannelOfOrNull?.asGuildOrNull()?.getChannelOfOrNull(channelId) }
 }
