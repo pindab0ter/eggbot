@@ -32,7 +32,7 @@ class UpdateLeaderBoardsJob : Job {
             return
         }
 
-        logger.info { "Updating leader boards…" }
+        logger.info { "Updating leader boards in ${server.name}…" }
 
         runBlocking {
             val guild = kord.getGuild(server.snowflake)
