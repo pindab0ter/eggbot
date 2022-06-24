@@ -114,7 +114,7 @@ class RollCallCommand : Extension() {
                         Farmer.wrapRows(Farmers.innerJoin(DiscordUsers)
                             .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) })
                             .associateWithAsync { AuxBrain.getFarmerBackup(it.eggIncId, databases[server.name]).also { increment() } }
-                            .filterValues { backup -> backup.attemptStatusFor(arguments.contract.id) != COMPLETED }
+                            .filterValues { backup -> backup != null && backup.attemptStatusFor(arguments.contract.id) != COMPLETED }
                             .keys
                             .toList()
                     }
