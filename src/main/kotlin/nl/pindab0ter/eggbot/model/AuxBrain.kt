@@ -82,11 +82,12 @@ object AuxBrain {
             .body("data=$data")
     }
 
-    private fun updateFarmerBackupsCache(eggIncId: String, database: Database?): Unit = when (
-        val result = runBlocking { firstContactRequest(eggIncId).awaitResult(BackupDeserializer) }
-    ) {
+    private fun updateFarmerBackupsCache(
+        eggIncId: String,
+        database: Database? = null
+    ): Unit = when (val result = runBlocking { firstContactRequest(eggIncId).awaitResult(BackupDeserializer) }) {
         is Result.Success -> runBlocking {
-            suspendedTransactionAsync(null, database) {
+            if (database != null) suspendedTransactionAsync(null, database) {
                 Farmer.findById(eggIncId)?.update(result.value)
             }.start()
             farmerBackupsCache[eggIncId] = FarmerBackupCache(
@@ -100,7 +101,7 @@ object AuxBrain {
         }
     }
 
-    fun getFarmerBackup(eggIncId: String, database: Database?): Backup? = farmerBackupsCache[eggIncId]
+    fun getFarmerBackup(eggIncId: String, database: Database? = null): Backup? = farmerBackupsCache[eggIncId]
         ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }?.farmerBackup
         ?: updateFarmerBackupsCache(eggIncId, database).run { farmerBackupsCache[eggIncId]?.farmerBackup }
 
