@@ -65,17 +65,26 @@ class ContractAttemptsCommand : Extension() {
                         if (failedToGetProphecyEggFarmers.isNotEmpty()) {
                             appendLine("- ${failedToGetProphecyEggFarmers.size} farmers have not earned the Prophecy Egg:")
                             append("  ")
-                            appendLine(failedToGetProphecyEggFarmers.keys.joinToString { "`${it.userName ?: NO_ALIAS}`" })
+                            appendLine(failedToGetProphecyEggFarmers.keys.joinToString { farmer ->
+                                val userName = farmer.userName
+                                "`${if (!userName.isNullOrBlank()) userName else NO_ALIAS}`"
+                            })
                         }
                         if (failedToCompleteAllGoalsFarmers.isNotEmpty()) {
                             appendLine("- ${failedToCompleteAllGoalsFarmers.size} farmers have not completed all goals:")
                             append("  ")
-                            appendLine(failedToCompleteAllGoalsFarmers.keys.joinToString { "`${it.userName ?: NO_ALIAS}`" })
+                            appendLine(failedToCompleteAllGoalsFarmers.keys.joinToString { farmer ->
+                                val userName = farmer.userName
+                                "`${if (!userName.isNullOrBlank()) userName else NO_ALIAS}`"
+                            })
                         }
                         if (neverAttemptedFarmers.isNotEmpty()) {
                             appendLine("- ${neverAttemptedFarmers.size} farmers have not attempted this contract:")
                             append("  ")
-                            appendLine(neverAttemptedFarmers.keys.joinToString { "`${it.userName ?: NO_ALIAS}`" })
+                            appendLine(neverAttemptedFarmers.keys.joinToString { farmer ->
+                                val userName = farmer.userName
+                                "`${if (!userName.isNullOrBlank()) userName else NO_ALIAS}`"
+                            })
                         }
                     }
                 }

@@ -46,9 +46,17 @@ class EarningsBonusCommand : Extension() {
                 }
 
                 farmers.forEachAsync { farmer ->
-                    when (val backup = AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])) {
-                        null -> respond { content = "Could not get information on EggBot user with in-game name: `${farmer.inGameName ?: NO_ALIAS}`" }
-                        else -> respond { content = earningsBonusResponse(backup, arguments.displayMode) }
+                    respond {
+                        content = when (val backup = AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])) {
+                            null -> {
+                                val inGameName = when {
+                                    farmer.inGameName.isNullOrBlank() -> NO_ALIAS
+                                    else -> farmer.inGameName
+                                }
+                                "Could not get information on EggBot user with in-game name: `$inGameName`"
+                            }
+                            else -> earningsBonusResponse(backup, arguments.displayMode)
+                        }
                     }
                 }
             }

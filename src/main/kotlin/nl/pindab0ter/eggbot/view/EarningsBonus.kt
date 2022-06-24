@@ -57,7 +57,7 @@ fun earningsBonusResponse(
     }
 
     return table {
-        title = "Earnings bonus for **${farmer.userName ?: NO_ALIAS}**"
+        title = "Earnings bonus for **${if (!farmer.userName.isNullOrBlank()) farmer.userName else NO_ALIAS}**"
         displayHeaders = false
         column {
             rightPadding = 2

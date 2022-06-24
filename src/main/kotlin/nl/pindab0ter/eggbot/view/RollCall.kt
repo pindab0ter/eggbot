@@ -50,10 +50,14 @@ suspend fun GuildBehavior.rollCallResponse(
             coop.farmers
                 .sortedByDescending { farmer -> farmer.earningsBonus }
                 .forEach { farmer ->
-                    if (farmer.isActive.not()) append("_")
-                    append(mentionUser(farmer.discordUser.snowflake))
-                    append(" (`${farmer.inGameName ?: NO_ALIAS}`)")
-                    if (farmer.isActive.not()) append(" (Inactive)_")
+                    val inGameName = when {
+                        farmer.inGameName.isNullOrBlank() -> NO_ALIAS
+                        else -> farmer.inGameName
+                    }
+                    when (val userMention = asGuildOrNull()?.mentionUser(farmer.discordUser.snowflake)) {
+                        null -> append("`$inGameName`")
+                        else -> append("$userMention (`$inGameName`)")
+                    }
                     appendLine()
                 }
             appendLine()
@@ -74,9 +78,13 @@ suspend fun GuildBehavior.coopChannelMessage(
     coop.farmers
         .sortedBy(Farmer::earningsBonus)
         .forEach { farmer ->
+            val inGameName = when {
+                farmer.inGameName.isNullOrBlank() -> NO_ALIAS
+                else -> farmer.inGameName
+            }
             when (val userMention = asGuildOrNull()?.mentionUser(farmer.discordUser.snowflake)) {
-                null -> append("`${farmer.inGameName ?: NO_ALIAS}`")
-                else -> append("$userMention (`${farmer.inGameName ?: NO_ALIAS}`)")
+                null -> append("`$inGameName`")
+                else -> append("$userMention (`$inGameName`)")
             }
             append("${farmer.earningsBonus.formatIllions(INTEGER)} %)")
             appendLine()

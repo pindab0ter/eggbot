@@ -189,9 +189,11 @@ suspend fun GuildBehavior.coopFinishedResponse(
 }.splitMessage(separator = zwsp)
 
 private fun List<Farmer>.shortenedNames(): List<String> = map { farmer ->
-    (farmer.name ?: NO_ALIAS).let { name ->
-        if (name.length <= 10) name
-        else "${name.substring(0 until 9)}…"
+    val inGameName = farmer.inGameName
+    when {
+        inGameName.isNullOrBlank() -> NO_ALIAS
+        inGameName.length <= 10 -> inGameName
+        else -> "${inGameName.substring(0 until 9)}…"
     }
 }
 
@@ -298,7 +300,9 @@ private fun StringBuilder.drawMembers(
         header = "Name"
         leftPadding = 1
         rightPadding = 2
-        cells = state.farmers.map { farmer -> "${farmer.name}${if (farmer.isSleeping) " zZ" else ""}" }
+        cells = state.farmers.map { farmer ->
+            "${if (farmer.inGameName.isNullOrBlank()) NO_ALIAS else farmer.inGameName}${if (farmer.isSleeping) " zZ" else ""}"
+        }
     }
 
     column {
@@ -430,7 +434,12 @@ private fun StringBuilder.drawBottleNecks(
     column {
         header = "Name"
         rightPadding = 2
-        cells = bottleneckedFarmers.map { (farmer, _) -> farmer.name ?: NO_ALIAS }
+        cells = bottleneckedFarmers.map { (farmer, _) ->
+            when {
+                farmer.inGameName.isNullOrBlank() -> NO_ALIAS
+                else -> farmer.inGameName
+            }
+        }
     }
 
     column {
@@ -637,7 +646,10 @@ private fun StringBuilder.drawTimeSinceLastBackup(
     column {
         header = "Name"
         cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
-            farmer.name ?: NO_ALIAS
+            when {
+                farmer.inGameName.isNullOrBlank() -> NO_ALIAS
+                else -> farmer.inGameName
+            }
         }
     }
 

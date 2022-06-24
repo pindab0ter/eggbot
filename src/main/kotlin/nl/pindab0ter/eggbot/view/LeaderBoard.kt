@@ -30,11 +30,13 @@ fun GuildBehavior.leaderboardResponse(
         ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
     }.let { sortedFarmers -> if (top != null) sortedFarmers.take(top) else sortedFarmers }
 
-    val shortenedNames = sortedFarmers.map { farmer ->
-        farmer.inGameName?.let { name ->
-            if (name.length <= 10) name
-            else "${name.substring(0 until 9)}…"
-        } ?: NO_ALIAS
+    val shortenedNames: List<String> = sortedFarmers.map { farmer ->
+        val inGameName = farmer.inGameName
+        when {
+            inGameName.isNullOrBlank() -> NO_ALIAS
+            inGameName.length <= 10 -> inGameName
+            else -> "${inGameName.substring(0 until 9)}…"
+        }
     }
 
     val soulEgg = runBlocking { getEmojiOrNull(server.emote.soulEgg)?.mention } ?: "🥚"
@@ -56,7 +58,14 @@ fun GuildBehavior.leaderboardResponse(
         header = "Name"
         leftPadding = 1
         rightPadding = if (compact) 1 else 2
-        cells = if (compact) shortenedNames else sortedFarmers.map { farmer -> farmer.inGameName ?: NO_ALIAS }
+        cells = when {
+            compact -> shortenedNames
+            else -> sortedFarmers.map { farmer ->
+                val inGameName = farmer.inGameName
+                if (!inGameName.isNullOrBlank()) inGameName!!
+                else NO_ALIAS
+            }
+        }
     }
 
     column {

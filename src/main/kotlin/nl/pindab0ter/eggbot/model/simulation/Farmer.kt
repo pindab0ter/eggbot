@@ -8,7 +8,7 @@ import org.joda.time.Duration
 import java.math.BigDecimal
 
 data class Farmer(
-    val name: String?,
+    val inGameName: String?,
     val reportedState: FarmState,
     val currentState: FarmState?,
     val runningState: FarmState,
@@ -18,13 +18,13 @@ data class Farmer(
     val timeSinceBackup: Duration,
 ) {
     constructor(
-        name: String?,
+        inGameName: String?,
         reportedState: FarmState,
         currentState: FarmState? = null,
         constants: Constants,
         timeSinceBackup: Duration,
     ) : this(
-        name = name,
+        inGameName = inGameName,
         reportedState = reportedState,
         currentState = currentState,
         runningState = currentState ?: reportedState,
@@ -62,7 +62,7 @@ data class Farmer(
             val constants = Constants(backup, farm, activeCoopArtifacts)
             val reportedState = FarmState(farm, backup, constants)
             return Farmer(
-                name = backup.userName,
+                inGameName = backup.userName,
                 reportedState = reportedState,
                 currentState = catchUp(reportedState, constants, minOf(farm.timeSinceLastStep, constants.maxAwayTime)),
                 constants = constants,

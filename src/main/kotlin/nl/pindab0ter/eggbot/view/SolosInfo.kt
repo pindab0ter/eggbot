@@ -99,7 +99,10 @@ private fun StringBuilder.drawFarmers(
         rightPadding = 1
 
         cells = states.map { state ->
-            state.farmer.name ?: NO_ALIAS
+            when {
+                state.farmer.inGameName.isNullOrBlank() -> NO_ALIAS
+                else -> state.farmer.inGameName
+            }
         }
     }
 
@@ -192,9 +195,11 @@ private fun StringBuilder.drawCompactFarmers(
         rightPadding = 1
 
         cells = states.map { state ->
-            (state.farmer.name ?: NO_ALIAS).let { name ->
-                if (name.length <= 10) name
-                else "${name.substring(0 until 9)}…"
+            val inGameName = state.farmer.inGameName
+            when {
+                inGameName.isNullOrBlank() -> NO_ALIAS
+                inGameName.length <= 10 -> inGameName
+                else -> "${inGameName.substring(0 until 9)}…"
             }
         }
     }

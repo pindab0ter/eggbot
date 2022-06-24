@@ -13,7 +13,7 @@ fun Guild.soloInfoResponse(
     state: SoloContractState,
     compact: Boolean = false,
 ): String = buildString message@{
-    appendLine("`${state.farmer.name}` vs. _${state.contractName}_:")
+    appendLine("`${state.farmer.inGameName}` vs. _${state.contractName}_:")
 
     drawGoals(state, compact, this@soloInfoResponse)
 
@@ -27,7 +27,7 @@ fun Guild.soloFinishedIfBankedResponse(
     state: SoloContractState,
     compact: Boolean,
 ): String = buildString {
-    appendLine("`${state.farmer.name}` vs. _${state.contractName}_:")
+    appendLine("`${state.farmer.inGameName}` vs. _${state.contractName}_:")
     appendLine()
 
     drawGoals(state, compact, this@soloFinishedIfBankedResponse)
