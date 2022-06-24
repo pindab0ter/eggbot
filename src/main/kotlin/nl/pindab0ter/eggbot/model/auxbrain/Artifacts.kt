@@ -111,7 +111,7 @@ private val artifactMultipliers = hashMapOf(
     Identifier(TACHYON_DEFLECTOR,    INFERIOR, COMMON)    to BigDecimal("1.05"),
     Identifier(TACHYON_DEFLECTOR,    LESSER,   COMMON)    to BigDecimal("1.08"),
     Identifier(TACHYON_DEFLECTOR,    NORMAL,   COMMON)    to BigDecimal("1.12"),
-    Identifier(TACHYON_DEFLECTOR,    NORMAL,   RARE)      to BigDecimal("1.13"),
+    Identifier(TACHYON_DEFLECTOR,    NORMAL,   RARE)      to BigDecimal("1.12"),
     Identifier(TACHYON_DEFLECTOR,    GREATER,  COMMON)    to BigDecimal("1.15"),
     Identifier(TACHYON_DEFLECTOR,    GREATER,  RARE)      to BigDecimal("1.17"),
     Identifier(TACHYON_DEFLECTOR,    GREATER,  EPIC)      to BigDecimal("1.19"),
