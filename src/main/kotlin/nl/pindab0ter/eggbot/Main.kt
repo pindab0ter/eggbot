@@ -32,6 +32,7 @@ suspend fun main() {
             add(::RemoveCoopsCommand)
             add(::RollCallCommand)
             add(::UnregisterCommand)
+            add(::UpdateLeaderBoardsCommand)
             add(::WhoIsCommand)
 
             // Test command
