@@ -102,7 +102,7 @@ class Channel(
             "prestigesLeaderBoard" to prestigesLeaderBoard,
             "droneTakedownsLeaderBoard" to droneTakedownsLeaderBoard,
             "eliteDroneTakedownsLeaderBoard" to eliteDroneTakedownsLeaderBoard,
-        ).filter { (_, value) -> value != null }
+        ).filterValues { snowflake -> snowflake != null }
 }
 
 @SerialName("emote")

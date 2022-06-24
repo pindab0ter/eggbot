@@ -44,12 +44,8 @@ suspend fun main() {
         hooks {
             beforeExtensionsAdded {
                 connectToDatabase()
-            }
 
-            beforeStart {
-                if (config.environment == "production") {
-                    startScheduler()
-                }
+                if (config.environment == "production") startScheduler()
             }
         }
     }
