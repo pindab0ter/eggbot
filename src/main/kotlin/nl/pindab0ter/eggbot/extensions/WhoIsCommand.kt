@@ -56,7 +56,7 @@ class WhoIsCommand : Extension() {
         }
 
         publicSlashCommand(::WhoIsThisArguments) {
-            name = "whoisthis"
+            name = "who-is-this"
             description = "Find out who is who."
             guild(server.snowflake)
 
