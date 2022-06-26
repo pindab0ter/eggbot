@@ -36,9 +36,6 @@ val List<Artifact>.habCapacityMultiplier
         artifact.name in habCapacityArtifacts
     }.productOf(Artifact::multiplier)
 
-val Farm.baseHabCapacity: BigDecimal
-    get() = habs.sumOf(HabLevel::capacity)
-
 // @formatter:off
 val HabLevel.capacity: BigDecimal get() = when(this) {
     NO_HAB ->                              ZERO

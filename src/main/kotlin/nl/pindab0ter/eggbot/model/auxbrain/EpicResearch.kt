@@ -29,7 +29,7 @@ enum class EpicResearch(val id: String) {
 
     companion object {
         fun toResearchItems(): List<Backup.ResearchItem> = values().map { item ->
-            Backup.ResearchItem (
+            Backup.ResearchItem(
                 id = item.id,
                 level = 0,
             )

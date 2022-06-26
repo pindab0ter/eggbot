@@ -7,6 +7,7 @@ import nl.pindab0ter.eggbot.helpers.*
 import org.joda.time.Duration
 import java.math.BigDecimal
 
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 data class SoloContractState(
     val contractId: String,
     val contractName: String,

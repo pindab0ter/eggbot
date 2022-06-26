@@ -17,21 +17,21 @@ fun Backup.eggLayingRateResearchMultiplierFor(farm: Backup.Farm) = farm.eggLayin
 fun Backup.eggLayingRateArtifactsMultiplierFor(
     farm: Backup.Farm,
     coopArtifacts: List<Artifact> = emptyList(),
-): BigDecimal =
-    artifactsFor(farm).eggLayingRateMultiplier.multiply(coopArtifacts.minus(artifactsFor(farm).toSet()).eggLayingRateMultiplier)
-
-fun Backup.eggLayingRateMultiplierFor(
-    farm: Backup.Farm,
-    coopArtifacts: List<Artifact> = emptyList(),
 ): BigDecimal {
     val farmArtifacts = artifactsFor(farm)
     val nonCoopArtifacts = farmArtifacts.filter { artifact -> artifact.name != TACHYON_DEFLECTOR }
     val remainingCoopArtifacts = farmArtifacts.fold(coopArtifacts) { acc, artifact -> acc.minusElement(artifact) }
 
-    return eggLayingRateResearchMultiplierFor(farm)
-        .multiply(nonCoopArtifacts.eggLayingRateMultiplier)
+    return nonCoopArtifacts.eggLayingRateMultiplier
         .multiply(remainingCoopArtifacts.eggLayingRateMultiplier)
 }
+
+
+fun Backup.eggLayingRateMultiplierFor(
+    farm: Backup.Farm,
+    coopArtifacts: List<Artifact> = emptyList(),
+): BigDecimal = eggLayingRateResearchMultiplierFor(farm)
+    .multiply(eggLayingRateArtifactsMultiplierFor(farm, coopArtifacts))
 
 val eggLayingRateArtifacts = listOf(
     QUANTUM_METRONOME,

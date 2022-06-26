@@ -89,7 +89,7 @@ enum class CommonResearch(val id: String) {
     companion object {
         fun toResearchItems(levels: Map<CommonResearch, Int> = emptyMap()): List<Backup.ResearchItem> =
             values().map { researchItem ->
-                Backup.ResearchItem (
+                Backup.ResearchItem(
                     id = researchItem.id,
                     level = levels[researchItem] ?: 0,
                 )

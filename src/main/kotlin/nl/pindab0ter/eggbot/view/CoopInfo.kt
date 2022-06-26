@@ -4,12 +4,12 @@ import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
 import dev.kord.core.behavior.GuildBehavior
 import dev.kord.core.entity.Guild
+import nl.pindab0ter.eggbot.ZERO_WIDTH_SPACE
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
 import nl.pindab0ter.eggbot.helpers.HabsStatus.MaxedOut
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
-import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.Table
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
@@ -48,7 +48,7 @@ suspend fun GuildBehavior.coopInfoResponse(
             drawCompactBottleNecks(state, bottleneckedFarmers)
         }
     }
-}.splitMessage(separator = zwsp)
+}.splitMessage(separator = ZERO_WIDTH_SPACE)
 
 suspend fun GuildBehavior.coopFinishedIfBankedResponse(
     state: CoopContractState,
@@ -69,7 +69,7 @@ suspend fun GuildBehavior.coopFinishedIfBankedResponse(
         appendBreakpoint()
         drawCompactTimeSinceLastBackup(state)
     }
-}.splitMessage(separator = zwsp)
+}.splitMessage(separator = ZERO_WIDTH_SPACE)
 
 suspend fun GuildBehavior.coopFinishedResponse(
     status: CoopStatus,
@@ -185,7 +185,7 @@ suspend fun GuildBehavior.coopFinishedResponse(
             }
         }
     }
-}.splitMessage(separator = zwsp)
+}.splitMessage(separator = ZERO_WIDTH_SPACE)
 
 private fun List<Farmer>.shortenedNames(): List<String> = map { farmer ->
     when {

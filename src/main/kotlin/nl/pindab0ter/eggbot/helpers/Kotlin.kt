@@ -6,9 +6,6 @@ import kotlin.coroutines.CoroutineContext
 fun <T> Iterable<T>.init(): Iterable<T> = take((count() - 1).coerceAtLeast(0))
 fun <T> Iterable<T>.tail(): Iterable<T> = filterIndexed { index, _ -> index > 0 }
 fun <T> Iterable<T>.replaceLast(block: (T) -> T) = init().plus(block(last()))
-fun <T> Iterable<T>.replace(newValue: T, predicate: (T) -> Boolean): List<T> = map { element ->
-    if (predicate(element)) newValue else element
-}
 
 inline fun <T, R, V> Iterable<T>.mapCartesianProducts(
     other: Iterable<R>,
@@ -51,14 +48,6 @@ suspend fun <T> Iterable<T>.forEachAsync(
     action: suspend (T) -> Unit,
 ): Unit = coroutineScope {
     forEach { launch(coroutineContext) { action(it) } }
-}
-
-object Typography {
-    /** The character &zwsp; – zero-width space */
-    const val zwsp = '\u200B'
-
-    /** The character &zwj; – zero-width joiner */
-    const val zwj = '\u200D'
 }
 
 /**

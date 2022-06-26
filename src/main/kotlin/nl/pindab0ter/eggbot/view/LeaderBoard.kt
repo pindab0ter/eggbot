@@ -3,9 +3,9 @@ package nl.pindab0ter.eggbot.view
 import dev.kord.core.behavior.GuildBehavior
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.Server
+import nl.pindab0ter.eggbot.ZERO_WIDTH_SPACE
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.*
-import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.model.LeaderBoard
 import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
@@ -76,8 +76,8 @@ fun GuildBehavior.leaderboardResponse(
         cells = when (leaderBoard) {
             EARNINGS_BONUS -> sortedFarmers.map { farmer ->
                 when (displayMode) {
-                    EXTENDED -> "${farmer.earningsBonus.formatInteger()}$zwsp%"
-                    else -> "${farmer.earningsBonus.formatIllions(shortened = compact)}${if (compact) "" else "$zwsp%"}"
+                    EXTENDED -> "${farmer.earningsBonus.formatInteger()}$ZERO_WIDTH_SPACE%"
+                    else -> "${farmer.earningsBonus.formatIllions(shortened = compact)}${if (compact) "" else "$ZERO_WIDTH_SPACE%"}"
                 }
             }
             SOUL_EGGS -> sortedFarmers.map { farmer ->

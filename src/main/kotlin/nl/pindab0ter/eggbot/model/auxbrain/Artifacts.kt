@@ -128,12 +128,3 @@ private val artifactMultipliers = hashMapOf(
 fun Artifact.formatName() = name.name.lowercase(Locale.getDefault())
     .split("_")
     .joinToString(" ") { string -> string.replaceFirstChar { char -> char.titlecase() } }
-
-fun Artifact.formatFullName() = buildString {
-    append(level.name.lowercase().replaceFirstChar { char -> char.titlecase() })
-    append(" ")
-    append(rarity.name.lowercase())
-    append(" ")
-    append(formatName())
-}
-

@@ -7,6 +7,7 @@ import org.jetbrains.exposed.dao.Entity
 import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 
+@Suppress("unused")
 class DiscordUser(id: EntityID<String>) : Entity<String>(id) {
     val snowflake: Snowflake get() = Snowflake(this.id.value)
     var tag: String by DiscordUsers.tag

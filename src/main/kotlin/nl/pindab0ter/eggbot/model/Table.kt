@@ -1,7 +1,7 @@
 package nl.pindab0ter.eggbot.model
 
+import nl.pindab0ter.eggbot.ZERO_WIDTH_SPACE
 import nl.pindab0ter.eggbot.helpers.TableMarker
-import nl.pindab0ter.eggbot.helpers.Typography.zwsp
 import nl.pindab0ter.eggbot.helpers.interleave
 import nl.pindab0ter.eggbot.helpers.renderRow
 import nl.pindab0ter.eggbot.helpers.repeat
@@ -9,7 +9,7 @@ import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.LEFT
 import nl.pindab0ter.eggbot.model.Table.AlignedColumn.Alignment.RIGHT
 
 @TableMarker
-@Suppress("SuspiciousVarProperty")
+@Suppress("MemberVisibilityCanBePrivate", "SuspiciousVarProperty")
 class Table {
 
     // region Properties
@@ -179,7 +179,7 @@ class Table {
                 val renderedRow = spacedColumns.renderRow { cells[rowIndex] }
                 // 20 as a healthy margin until the exact calculation is figured out
                 if (length + renderedRow.length + 20 > 2000) {
-                    append("```$zwsp")
+                    append("```$ZERO_WIDTH_SPACE")
                     add(toString())
                     clear()
                     appendLine("```")

@@ -47,8 +47,6 @@ val Backup.Game.soulEggsToNextRank: BigDecimal
 val Backup.Game.prophecyEggsToNextRank: BigDecimal
     get() = BigDecimalMath.log(earningsBonusForNextRank.divide(earningsBonus, MathContext.DECIMAL128), MathContext.DECIMAL128)
         .divide(BigDecimalMath.log(prophecyEggBonus, MathContext.DECIMAL128), MathContext.DECIMAL128).ceiling()
-val Backup.Game.prophecyEggsForNextRank: BigDecimal
-    get() = prophecyEggsToNextRank + prophecyEggs.toBigDecimal()
 
 // Contracts
 val Backup.localContracts: List<LocalContract>

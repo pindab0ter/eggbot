@@ -12,6 +12,7 @@ import org.jetbrains.exposed.dao.EntityClass
 import org.jetbrains.exposed.dao.id.EntityID
 import java.math.BigDecimal
 
+@Suppress("MemberVisibilityCanBePrivate", "unused")
 class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val eggIncId: String get() = this.id.value
     var discordUser by DiscordUser referencedOn Farmers.discordUserId

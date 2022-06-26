@@ -105,6 +105,7 @@ class Channel(
         ).filterValues { snowflake -> snowflake != null }
 }
 
+@Suppress("unused")
 @SerialName("emote")
 @Serializable
 data class Emote(

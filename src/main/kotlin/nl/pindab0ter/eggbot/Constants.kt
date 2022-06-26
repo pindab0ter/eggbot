@@ -6,6 +6,9 @@ import java.math.BigDecimal
 const val NO_ALIAS = "[no alias]"
 const val COOP_FILL_PERCENTAGE = 0.8
 
+/** The character &zwsp; – zero-width space */
+const val ZERO_WIDTH_SPACE = '\u200B'
+
 val DEFAULT_ROLE_COLOR = Color(15, 212, 57) // #0FD439
 
 // Research max levels and multipliers

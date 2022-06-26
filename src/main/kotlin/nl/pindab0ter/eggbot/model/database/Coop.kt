@@ -7,6 +7,7 @@ import org.jetbrains.exposed.dao.id.EntityID
 import java.math.BigDecimal
 
 
+@Suppress("unused")
 class Coop(id: EntityID<Int>) : IntEntity(id) {
     var name by Coops.name
     var contractId by Coops.contractId
