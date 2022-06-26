@@ -1,5 +1,6 @@
 package nl.pindab0ter.eggbot.helpers
 
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.TWO_DECIMALS
 import nl.pindab0ter.eggbot.model.database.Farmer
@@ -171,10 +172,14 @@ fun <T : Any> StringBuilder.appendPaddingCharacters(
 
 fun Iterable<Farmer>.toListing(): String = buildString {
     this@toListing.forEach { farmer ->
+        val inGameName = when {
+            farmer.inGameName.isNullOrBlank() -> NO_ALIAS
+            else -> farmer.inGameName
+        }
         when (farmer) {
-            this@toListing.first() -> append("`${farmer.inGameName}`")
-            this@toListing.last() -> append(" and `${farmer.inGameName}`")
-            else -> append(", `${farmer.inGameName}`")
+            this@toListing.first() -> append("`${inGameName}`")
+            this@toListing.last() -> append(" and `${inGameName}`")
+            else -> append(", `${inGameName}`")
         }
     }
 }

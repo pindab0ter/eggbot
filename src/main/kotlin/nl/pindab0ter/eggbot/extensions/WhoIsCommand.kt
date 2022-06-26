@@ -8,6 +8,7 @@ import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.entity.User
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.converters.optionalFarmer
 import nl.pindab0ter.eggbot.databases
@@ -81,10 +82,20 @@ class WhoIsCommand : Extension() {
                     arguments.farmer != null -> {
                         val discordUser = arguments.farmer?.discordId?.let { guild.getMemberOrNull(it) }
 
+                        if (discordUser == null) {
+                            respond { content = "**Error:** Failed to find member for ${arguments.farmer?.inGameName}." }
+                            return@action
+                        }
+
                         respond {
-                            content =
-                                if (discordUser != null) "${arguments.farmer?.inGameName} is registered by ${discordUser.mention}"
-                                else "**Error:** Failed to find member for ${arguments.farmer?.inGameName}."
+                            content = buildString {
+                                val inGameName = arguments.farmer?.inGameName
+                                when {
+                                    inGameName.isNullOrBlank() -> append(NO_ALIAS)
+                                    else -> append(inGameName)
+                                }
+                                append(" is registered by ${discordUser.mention}")
+                            }
                         }
                     }
                     else -> {
