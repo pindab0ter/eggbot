@@ -4,7 +4,6 @@ import com.auxbrain.ei.Contract
 import com.auxbrain.ei.CoopStatus
 import dev.kord.core.behavior.GuildBehavior
 import dev.kord.core.entity.Guild
-import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.HabsStatus.BottleneckReached
@@ -189,11 +188,9 @@ suspend fun GuildBehavior.coopFinishedResponse(
 }.splitMessage(separator = zwsp)
 
 private fun List<Farmer>.shortenedNames(): List<String> = map { farmer ->
-    val inGameName = farmer.inGameName
     when {
-        inGameName.isNullOrBlank() -> NO_ALIAS
-        inGameName.length <= 10 -> inGameName
-        else -> "${inGameName.substring(0 until 9)}…"
+        farmer.inGameName.length <= 10 -> farmer.inGameName
+        else -> "${farmer.inGameName.substring(0 until 9)}…"
     }
 }
 
@@ -301,7 +298,7 @@ private fun StringBuilder.drawMembers(
         leftPadding = 1
         rightPadding = 2
         cells = state.farmers.map { farmer ->
-            "${if (farmer.inGameName.isNullOrBlank()) NO_ALIAS else farmer.inGameName}${if (farmer.isSleeping) " zZ" else ""}"
+            "${farmer.inGameName}${if (farmer.isSleeping) " zZ" else ""}"
         }
     }
 
@@ -434,12 +431,7 @@ private fun StringBuilder.drawBottleNecks(
     column {
         header = "Name"
         rightPadding = 2
-        cells = bottleneckedFarmers.map { (farmer, _) ->
-            when {
-                farmer.inGameName.isNullOrBlank() -> NO_ALIAS
-                else -> farmer.inGameName
-            }
-        }
+        cells = bottleneckedFarmers.map { (farmer, _) -> farmer.inGameName }
     }
 
     column {
@@ -645,12 +637,7 @@ private fun StringBuilder.drawTimeSinceLastBackup(
 
     column {
         header = "Name"
-        cells = farmersSortedByUnreportedEggsLaid.map { farmer ->
-            when {
-                farmer.inGameName.isNullOrBlank() -> NO_ALIAS
-                else -> farmer.inGameName
-            }
-        }
+        cells = farmersSortedByUnreportedEggsLaid.map(Farmer::inGameName)
     }
 
     column {

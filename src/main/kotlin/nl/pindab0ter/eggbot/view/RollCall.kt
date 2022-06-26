@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.view
 import com.auxbrain.ei.Contract
 import dev.kord.core.behavior.GuildBehavior
 import dev.kord.core.entity.Role
-import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.INTEGER
 import nl.pindab0ter.eggbot.helpers.appendPaddingCharacters
 import nl.pindab0ter.eggbot.helpers.formatIllions
@@ -50,13 +49,9 @@ suspend fun GuildBehavior.rollCallResponse(
             coop.farmers
                 .sortedByDescending { farmer -> farmer.earningsBonus }
                 .forEach { farmer ->
-                    val inGameName = when {
-                        farmer.inGameName.isNullOrBlank() -> NO_ALIAS
-                        else -> farmer.inGameName
-                    }
                     when (val userMention = asGuildOrNull()?.mentionUser(farmer.discordUser.snowflake)) {
-                        null -> append("`$inGameName`")
-                        else -> append("$userMention (`$inGameName`)")
+                        null -> append("`${farmer.inGameName}`")
+                        else -> append("$userMention (`${farmer.inGameName}`)")
                     }
                     appendLine()
                 }
@@ -78,13 +73,9 @@ suspend fun GuildBehavior.coopChannelMessage(
     coop.farmers
         .sortedBy(Farmer::earningsBonus)
         .forEach { farmer ->
-            val inGameName = when {
-                farmer.inGameName.isNullOrBlank() -> NO_ALIAS
-                else -> farmer.inGameName
-            }
             when (val userMention = asGuildOrNull()?.mentionUser(farmer.discordUser.snowflake)) {
-                null -> append("`$inGameName`")
-                else -> append("$userMention (`$inGameName`)")
+                null -> append("`${farmer.inGameName}`")
+                else -> append("$userMention (`${farmer.inGameName}`)")
             }
             append(" ${farmer.earningsBonus.formatIllions(INTEGER)}%)")
             appendLine()

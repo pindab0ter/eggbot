@@ -3,10 +3,7 @@ package nl.pindab0ter.eggbot.model.database
 import com.auxbrain.ei.Backup
 import dev.kord.common.entity.Snowflake
 import mu.KotlinLogging
-import nl.pindab0ter.eggbot.BASE_PROPHECY_EGG_RESEARCH_BONUS
-import nl.pindab0ter.eggbot.BASE_SOUL_EGG_RESEARCH_BONUS
-import nl.pindab0ter.eggbot.PROPHECY_EGG_RESEARCH_BONUS_PER_LEVEL
-import nl.pindab0ter.eggbot.SOUL_EGG_RESEARCH_BONUS_PER_LEVEL
+import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.toDateTime
@@ -24,7 +21,10 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         set(snowflake) {
             _discordId = EntityID(snowflake.toString(), Farmers)
         }
-    var inGameName by Farmers.inGameName
+    private var _inGameName by Farmers.inGameName
+    val inGameName: String
+        get() = _inGameName ?: NO_ALIAS
+
     var coops by Coop via CoopFarmers
 
     private var _soulEggs by Farmers.soulEggs
@@ -64,7 +64,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             return
         }
 
-        inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
+        _inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
         _soulEggs = backup.game.soulEggs
         _prophecyEggs = backup.game.prophecyEggs
         _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()
@@ -86,7 +86,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
 
             return Farmer.new(backup.eiUserId.ifBlank { backup.userId }) {
                 this.discordUser = discordUser
-                inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
+                _inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
                 _soulEggs = backup.game.soulEggs
                 _prophecyEggs = backup.game.prophecyEggs
                 _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()

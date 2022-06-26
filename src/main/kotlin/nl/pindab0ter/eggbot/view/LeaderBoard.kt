@@ -2,7 +2,6 @@ package nl.pindab0ter.eggbot.view
 
 import dev.kord.core.behavior.GuildBehavior
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.Server
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.DisplayMode.*
@@ -31,11 +30,9 @@ fun GuildBehavior.leaderboardResponse(
     }.let { sortedFarmers -> if (top != null) sortedFarmers.take(top) else sortedFarmers }
 
     val shortenedNames: List<String> = sortedFarmers.map { farmer ->
-        val inGameName = farmer.inGameName
         when {
-            inGameName.isNullOrBlank() -> NO_ALIAS
-            inGameName.length <= 10 -> inGameName
-            else -> "${inGameName.substring(0 until 9)}…"
+            farmer.inGameName.length <= 10 -> farmer.inGameName
+            else -> "${farmer.inGameName.substring(0 until 9)}…"
         }
     }
 
@@ -60,11 +57,7 @@ fun GuildBehavior.leaderboardResponse(
         rightPadding = if (compact) 1 else 2
         cells = when {
             compact -> shortenedNames
-            else -> sortedFarmers.map { farmer ->
-                val inGameName = farmer.inGameName
-                if (!inGameName.isNullOrBlank()) inGameName!!
-                else NO_ALIAS
-            }
+            else -> sortedFarmers.map(Farmer::inGameName)
         }
     }
 

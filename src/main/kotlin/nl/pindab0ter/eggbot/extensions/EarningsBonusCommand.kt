@@ -5,7 +5,6 @@ import com.kotlindiscord.kord.extensions.extensions.Extension
 import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
-import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.helpers.DisplayMode
@@ -48,13 +47,7 @@ class EarningsBonusCommand : Extension() {
                 farmers.forEachAsync { farmer ->
                     respond {
                         content = when (val backup = AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])) {
-                            null -> {
-                                val inGameName = when {
-                                    farmer.inGameName.isNullOrBlank() -> NO_ALIAS
-                                    else -> farmer.inGameName
-                                }
-                                "Could not get information on EggBot user with in-game name: `$inGameName`"
-                            }
+                            null -> "Could not get information on EggBot user with in-game name: `${farmer.inGameName}`"
                             else -> earningsBonusResponse(backup, arguments.displayMode)
                         }
                     }

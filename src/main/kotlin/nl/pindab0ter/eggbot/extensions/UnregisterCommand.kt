@@ -46,7 +46,7 @@ class UnregisterCommand : Extension() {
                             .find { Farmers.inGameName like "%$farmerInput%" }
                             .orderBy(Farmers.inGameName to ASC)
                             .limit(25)
-                            .associate { farmer -> farmer.inGameName!! to farmer.inGameName!! }
+                            .associate { farmer -> farmer.inGameName to farmer.inGameName }
                     }
 
                     suggestStringMap(farmers)

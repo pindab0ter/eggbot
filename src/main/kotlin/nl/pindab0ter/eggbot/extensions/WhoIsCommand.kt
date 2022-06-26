@@ -8,7 +8,6 @@ import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
 import dev.kord.core.entity.User
-import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.converters.optionalFarmer
 import nl.pindab0ter.eggbot.databases
@@ -47,7 +46,7 @@ class WhoIsCommand : Extension() {
                             .limit(25)
 
                         Farmer.wrapRows(query).associate { farmer ->
-                            farmer.inGameName!! to farmer.eggIncId
+                            farmer.inGameName to farmer.eggIncId
                         }
                     }
 
@@ -62,45 +61,38 @@ class WhoIsCommand : Extension() {
             guild(server.snowflake)
 
             action {
+                val discordUser = arguments.discordUser
+                val farmer = arguments.farmer
                 when {
                     arguments.discordUser != null && arguments.farmer != null -> {
                         respond { content = "You can't specify both a member and a farmer." }
                     }
 
-                    arguments.discordUser != null -> {
+                    discordUser != null -> {
                         val farmers = transaction(databases[server.name]) {
-                            Farmer.find { Farmers.discordUserId eq arguments.discordUser?.id.toString() }.toList()
+                            Farmer.find { Farmers.discordUserId eq discordUser.id.toString() }.toList()
                         }
 
                         respond {
                             content =
-                                if (farmers.isNotEmpty()) "${arguments.discordUser?.mention} has: ${farmers.toListing()}"
-                                else "${arguments.discordUser?.mention} has not registered any farmers."
+                                if (farmers.isNotEmpty()) "${discordUser.mention} has: ${farmers.toListing()}"
+                                else "${discordUser.mention} has not registered any farmers."
                         }
                     }
 
-                    arguments.farmer != null -> {
-                        val discordUser = arguments.farmer?.discordId?.let { guild.getMemberOrNull(it) }
+                    farmer != null -> {
+                        val associatedDiscordUser = farmer.discordId.let { guild.getMemberOrNull(it) }
 
-                        if (discordUser == null) {
-                            respond { content = "**Error:** Failed to find member for ${arguments.farmer?.inGameName}." }
+                        if (associatedDiscordUser == null) {
+                            respond { content = "**Error:** Failed to find member for ${farmer.inGameName}." }
                             return@action
                         }
 
                         respond {
-                            content = buildString {
-                                val inGameName = arguments.farmer?.inGameName
-                                when {
-                                    inGameName.isNullOrBlank() -> append(NO_ALIAS)
-                                    else -> append(inGameName)
-                                }
-                                append(" is registered by ${discordUser.mention}")
-                            }
+                            content = "${farmer.inGameName} is registered by ${associatedDiscordUser.mention}"
                         }
                     }
-                    else -> {
-                        respond { content = "Please specify a member or a farmer." }
-                    }
+                    else -> respond { content = "Please specify a member or a farmer." }
                 }
             }
         }

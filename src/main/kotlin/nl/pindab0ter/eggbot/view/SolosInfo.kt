@@ -3,7 +3,6 @@ package nl.pindab0ter.eggbot.view
 import com.auxbrain.ei.Contract
 import com.kotlindiscord.kord.extensions.commands.application.ApplicationCommandContext
 import kotlinx.coroutines.runBlocking
-import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.SIXTY
 import nl.pindab0ter.eggbot.helpers.NumberFormatter.OPTIONAL_DECIMALS
@@ -98,12 +97,7 @@ private fun StringBuilder.drawFarmers(
 
         rightPadding = 1
 
-        cells = states.map { state ->
-            when {
-                state.farmer.inGameName.isNullOrBlank() -> NO_ALIAS
-                else -> state.farmer.inGameName
-            }
-        }
+        cells = states.map { state -> state.farmer.inGameName }
     }
 
     column {
@@ -195,11 +189,9 @@ private fun StringBuilder.drawCompactFarmers(
         rightPadding = 1
 
         cells = states.map { state ->
-            val inGameName = state.farmer.inGameName
             when {
-                inGameName.isNullOrBlank() -> NO_ALIAS
-                inGameName.length <= 10 -> inGameName
-                else -> "${inGameName.substring(0 until 9)}…"
+                state.farmer.inGameName.length <= 10 -> state.farmer.inGameName
+                else -> "${state.farmer.inGameName.substring(0 until 9)}…"
             }
         }
     }

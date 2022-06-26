@@ -3,10 +3,7 @@ package nl.pindab0ter.eggbot.helpers
 import ch.obermuhlner.math.big.BigDecimalMath
 import com.auxbrain.ei.*
 import com.kotlindiscord.kord.extensions.utils.capitalizeWords
-import nl.pindab0ter.eggbot.BASE_PROPHECY_EGG_RESEARCH_BONUS
-import nl.pindab0ter.eggbot.BASE_SOUL_EGG_RESEARCH_BONUS
-import nl.pindab0ter.eggbot.PROPHECY_EGG_RESEARCH_BONUS_PER_LEVEL
-import nl.pindab0ter.eggbot.SOUL_EGG_RESEARCH_BONUS_PER_LEVEL
+import nl.pindab0ter.eggbot.*
 import org.joda.time.DateTime.now
 import org.joda.time.Duration
 import java.math.BigDecimal
@@ -74,6 +71,8 @@ fun Backup.attemptStatusFor(contractId: String): AttemptStatus {
     }
 }
 
+val Backup.inGameName: String
+    get() = if (userName.isNullOrBlank()) NO_ALIAS else userName
 val Contract.finalGoal: BigDecimal
     get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
 val Contract.indexOfPeGoal: Int?

@@ -8,6 +8,7 @@ import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.annotation.KordPreview
 import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.NO_ALIAS
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.databases
 import nl.pindab0ter.eggbot.model.AuxBrain
@@ -93,7 +94,7 @@ class RegisterCommand : Extension() {
 
                 respond {
                     content = when (farmer.inGameName) {
-                        null -> "A farmer without a name has been registered to ${runBlocking { getMember()?.mention }}"
+                        NO_ALIAS -> "A farmer without a name has been registered to ${runBlocking { getMember()?.mention }}"
                         else -> "Farmer `${farmer.inGameName}` has been registered to ${runBlocking { getMember()?.mention }}."
                     }
                 }
