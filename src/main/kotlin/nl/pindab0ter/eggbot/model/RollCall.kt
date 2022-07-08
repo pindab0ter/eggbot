@@ -14,7 +14,7 @@ fun createRollCall(
     baseName: String,
     maxCoopSize: Int,
     farmers: List<Farmer>,
-): List<Pair<String, List<Farmer>>> {
+): Map<String, List<Farmer>> {
     // Fill each co-op with the strongest available player so that all co-ops have one
     val coops = coopNames(
         amount = ceil(farmers.size.toDouble() / maxCoopSize.toDouble()).roundToInt(),
@@ -34,7 +34,7 @@ fun createRollCall(
             ?.let { (_, farmers) -> farmers.add(activeFarmer) }
     }
 
-    return coops.map { (name, farmers) -> name to farmers }
+    return coops.associate { (name, farmers) -> name to farmers }
 }
 
 private fun coopNames(amount: Int, baseName: String): List<String> = when {
