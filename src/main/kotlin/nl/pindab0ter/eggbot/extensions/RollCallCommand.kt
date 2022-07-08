@@ -166,7 +166,7 @@ class RollCallCommand : Extension() {
 
                     val coops = withProgressBar(
                         goal = rollCall.size,
-                        statusText = "Roll call for __${arguments.contract.name}__…",
+                        statusText = "Roll call for __${arguments.contract.name}__:\nCreating co-ops…",
                         unit = "co-ops"
                     ) {
                         rollCall.map { (name, farmers) ->
