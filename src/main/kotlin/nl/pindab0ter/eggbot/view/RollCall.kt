@@ -77,7 +77,7 @@ suspend fun GuildBehavior.coopChannelMessage(
                 null -> append("`${farmer.inGameName}`")
                 else -> append("$userMention (`${farmer.inGameName}`)")
             }
-            append(" ${farmer.earningsBonus.formatIllions(INTEGER)}%)")
+            append(" ${farmer.earningsBonus.formatIllions(INTEGER)}%")
             appendLine()
         }
     appendLine()
