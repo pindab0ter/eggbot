@@ -39,6 +39,7 @@ import org.jetbrains.exposed.sql.jodatime.CurrentDateTime
 import org.jetbrains.exposed.sql.or
 import org.jetbrains.exposed.sql.select
 import org.jetbrains.exposed.sql.transactions.experimental.newSuspendedTransaction
+import org.joda.time.DateTime.now
 import kotlin.math.roundToInt
 
 class RollCallCommand : Extension() {
@@ -129,6 +130,39 @@ class RollCallCommand : Extension() {
                         else (arguments.contract.maxCoopSize * COOP_FILL_PERCENTAGE).roundToInt()
 
                     val rollCall = createRollCall(arguments.basename, maxCoopSize, farmers)
+
+                    val existingCoops = withProgressBar(
+                        goal = rollCall.size,
+                        statusText = "Roll call for __${arguments.contract.name}__:\nChecking if co-ops with the given names already exist…"
+                    ) {
+                        rollCall.keys
+                            .mapAsync { coopName -> AuxBrain.getCoopStatus(arguments.contract.id, coopName) }
+                            .filterNotNull()
+                    }
+
+                    if (existingCoops.isNotEmpty()) {
+                        val coopsString = existingCoops.joinToString("\n") { coop ->
+                            val validUntil = now().plusSeconds(coop.secondsRemaining.roundToInt())
+                            if (validUntil.isAfterNow) {
+                                "`${coop.coopId}` (in progress)"
+                            } else {
+                                "`${coop.coopId}` (ended on ${validUntil.formatYearMonthAndDay()})"
+                            }
+                        }
+
+                        edit {
+                            content = buildString {
+                                append("**Error:** ")
+                                appendPlural(
+                                    existingCoops,
+                                    singular = "A co-op already exists for ",
+                                    plural = "Co-ops already exist for:\n"
+                                )
+                                appendLine(coopsString)
+                            }
+                        }
+                        return@newSuspendedTransaction
+                    }
 
                     val coops = withProgressBar(
                         goal = rollCall.size,

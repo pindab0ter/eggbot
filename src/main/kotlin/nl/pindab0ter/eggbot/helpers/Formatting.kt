@@ -164,6 +164,37 @@ fun <T : Any> StringBuilder.appendPaddingCharacters(
     character: String = " ",
 ): StringBuilder = append(paddingCharacters(current, containsLongest.plus(current), character))
 
+fun plural(
+    count: Int,
+    singular: String,
+    plural: String
+): String = when (count) {
+    1 -> singular
+    else -> plural
+}
+
+fun <T> plural(
+    iterable: Iterable<T>,
+    singular: String,
+    plural: String
+): String = plural(iterable, singular, plural)
+
+fun StringBuilder.appendPlural(
+    count: Int,
+    singular: String,
+    plural: String
+) {
+    append(plural(count, singular, plural))
+}
+
+fun <T> StringBuilder.appendPlural(
+    iterable: Iterable<T>,
+    singular: String,
+    plural: String
+) {
+    appendPlural(iterable.count(), singular, plural)
+}
+
 fun Iterable<Farmer>.toListing(): String = buildString {
     this@toListing.forEach { farmer ->
         when (farmer) {
