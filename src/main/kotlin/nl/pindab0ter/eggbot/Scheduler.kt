@@ -27,7 +27,7 @@ internal fun startScheduler() = StdSchedulerFactory.getDefaultScheduler().apply 
         logger.info { "Checking permissions before starting update_leader_board schedule…" }
         config.servers.forEachAsync { server ->
             val guild = kord.getGuild(server.snowflake)
-            server.channel.configuredLeaderBoards.forEach { (channelName, channelId) ->
+            server.configuredLeaderBoards.forEach { (channelName, channelId) ->
                 val channel = guild?.getChannelOrNull(channelId)
 
                 if (channel == null) {

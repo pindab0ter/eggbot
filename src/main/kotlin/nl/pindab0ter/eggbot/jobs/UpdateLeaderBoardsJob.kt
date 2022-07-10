@@ -10,7 +10,6 @@ import nl.pindab0ter.eggbot.helpers.getChannelOfOrNull
 import nl.pindab0ter.eggbot.helpers.kord
 import nl.pindab0ter.eggbot.helpers.onEachAsync
 import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.view.leaderboardResponse
 import org.jetbrains.exposed.sql.transactions.transaction
@@ -19,6 +18,8 @@ import org.quartz.JobExecutionContext
 
 class UpdateLeaderBoardsJob : Job {
     override fun execute(context: JobExecutionContext?) = config.servers.forEach { server ->
+
+        // Update all farmers
         val farmers = transaction(databases[server.name]) {
             runBlocking {
                 Farmer.all().onEachAsync { farmer ->
@@ -36,23 +37,19 @@ class UpdateLeaderBoardsJob : Job {
 
         runBlocking {
             val guild = kord.getGuild(server.snowflake)
-            listOf(
-                server.channel.earningsBonusLeaderBoard to EARNINGS_BONUS,
-                server.channel.soulEggsLeaderBoard to SOUL_EGGS,
-                server.channel.prestigesLeaderBoard to PRESTIGES,
-                server.channel.droneTakedownsLeaderBoard to DRONE_TAKEDOWNS,
-                server.channel.eliteDroneTakedownsLeaderBoard to ELITE_DRONE_TAKEDOWNS
-            ).map { (channelSnowFlake, category) ->
-                guild?.getChannelOfOrNull<TextChannel>(channelSnowFlake) to category
-            }.forEach { (textChannel, category) ->
-                textChannel?.withStrategy(rest)?.messages?.collect { message ->
-                    message.delete("Updating leader boards")
+            server.configuredLeaderBoards
+                .mapValues { (_, channelSnowflake) ->
+                    guild?.getChannelOfOrNull<TextChannel>(channelSnowflake)
                 }
+                .forEach { (category, textChannel) ->
+                    textChannel?.withStrategy(rest)?.messages?.collect { message ->
+                        message.delete("Updating leader boards")
+                    }
 
-                guild?.leaderboardResponse(farmers, category, server = server)?.forEach { content ->
-                    textChannel?.createMessage(content)
+                    guild?.leaderboardResponse(farmers, category, server = server)?.forEach { content ->
+                        textChannel?.createMessage(content)
+                    }
                 }
-            }
         }
     }
 

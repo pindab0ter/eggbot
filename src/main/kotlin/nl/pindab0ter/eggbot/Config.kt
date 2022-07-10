@@ -6,6 +6,8 @@ import dev.kord.common.entity.Snowflake
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 import mu.KotlinLogging
+import nl.pindab0ter.eggbot.model.LeaderBoard
+import nl.pindab0ter.eggbot.model.LeaderBoard.*
 import java.io.File
 
 val logger = KotlinLogging.logger {}
@@ -39,7 +41,14 @@ class Server(
     val emote: Emote,
 ) {
     val snowflake: Snowflake get() = Snowflake(this.id)
-
+    val configuredLeaderBoards: Map<LeaderBoard, Snowflake?>
+        get() = mapOf(
+            EARNINGS_BONUS to channel.earningsBonusLeaderBoard,
+            SOUL_EGGS to channel.soulEggsLeaderBoard,
+            PRESTIGES to channel.prestigesLeaderBoard,
+            DRONE_TAKEDOWNS to channel.droneTakedownsLeaderBoard,
+            ELITE_DRONE_TAKEDOWNS to channel.eliteDroneTakedownsLeaderBoard,
+        ).filterValues { snowflake -> snowflake != null }
 }
 
 // @formatter:off
@@ -95,14 +104,6 @@ class Channel(
     val prestigesLeaderBoard get() = prestigesLeaderBoardId?.let { Snowflake(it) }
     val droneTakedownsLeaderBoard get() = droneTakedownsLeaderBoardId?.let { Snowflake(it) }
     val eliteDroneTakedownsLeaderBoard get() = eliteDroneTakedownsLeaderBoardId?.let { Snowflake(it) }
-    val configuredLeaderBoards: Map<String, Snowflake?>
-        get() = mapOf(
-            "earningsBonusLeaderBoard" to earningsBonusLeaderBoard,
-            "soulEggsLeaderBoard" to soulEggsLeaderBoard,
-            "prestigesLeaderBoard" to prestigesLeaderBoard,
-            "droneTakedownsLeaderBoard" to droneTakedownsLeaderBoard,
-            "eliteDroneTakedownsLeaderBoard" to eliteDroneTakedownsLeaderBoard,
-        ).filterValues { snowflake -> snowflake != null }
 }
 
 @Suppress("unused")
