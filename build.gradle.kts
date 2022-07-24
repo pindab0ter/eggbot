@@ -36,7 +36,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlin", "kotlin-stdlib-jdk8", "1.6.0")
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.6.3")
+    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-core", "1.6.4")
     implementation("joda-time", "joda-time", "2.10.14")
     implementation("ch.obermuhlner", "big-math", "2.3.0")
 
@@ -50,7 +50,7 @@ dependencies {
     implementation("org.jetbrains.exposed", "exposed-jdbc", "0.38.2")
     implementation("org.jetbrains.exposed", "exposed-jodatime", "0.38.2")
     runtimeOnly("org.postgresql", "postgresql", "42.4.0")
-    implementation("org.flywaydb", "flyway-core", "8.5.13")
+    implementation("org.flywaydb", "flyway-core", "9.0.1")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
@@ -65,7 +65,7 @@ dependencies {
     // Logging
     runtimeOnly("ch.qos.logback", "logback-classic", "1.2.11")
     implementation("io.github.microutils", "kotlin-logging-jvm", "2.1.23")
-    implementation("io.sentry", "sentry", "6.1.4")
+    implementation("io.sentry", "sentry", "6.3.0")
 }
 
 tasks {
