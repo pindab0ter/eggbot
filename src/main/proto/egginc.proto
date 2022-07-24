@@ -6,12 +6,12 @@ message Backup {
   string userId = 1;
   optional string userName = 2;
   double approxTime = 3;
-  Settings settings = 4;
-  Tutorial tutorial = 5;
+//  Settings settings = 4;
+//  Tutorial tutorial = 5;
   Stats stats = 6;
   Game game = 7;
-  Missions missions = 9;
-  Misc misc = 10;
+//  Missions missions = 9;
+//  Misc misc = 10;
   repeated Farm farms = 12;
   MyContracts contracts = 13;
   ArtifactsStatus artifactsStatus = 14;
@@ -19,36 +19,36 @@ message Backup {
   string gameServicesId = 16;
   string deviceId = 17;
   string eiUserId = 18;
-  bool forceOfferBackup = 20;
+//  bool forceOfferBackup = 20;
   uint32 clientVersion = 21;
-  bool forceBackup = 22;
-  uint64 checksum = 100;
-  string signature = 101;
+//  bool forceBackup = 22;
+//  uint64 checksum = 100;
+//  string signature = 101;
 
   message Settings {
-    bool sfx = 1;
-    bool music = 2;
-    bool lowBatteryMode = 3;
-    bool lowPerformanceMode = 4;
-    bool notificationsQueried = 5;
-    bool notificationsEnabled = 6;
-    bool coppaQueried = 7;
-    bool coppaRestricted = 8;
-    bool forceTouchChickenBtn = 9;
-    bool lowPerformance = 10;
-    bool notifyDailyGift = 11;
-    bool gdprConsentQueried = 12;
-    bool gdprConsentGiven = 13;
-    bool userAdsEnabled = 14;
-    bool userCloudEnabled = 15;
-    bool gdprAgeRestricted = 16;
-    uint32 lastDayAgeQueried = 17;
-    bool ageQueried = 18;
-    bool ageRestricted = 19;
-    bool dataCollectionConsentQueried = 20;
-    bool dataCollectionConsentGiven = 21;
-    bool userAnalyticsEnabled = 22;
-    bool userPersonalizedAdsEnabled = 23;
+//    bool sfx = 1;
+//    bool music = 2;
+//    bool lowBatteryMode = 3;
+//    bool lowPerformanceMode = 4;
+//    bool notificationsQueried = 5;
+//    bool notificationsEnabled = 6;
+//    bool coppaQueried = 7;
+//    bool coppaRestricted = 8;
+//    bool forceTouchChickenBtn = 9;
+//    bool lowPerformance = 10;
+//    bool notifyDailyGift = 11;
+//    bool gdprConsentQueried = 12;
+//    bool gdprConsentGiven = 13;
+//    bool userAdsEnabled = 14;
+//    bool userCloudEnabled = 15;
+//    bool gdprAgeRestricted = 16;
+//    uint32 lastDayAgeQueried = 17;
+//    bool ageQueried = 18;
+//    bool ageRestricted = 19;
+//    bool dataCollectionConsentQueried = 20;
+//    bool dataCollectionConsentGiven = 21;
+//    bool userAnalyticsEnabled = 22;
+//    bool userPersonalizedAdsEnabled = 23;
     double lastBackupTime = 24;
   }
 
@@ -67,23 +67,23 @@ message Backup {
   }
 
   message Stats {
-    uint64 refillUses = 2;
-    uint64 videoDoublerUses = 3;
-    uint64 warp_1Uses = 4;
-    uint64 warp_8Uses = 5;
+//    uint64 refillUses = 2;
+//    uint64 videoDoublerUses = 3;
+//    uint64 warp_1Uses = 4;
+//    uint64 warp_8Uses = 5;
     uint64 droneTakedowns = 6;
-    uint64 unlimitedChickensUses = 7;
-    repeated double eggTotals = 8;
+//    uint64 unlimitedChickensUses = 7;
+//    repeated double eggTotals = 8;
     uint64 prestiges = 9;
     uint64 droneTakedownsElite = 10;
-    uint64 piggyBreaks = 11;
-    uint64 iapPacksPurchased = 12;
-    uint64 boostsUsed = 13;
-    bool piggyFull = 14;
-    bool piggyFoundFull = 15;
-    double timePiggyFilledRealtime = 16;
-    double timePiggyFullGametime = 17;
-    uint64 lostPiggyIncrements = 18;
+//    uint64 piggyBreaks = 11;
+//    uint64 iapPacksPurchased = 12;
+//    uint64 boostsUsed = 13;
+//    bool piggyFull = 14;
+//    bool piggyFoundFull = 15;
+//    double timePiggyFilledRealtime = 16;
+//    double timePiggyFullGametime = 17;
+//    uint64 lostPiggyIncrements = 18;
   }
 
   message ResearchItem {
@@ -113,40 +113,40 @@ message Backup {
   }
 
   message Game {
-    Egg maxEggReached = 1;
-    uint64 goldenEggsEarned = 2;
-    uint64 goldenEggsSpent = 3;
-    double prestigeCashEarned = 5;
-    double lifetimeCashEarned = 6;
-    uint64 piggyBank = 7;
+//    Egg maxEggReached = 1;
+//    uint64 goldenEggsEarned = 2;
+//    uint64 goldenEggsSpent = 3;
+//    double prestigeCashEarned = 5;
+//    double lifetimeCashEarned = 6;
+//    uint64 piggyBank = 7;
     uint32 permitLevel = 8;
     repeated ResearchItem epicResearch = 9;
-    double nextDailyGiftTime = 10;
-    repeated NewsHeadline news = 11;
-    double lastNewsTime = 12;
-    double currentMultiplier = 13;
-    double currentMultiplierExpiration = 14;
-    repeated AchievementInfo achievements = 15;
-    uint64 unclaimedGoldenEggs = 16;
-    repeated uint64 maxFarmSizeReached = 18;
-    repeated TrophyLevel eggMedalLevels = 19;
-    uint32 lastDailyGiftCollectedDay = 20;
-    uint32 currentFarm = 22;
+//    double nextDailyGiftTime = 10;
+//    repeated NewsHeadline news = 11;
+//    double lastNewsTime = 12;
+//    double currentMultiplier = 13;
+//    double currentMultiplierExpiration = 14;
+//    repeated AchievementInfo achievements = 15;
+//    uint64 unclaimedGoldenEggs = 16;
+//    repeated uint64 maxFarmSizeReached = 18;
+//    repeated TrophyLevel eggMedalLevels = 19;
+//    uint32 lastDailyGiftCollectedDay = 20;
+//    uint32 currentFarm = 22;
     uint64 prophecyEggs = 23;
-    uint32 unclaimedProphecyEggs = 24;
-    bool longIdleNotificationSet = 25;
-    double longIdleNotificationThreshold = 26;
-    double longIdleReward = 27;
-    uint32 dailyGiftIndex = 28;
-    bool hyperloopStation = 29;
-    repeated OwnedBoost boosts = 30;
-    bool piggyFullAlertShown = 31;
-    uint32 totalTimeCheatsDetected = 32;
-    double prestigeSoulBoostCash = 33;
+//    uint32 unclaimedProphecyEggs = 24;
+//    bool longIdleNotificationSet = 25;
+//    double longIdleNotificationThreshold = 26;
+//    double longIdleReward = 27;
+//    uint32 dailyGiftIndex = 28;
+//    bool hyperloopStation = 29;
+//    repeated OwnedBoost boosts = 30;
+//    bool piggyFullAlertShown = 31;
+//    uint32 totalTimeCheatsDetected = 32;
+//    double prestigeSoulBoostCash = 33;
     double soulEggs = 34;
-    double unclaimedSoulEggs = 35;
-    bool forceEliteContracts = 36;
-    double newPlayerEventEndTime = 37;
+//    double unclaimedSoulEggs = 35;
+//    bool forceEliteContracts = 36;
+//    double newPlayerEventEndTime = 37;
   }
 
   message ArtifactsStatus {
@@ -167,71 +167,71 @@ message Backup {
 
   message Farm {
     Egg egg = 1;
-    double cashEarned = 2;
-    double cashSpent = 3;
-    double unclaimedCash = 4;
+//    double cashEarned = 2;
+//    double cashSpent = 3;
+//    double unclaimedCash = 4;
     double lastStepTime = 5;
     uint64 chickens = 6;
-    uint64 unsettledChicken = 7;
+//    uint64 unsettledChicken = 7;
     uint64 runningChicken = 8;
     double eggsLaid = 9;
-    double eggsPaidFor = 10;
+//    double eggsPaidFor = 10;
     uint32 silosOwned = 11;
     repeated HabLevel habs = 12;
     repeated uint64 habPopulations = 13;
     repeated uint64 habPopulationInbounds = 14;
     repeated double habIncubatorPopulations = 15;
-    double hatcheryPopulation = 16;
+//    double hatcheryPopulation = 16;
     repeated VehicleType vehicles = 17;
     repeated ResearchItem commonResearch = 18;
     FarmType farmType = 19;
     string contractId = 20;
     repeated uint32 hyperloopCars = 21;
     repeated ActiveBoost activeBoosts = 22;
-    uint32 timeCheatsDetected = 23;
-    double timeCheatDebt = 24;
+//    uint32 timeCheatsDetected = 23;
+//    double timeCheatDebt = 24;
     uint32 boostTokensReceived = 25;
     uint32 boostTokensSpent = 26;
     uint32 unclaimedBoostTokens = 27;
     uint32 boostTokensGiven = 28;
-    double gametimeUntilNextBoostToken = 29;
+//    double gametimeUntilNextBoostToken = 29;
     double eggsShipped = 30;
   }
 
-  message Mission {
-    string id = 1;
-    bool completed = 2;
-    double referenceValue = 3;
-  }
+//  message Mission {
+//    string id = 1;
+//    bool completed = 2;
+//    double referenceValue = 3;
+//  }
 
-  message Missions {
-    string currentMissionName = 1;
-    double referenceValue = 2;
-    repeated Mission missions = 3;
-    repeated string currentMissions = 4;
-  }
+//  message Missions {
+//    string currentMissionName = 1;
+//    double referenceValue = 2;
+//    repeated Mission missions = 3;
+//    repeated string currentMissions = 4;
+//  }
 
-  message Misc {
-    bool chickenBtnPrefBig = 1;
-    bool freeHatcheryRefillGiven = 2;
-    double lastShareFarmValue = 3;
-    double lastShareSwarmFarmValue = 4;
-    double lastShareSwarmSize = 5;
-    uint64 friendRank = 6;
-    uint64 friendRankPop = 7;
-    uint64 globalRank = 8;
-    uint64 globalRankPop = 9;
-    uint64 lastPrestigeAlertSoulEggs = 10;
-    bool trophyAlert = 11;
-    bool arAlert = 12;
-    bool contractsAlert = 13;
-    bool coopAlert = 14;
-    bool switchAlert = 15;
-    bool eggOfProphecyAlert = 16;
-    bool boostTokenAlert = 17;
-    bool soulEggAlert = 18;
-    bool backupReminderAlert = 19;
-  }
+//  message Misc {
+//    bool chickenBtnPrefBig = 1;
+//    bool freeHatcheryRefillGiven = 2;
+//    double lastShareFarmValue = 3;
+//    double lastShareSwarmFarmValue = 4;
+//    double lastShareSwarmSize = 5;
+//    uint64 friendRank = 6;
+//    uint64 friendRankPop = 7;
+//    uint64 globalRank = 8;
+//    uint64 globalRankPop = 9;
+//    uint64 lastPrestigeAlertSoulEggs = 10;
+//    bool trophyAlert = 11;
+//    bool arAlert = 12;
+//    bool contractsAlert = 13;
+//    bool coopAlert = 14;
+//    bool switchAlert = 15;
+//    bool eggOfProphecyAlert = 16;
+//    bool boostTokenAlert = 17;
+//    bool soulEggAlert = 18;
+//    bool backupReminderAlert = 19;
+//  }
 }
 
 /* https://www.auxbrain.com/ei/first_contact */
@@ -282,25 +282,25 @@ message Contract {
   double expirationTime = 6;
   double lengthSeconds = 7;
   string name = 9;
-  string description = 10;
-  bool debug = 11;
+//  string description = 10;
+//  bool debug = 11;
   uint32 maxBoosts = 12;
   double maxSoulEggs = 13;
-  uint32 minClientVersion = 14;
-  double minutesPerToken = 15;
+//  uint32 minClientVersion = 14;
+//  double minutesPerToken = 15;
   repeated GoalSet goalSets = 16;
-
-  message Goal {
-    GoalType type = 1;
-    double targetAmount = 2;
-    RewardType rewardType = 3;
-    string rewardSubType = 4;
-    double rewardAmount = 5;
-    double targetSoulEggs = 6;
-  }
 
   message GoalSet {
     repeated Goal goals = 1;
+  }
+
+  message Goal {
+//    GoalType type = 1;
+    double targetAmount = 2;
+    RewardType rewardType = 3;
+//    string rewardSubType = 4;
+    double rewardAmount = 5;
+    //    double targetSoulEggs = 6;
   }
 }
 
@@ -375,25 +375,25 @@ message LocalContract {
   Contract contract = 1;
   string coopId = 2;
   double timeAccepted = 3;
-  bool cancelled = 4;
-  double coopSharedEndTime = 5;
+//  bool cancelled = 4;
+//  double coopSharedEndTime = 5;
   double lastAmountWhenRewardGiven = 6;
-  bool accepted = 7;
-  bool new = 8;
-  double coopGracePeriodEndTime = 9;
-  bool coopContributionFinalized = 10;
-  double coopLastUploadedContribution = 11;
+//  bool accepted = 7;
+//  bool new = 8;
+//  double coopGracePeriodEndTime = 9;
+//  bool coopContributionFinalized = 10;
+//  double coopLastUploadedContribution = 11;
   uint32 boostsUsed = 12;
   string coopUserId = 13;
   uint32 goalsAchieved = 14;
-  uint32 league = 15;
+//  uint32 league = 15;
 }
 
 message MyContracts {
   repeated LocalContract contracts = 1;
   repeated LocalContract archived = 2;
-  repeated string contractIdsSeen = 3;
-  repeated CoopStatus coopStatuses = 4;
+//  repeated string contractIdsSeen = 3;
+//  repeated CoopStatus coopStatuses = 4;
 }
 
 message CoopBuffState {
@@ -947,12 +947,12 @@ message ArtifactsDatabase {
   repeated ArtifactInventoryItem inventoryItems = 1;
   uint64 itemSequence = 2;
   repeated InventorySlot inventorySlots = 3;
-  repeated Mission missions = 4;
-  repeated Mission archivedMissions = 5;
+//  repeated Mission missions = 4;
+//  repeated Mission archivedMissions = 5;
   repeated ActiveArtifactSlot activeArtifacts = 7;
-  repeated Artifact discoveredArtifacts = 8;
-  repeated CraftableArtifact craftableArtifacts = 9;
-  repeated CraftableArtifact craftingCounts = 10;
+//  repeated Artifact discoveredArtifacts = 8;
+//  repeated CraftableArtifact craftableArtifacts = 9;
+//  repeated CraftableArtifact craftingCounts = 10;
   repeated ActiveArtifactSet activeArtifactSets = 11;
 
   message ActiveArtifactSlot {
