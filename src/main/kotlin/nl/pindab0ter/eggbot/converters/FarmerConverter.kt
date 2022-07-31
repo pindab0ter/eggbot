@@ -33,7 +33,7 @@ class FarmerConverter(
     }
 
     override suspend fun parseOption(context: CommandContext, option: OptionValue<*>): Boolean {
-        parsed = transaction { Farmer.find { Farmers.id eq option.value as? String }.firstOrNull() }
+        parsed = transaction { Farmer.find { Farmers.inGameName eq option.value as? String }.firstOrNull() }
             ?: throw Exception("Farmer not found")
 
         return true

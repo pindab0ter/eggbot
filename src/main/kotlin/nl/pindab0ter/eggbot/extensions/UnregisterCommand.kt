@@ -13,7 +13,6 @@ import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.converters.optionalFarmer
 import nl.pindab0ter.eggbot.databases
-import nl.pindab0ter.eggbot.helpers.getMemberOrNull
 import nl.pindab0ter.eggbot.helpers.mentionUser
 import nl.pindab0ter.eggbot.helpers.toListing
 import nl.pindab0ter.eggbot.model.database.DiscordUser
@@ -119,7 +118,7 @@ class UnregisterCommand : Extension() {
                                         if (count > 0) {
                                             append("${discordUser?.farmers?.toListing()} ")
                                             if (count == 1L) append("is") else append("are")
-                                            append(" still registered to ${guild?.getMemberOrNull(discordUser?.snowflake)}.")
+                                            append(" still registered to ${guild?.mentionUser(discordUser?.snowflake)}.")
                                         }
                                     }
                                 }
