@@ -8,9 +8,10 @@ set -o errexit -o nounset -o pipefail
 
 ./gradlew installDist
 cd build/install/EggBot
-ssh_config=$1
-name=$2
-echo "Updating ${name} on ${ssh_config}…"
+SSH_CONFIG_NAME=$1
+NAME=$2
+
+echo "Updating ${NAME} on ${SSH_CONFIG_NAME}…"
 rsync \
   --recursive \
   --checksum \
@@ -22,9 +23,10 @@ rsync \
   -e ssh \
   ./bin \
   ./lib \
-  "$ssh_config":~/"$name"
+  "$SSH_CONFIG_NAME":~/"$NAME"
+
 # shellcheck disable=SC2087
-ssh -t "$ssh_config" <<EOF
-  pkill -f /$name
-  tmux new-window -n $name -c $name bin/EggBot
+ssh -t "$SSH_CONFIG_NAME" <<EOF
+  pkill -f /$NAME
+  tmux new-window -n $NAME -c $NAME bin/EggBot
 EOF
