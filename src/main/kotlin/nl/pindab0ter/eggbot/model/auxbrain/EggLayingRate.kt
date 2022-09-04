@@ -40,7 +40,7 @@ val eggLayingRateArtifacts = listOf(
 )
 
 private val Backup.eggLayingEpicResearchMultiplier: BigDecimal
-    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
+    get() = ONE + BigDecimal(".05") * game.epicResearch[EpicResearch.EPIC_COMFY_NESTS.ordinal].level
 
 private val List<Artifact>.eggLayingRateMultiplier
     get() = filter { artifact ->

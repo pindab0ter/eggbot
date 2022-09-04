@@ -60,12 +60,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     val isActive: Boolean get() = discordUser.isActive
 
     fun update(backup: Backup) {
-        if (backup.game == null || backup.stats == null) {
-            logger.warn { "Tried to update from backup but failed." }
-            return
-        }
-
-        _inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
+        if (backup.userName.isNotBlank()) _inGameName = backup.userName
         _soulEggs = backup.game.soulEggs
         _prophecyEggs = backup.game.prophecyEggs
         _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()
@@ -79,23 +74,16 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     companion object : EntityClass<String, Farmer>(Farmers) {
         val logger = KotlinLogging.logger { }
 
-        fun new(discordUser: DiscordUser, backup: Backup): Farmer? {
-            if (backup.game == null || backup.stats == null) {
-                logger.warn { "Tried to register from backup but failed." }
-                return null
-            }
-
-            return Farmer.new(backup.eiUserId.ifBlank { backup.userId }) {
-                this.discordUser = discordUser
-                _inGameName = if (backup.userName.isNullOrBlank()) null else backup.userName
-                _soulEggs = backup.game.soulEggs
-                _prophecyEggs = backup.game.prophecyEggs
-                _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()
-                _prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel.toInt()
-                prestiges = backup.stats.prestiges
-                droneTakedowns = backup.stats.droneTakedowns
-                eliteDroneTakedowns = backup.stats.droneTakedownsElite
-            }
+        fun new(discordUser: DiscordUser, backup: Backup): Farmer = Farmer.new(backup.eiUserId) {
+            this.discordUser = discordUser
+            if (backup.userName.isNotBlank()) _inGameName = backup.userName
+            _soulEggs = backup.game.soulEggs
+            _prophecyEggs = backup.game.prophecyEggs
+            _soulEggResearchLevel = backup.game.soulEggResearchLevel.toInt()
+            _prophecyEggResearchLevel = backup.game.prophecyEggResearchLevel.toInt()
+            prestiges = backup.stats.prestiges
+            droneTakedowns = backup.stats.droneTakedowns
+            eliteDroneTakedowns = backup.stats.droneTakedownsElite
         }
     }
 }

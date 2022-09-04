@@ -11,6 +11,6 @@ object Silos {
     private val Backup.extraAwayTimePerSilo: Duration
         get() = Duration.ZERO.withDurationAdded(
             Duration.standardMinutes(6L),
-            game!!.epicResearch[EpicResearch.SILO_CAPACITY.ordinal].level
+            game.epicResearch[EpicResearch.SILO_CAPACITY.ordinal].level
         )
 }

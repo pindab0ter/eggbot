@@ -45,7 +45,7 @@ class RegisterCommand : Extension() {
 
                 val farmerBackup = AuxBrain.getFarmerBackup(eggIncId, databases[server?.name])
                 failIf("Could not find a farmer with _Egg, Inc. ID_ `$eggIncId`") {
-                    farmerBackup?.game == null || farmerBackup.stats == null
+                    farmerBackup?.game == null
                 }
                 throwIfFailed()
 
@@ -85,11 +85,6 @@ class RegisterCommand : Extension() {
 
                 val farmer = transaction(databases[server?.name]) {
                     Farmer.new(discordUser, farmerBackup)
-                }
-
-                if (farmer == null) {
-                    respond { content = "**Error:** Could not register your account. Please contact the admins." }
-                    return@action
                 }
 
                 respond {

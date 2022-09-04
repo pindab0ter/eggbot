@@ -14,8 +14,6 @@ fun earningsBonusResponse(
     farmer: Backup,
     displayMode: DisplayMode,
 ): String = farmer.game.run {
-    if (this == null) throw IllegalStateException("Backup is not in a valid state")
-
     data class Row(val label: String = "", val value: String = "", val suffix: String = "")
 
     fun MutableList<Row>.addRow(label: String = "", value: String = "", suffix: String = "") = add(Row(label, value, suffix))
@@ -44,7 +42,7 @@ fun earningsBonusResponse(
             addRow("Soul Bonus:", soulEggResearchLevel.formatInteger(), "/140")
         if (prophecyEggResearchLevel < MAX_PROPHECY_EGG_RESEARCH_LEVEL)
             addRow("Prophecy Bonus:", prophecyEggResearchLevel.formatInteger(), "/5")
-        addRow("Prestiges:", farmer.stats?.prestiges?.formatInteger() ?: "?")
+        addRow("Prestiges:", farmer.stats.prestiges.formatInteger())
         addRow(
             "SE to next rank:", "+ ${
                 when (displayMode) {

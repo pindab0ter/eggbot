@@ -49,12 +49,12 @@ private val Farm.shippingRateCommonResearchMultipliers: List<BigDecimal>
     )
 
 private val Backup.shippingRateEpicResearchMultiplier: BigDecimal
-    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
+    get() = ONE + BigDecimal(".05") * game.epicResearch[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
 
 val Farm.baseShippingRate: BigDecimal
     get() = vehicles.foldIndexed(ZERO) { index, acc, vehicleType ->
         when (vehicleType) {
-            VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * hyperloopCars[index]
+            VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * trainLengths[index]
             else -> acc + vehicleType.capacity
         }
     }

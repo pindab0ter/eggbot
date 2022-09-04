@@ -39,6 +39,7 @@ servers:
       prestigesLeaderBoardId:
       droneTakedownsLeaderBoardId:
       eliteDroneTakedownsLeaderBoardId:
+      rocketLaunchesLeaderBoardId:
 
     emote:
       edibleEggId:

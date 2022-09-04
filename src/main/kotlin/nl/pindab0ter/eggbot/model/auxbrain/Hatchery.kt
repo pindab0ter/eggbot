@@ -37,9 +37,9 @@ private val List<Artifact>.hatcheryRateMultiplier
     }
 
 private val Backup.hatcheryRateMultiplier: BigDecimal
-    get() = ONE + BigDecimal(".05") * game!!.epicResearch[EPIC_INT_HATCHERIES.ordinal].level
+    get() = ONE + BigDecimal(".05") * game.epicResearch[EPIC_INT_HATCHERIES.ordinal].level
 val Backup.hatcherySharingMultiplier: BigDecimal
-    get() = ONE + BigDecimal(".10") * game!!.epicResearch[INTERNAL_HATCH_SHARING.ordinal].level
+    get() = ONE + BigDecimal(".10") * game.epicResearch[INTERNAL_HATCH_SHARING.ordinal].level
 private val Farm.hatcheryRateFlatIncreases: List<BigDecimal>
     get() = listOf(
         BigDecimal(2 * commonResearch[INTERNAL_HATCHERY1.ordinal].level),

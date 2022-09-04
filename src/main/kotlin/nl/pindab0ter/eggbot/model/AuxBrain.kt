@@ -61,7 +61,7 @@ object AuxBrain {
 
     private object ContractsDeserializer : ResponseDeserializable<List<Contract>> {
         override fun deserialize(content: String): List<Contract>? {
-            return content.decodeBase64()?.let { PeriodicalsResponse.ADAPTER.decode(it).periodicals?.contracts?.contracts }
+            return content.decodeBase64()?.let { PeriodicalsResponse.ADAPTER.decode(it).periodicals.contracts.contracts }
         }
     }
     //endregion
@@ -105,7 +105,7 @@ object AuxBrain {
         ?.takeIf { cachedFarmerBackup -> cachedFarmerBackup.validUntil.isAfterNow }?.farmerBackup
         ?: updateFarmerBackupsCache(eggIncId, database).run { farmerBackupsCache[eggIncId]?.farmerBackup }
 
-    private object BackupDeserializer : ResponseDeserializable<Backup> {
+    object BackupDeserializer : ResponseDeserializable<Backup> {
         override fun deserialize(content: String): Backup? {
             return content.decodeBase64()?.let { FirstContact.ADAPTER.decode(it).backup }
         }

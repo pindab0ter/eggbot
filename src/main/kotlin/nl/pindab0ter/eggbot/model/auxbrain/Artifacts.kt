@@ -13,12 +13,12 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.util.*
 
-fun Backup.artifactsFor(farm: Farm?): List<Artifact> = artifactsDatabase?.activeArtifactSets
-    ?.getOrNull(farms.indexOf(farm))?.slots?.flatMap { activeArtifactSlot ->
+fun Backup.artifactsFor(farm: Farm?): List<Artifact> = artifactsDatabase.activeArtifactSets
+    .getOrNull(farms.indexOf(farm))?.slots?.flatMap { activeArtifactSlot ->
         artifactsDatabase.inventoryItems.find { artifactInventoryItem ->
             artifactInventoryItem.itemId == activeArtifactSlot.itemId
         }?.artifact?.let { artifact ->
-            artifact.stones.plus(artifact.artifactBase).filterNotNull()
+            artifact.stones.plus(artifact.base)
         }.orEmpty()
     }.orEmpty()
 
@@ -29,7 +29,7 @@ fun Backup.coopArtifactsFor(farm: Farm?): List<Artifact> = artifactsFor(farm).fi
 val Artifact.multiplier: BigDecimal
     get() = artifactMultipliers[identifier] ?: ONE.also {
         logger(Artifact::class.qualifiedName!!).warn {
-            "Unknown artifact: ${rarity.name} ${level.name} ${name.name}"
+            "Unknown artifact: ${rarity?.name} ${level.name} ${name.name}"
         }
     }
 
@@ -42,7 +42,7 @@ private data class Identifier(
 )
 
 private val Artifact.identifier
-    get() = Identifier(name, level, rarity)
+    get() = rarity?.let { Identifier(name, level, it) }
 
 // @formatter:off
 private val artifactMultipliers = hashMapOf(

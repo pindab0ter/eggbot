@@ -50,35 +50,36 @@ val Backup.Game.prophecyEggsToNextRank: BigDecimal
 
 // Contracts
 val Backup.localContracts: List<LocalContract>
-    get() = (contracts?.contracts ?: emptyList()) + (contracts?.archived ?: emptyList())
+    get() = contracts.contracts + contracts.archived
 
 enum class AttemptStatus { NEVER_ATTEMPTED, FAILED_TO_GET_PROPHECY_EGG, FAILED_TO_COMPLETE_ALL_GOALS, COMPLETED }
 
 fun Backup.attemptStatusFor(contractId: String): AttemptStatus {
-    val localContract = this.localContracts.firstOrNull { it.contract?.id == contractId }
+    val localContract = this.localContracts.firstOrNull { it.contract.id == contractId }
 
     return when {
-        localContract == null ->
-            AttemptStatus.NEVER_ATTEMPTED
-        localContract.contract?.indexOfPeGoal != null && localContract.goalsAchieved < (localContract.contract.indexOfPeGoal!! + 1) ->
+        localContract == null -> AttemptStatus.NEVER_ATTEMPTED
+
+        localContract.contract.indexOfPeGoal != null && localContract.goalsAchieved!! < (localContract.contract.indexOfPeGoal!! + 1) ->
             AttemptStatus.FAILED_TO_GET_PROPHECY_EGG
-        localContract.goalsAchieved < (localContract.contract?.goals?.size ?: 0) ->
+
+        localContract.goalsAchieved!! < localContract.contract.goals.size ->
             AttemptStatus.FAILED_TO_COMPLETE_ALL_GOALS
-        else ->
-            AttemptStatus.COMPLETED
+
+        else -> AttemptStatus.COMPLETED
     }
 }
 
 val Backup.inGameName: String
-    get() = if (userName.isNullOrBlank()) NO_ALIAS else userName
+    get() = userName.ifBlank { NO_ALIAS }
 val Contract.finalGoal: BigDecimal
     get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
 val Contract.indexOfPeGoal: Int?
     get() = goals.indexOfFirst { it.rewardType == RewardType.PROPHECY_EGGS }.takeIf { it != -1 }
 val LocalContract.finished: Boolean
-    get() = goalsAchieved == contract?.goals?.size
+    get() = goalsAchieved == contract.goals.size
 val LocalContract.timeRemaining: Duration
-    get() = contract!!.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), now()))
+    get() = contract.lengthSeconds.toDuration().minus(Duration(timeAccepted.toDateTime(), now()))
 val CoopStatus.eggsLaid: BigDecimal
     get() = BigDecimal(totalAmount)
 val CoopStatus.timeRemaining: Duration

@@ -56,7 +56,7 @@ data class SoloContractState(
             backup: Backup,
             localContract: LocalContract,
         ): SoloContractState? {
-            val farmer = Farmer(backup, localContract.contract!!.id)
+            val farmer = Farmer(backup, localContract.contract.id)
 
             return if (farmer == null) null else SoloContractState(
                 contractId = localContract.contract.id,
