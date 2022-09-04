@@ -5,6 +5,7 @@ import dev.kord.common.entity.Snowflake
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.*
 import nl.pindab0ter.eggbot.helpers.prophecyEggResearchLevel
+import nl.pindab0ter.eggbot.helpers.rocketsLaunched
 import nl.pindab0ter.eggbot.helpers.soulEggResearchLevel
 import nl.pindab0ter.eggbot.helpers.toDateTime
 import org.jetbrains.exposed.dao.Entity
@@ -53,6 +54,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
     var prestiges by Farmers.prestiges
     var droneTakedowns by Farmers.droneTakedowns
     var eliteDroneTakedowns by Farmers.eliteDroneTakedowns
+    var rocketsLaunched by Farmers.rocketsLaunched
 
     var createdAt by Farmers.createdAt
     var updatedAt by Farmers.updatedAt
@@ -68,6 +70,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
         prestiges = backup.stats.prestiges
         droneTakedowns = backup.stats.droneTakedowns
         eliteDroneTakedowns = backup.stats.droneTakedownsElite
+        rocketsLaunched = backup.rocketsLaunched
         updatedAt = backup.approxTime.toDateTime()
     }
 
@@ -84,6 +87,7 @@ class Farmer(id: EntityID<String>) : Entity<String>(id) {
             prestiges = backup.stats.prestiges
             droneTakedowns = backup.stats.droneTakedowns
             eliteDroneTakedowns = backup.stats.droneTakedownsElite
+            rocketsLaunched = backup.rocketsLaunched
         }
     }
 }

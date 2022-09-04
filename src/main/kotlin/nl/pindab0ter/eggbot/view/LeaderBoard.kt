@@ -27,6 +27,7 @@ fun GuildBehavior.leaderboardResponse(
         PRESTIGES -> farmers.sortedByDescending { farmer -> farmer.prestiges }
         DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.droneTakedowns }
         ELITE_DRONE_TAKEDOWNS -> farmers.sortedByDescending { farmer -> farmer.eliteDroneTakedowns }
+        ROCKET_LAUNCHES -> farmers.sortedByDescending { farmer -> farmer.rocketsLaunched }
     }.let { sortedFarmers -> if (top != null) sortedFarmers.take(top) else sortedFarmers }
 
     val shortenedNames: List<String> = sortedFarmers.map { farmer ->
@@ -46,6 +47,7 @@ fun GuildBehavior.leaderboardResponse(
         PRESTIGES -> "🥨 Prestiges"
         DRONE_TAKEDOWNS -> "✈🚫 Drone Takedowns"
         ELITE_DRONE_TAKEDOWNS -> "🎖✈🚫 Elite Drone Takedowns"
+        ROCKET_LAUNCHES -> "🚀 Rockets Launched"
     }
 
     title = "__**$boardTitle${if (!compact) " Leader Board" else ""}**__"
@@ -69,6 +71,7 @@ fun GuildBehavior.leaderboardResponse(
             PRESTIGES -> "Prestiges"
             DRONE_TAKEDOWNS -> "Drone Takedowns"
             ELITE_DRONE_TAKEDOWNS -> "Elite Drone Takedowns"
+            ROCKET_LAUNCHES -> "Rockets Launched"
         }
 
         alignment = RIGHT
@@ -80,16 +83,19 @@ fun GuildBehavior.leaderboardResponse(
                     else -> "${farmer.earningsBonus.formatIllions(shortened = compact)}${if (compact) "" else "$ZERO_WIDTH_SPACE%"}"
                 }
             }
+
             SOUL_EGGS -> sortedFarmers.map { farmer ->
                 when (displayMode) {
                     EXTENDED -> farmer.soulEggs.formatInteger()
                     else -> farmer.soulEggs.formatIllions(shortened = compact)
                 }
             }
+
             PROPHECY_EGGS -> sortedFarmers.map { farmer -> farmer.prophecyEggs.formatInteger() }
             PRESTIGES -> sortedFarmers.map { farmer -> farmer.prestiges.formatInteger() }
             DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.droneTakedowns.formatInteger() }
             ELITE_DRONE_TAKEDOWNS -> sortedFarmers.map { farmer -> farmer.eliteDroneTakedowns.formatInteger() }
+            ROCKET_LAUNCHES -> sortedFarmers.map { farmer -> farmer.rocketsLaunched.formatInteger() }
         }
     }
 

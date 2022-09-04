@@ -4,7 +4,7 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.C
 import java.util.*
 
 enum class LeaderBoard : ChoiceEnum {
-    EARNINGS_BONUS, SOUL_EGGS, PROPHECY_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS;
+    EARNINGS_BONUS, SOUL_EGGS, PROPHECY_EGGS, PRESTIGES, DRONE_TAKEDOWNS, ELITE_DRONE_TAKEDOWNS, ROCKET_LAUNCHES;
 
     override val readableName: String
         get() = name.split("_").joinToString(" ") { word ->

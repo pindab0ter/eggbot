@@ -43,6 +43,7 @@ fun earningsBonusResponse(
         if (prophecyEggResearchLevel < MAX_PROPHECY_EGG_RESEARCH_LEVEL)
             addRow("Prophecy Bonus:", prophecyEggResearchLevel.formatInteger(), "/5")
         addRow("Prestiges:", farmer.stats.prestiges.formatInteger())
+        addRow("Rockets launched:", farmer.rocketsLaunched.formatInteger())
         addRow(
             "SE to next rank:", "+ ${
                 when (displayMode) {

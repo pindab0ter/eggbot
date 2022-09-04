@@ -18,6 +18,7 @@ object Farmers : IdTable<String>() {
     val prestiges = long("prestiges")
     val droneTakedowns = long("drone_takedowns")
     val eliteDroneTakedowns = long("elite_drone_takedowns")
+    val rocketsLaunched = integer("rockets_launched")
     val createdAt = datetime("created_at").clientDefault { now() }
     val updatedAt = datetime("updated_at").clientDefault { now() }
 }

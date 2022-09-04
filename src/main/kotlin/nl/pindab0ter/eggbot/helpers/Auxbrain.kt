@@ -72,6 +72,12 @@ fun Backup.attemptStatusFor(contractId: String): AttemptStatus {
 
 val Backup.inGameName: String
     get() = userName.ifBlank { NO_ALIAS }
+val Backup.rocketsLaunched: Int
+    get() = artifactsDatabase.currentMissions.count { mission ->
+        mission.status !== Mission.Status.FUELING && mission.status !== Mission.Status.PREPARE_TO_LAUNCH
+    } + artifactsDatabase.missionArchive.count { mission ->
+        mission.status !== Mission.Status.FUELING && mission.status !== Mission.Status.PREPARE_TO_LAUNCH
+    }
 val Contract.finalGoal: BigDecimal
     get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
 val Contract.indexOfPeGoal: Int?

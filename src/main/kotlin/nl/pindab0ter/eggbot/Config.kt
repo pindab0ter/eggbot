@@ -48,6 +48,7 @@ class Server(
             PRESTIGES to channel.prestigesLeaderBoard,
             DRONE_TAKEDOWNS to channel.droneTakedownsLeaderBoard,
             ELITE_DRONE_TAKEDOWNS to channel.eliteDroneTakedownsLeaderBoard,
+            ROCKET_LAUNCHES to channel.rocketLaunchesLeaderBoard,
         ).filterValues { snowflake -> snowflake != null }
 }
 
@@ -97,6 +98,7 @@ class Channel(
     private val prestigesLeaderBoardId: String?,
     private val droneTakedownsLeaderBoardId: String?,
     private val eliteDroneTakedownsLeaderBoardId: String?,
+    private val rocketLaunchesLeaderBoardId: String?,
 ) {
     val coopsGroup get() = Snowflake(coopsGroupId)
     val earningsBonusLeaderBoard get() = earningsBonusLeaderBoardId?.let { Snowflake(it) }
@@ -104,6 +106,7 @@ class Channel(
     val prestigesLeaderBoard get() = prestigesLeaderBoardId?.let { Snowflake(it) }
     val droneTakedownsLeaderBoard get() = droneTakedownsLeaderBoardId?.let { Snowflake(it) }
     val eliteDroneTakedownsLeaderBoard get() = eliteDroneTakedownsLeaderBoardId?.let { Snowflake(it) }
+    val rocketLaunchesLeaderBoard get() = rocketLaunchesLeaderBoardId?.let { Snowflake(it) }
 }
 
 @Suppress("unused")
