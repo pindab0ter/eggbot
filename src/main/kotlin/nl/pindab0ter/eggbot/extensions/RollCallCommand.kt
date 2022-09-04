@@ -106,7 +106,7 @@ class RollCallCommand : Extension() {
 
                 newSuspendedTransaction(null, databases[server.name]) {
                     val farmers = withProgressBar(
-                        goal = Farmers.innerJoin(DiscordUsers)
+                        goal = Farmers.leftJoin(DiscordUsers)
                             .select { DiscordUsers.inactiveUntil.isNull() or (DiscordUsers.inactiveUntil less CurrentDateTime) }
                             .count().toInt(),
                         statusText = "Roll call for __${arguments.contract.name}__:\nChecking who has attempted this contract in the past…",

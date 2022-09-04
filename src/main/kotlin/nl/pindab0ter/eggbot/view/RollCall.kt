@@ -62,6 +62,7 @@ suspend fun GuildBehavior.rollCallResponse(
     return header + coopContent
 }
 
+// TODO: Support non-registered contributors
 suspend fun GuildBehavior.coopChannelMessage(
     coop: Coop,
     role: Role?,
