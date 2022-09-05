@@ -48,6 +48,7 @@ object AuxBrain {
             contractsCache = result.value.filter { contract -> contract.id != "first-contract" }.toSet()
             contractsCacheUpdateValidUntil = Instant.now().plus(minutes(CACHE_TTL_MINUTES).toStandardDuration())
         }
+
         is Result.Failure -> {
             logger.error { "Could not get contracts from AuxBrain." }
             logger.error { result.error }
@@ -90,11 +91,13 @@ object AuxBrain {
             if (database != null) suspendedTransactionAsync(null, database) {
                 Farmer.findById(eggIncId)?.update(result.value)
             }.start()
+
             farmerBackupsCache[eggIncId] = FarmerBackupCache(
                 validUntil = Instant.now().plus(minutes(CACHE_TTL_MINUTES).toStandardDuration()),
                 farmerBackup = result.value
             )
         }
+
         is Result.Failure -> {
             logger.error { "Could not get backup for ID $eggIncId from AuxBrain." }
             logger.error { result.error }

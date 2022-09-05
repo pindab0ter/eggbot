@@ -58,21 +58,27 @@ class UpdateLeaderBoardsCommand : Extension() {
             }
 
             action {
-                val farmers = transaction(databases[server.name]) {
-                    Farmer.all().toList()
+                // Update all farmers
+                transaction(databases[server.name]) {
+                    val oldFarmers = Farmer.all().toList()
+
+                    runBlocking {
+                        withProgressBar(
+                            goal = oldFarmers.count(),
+                            statusText = "Updating farmers…",
+                            unit = "farmers",
+                        ) {
+                            oldFarmers.onEachAsync { farmer ->
+                                AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])
+                                increment()
+                            }.toList()
+                        }
+                    }
                 }
 
-                runBlocking {
-                    withProgressBar(
-                        goal = farmers.count(),
-                        statusText = "Updating farmers…",
-                        unit = "farmers",
-                    ) {
-                        farmers.onEachAsync { farmer ->
-                            AuxBrain.getFarmerBackup(farmer.eggIncId, databases[server.name])
-                            increment()
-                        }.toList()
-                    }
+                // Retrieve updated farmers
+                val farmers = transaction {
+                    Farmer.all().toList()
                 }
 
                 withProgressBar(
