@@ -8,6 +8,7 @@ import org.joda.time.DateTime.now
 import org.joda.time.Duration
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
+import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import java.math.RoundingMode
 
@@ -25,11 +26,11 @@ val Backup.Farm.timeSinceLastStep: Duration
 
 // Earnings bonus
 val Backup.Game.soulEggResearchLevel: BigDecimal
-    get() = epicResearch.find { it.id == "soul_eggs" }!!.level.toBigDecimal()
+    get() = epicResearch.find { it.id == "soul_eggs" }?.level?.toBigDecimal() ?: ZERO
 val Backup.Game.soulEggBonus: BigDecimal
     get() = BASE_SOUL_EGG_RESEARCH_BONUS + (SOUL_EGG_RESEARCH_BONUS_PER_LEVEL * soulEggResearchLevel)
 val Backup.Game.prophecyEggResearchLevel: BigDecimal
-    get() = epicResearch.find { it.id == "prophecy_bonus" }!!.level.toBigDecimal()
+    get() = epicResearch.find { it.id == "prophecy_bonus" }?.level?.toBigDecimal() ?: ZERO
 val Backup.Game.prophecyEggBonus: BigDecimal
     get() = ONE + BASE_PROPHECY_EGG_RESEARCH_BONUS + (PROPHECY_EGG_RESEARCH_BONUS_PER_LEVEL * prophecyEggResearchLevel)
 val Backup.Game.earningsBonusPerSoulEgg: BigDecimal
@@ -60,10 +61,10 @@ fun Backup.attemptStatusFor(contractId: String): AttemptStatus {
     return when {
         localContract == null -> AttemptStatus.NEVER_ATTEMPTED
 
-        localContract.contract.indexOfPeGoal != null && localContract.goalsAchieved!! < (localContract.contract.indexOfPeGoal!! + 1) ->
+        localContract.contract.indexOfPeGoal != null && (localContract.goalsAchieved ?: 0) < ((localContract.contract.indexOfPeGoal ?: 0) + 1) ->
             AttemptStatus.FAILED_TO_GET_PROPHECY_EGG
 
-        localContract.goalsAchieved!! < localContract.contract.goals.size ->
+        (localContract.goalsAchieved ?: 0) < localContract.contract.goals.size ->
             AttemptStatus.FAILED_TO_COMPLETE_ALL_GOALS
 
         else -> AttemptStatus.COMPLETED
@@ -79,7 +80,7 @@ val Backup.rocketsLaunched: Int
         mission.status !== Mission.Status.FUELING && mission.status !== Mission.Status.PREPARE_TO_LAUNCH
     }
 val Contract.finalGoal: BigDecimal
-    get() = BigDecimal(goals.maxByOrNull { it.targetAmount }!!.targetAmount)
+    get() = BigDecimal(goals.maxByOrNull { it.targetAmount }?.targetAmount ?: 0.0)
 val Contract.indexOfPeGoal: Int?
     get() = goals.indexOfFirst { it.rewardType == RewardType.PROPHECY_EGGS }.takeIf { it != -1 }
 val LocalContract.finished: Boolean

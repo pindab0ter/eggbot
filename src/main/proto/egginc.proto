@@ -397,9 +397,9 @@ message ContractsRequest {
 
 message ContractsResponse {
   repeated Contract contracts = 1;
-  required string warningMessage = 4;
-  required double serverTime = 2;
-  required uint32 maxEop = 3 [default = 1000];
+  optional string warningMessage = 4;
+  optional double serverTime = 2;
+  optional uint32 maxEop = 3;
 }
 
 message CoopStatusRequest {
@@ -464,7 +464,7 @@ message CoopStatus {
     required uint32 amount = 2;
   }
 
-  required double localTimestamp = 12;
+  optional double localTimestamp = 12;
 
   enum MemberStatus {
     VALID = 0;
@@ -775,8 +775,8 @@ message Periodicals {
   required CurrentEvents events = 2;
   required ContractsResponse contracts = 3;
   repeated ServerGift gifts = 4;
-  required LiveConfig liveConfig = 5;
-  required MailDB mailBag = 6;
+  optional LiveConfig liveConfig = 5;
+  optional MailDB mailBag = 6;
 }
 
 message ConfigRequest {

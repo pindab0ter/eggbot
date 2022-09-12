@@ -50,4 +50,3 @@ private fun coopNames(amount: Int, baseName: String): List<String> = when {
                 .map { c -> "${c + chunkSize}-$baseName" })
     }
 }
-

@@ -10,7 +10,6 @@ import com.kotlindiscord.kord.extensions.extensions.ephemeralSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import dev.kord.common.Color
 import dev.kord.common.entity.Permission.*
-import dev.kord.core.behavior.channel.createMessage
 import dev.kord.core.behavior.channel.createTextChannel
 import dev.kord.core.behavior.createRole
 import dev.kord.core.behavior.getChannelOfOrNull
@@ -28,7 +27,7 @@ import nl.pindab0ter.eggbot.model.database.Coop
 import nl.pindab0ter.eggbot.model.database.Coops
 import nl.pindab0ter.eggbot.model.database.Farmer
 import nl.pindab0ter.eggbot.model.database.Farmers
-import nl.pindab0ter.eggbot.view.coopChannelMessage
+import org.jetbrains.exposed.sql.SizedCollection
 import org.jetbrains.exposed.sql.and
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -91,10 +90,12 @@ class AddCoopCommand : Extension() {
                             respond { content = "Role ${role.mention} and channel ${coopChannel.mention} already exist." }
                             return@action
                         }
+
                         role != null -> {
                             respond { content = "Role ${role.mention} already exists." }
                             return@action
                         }
+
                         coopChannel != null -> {
                             respond { content = "Channel ${coopChannel.mention} already exists." }
                             return@action
@@ -123,7 +124,7 @@ class AddCoopCommand : Extension() {
                 if (!arguments.createRolesAndChannels) {
                     respond {
                         content = buildString {
-                            append("Registered co-op `${coop.name}` for contract __${contract.name}__")
+                            append("Registered co-op `${coopId}` for contract __${contract.name}__")
                             if (arguments.preEmptive && coopStatus == null) append(", even though the co-op was not found")
                             append(".")
                         }
@@ -138,31 +139,34 @@ class AddCoopCommand : Extension() {
                     reason = "Added by ${user.asUser().username} through ${this@ephemeralSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                 }
 
-                val channel = coopCategoryChannel?.createTextChannel(coop.name) {
+                val channel = coopCategoryChannel?.createTextChannel(coopId) {
                     reason = "Added by ${user.asUser().username} through ${this@ephemeralSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
-                    topic = "**${coop.name}** vs. __${contract.name}__"
-                }?.also { channel ->
-                    channel.createMessage { content = guild?.coopChannelMessage(coop, role) }
-                }
-
-                transaction(databases[server.name]) {
-                    coop.roleId = role?.id
-                    coop.channelId = channel?.id
+                    topic = "**${coopId}** vs. __${contract.name}__"
                 }
 
                 val successes = mutableListOf<String>()
                 val failures = mutableListOf<String>()
 
                 // Assign the role to each member
-                coopStatus?.contributors?.map { contributor ->
-                    val member = transaction(databases[server.name]) {
+                val farmers = coopStatus?.contributors?.mapNotNull { contributor ->
+                    val farmer = transaction(databases[server.name]) {
                         Farmer.find { Farmers.id eq contributor.userId }.firstOrNull()
-                    }?.discordId?.let { this@action.guild?.getMemberOrNull(it) }
+                    }
+                    val member = farmer?.discordId?.let { this@action.guild?.getMemberOrNull(it) }
 
                     if (member != null && role != null) {
                         member.addRole(role.id)
                         successes.add(member.mention)
                     } else failures.add(contributor.userName)
+
+                    farmer
+                }.orEmpty()
+
+                // Create the co-op
+                transaction(databases[server.name]) {
+                    coop.roleId = role?.id
+                    coop.channelId = channel?.id
+                    coop.farmers = SizedCollection(farmers)
                 }
 
                 val responseBuilder = StringBuilder().apply {
