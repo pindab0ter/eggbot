@@ -4,6 +4,8 @@ import com.kotlindiscord.kord.extensions.ExtensibleBot
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.connectToDatabase
+import nl.pindab0ter.eggbot.databases
+import org.jetbrains.exposed.sql.transactions.transaction
 import kotlin.system.exitProcess
 
 suspend fun main() = ExtensibleBot(
@@ -17,7 +19,9 @@ suspend fun main() = ExtensibleBot(
                 connectToDatabase()
 
                 config.servers.forEach { server ->
-                    logger.debug { "Scratch here…" }
+                    transaction(databases[server.name]) {
+                        logger.debug { "Scratch here…" }
+                    }
                 }
 
             } catch (e: Exception) {
