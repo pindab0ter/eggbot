@@ -46,7 +46,7 @@ class WhoIsCommand : Extension() {
                             .limit(25)
 
                         Farmer.wrapRows(query).associate { farmer ->
-                            farmer.inGameName to farmer.eggIncId
+                            farmer.inGameName to farmer.inGameName
                         }
                     }
 
@@ -89,7 +89,7 @@ class WhoIsCommand : Extension() {
                         }
 
                         respond {
-                            content = "${farmer.inGameName} is registered by ${associatedDiscordUser.mention}"
+                            content = "`${farmer.inGameName}` is registered by ${associatedDiscordUser.mention}"
                         }
                     }
                     else -> respond { content = "Please specify a member or a farmer." }
