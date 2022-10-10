@@ -193,17 +193,20 @@ class RollCallCommand : Extension() {
                         coops.forEach createRolesAndChannels@{ coop ->
 
                             // Create and assign roles
+                            logger.info { "Creating and assigning roles for `${coop.name}`…" }
                             setStatusText("Roll call for __${arguments.contract.name}__:\nCreating and assigning roles for `${coop.name}`…")
+
                             val role = guild?.createRole {
                                 name = coop.name
                                 mentionable = true
                                 color = DEFAULT_ROLE_COLOR
-                                reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
+                                reason = "Roll call by ${user.asUserOrNull()?.tag} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                             }
 
                             if (role != null) {
                                 coop.roleId = role.id
                                 coop.farmers.forEach { farmer ->
+                                    logger.info { "Assigning role ${role.name} to ‘${farmer.inGameName}’ (${farmer.eggIncId})" }
                                     guild
                                         ?.getMemberOrNull(farmer.discordUser.snowflake)
                                         ?.addRole(role.id, "Roll call for ${arguments.contract.name}")
@@ -211,10 +214,11 @@ class RollCallCommand : Extension() {
                             }
 
                             // Create channel
+                            logger.info { "Roll call for __${arguments.contract.name}__:\nCreating channel and message for `${coop.name}`…" }
                             setStatusText("Roll call for __${arguments.contract.name}__:\nCreating channel and message for `${coop.name}`…")
                             val channel = coopsCategoryChannel?.createTextChannel(coop.name) {
                                 topic = "**${coop.name}** vs. __${arguments.contract.name}__"
-                                reason = "Roll call ${user.asUser().username} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
+                                reason = "Roll call by ‘${user.asUserOrNull()?.tag} through ${this@publicSlashCommand.kord.getSelf().username} for \"${arguments.contract.name}\""
                             }
                             coop.channelId = channel?.id
 
