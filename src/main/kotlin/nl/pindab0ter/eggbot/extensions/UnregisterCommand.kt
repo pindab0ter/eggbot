@@ -99,6 +99,7 @@ class UnregisterCommand : Extension() {
                         if (discordUser?.farmers?.minus(arguments.farmer)?.isEmpty() == true) {
                             val discordUserMention = guild?.mentionUser(discordUser.snowflake)
 
+                            arguments.farmer?.delete()
                             discordUser.delete()
 
                             runBlocking {
