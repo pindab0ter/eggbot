@@ -17,6 +17,7 @@ suspend fun main() {
 
             // Extensions
             add(::CommandLogger)
+            add(::UnregisterLeavingMembers)
 
             // Commands
             add(::RegisterCommand)
