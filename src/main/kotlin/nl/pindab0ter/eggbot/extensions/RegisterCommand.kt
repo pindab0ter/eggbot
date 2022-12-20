@@ -87,12 +87,13 @@ class RegisterCommand : Extension() {
                     Farmer.new(discordUser, farmerBackup)
                 }
 
-                respond {
-                    content = when (farmer.inGameName) {
-                        NO_ALIAS -> "A farmer without a name has been registered to ${runBlocking { getMember()?.mention }}"
-                        else -> "Farmer `${farmer.inGameName}` has been registered to ${runBlocking { getMember()?.mention }}."
-                    }
+                val message = when (farmer.inGameName) {
+                    NO_ALIAS -> "A farmer without a name has been registered to ${runBlocking { getMember()?.mention }}"
+                    else -> "Farmer `${farmer.inGameName}` has been registered to ${runBlocking { getMember()?.mention }}."
                 }
+
+                logger.info { message }
+                respond { content = message }
             }
         }
     }
