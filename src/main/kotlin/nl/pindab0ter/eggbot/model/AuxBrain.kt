@@ -120,6 +120,7 @@ object AuxBrain {
         val data = CoopStatusRequest(
             contractId = contractId,
             coopId = coopId,
+            userId = config.eggIncId,
         ).encode().encodeBase64()
 
         return COOP_STATUS_URL.httpPost()
