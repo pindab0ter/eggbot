@@ -223,36 +223,10 @@ message FirstContact {
   }
 }
 
-message AdConfig {
-  repeated AdNetwork networkPriority = 1;
-}
-
 message DailyGiftInfo {
   required uint32 currentDay = 1;
   required double secondsToNextDay = 2;
 }
-
-message SalesInfoRequest {
-  required string userId = 1;
-  required bool piggyFull = 2;
-  required bool piggyFoundFull = 3;
-  required double secondsFullRealtime = 4;
-  required double secondsFullGametime = 5;
-  required uint32 lostIncrements = 7;
-  required uint32 clientVersion = 10;
-}
-
-message IAPSaleEntry {
-  required string productId = 1;
-  required double secondsRemaining = 2;
-  required string discountString = 3;
-  required string saleId = 4;
-}
-
-message SalesInfo {
-  repeated IAPSaleEntry sales = 1;
-}
-
 message Event {
   required string identifier = 1;
   required double secondsRemaining = 2;
@@ -348,6 +322,17 @@ message Reward {
   required double rewardAmount = 3;
 }
 
+enum GameDimension {
+  EARNINGS = 1;
+  AWAY_EARNINGS = 2;
+}
+
+message GameModifier {
+  required GameDimension dimension = 1;
+  required double value_modifier = 2;
+  required string description = 3;
+}
+
 message Contract {
   required string id = 1;
   required string name = 9;
@@ -378,6 +363,19 @@ message Contract {
   optional double maxSoulEggs = 13;
   optional uint32 minClientVersion = 14;
   optional bool debug = 11;
+  optional string key = 21;
+
+  repeated GradeSpec gradeSpecs = 20;
+  message GradeSpec {
+    optional PlayerGrade grade = 1;
+    repeated Goal goals = 2;
+    repeated GameModifier modifiers = 3;
+  }
+}
+
+message ContractPlayerInfo {
+  optional PlayerGrade grade = 1;
+  optional double totalCxp = 2;
 }
 
 message BasicRequestInfo {
@@ -388,6 +386,40 @@ message BasicRequestInfo {
   required string platform = 5;
   required string country = 6;
   required string language = 7;
+}
+
+message ContractSimConfig {
+  repeated ContractGradeSimConfig gradeConfigs = 1;
+  message ContractGradeSimConfig {
+    required PlayerGrade grade = 1;
+
+    repeated GoalParams goalParams = 2;
+    message GoalParams {
+      required double targetSoulEggs = 1;
+      required double cpsMultiplier = 2;
+      required double earningsMultiplier = 3;
+    }
+  }
+}
+
+message ContractSimPoll {
+  required uint32 clientVersion = 1;
+}
+
+message ContractSimPollResponse {
+  required Contract contractToSimulate = 1;
+  required ContractSimConfig simConfig = 2;
+}
+
+message ContractSimResultUpdate {
+  required string contractId = 1;
+
+  repeated GoalInfo goalInfos = 2;
+  message GoalInfo {
+    required PlayerGrade playerGrade = 1;
+    required uint32 goalIndex = 2;
+    required double projectedEggsLaid = 3;
+  }
 }
 
 message ContractsRequest {
@@ -767,11 +799,11 @@ message PeriodicalsRequest {
 
 message PeriodicalsResponse {
   required Periodicals periodicals = 1;
+  optional ContractPlayerInfo contractPlayerInfo = 7;
   required string checksum = 2;
 }
 
 message Periodicals {
-  required SalesInfo sales = 1;
   required CurrentEvents events = 2;
   required ContractsResponse contracts = 3;
   repeated ServerGift gifts = 4;
@@ -1292,22 +1324,17 @@ enum RewardType {
   ARTIFACT_CASE = 12;
   UNKNOWN_REWARD = 100;
 }
+
 enum Platform {
   IOS = 1;
   DROID = 2;
 }
 
-enum DeviceFormFactor {
-  PHONE = 1;
-  TABLET = 2;
-}
-
-enum AdNetwork {
-  VUNGLE = 0;
-  CHARTBOOST = 1;
-  AD_COLONY = 2;
-  HYPER_MX = 3;
-  UNITY = 4;
-  FACEBOOK = 5;
-  APPLOVIN = 6;
+enum PlayerGrade {
+  GRADE_UNSET = 0;
+  GRADE_C = 1;
+  GRADE_B = 2;
+  GRADE_A = 3;
+  GRADE_AA = 4;
+  GRADE_AAA = 5;
 }
