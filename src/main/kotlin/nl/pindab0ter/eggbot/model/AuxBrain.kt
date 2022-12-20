@@ -24,9 +24,9 @@ private const val CACHE_TTL_MINUTES = 10
 object AuxBrain {
     private val logger = KotlinLogging.logger {}
 
-    private const val PERIODICALS_URL = "https://afx-2-dot-auxbrainhome.appspot.com/ei/get_periodicals"
-    private const val COOP_STATUS_URL = "https://afx-2-dot-auxbrainhome.appspot.com/ei/coop_status"
-    private const val FIRST_CONTACT_URL = "https://afx-2-dot-auxbrainhome.appspot.com/ei/bot_first_contact"
+    private const val PERIODICALS_URL = "https://auxbrain.com/ei/get_periodicals"
+    private const val COOP_STATUS_URL = "https://auxbrain.com/ei/coop_status"
+    private const val FIRST_CONTACT_URL = "https://auxbrain.com/ei/bot_first_contact"
 
     //region Contracts
     private var contractsCacheUpdateValidUntil: Instant = Instant.EPOCH
