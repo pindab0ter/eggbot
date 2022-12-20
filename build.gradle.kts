@@ -68,15 +68,25 @@ dependencies {
     implementation("io.sentry", "sentry", "6.9.2")
 }
 
-tasks {
-    withType<KotlinCompile>().configureEach {
-        kotlinOptions {
-            jvmTarget = "11"
-            freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
-        }
-    }
-
-    withType<JavaCompile>().configureEach {
-        enabled = false
+kotlin {
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(11))
+    }
+}
+
+tasks.withType<KotlinCompile>().configureEach {
+    kotlinOptions {
+        freeCompilerArgs = listOf("-opt-in=kotlin.RequiresOptIn")
+    }
+}
+
+tasks.withType<JavaCompile>().configureEach {
+    enabled = false
+}
+
