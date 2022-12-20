@@ -36,7 +36,7 @@ class UpdateLeaderBoardsJob : Job {
         logger.info { "Updating leader boards in ${server.name}…" }
 
         runBlocking {
-            val guild = kord.getGuild(server.snowflake)
+            val guild = kord.getGuildOrNull(server.snowflake)
             server.configuredLeaderBoards
                 .mapValues { (_, channelSnowflake) ->
                     guild?.getChannelOfOrNull<TextChannel>(channelSnowflake)

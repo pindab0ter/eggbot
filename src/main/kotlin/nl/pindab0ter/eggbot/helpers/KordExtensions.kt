@@ -7,6 +7,7 @@ import com.kotlindiscord.kord.extensions.commands.application.slash.converters.C
 import com.kotlindiscord.kord.extensions.commands.application.slash.converters.impl.defaultingEnumChoice
 import com.kotlindiscord.kord.extensions.commands.converters.SingleConverter
 import com.kotlindiscord.kord.extensions.commands.converters.impl.defaultingBoolean
+import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.core.behavior.channel.createMessage
@@ -15,7 +16,7 @@ import nl.pindab0ter.eggbot.helpers.Plurality.PLURAL
 import nl.pindab0ter.eggbot.helpers.Plurality.SINGULAR
 import nl.pindab0ter.eggbot.model.AuxBrain
 
-suspend fun <A : Arguments> PublicSlashCommandContext<A>.multipartRespond(messages: List<String>) {
+suspend fun <A : Arguments> PublicSlashCommandContext<A, ModalForm>.multipartRespond(messages: List<String>) {
     respond { content = messages.first() }
     messages.tail().forEach { message ->
         channel.createMessage { content = message }

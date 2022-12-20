@@ -41,7 +41,7 @@ class UpdateLeaderBoardsCommand : Extension() {
 
                 throwIfFailedWithMessage()
 
-                val guild = kord.getGuild(server.snowflake)
+                val guild = kord.getGuildOrNull(server.snowflake)
                 server.configuredLeaderBoards.forEach { (channelName, channelId) ->
                     val channel = guild?.getChannelOrNull(channelId)
 

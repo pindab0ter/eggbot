@@ -22,7 +22,7 @@ class CommandLogger : Extension() {
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {
-                val guild = event.interaction.data.guildId.value?.let { kord.getGuild(it) } ?: return@action
+                val guild = event.interaction.data.guildId.value?.let { kord.getGuildOrNull(it) } ?: return@action
 
                 val userName = event.interaction.user.asMemberOrNull(guild.id)?.displayName
                     ?: event.interaction.user.asUser().username
@@ -39,7 +39,7 @@ class CommandLogger : Extension() {
         @KordPreview
         fun Interaction.userInput(): String = buildString {
             val guild = runBlocking {
-                data.guildId.value?.let { guildId -> kord.getGuild(guildId) }
+                data.guildId.value?.let { guildId -> kord.getGuildOrNull(guildId) }
             }
 
             fun List<Option>.formatOptions(): String = joinToString(" ") { option ->

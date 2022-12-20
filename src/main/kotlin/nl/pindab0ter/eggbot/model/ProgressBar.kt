@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.model
 
 import com.kotlindiscord.kord.extensions.commands.Arguments
 import com.kotlindiscord.kord.extensions.commands.application.slash.PublicSlashCommandContext
+import com.kotlindiscord.kord.extensions.components.forms.ModalForm
 import com.kotlindiscord.kord.extensions.types.edit
 import dev.kord.core.behavior.edit
 import dev.kord.core.entity.Message
@@ -21,7 +22,7 @@ import kotlin.math.roundToInt
 
 
 @OptIn(ExperimentalContracts::class)
-inline fun <T, A : Arguments> PublicSlashCommandContext<A>.withProgressBar(
+inline fun <T, A : Arguments> PublicSlashCommandContext<A, ModalForm>.withProgressBar(
     goal: Int,
     statusText: String? = null,
     unit: String = "",
