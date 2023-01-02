@@ -39,7 +39,7 @@ object AuxBrain {
         ).encode().encodeBase64()
 
         return PERIODICALS_URL.httpPost()
-            .header("Content-Type", "application/x-www-form-urlencoded")
+            .appendHeader("Content-Type", "application/x-www-form-urlencoded")
             .body("data=$data")
     }
 
@@ -79,7 +79,7 @@ object AuxBrain {
         ).encode().encodeBase64()
 
         return FIRST_CONTACT_URL.httpPost()
-            .header("Content-Type", "application/x-www-form-urlencoded")
+            .appendHeader("Content-Type", "application/x-www-form-urlencoded")
             .body("data=$data")
     }
 
@@ -124,7 +124,7 @@ object AuxBrain {
         ).encode().encodeBase64()
 
         return COOP_STATUS_URL.httpPost()
-            .header("Content-Type", "application/x-www-form-urlencoded")
+            .appendHeader("Content-Type", "application/x-www-form-urlencoded")
             .body("data=$data")
     }
 
