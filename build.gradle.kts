@@ -40,7 +40,6 @@ dependencies {
     implementation("joda-time", "joda-time", "2.12.2")
     implementation("ch.obermuhlner", "big-math", "2.3.2")
 
-
     // Configuration
     implementation("com.charleskorn.kaml", "kaml", "0.49.0")
 
