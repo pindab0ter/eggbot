@@ -1,6 +1,7 @@
 package nl.pindab0ter.eggbot.model.auxbrain
 
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.CoopStatus
 import org.joda.time.Duration
 
 object Silos {
@@ -14,3 +15,14 @@ object Silos {
             game.epicResearch[EpicResearch.SILO_CAPACITY.ordinal].level
         )
 }
+
+val CoopStatus.ContributionInfo.maxAwayTime: Duration
+    get() = Duration.standardHours(1L)
+        .plus(extraAwayTimePerSilo)
+        .multipliedBy(farmInfo.silosOwned.toLong())
+
+private val CoopStatus.ContributionInfo.extraAwayTimePerSilo: Duration
+    get() = Duration.ZERO.withDurationAdded(
+        Duration.standardMinutes(6L),
+        farmInfo.epicResearch[EpicResearch.SILO_CAPACITY.ordinal].level
+    )

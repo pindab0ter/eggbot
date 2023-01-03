@@ -8,6 +8,7 @@ import com.auxbrain.ei.Artifact.Rarity
 import com.auxbrain.ei.Artifact.Rarity.*
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Backup.Farm
+import com.auxbrain.ei.CoopStatus
 import mu.KotlinLogging.logger
 import java.math.BigDecimal
 import java.math.BigDecimal.ONE
@@ -22,9 +23,8 @@ fun Backup.artifactsFor(farm: Farm?): List<Artifact> = artifactsDatabase.activeA
         }.orEmpty()
     }.orEmpty()
 
-fun Backup.coopArtifactsFor(farm: Farm?): List<Artifact> = artifactsFor(farm).filter { artifact ->
-    artifact.name in coopArtifacts
-}
+val CoopStatus.FarmInfo.artifacts: List<Artifact>
+    get() = equippedArtifacts.flatMap { artifact -> artifact.stones.plus(artifact.base) }
 
 val Artifact.multiplier: BigDecimal
     get() = artifactMultipliers[identifier] ?: ONE.also {
@@ -32,8 +32,6 @@ val Artifact.multiplier: BigDecimal
             "Unknown artifact: ${rarity?.name} ${level.name} ${name.name}"
         }
     }
-
-private val coopArtifacts: List<Artifact.Name> = listOf(TACHYON_DEFLECTOR)
 
 private data class Identifier(
     val name: Artifact.Name,

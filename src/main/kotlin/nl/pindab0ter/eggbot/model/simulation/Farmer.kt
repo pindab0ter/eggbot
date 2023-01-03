@@ -2,6 +2,7 @@ package nl.pindab0ter.eggbot.model.simulation
 
 import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Backup
+import com.auxbrain.ei.CoopStatus
 import nl.pindab0ter.eggbot.helpers.*
 import nl.pindab0ter.eggbot.helpers.BigDecimal.Companion.FOUR
 import org.joda.time.Duration
@@ -22,7 +23,7 @@ data class Farmer(
         reportedState: FarmState,
         currentState: FarmState? = null,
         constants: Constants,
-        timeSinceBackup: Duration,
+        timeSinceLastCheckIn: Duration,
     ) : this(
         inGameName = inGameName,
         reportedState = reportedState,
@@ -31,7 +32,7 @@ data class Farmer(
         goalsReachedState = null,
         timeUpState = null,
         constants = constants,
-        timeSinceBackup = timeSinceBackup
+        timeSinceBackup = timeSinceLastCheckIn
     )
 
     val reportedEggsLaid: BigDecimal get() = reportedState.eggsLaid
@@ -66,7 +67,19 @@ data class Farmer(
                 reportedState = reportedState,
                 currentState = catchUp(reportedState, constants, minOf(farm.timeSinceLastStep, constants.maxAwayTime)),
                 constants = constants,
-                timeSinceBackup = backup.timeSinceBackup
+                timeSinceLastCheckIn = backup.timeSinceBackup
+            )
+        }
+
+        operator fun invoke(contributionInfo: CoopStatus.ContributionInfo): Farmer {
+            val constants = Constants(contributionInfo)
+            val reportedState = FarmState(contributionInfo, constants)
+            return Farmer(
+                inGameName = contributionInfo.userName,
+                reportedState = reportedState,
+                currentState = catchUp(reportedState, constants, minOf(contributionInfo.timeSinceLastCheckIn, constants.maxAwayTime)),
+                constants = constants,
+                timeSinceLastCheckIn = contributionInfo.timeSinceLastCheckIn
             )
         }
     }

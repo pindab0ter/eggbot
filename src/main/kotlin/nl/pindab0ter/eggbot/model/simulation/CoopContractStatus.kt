@@ -5,15 +5,11 @@ import com.auxbrain.ei.CoopStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.runBlocking
 import nl.pindab0ter.eggbot.helpers.eggsLaid
-import nl.pindab0ter.eggbot.helpers.farmFor
 import nl.pindab0ter.eggbot.helpers.finalGoal
-import nl.pindab0ter.eggbot.helpers.mapAsync
-import nl.pindab0ter.eggbot.model.AuxBrain
-import nl.pindab0ter.eggbot.model.auxbrain.coopArtifactsFor
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InActive.*
 import nl.pindab0ter.eggbot.model.simulation.CoopContractStatus.InProgress.*
-import org.jetbrains.exposed.sql.Database
 import org.joda.time.Duration
+import nl.pindab0ter.eggbot.model.simulation.Farmer.Companion as SimulationFarmer
 
 sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopContractStatus> {
     data class NotFound(val coopId: String) : CoopContractStatus(0)
@@ -41,27 +37,23 @@ sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopCont
             contract: Contract,
             coopStatus: CoopStatus?,
             coopId: String,
-            database: Database?,
-            progressCallback: () -> Unit = { },
         ): CoopContractStatus = when {
             coopStatus == null ->
                 NotFound(coopId)
+
             coopStatus.contributors.isEmpty() ->
                 Abandoned(coopStatus)
+
             coopStatus.eggsLaid >= contract.finalGoal ->
                 Finished(coopStatus)
+
             coopStatus.gracePeriodSecondsRemaining <= 0.0 && coopStatus.eggsLaid < contract.finalGoal ->
                 Failed(coopStatus)
-            else -> runBlocking(Dispatchers.Default) {
-                val backups = coopStatus.contributors.mapAsync(coroutineContext) { contributionInfo ->
-                    AuxBrain.getFarmerBackup(contributionInfo.userId, database).also { progressCallback() }
-                }.filterNotNull()
-                val activeCoopArtifacts = backups.flatMap { backup ->
-                    backup.coopArtifactsFor(backup.farmFor(contract.id))
-                }
-                val farmers = backups.mapNotNull { Farmer(it, contract.id, activeCoopArtifacts) }
 
-                val coopContractState = simulate(CoopContractState(contract, coopStatus, farmers))
+            else -> runBlocking(Dispatchers.Default) {
+                val simulationFarmers = coopStatus.contributors.map { contributor -> SimulationFarmer(contributor) }
+
+                val coopContractState = simulate(CoopContractState(contract, coopStatus, simulationFarmers))
 
                 when {
                     coopContractState.finished -> Finished(coopStatus)

@@ -5,6 +5,7 @@ import com.auxbrain.ei.Artifact.Name.INTERSTELLAR_COMPASS
 import com.auxbrain.ei.Artifact.Name.QUANTUM_STONE
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Backup.Farm
+import com.auxbrain.ei.CoopStatus
 import com.auxbrain.ei.VehicleType
 import nl.pindab0ter.eggbot.helpers.product
 import nl.pindab0ter.eggbot.helpers.productOf
@@ -17,11 +18,24 @@ fun Backup.shippingRateResearchMultiplierFor(farm: Farm): BigDecimal = farm.ship
     .plus(shippingRateEpicResearchMultiplier)
     .product()
 
+val CoopStatus.FarmInfo.shippingRateResearchMultiplier: BigDecimal
+    get() = shippingRateCommonResearchMultipliers
+        .plus(shippingRateEpicResearchMultiplier)
+        .product()
+
 fun Backup.shippingRateArtifactsMultiplierFor(farm: Farm): BigDecimal = artifactsFor(farm).shippingRateMultiplier
+
+val CoopStatus.FarmInfo.shippingRateArtifactsMultiplier: BigDecimal
+    get() = artifacts.shippingRateMultiplier
 
 fun Backup.shippingRateFor(farm: Farm): BigDecimal = farm.baseShippingRate
     .multiply(shippingRateResearchMultiplierFor(farm))
     .multiply(shippingRateArtifactsMultiplierFor(farm))
+
+val CoopStatus.FarmInfo.shippingRate: BigDecimal
+    get() = baseShippingRate
+        .multiply(shippingRateResearchMultiplier)
+        .multiply(shippingRateArtifactsMultiplier)
 
 val shippingRateArtifacts = listOf(
     INTERSTELLAR_COMPASS,
@@ -48,10 +62,34 @@ private val Farm.shippingRateCommonResearchMultipliers: List<BigDecimal>
         ONE + BigDecimal(".05") * commonResearch[CommonResearch.HYPER_PORTALLING.ordinal].level,
     )
 
+private val CoopStatus.FarmInfo.shippingRateCommonResearchMultipliers: List<BigDecimal>
+    get() = listOf(
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.IMPROVED_LEAFSPRINGS.ordinal].level,
+        ONE + BigDecimal(".10") * commonResearch[CommonResearch.LIGHTWEIGHT_BOXES.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.DRIVER_TRAINING.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.SUPER_ALLOY_FRAMES.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.QUANTUM_STORAGE.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.HOVER_UPGRADES.ordinal].level, // Assumes at least Hover Semi
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.DARK_CONTAINMENT.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.NEURAL_NET_REFINEMENT.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[CommonResearch.HYPER_PORTALLING.ordinal].level,
+    )
+
 private val Backup.shippingRateEpicResearchMultiplier: BigDecimal
     get() = ONE + BigDecimal(".05") * game.epicResearch[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
 
+private val CoopStatus.FarmInfo.shippingRateEpicResearchMultiplier: BigDecimal
+    get() = ONE + BigDecimal(".05") * epicResearch[EpicResearch.TRANSPORTATION_LOBBYISTS.ordinal].level
+
 val Farm.baseShippingRate: BigDecimal
+    get() = vehicles.foldIndexed(ZERO) { index, acc, vehicleType ->
+        when (vehicleType) {
+            VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * trainLengths[index]
+            else -> acc + vehicleType.capacity
+        }
+    }
+
+val CoopStatus.FarmInfo.baseShippingRate: BigDecimal
     get() = vehicles.foldIndexed(ZERO) { index, acc, vehicleType ->
         when (vehicleType) {
             VehicleType.HYPERLOOP_TRAIN -> acc + vehicleType.capacity * trainLengths[index]

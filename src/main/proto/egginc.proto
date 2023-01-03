@@ -124,7 +124,7 @@ message Backup {
     required double eggsShipped = 30;
     required double eggsPaidFor = 10;
     required uint32 silosOwned = 11;
-    repeated HabLevel habs = 12;
+    repeated HabLevel habLevels = 12;
     repeated uint64 habPopulations = 13;
     repeated uint64 inboundHabPopulations = 14;
     repeated double habIncubatorPopulations = 15;
@@ -469,6 +469,7 @@ message CoopStatus {
     required double contributionRate = 6;
     required double soulPower = 11;
     required FarmProduction farmProduction = 15;
+    required FarmInfo farmInfo = 18;
     optional int32 rankChange = 8;
     required bool active = 4;
     required bool leech = 16;
@@ -496,7 +497,38 @@ message CoopStatus {
     required uint32 amount = 2;
   }
 
+  repeated ChickenRun chickenRuns = 13;
+  message ChickenRun {
+    required string userId = 1;
+    required string userName = 3;
+    required uint64 amount = 2;
+  }
+
   optional double localTimestamp = 12;
+
+  message FarmInfo {
+    required uint32 clientVersion = 20;
+    required double soulEggs = 1;
+    required uint64 eggsOfProphecy = 2;
+    required uint32 permitLevel = 3;
+    required bool hyperloopStation = 4;
+    repeated uint32 eggMedalLevels = 5;
+    repeated Backup.ResearchItem epicResearch = 6;
+    required Egg eggType = 7;
+    required double cashOnHand = 8;
+    repeated HabLevel habLevels = 9;
+    repeated uint64 habPopulations = 10;
+    repeated uint64 habCapacities = 21;
+    repeated VehicleType vehicles = 11;
+    repeated uint32 trainLengths = 12;
+    required uint32 silosOwned = 13;
+    repeated Backup.ResearchItem commonResearch = 14;
+    repeated Backup.ActiveBoost activeBoosts = 15;
+    required uint32 boostTokens = 16;
+    repeated CompleteArtifact equippedArtifacts = 17;
+    required uint64 artifactInventoryScore = 18;
+    required double timestamp = 22;
+  }
 
   enum MemberStatus {
     VALID = 0;
@@ -653,30 +685,6 @@ message KickPlayerCoopRequest {
   }
 
   required uint32 clientVersion = 7;
-}
-
-message ContractCoopStatusUpdateRequest {
-  required BasicRequestInfo requestInfo = 12;
-  required string userId = 1;
-  required string contractId = 2;
-  required string coopId = 3;
-  required string pushUserId = 8;
-  required double amount = 4;
-  required double rate = 5;
-  required uint32 timeCheatsDetected = 6;
-  required double soulPower = 7;
-  required uint32 eop = 15;
-  required uint32 boostTokens = 9;
-  required uint32 boostTokensSpent = 13;
-  required FarmProduction farmProduction = 14;
-  required double eggLayingRateBuff = 10 [default = 1];
-  required double earningsBuff = 11 [default = 1];
-}
-
-message ContractCoopStatusUpdateResponse {
-  required bool finalized = 1;
-  required bool exists = 2;
-  required CoopStatus.MemberStatus status = 3;
 }
 
 message CoopBuffState {
@@ -1327,7 +1335,7 @@ enum RewardType {
 
 enum Platform {
   IOS = 1;
-  DROID = 2;
+  ANDROID = 2;
 }
 
 enum PlayerGrade {

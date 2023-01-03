@@ -15,6 +15,8 @@ import java.math.RoundingMode
 // Basic information
 val Backup.timeSinceBackup: Duration
     get() = Duration(approxTime.toDateTime(), now())
+val CoopStatus.ContributionInfo.timeSinceLastCheckIn: Duration
+    get() = Duration(farmInfo.timestamp.toDateTime(), now())
 
 // Farms
 fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm ->

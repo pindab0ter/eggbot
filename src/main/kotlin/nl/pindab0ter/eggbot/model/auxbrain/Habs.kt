@@ -4,6 +4,7 @@ import com.auxbrain.ei.Artifact
 import com.auxbrain.ei.Artifact.Name.GUSSET
 import com.auxbrain.ei.Backup
 import com.auxbrain.ei.Backup.Farm
+import com.auxbrain.ei.CoopStatus
 import com.auxbrain.ei.HabLevel
 import com.auxbrain.ei.HabLevel.*
 import nl.pindab0ter.eggbot.helpers.product
@@ -14,16 +15,32 @@ import java.math.BigDecimal
 import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 
-fun Farm.habCapacityResearchMultiplier(): BigDecimal = habCapacityResearchMultipliers.product()
+val Farm.habCapacityResearchMultiplier: BigDecimal get() = habCapacityResearchMultipliers.product()
+val CoopStatus.FarmInfo.habCapacityResearchMultiplier: BigDecimal get() = habCapacityResearchMultipliers.product()
+
 fun Backup.habCapacityArtifactsMultiplierFor(farm: Farm): BigDecimal = artifactsFor(farm).habCapacityMultiplier
-fun Backup.habCapacityMultiplierFor(farm: Farm): BigDecimal = farm.habCapacityResearchMultiplier()
+val CoopStatus.FarmInfo.habCapacityArtifactsMultiplier: BigDecimal get() = artifacts.habCapacityMultiplier
+
+fun Backup.habCapacityMultiplierFor(farm: Farm): BigDecimal = farm.habCapacityResearchMultiplier
     .multiply(habCapacityArtifactsMultiplierFor(farm))
+
+val CoopStatus.FarmInfo.habCapacityMultiplier: BigDecimal
+    get() = habCapacityResearchMultiplier
+        .multiply(habCapacityArtifactsMultiplier)
 
 val habCapacityArtifacts = listOf(
     GUSSET,
 )
 
 private val Farm.habCapacityResearchMultipliers: List<BigDecimal>
+    get() = listOf(
+        ONE + BigDecimal(".05") * commonResearch[HEN_HOUSE_REMODEL.ordinal].level,
+        ONE + BigDecimal(".05") * commonResearch[MICROLUX_CHICKEN_SUITES.ordinal].level,
+        ONE + BigDecimal(".02") * commonResearch[GRAV_PLATING.ordinal].level,
+        ONE + BigDecimal(".02") * commonResearch[WORMHOLE_DAMPENING.ordinal].level
+    )
+
+private val CoopStatus.FarmInfo.habCapacityResearchMultipliers: List<BigDecimal>
     get() = listOf(
         ONE + BigDecimal(".05") * commonResearch[HEN_HOUSE_REMODEL.ordinal].level,
         ONE + BigDecimal(".05") * commonResearch[MICROLUX_CHICKEN_SUITES.ordinal].level,
