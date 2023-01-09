@@ -11,12 +11,14 @@ import java.math.BigDecimal.ONE
 import java.math.BigDecimal.ZERO
 import java.math.MathContext
 import java.math.RoundingMode
+import kotlin.math.absoluteValue
+import kotlin.math.roundToLong
 
 // Basic information
 val Backup.timeSinceBackup: Duration
     get() = Duration(approxTime.toDateTime(), now())
 val CoopStatus.ContributionInfo.timeSinceLastCheckIn: Duration
-    get() = Duration(farmInfo.timestamp.toDateTime(), now())
+    get() = Duration.standardSeconds(farmInfo.timestamp.roundToLong().absoluteValue)
 
 // Farms
 fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm ->
