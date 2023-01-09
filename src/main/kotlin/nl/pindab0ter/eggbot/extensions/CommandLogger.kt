@@ -5,6 +5,7 @@ import com.kotlindiscord.kord.extensions.extensions.event
 import dev.kord.common.annotation.KordPreview
 import dev.kord.common.entity.CommandArgument.*
 import dev.kord.common.entity.CommandGroup
+import dev.kord.common.entity.InteractionType
 import dev.kord.common.entity.Option
 import dev.kord.common.entity.SubCommand
 import dev.kord.common.entity.optional.Optional
@@ -22,6 +23,8 @@ class CommandLogger : Extension() {
     override suspend fun setup() {
         event<InteractionCreateEvent> {
             action {
+                if (event.interaction.type !== InteractionType.ApplicationCommand) return@action
+
                 val guild = event.interaction.data.guildId.value?.let { kord.getGuildOrNull(it) } ?: return@action
 
                 val userName = event.interaction.user.asMemberOrNull(guild.id)?.displayName
