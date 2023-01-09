@@ -11,7 +11,7 @@ import org.jetbrains.exposed.sql.transactions.transaction
 @KordPreview
 class UnregisterLeavingMembers : Extension() {
     val logger = KotlinLogging.logger { }
-    override val name: String = "CommandLoggerExtension"
+    override val name: String = "UnregisterLeavingMembersExtension"
 
     override suspend fun setup() {
         event<MemberLeaveEvent> {
