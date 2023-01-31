@@ -71,7 +71,7 @@ class UnregisterCommand : Extension() {
 
                     arguments.discordUser != null -> {
                         val databaseDiscordUser = transaction(databases[server.name]) {
-                            arguments.discordUser?.id?.let { DiscordUser.findBy(it)?.load(DiscordUser::farmers) }
+                            arguments.discordUser!!.id.let { DiscordUser.findBy(it)?.load(DiscordUser::farmers) }
                         }
 
                         if (databaseDiscordUser == null) {
@@ -93,10 +93,10 @@ class UnregisterCommand : Extension() {
                     }
 
                     arguments.farmer != null -> transaction(databases[server.name]) {
-                        val discordUser = arguments.farmer?.discordUser?.load(DiscordUser::farmers)
+                        val discordUser = arguments.farmer!!.discordUser.load(DiscordUser::farmers)
 
                         // If this is the only farmer
-                        if (discordUser?.farmers?.minus(arguments.farmer)?.isEmpty() == true) {
+                        if (discordUser.farmers.minus(arguments.farmer).isEmpty()) {
                             val discordUserMention = guild?.mentionUser(discordUser.snowflake)
 
                             arguments.farmer?.delete()
@@ -115,9 +115,9 @@ class UnregisterCommand : Extension() {
                                     content = buildString {
                                         appendLine("Unregistered `${arguments.farmer?.inGameName}`.")
 
-                                        val count = discordUser?.farmers?.count() ?: 0
+                                        val count = discordUser.farmers.count()
                                         if (count > 0) {
-                                            append("${discordUser?.farmers?.toListing()} ")
+                                            append("${discordUser.farmers.toListing()} ")
                                             if (count == 1L) append("is") else append("are")
                                             append(" still registered to ${guild?.mentionUser(discordUser?.snowflake)}.")
                                         }
