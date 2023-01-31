@@ -17,8 +17,8 @@ import kotlin.math.roundToLong
 // Basic information
 val Backup.timeSinceBackup: Duration
     get() = Duration(approxTime.toDateTime(), now())
-val CoopStatus.ContributionInfo.timeSinceLastCheckIn: Duration
-    get() = Duration.standardSeconds(farmInfo.timestamp.roundToLong().absoluteValue)
+val CoopStatus.FarmInfo.timeSinceLastCheckIn: Duration
+    get() = Duration.standardSeconds(timestamp.roundToLong().absoluteValue)
 
 // Farms
 fun Backup.farmFor(contractId: String): Backup.Farm? = farms.firstOrNull { farm ->

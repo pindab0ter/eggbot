@@ -469,7 +469,7 @@ message CoopStatus {
     required double contributionRate = 6;
     required double soulPower = 11;
     required FarmProduction farmProduction = 15;
-    required FarmInfo farmInfo = 18;
+    optional FarmInfo farmInfo = 18;
     optional int32 rankChange = 8;
     required bool active = 4;
     required bool leech = 16;

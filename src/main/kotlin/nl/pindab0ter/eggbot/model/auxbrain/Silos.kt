@@ -16,13 +16,13 @@ object Silos {
         )
 }
 
-val CoopStatus.ContributionInfo.maxAwayTime: Duration
+val CoopStatus.FarmInfo.maxAwayTime: Duration
     get() = Duration.standardHours(1L)
         .plus(extraAwayTimePerSilo)
-        .multipliedBy(farmInfo.silosOwned.toLong())
+        .multipliedBy(silosOwned.toLong())
 
-private val CoopStatus.ContributionInfo.extraAwayTimePerSilo: Duration
+private val CoopStatus.FarmInfo.extraAwayTimePerSilo: Duration
     get() = Duration.ZERO.withDurationAdded(
         Duration.standardMinutes(6L),
-        farmInfo.epicResearch[EpicResearch.SILO_CAPACITY.ordinal].level
+        epicResearch[EpicResearch.SILO_CAPACITY.ordinal].level
     )

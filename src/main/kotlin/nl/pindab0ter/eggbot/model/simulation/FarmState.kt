@@ -25,15 +25,23 @@ data class FarmState(
         }
     )
 
-    constructor(contributionInfo: CoopStatus.ContributionInfo, constants: Constants) : this(
-        habs = contributionInfo.farmInfo.habs,
-        eggsLaid = BigDecimal(contributionInfo.contributionAmount),
-        habsStatus = habsStatus(contributionInfo.farmInfo.habs, Duration.ZERO),
-        transportBottleneck = when {
-            eggIncrease(contributionInfo.farmInfo.habs, constants) >= constants.transportRate -> Duration.ZERO
-            else -> null
-        }
-    )
-
     val population: BigDecimal get() = habs.sumOf(Hab::population)
+
+    companion object {
+        operator fun invoke(contributionInfo: CoopStatus.ContributionInfo, constants: Constants?): FarmState? {
+            if (contributionInfo.farmInfo === null || constants === null) {
+                return null
+            }
+
+            return FarmState(
+                habs = contributionInfo.farmInfo.habs,
+                eggsLaid = BigDecimal(contributionInfo.contributionAmount),
+                habsStatus = habsStatus(contributionInfo.farmInfo.habs, Duration.ZERO),
+                transportBottleneck = when {
+                    eggIncrease(contributionInfo.farmInfo.habs, constants) >= constants.transportRate -> Duration.ZERO
+                    else -> null
+                }
+            )
+        }
+    }
 }

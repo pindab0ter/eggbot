@@ -32,16 +32,24 @@ data class Constants(
         maxAwayTime = Silos.maxAwayTimeFor(backup, farm),
     )
 
-    constructor(
-        contributionInfo: CoopStatus.ContributionInfo
-    ) : this(
-        hatcherySharing = contributionInfo.farmInfo.hatcherySharingMultiplier,
-        hatcheryRate = contributionInfo.farmInfo.hatcheryRate,
-        habCapacityMultiplier = contributionInfo.farmInfo.habCapacityMultiplier,
-        eggLayingBonus = contributionInfo.farmInfo.eggLayingRateMultiplier,
-        transportRate = contributionInfo.farmInfo.shippingRate,
-        tokensAvailable = contributionInfo.boostTokens ?: 0,
-        tokensSpent = contributionInfo.boostTokensSpent ?: 0,
-        maxAwayTime = contributionInfo.maxAwayTime,
-    )
+    companion object {
+        operator fun invoke(
+            contributionInfo: CoopStatus.ContributionInfo
+        ): Constants? {
+            if (contributionInfo.farmInfo === null) {
+                return null
+            }
+
+            return Constants(
+                hatcherySharing = contributionInfo.farmInfo.hatcherySharingMultiplier,
+                hatcheryRate = contributionInfo.farmInfo.hatcheryRate,
+                habCapacityMultiplier = contributionInfo.farmInfo.habCapacityMultiplier,
+                eggLayingBonus = contributionInfo.farmInfo.eggLayingRateMultiplier,
+                transportRate = contributionInfo.farmInfo.shippingRate,
+                tokensAvailable = contributionInfo.boostTokens ?: 0,
+                tokensSpent = contributionInfo.boostTokensSpent ?: 0,
+                maxAwayTime = contributionInfo.farmInfo.maxAwayTime,
+            )
+        }
+    }
 }

@@ -104,6 +104,8 @@ class RollCallCommand : Extension() {
                     return@action
                 }
 
+                // TODO: Exclude Farmers that belong to DiscordUsers that are no longer part of this server
+
                 newSuspendedTransaction(null, databases[server.name]) {
                     val farmers = withProgressBar(
                         goal = Farmers.leftJoin(DiscordUsers)

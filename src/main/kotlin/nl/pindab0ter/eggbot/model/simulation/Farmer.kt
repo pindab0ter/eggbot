@@ -71,15 +71,19 @@ data class Farmer(
             )
         }
 
-        operator fun invoke(contributionInfo: CoopStatus.ContributionInfo): Farmer {
-            val constants = Constants(contributionInfo)
-            val reportedState = FarmState(contributionInfo, constants)
+        operator fun invoke(contributionInfo: CoopStatus.ContributionInfo): Farmer? {
+            if (contributionInfo.farmInfo === null) {
+                return null
+            }
+
+            val constants = Constants(contributionInfo)!!
+            val reportedState = FarmState(contributionInfo, constants)!!
             return Farmer(
                 inGameName = contributionInfo.userName,
                 reportedState = reportedState,
-                currentState = catchUp(reportedState, constants, minOf(contributionInfo.timeSinceLastCheckIn, constants.maxAwayTime)),
+                currentState = catchUp(reportedState, constants, minOf(contributionInfo.farmInfo.timeSinceLastCheckIn, constants.maxAwayTime)),
                 constants = constants,
-                timeSinceLastCheckIn = contributionInfo.timeSinceLastCheckIn
+                timeSinceLastCheckIn = contributionInfo.farmInfo.timeSinceLastCheckIn
             )
         }
     }

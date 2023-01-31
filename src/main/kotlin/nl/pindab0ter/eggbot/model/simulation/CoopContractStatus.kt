@@ -51,7 +51,8 @@ sealed class CoopContractStatus(private val priority: Int) : Comparable<CoopCont
                 Failed(coopStatus)
 
             else -> runBlocking(Dispatchers.Default) {
-                val simulationFarmers = coopStatus.contributors.map { contributor -> SimulationFarmer(contributor) }
+                val simulationFarmers = coopStatus.contributors.mapNotNull { contributor -> SimulationFarmer(contributor) }
+                // TODO: Communicate that we couldn't get the required information for a player where FarmInfo is null
 
                 val coopContractState = simulate(CoopContractState(contract, coopStatus, simulationFarmers))
 
