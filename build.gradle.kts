@@ -13,8 +13,8 @@ plugins {
     application
     kotlin("jvm") version "1.8.0-RC"
     kotlin("plugin.serialization") version "1.8.0-RC"
-    id("com.squareup.wire") version "4.4.3"
-    id("com.github.ben-manes.versions") version "0.44.0"
+    id("com.squareup.wire") version "4.5.2"
+    id("com.github.ben-manes.versions") version "0.46.0"
 }
 
 wire {
@@ -26,7 +26,7 @@ repositories {
     maven {
         // Required for Kord and Kord Extensions
         name = "Kord Extensions"
-        url = uri("https://maven.kotlindiscord.com/repository/maven-public/")
+        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
     }
     maven {
         name = "Kord Snapshots"
@@ -41,19 +41,19 @@ dependencies {
     implementation("ch.obermuhlner", "big-math", "2.3.2")
 
     // Configuration
-    implementation("com.charleskorn.kaml", "kaml", "0.49.0")
+    implementation("com.charleskorn.kaml", "kaml", "0.52.0")
 
     // Database
     implementation("org.jetbrains.exposed", "exposed-core", "0.41.1")
     implementation("org.jetbrains.exposed", "exposed-dao", "0.41.1")
     implementation("org.jetbrains.exposed", "exposed-jdbc", "0.41.1")
     implementation("org.jetbrains.exposed", "exposed-jodatime", "0.41.1")
-    implementation("org.flywaydb", "flyway-core", "9.10.0")
-    runtimeOnly("org.postgresql", "postgresql", "42.5.1")
+    implementation("org.flywaydb", "flyway-core", "9.15.2")
+    runtimeOnly("org.postgresql", "postgresql", "42.5.4")
 
     // Networking
     implementation("com.github.kittinunf.fuel", "fuel", "2.3.1")
-    implementation("com.squareup.wire", "wire-gradle-plugin", "4.4.3")
+    implementation("com.squareup.wire", "wire-gradle-plugin", "4.5.2")
 
     // Discord
     implementation("com.kotlindiscord.kord.extensions", "kord-extensions", "1.5.6-SNAPSHOT")
@@ -64,7 +64,7 @@ dependencies {
     // Logging
     runtimeOnly("ch.qos.logback", "logback-classic", "1.4.5")
     implementation("io.github.microutils", "kotlin-logging-jvm", "3.0.4")
-    implementation("io.sentry", "sentry", "6.9.2")
+    implementation("io.sentry", "sentry", "6.15.0")
 }
 
 kotlin {
