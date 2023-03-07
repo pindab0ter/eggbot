@@ -88,4 +88,3 @@ tasks.withType<KotlinCompile>().configureEach {
 tasks.withType<JavaCompile>().configureEach {
     enabled = false
 }
-

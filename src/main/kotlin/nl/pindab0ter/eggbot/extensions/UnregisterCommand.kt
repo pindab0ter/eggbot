@@ -8,7 +8,6 @@ import com.kotlindiscord.kord.extensions.extensions.publicSlashCommand
 import com.kotlindiscord.kord.extensions.types.respond
 import com.kotlindiscord.kord.extensions.utils.suggestStringMap
 import dev.kord.common.annotation.KordPreview
-import kotlinx.coroutines.runBlocking
 import mu.KotlinLogging
 import nl.pindab0ter.eggbot.config
 import nl.pindab0ter.eggbot.converters.optionalFarmer
@@ -66,63 +65,88 @@ class UnregisterCommand : Extension() {
             action {
                 when {
                     arguments.discordUser != null && arguments.farmer != null -> {
-                        respond { content = "You can't specify both a member and a farmer." }
+                        val message = "You can't specify both a member and a farmer."
+
+                        logger.trace { message }
+                        respond { content = message }
                     }
 
                     arguments.discordUser != null -> {
+                        logger.trace { "Unregistering by Discord user: ${arguments.discordUser}" }
+
                         val databaseDiscordUser = transaction(databases[server.name]) {
                             arguments.discordUser!!.id.let { DiscordUser.findBy(it)?.load(DiscordUser::farmers) }
                         }
 
                         if (databaseDiscordUser == null) {
-                            respond { content = "${arguments.discordUser?.mention} is not registered." }
+                            val message = "${arguments.discordUser?.mention} is not registered."
+                            logger.trace { message }
+                            respond { content = message }
                             return@action
                         }
 
                         val farmersListing = transaction(databases[server.name]) {
                             databaseDiscordUser.farmers.toListing()
                         }
+                        logger.trace { "Farmers to delete: $farmersListing" }
 
                         transaction(databases[server.name]) {
                             databaseDiscordUser.delete()
                         }
 
                         respond {
-                            content = "Unregistered ${arguments.discordUser?.mention}, removing their farmers: ${farmersListing}."
+                            val message = "Unregistered ${arguments.discordUser?.mention}, removing their farmers: ${farmersListing}."
+                            logger.trace { message }
+                            content = message
                         }
                     }
 
-                    arguments.farmer != null -> transaction(databases[server.name]) {
-                        val discordUser = arguments.farmer!!.discordUser.load(DiscordUser::farmers)
+                    arguments.farmer != null -> {
+                        logger.trace { "Unregistering by Farmer: ${arguments.farmer!!.inGameName}" }
+
+                        val discordUser = transaction(databases[server.name]) {
+                            arguments.farmer!!.discordUser.load(DiscordUser::farmers)
+                        }
+                        logger.trace { "DiscordUser associated with the farmer: ${discordUser.tag}" }
 
                         // If this is the only farmer
                         if (discordUser.farmers.minus(arguments.farmer).isEmpty()) {
+                            logger.trace { "This is the only farmer of this Discord user" }
+
                             val discordUserMention = guild?.mentionUser(discordUser.snowflake)
 
-                            arguments.farmer?.delete()
-                            discordUser.delete()
+                            transaction(databases[server.name]) {
+                                arguments.farmer?.delete()
+                                discordUser.delete()
+                            }
 
-                            runBlocking {
-                                respond {
-                                    content = "Unregistered `${arguments.farmer?.inGameName}` and member $discordUserMention along with it."
-                                }
+                            respond {
+                                val message = "Unregistered `${arguments.farmer?.inGameName}` and member $discordUserMention along with it."
+
+                                logger.trace { message }
+                                content = message
                             }
                         } else {
-                            arguments.farmer?.delete()
+                            logger.trace { "There are still other farmers registered to this Discord user" }
 
-                            runBlocking {
-                                respond {
-                                    content = buildString {
-                                        appendLine("Unregistered `${arguments.farmer?.inGameName}`.")
+                            transaction(databases[server.name]) {
+                                arguments.farmer?.delete()
+                            }
 
-                                        val count = discordUser.farmers.count()
-                                        if (count > 0) {
-                                            append("${discordUser.farmers.toListing()} ")
-                                            if (count == 1L) append("is") else append("are")
-                                            append(" still registered to ${guild?.mentionUser(discordUser?.snowflake)}.")
-                                        }
+                            respond {
+                                val message = buildString {
+                                    appendLine("Unregistered `${arguments.farmer?.inGameName}`.")
+
+                                    val count = discordUser.farmers.count()
+                                    if (count > 0) {
+                                        append("${discordUser.farmers.toListing()} ")
+                                        if (count == 1L) append("is") else append("are")
+                                        append(" still registered to ${guild?.mentionUser(discordUser.snowflake)}.")
                                     }
                                 }
+
+                                logger.trace { message }
+                                content = message
                             }
                         }
                     }
