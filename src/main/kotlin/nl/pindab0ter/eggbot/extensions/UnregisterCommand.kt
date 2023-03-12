@@ -109,11 +109,12 @@ class UnregisterCommand : Extension() {
                         }
                         logger.trace { "DiscordUser associated with the farmer: ${discordUser.tag}" }
 
+                        val discordUserName = guild?.mentionUser(discordUser.snowflake) ?: "`${discordUser.tag}`"
+
                         // If this is the only farmer
                         if (discordUser.farmers.minus(arguments.farmer).isEmpty()) {
                             logger.trace { "This is the only farmer of this Discord user" }
 
-                            val discordUserMention = guild?.mentionUser(discordUser.snowflake)
 
                             transaction(databases[server.name]) {
                                 arguments.farmer?.delete()
@@ -121,7 +122,7 @@ class UnregisterCommand : Extension() {
                             }
 
                             respond {
-                                val message = "Unregistered `${arguments.farmer?.inGameName}` and member $discordUserMention along with it."
+                                val message = "Unregistered `${arguments.farmer?.inGameName}` and member $discordUserName along with it."
 
                                 logger.trace { message }
                                 content = message
@@ -141,7 +142,7 @@ class UnregisterCommand : Extension() {
                                     if (count > 0) {
                                         append("${discordUser.farmers.toListing()} ")
                                         if (count == 1L) append("is") else append("are")
-                                        append(" still registered to ${guild?.mentionUser(discordUser.snowflake)}.")
+                                        append(" still registered to $discordUserName.")
                                     }
                                 }
 
